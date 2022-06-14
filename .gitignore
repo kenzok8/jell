@@ -1,18 +1,40 @@
-# Build and Release Folders
-bin-debug/
-bin-release/
-[Oo]bj/
-[Bb]in/
-
-# Other files and folders
-.settings/
-
-# Executables
-*.swf
-*.air
-*.ipa
-*.apk
-
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
+/create_acl_for_luci.ok
+/create_acl_for_luci.warn
+/create_acl_for_luci.err
+/luci-app-godproxy/rulesupdate.log
+/qt5
+/luci-app-softether
+/luci-app-cifs
+/luci-app-cifsd
+/luci-app-smstool
+/luci-app-mosquitto
+/luci-app-appfilter
+/luci-app-babeld
+/luci-app-siitwizard
+/luci-app-ttyd
+/luci-app-mentohust
+/luci-app-softethervpn
+/ddns-scripts_aliyun
+/ddns-scripts_dnspod
+/subweb
+/wget
+/autosamba
+/frp
+/amule
+/npc
+/fcgiwrap
+/ipv6-helper
+/ChinaDNS
+/luci-theme-netgear
+/csstidy
+/UnblockNeteaseMusicGo
+/default-settings
+/autocore
+/*k3*
+/luci-proto-bonding
+/rclone
+/luci-lib-docker
+/rclone-*
+/mt
+/mtk-eip93
+/r8152

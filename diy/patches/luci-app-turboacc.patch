@@ -1,0 +1,41 @@
+--- a/luci-app-turboacc/Makefile
++++ b/luci-app-turboacc/Makefile
+@@ -38,11 +38,11 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_OFFLOADING
+ config PACKAGE_$(PKG_NAME)_INCLUDE_SHORTCUT_FE_DRV
+ 	bool "Include Shortcut-FE for ECM"
+ 	depends on PACKAGE_$(PKG_NAME)_INCLUDE_SHORTCUT_FE=n
+-	default y if (TARGET_ipq806x||TARGET_ipq807x)
++	default y if (TARGET_ipq806x)
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_SHORTCUT_FE
+ 	bool "Include Shortcut-FE"
+-	default y if !(TARGET_ipq806x||TARGET_ipq807x||TARGET_ramips)
++	default y if !(TARGET_ipq806x||TARGET_ramips)
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_BBR_CCA
+ 	bool "Include BBR CCA"
+
+--- a/luci-app-turboacc/luasrc/controller/turboacc.lua
++++ b/luci-app-turboacc/luasrc/controller/turboacc.lua
+@@ -13,7 +13,7 @@ function index()
+ end
+ 
+ local function fastpath_status()
+-	return luci.sys.call("/etc/init.d/turboacc check_status fastpath") == 0
++	return luci.sys.call("/etc/init.d/turboacc check_status fastpath >/dev/null") == 0
+ end
+ 
+ local function bbr_status()
+
+--- a/luci-app-turboacc/root/etc/uci-defaults/luci-turboacc
++++ b/luci-app-turboacc/root/etc/uci-defaults/luci-turboacc
+@@ -7,4 +7,9 @@ uci -q batch <<-EOF >/dev/null
+ 	commit ucitrack
+ EOF
+ 
++ls /sys/module/shortcut_fe* >/dev/null 2>&1 && {
++uci -q del turboacc.config.sw_flow
++uci commit turboacc
++}
++
+ exit 0
