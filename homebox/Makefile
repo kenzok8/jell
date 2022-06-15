@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=homebox
 PKG_VERSION:=0.0.0-dev.2020062901
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE_URL_FILE:=v$(PKG_VERSION).tar.gz
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -48,7 +48,7 @@ define Build/Configure
 	( \
 		cd $(PKG_BUILD_DIR)/server; \
 		GOPATH=$(PKG_BUILD_DIR)/.go_work/build \
-		go get -modcacherw github.com/go-bindata/go-bindata/...; \
+		go install -modcacherw github.com/go-bindata/go-bindata/...@latest; \
 	)
 endef
 
@@ -58,7 +58,7 @@ define Build/Compile
 	$(CP) $(HOST_BUILD_DIR)/build/static $(PKG_BUILD_DIR)/build/
 	( \
 		cd $(PKG_BUILD_DIR); \
-		$(GO_PKG_VARS) PATH=$$$$PATH:$(PKG_BUILD_DIR)/.go_work/build/bin \
+		$(GO_PKG_VARS) PATH=$(PKG_BUILD_DIR)/.go_work/build/bin:$$$$PATH \
 		$(MAKE) build-server; \
 	)
 endef
@@ -99,3 +99,4 @@ endef
 
 $(eval $(call HostBuild))
 $(eval $(call BuildPackage,homebox))
+
