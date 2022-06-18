@@ -195,7 +195,7 @@ jobs:
         git_sparse_clone develop "https://github.com/Ysurac/openmptcprouter-feeds" "openmptcp" luci-app-snmpd \
         luci-app-packet-capture luci-app-mail msmtp
         git_sparse_clone master "https://github.com/immortalwrt/immortalwrt" "immortal" package/kernel/rtl88x2bu \
-        package/kernel/r8125 package/kernel/r8168
+        package/kernel/r8125 package/kernel/r8168 package/emortal/autocore
         ) &
 
         svn export --force https://github.com/coolsnowwolf/luci/trunk/applications
