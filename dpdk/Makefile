@@ -8,7 +8,7 @@ PKG_VERSION := 21.05
 
 PKG_SOURCE := dpdk-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL := http://static.dpdk.org/rel
-PKG_HASH := 1e12499b4c5fcdb57c83e5fe184ea6becddf7cf092893c2c5ef2efb0eec12f0b
+PKG_HASH:=skip
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/host-build.mk

@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
 PKG_VERSION:=3.0.20180503
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 # Content-Encoding conflict, can refer to this [issue](https://github.com/miniupnp/miniupnp/issues/605)
 # so switch mirror repo to http://miniupnp.tuxfamily.org
@@ -17,7 +17,7 @@ PKG_RELEASE:=1
 PKG_SOURCE_URL:=http://miniupnp.tuxfamily.org/files
 PKG_SOURCE:=$(PKG_NAME)-2.0.20180503.tar.gz
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-2.0.20180503
-PKG_HASH:=9677aeccadf73b4bf8bb9d832c32b5da8266b4d58eed888f3fd43d7656405643
+PKG_HASH:=skip
 
 PKG_MAINTAINER:=Markus Stenberg <fingon@iki.fi>
 PKG_LICENSE:=BSD-3-Clause
