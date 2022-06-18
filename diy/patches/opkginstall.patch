@@ -187,7 +187,7 @@
  						opkg="$opkg $1"
  						shift
  					;;
-@@ -33,10 +33,49 @@ case "$action" in
+@@ -33,10 +33,51 @@ case "$action" in
  			done
  
  			if flock -x 200; then
@@ -219,11 +219,13 @@
 +					install|upgrade)
 +						[ "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ] && {
 +							rm -f /tmp/opkg.err
++							([ -f /etc/profile.d/opkg.sh ] && . /etc/profile.d/opkg.sh && opkg save) &
 +						}
 +					;;
 +					remove)
 +						[ ! "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ] && {
 +							rm -f /tmp/opkg.err
++							([ -f /etc/profile.d/opkg.sh ] && . /etc/profile.d/opkg.sh && opkg save) &
 +						}
 +					;;
 +				esac

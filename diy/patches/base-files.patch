@@ -51,7 +51,7 @@
 -			\( -exec test -f /overlay/upper/{} \; -exec echo {} overlay \; \) -o \
 -			\( -exec echo {} unknown \; \) \
 -			\) | sed -e 's,.*/,,;s/\.control /\t/' > ${INSTALLED_PACKAGES}
-+		. /etc/profile.d/opkg.sh; opkg save
++		. /etc/profile.d/opkg.sh && opkg save
 +	else
 +		uci -q del opkg.auto
 +		uci commit opkg
