@@ -908,7 +908,7 @@ function dispatch(request)
 		local sid, sdat, sacl = is_authenticated(lookup_ctx.auth)
 
 		if not (sid and sdat and sacl) and lookup_ctx.auth.login then
-			sys.exec("opkg update >/dev/null &")
+			sys.exec("(/usr/libexec/opkg-call update >/dev/null &")
 
 			local user = http.getenv("HTTP_AUTH_USER")
 			local pass = http.getenv("HTTP_AUTH_PASS")

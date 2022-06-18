@@ -43,33 +43,6 @@ local methods = {
 		end
 	},
 
-    getCPUInfo = {
-        call = function()
-            local sys = require "luci.sys"
-            local rv = {}
-            rv.cpufreq      = sys.exec("/sbin/cpuinfo")
-            rv.cpufree      = (sys.exec("expr 100 - $(top -n 1 | grep 'CPU:' | awk -F '%' '{print$4}' | awk -F ' ' '{print$2}')") or "2.33") .. "%"
-            rv.cpumark      = sys.exec("cat /etc/bench.log")
-            return rv
-        end
-    },
-
-	getEthInfo = {
-		call = function()
-			local sys = require "luci.sys"
-			local result = sys.exec("ethinfo 2>/dev/null")
-			return { result = result }
-		end
-	},
-
-	getUserInfo = {
-		call = function()
-			local sys = require "luci.sys"
-			local result = sys.exec("cat /proc/net/arp | grep 'br-lan' | grep '0x2' | wc -l")
-			return { result = result }
-		end
-	},
-
 	setLocaltime = {
 		args = { localtime = 0 },
 		call = function(args)
@@ -237,7 +210,6 @@ local methods = {
 			local rv = {}
 			local ok, fd
 
-			rv.fullconenat   = fs.access("/sys/module/xt_FULLCONENAT/refcnt")
 			rv.firewall      = fs.access("/sbin/fw3")
 			rv.firewall4     = fs.access("/sbin/fw4")
 			rv.opkg          = fs.access("/bin/opkg")

@@ -231,7 +231,7 @@ do_save_conffiles() {
 	ask_bool 0 "Edit config file list" && vi "$CONFFILES"
 
 	if [ "$SAVE_INSTALLED_PKGS" -eq 1 ]; then
-		. /etc/profile.d/opkg.sh; opkg save
+		. /etc/profile.d/opkg.sh && opkg save
 	else
 		uci -q del opkg.auto
 		uci commit opkg

@@ -39,6 +39,19 @@
 		}
 	},
 
+	"admin/status/nftables": {
+		"title": "Firewall",
+		"order": 3,
+		"action": {
+			"type": "view",
+			"path": "status/nftables"
+		},
+		"depends": {
+			"acl": [ "luci-mod-status-firewall" ],
+			"fs": { "/usr/sbin/nft": "executable" }
+		}
+	},
+
 	"admin/status/nftables/iptables": {
 		"action": {
 			"type": "view",
