@@ -10,8 +10,8 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_DDNSTO:=$(ARCH)
 
 PKG_NAME:=ddnsto
-PKG_VERSION:=1.5.0
-PKG_RELEASE:=3
+PKG_VERSION:=1.5.1
+PKG_RELEASE:=4
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://fw.koolcenter.com/binary/ddnsto/
 PKG_HASH:=skip
