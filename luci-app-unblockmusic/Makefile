@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=luci-app-unblockmusic
 
 PKG_LICENSE:=Apache-2.0
-PKG_MAINTAINER:=lean
+PKG_MAINTAINER:=lean <coolsnowwolf@gmail.com>
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_UnblockNeteaseMusic_Go \
