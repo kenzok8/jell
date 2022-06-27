@@ -6,7 +6,7 @@ PKG_NAME:=luci-app-homeassistant
 
 LUCI_TITLE:=LuCI support for homeassistant
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+docker
+LUCI_DEPENDS:=+docker +luci-lib-iform
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
