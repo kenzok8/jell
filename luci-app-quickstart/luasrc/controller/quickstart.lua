@@ -5,6 +5,7 @@ module("luci.controller.quickstart", package.seeall)
 local page_index = {"admin", "quickstart", "pages"}
 
 function index()
+	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
     if luci.sys.call("pgrep quickstart >/dev/null") == 0 then
         entry({"admin", "quickstart"}, call("redirect_index"), _("QuickStart"), 1)
         entry({"admin", "network_guide"}, call("networkguide_index"), _("NetworkGuide"), 2)
@@ -14,6 +15,7 @@ function index()
             entry({"admin", "quickstart", "dev"}, call("quickstart_dev", {index={"admin", "quickstart", "dev"}})).leaf = true
             entry({"admin", "network_guide", "dev"}, call("quickstart_dev", {index={"admin", "network_guide", "dev"}})).leaf = true
         end
+        entry({"admin", "nas", "raid"}, call("quickstart_index", {index={"admin", "nas"}}), _("RAID"), 10).leaf = true
     else
         entry({"admin", "quickstart"})
         entry({"admin", "quickstart", "pages"}, call("redirect_fallback")).leaf = true
@@ -21,10 +23,12 @@ function index()
 end
 
 function networkguide_index()
+	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
     luci.http.redirect(luci.dispatcher.build_url("admin","network_guide","pages","network"))
 end
 
 function redirect_index()
+	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
     luci.http.redirect(luci.dispatcher.build_url(unpack(page_index)))
 end
 
