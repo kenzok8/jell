@@ -5,11 +5,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=filebrowser
-PKG_VERSION:=2.22.2
-PKG_RELEASE:=3
+PKG_VERSION:=2.22.3
+PKG_RELEASE:=4
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=9d54046140a8cf63fb559a25d0b147b38edfb44e
+PKG_SOURCE_VERSION:=49dbacdccdc38e4b8e8666f01ece93593e3011ce
 PKG_SOURCE_URL:=https://github.com/filebrowser/filebrowser
 PKG_MIRROR_HASH:=skip
 
