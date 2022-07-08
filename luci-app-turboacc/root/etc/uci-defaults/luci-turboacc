@@ -7,6 +7,9 @@ uci -q batch <<-EOF >/dev/null
 	commit ucitrack
 EOF
 
+[ -n "$(lsmod | grep mtkhnat)" ] && uci set turboacc.config.sw_flow='0' && uci set turboacc.config.hw_flow='0'
+uci commit turboacc
+
 ls /sys/module/shortcut_fe* >/dev/null 2>&1 && {
 uci -q del turboacc.config.sw_flow
 uci commit turboacc
