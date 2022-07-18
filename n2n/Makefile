@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=n2n
 PKG_VERSION:=3.0
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/ntop/n2n/tar.gz/$(PKG_VERSION)?
@@ -26,12 +26,12 @@ define Package/n2n/template
   SUBMENU:=VPN
   TITLE:=N2N Peer-to-peer VPN
   URL:=http://www.ntop.org/n2n
-  DEPENDS:=+libcap +libopenssl +libpthread +libzstd
+  DEPENDS:=+libopenssl +libpthread +libzstd
 endef
 
 define Package/n2n
   $(call Package/n2n/template)
-  DEPENDS+=+kmod-tun +resolveip
+  DEPENDS+=+libcap +kmod-tun +resolveip
 endef
 
 define Package/n2n/description
