@@ -375,11 +375,6 @@ o.description = font_red..bold_on..translate("TCP Concurrent Request IPs, Choose
 o.default = 1
 o:depends("enable_meta_core", "1")
 
-o = s:taboption("meta", Flag, "enable_http3", translate("Enable HTTP/3"))
-o.description = font_red..bold_on..translate("DOH DNS Prefers Using HTTP/3 For Connections")..bold_off..font_off
-o.default = 0
-o:depends("enable_meta_core", "1")
-
 o = s:taboption("meta", Flag, "enable_meta_sniffer", font_red..bold_on..translate("Enable Sniffer")..bold_off..font_off)
 o.description = font_red..bold_on..translate("Sniffer Will Prevent Domain Name Proxy and DNS Hijack Failure")..bold_off..font_off
 o.default = 1
@@ -489,7 +484,7 @@ o.title = translate("Custom GeoIP Dat URL")
 o.rmempty = true
 o.description = translate("Custom GeoIP Dat URL, Click Button Below To Refresh After Edit")
 o:value("https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat", translate("Loyalsoldier-Version")..translate("(Default)"))
-o:value("https://mirrors.tuna.tsinghua.edu.cn/osdn/storage/g/v/v2/v2raya/dists/v2ray-rules-dat/geoip.dat", translate("Tuna-Version")..translate("(Default)"))
+o:value("https://mirror.iscas.ac.cn/osdn/storage/g/v/v2/v2raya/dists/v2ray-rules-dat/geoip.dat", translate("OSDN-Version")..translate("(Default)"))
 o.default = "https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
 o:depends("geoip_auto_update", "1")
 
@@ -533,7 +528,7 @@ o.title = translate("Custom GeoSite URL")
 o.rmempty = true
 o.description = translate("Custom GeoSite Data URL, Click Button Below To Refresh After Edit")
 o:value("https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat", translate("Loyalsoldier-Version")..translate("(Default)"))
-o:value("https://mirrors.tuna.tsinghua.edu.cn/osdn/storage/g/v/v2/v2raya/dists/v2ray-rules-dat/geosite.dat", translate("Tuna-Version")..translate("(Default)"))
+o:value("https://mirror.iscas.ac.cn/osdn/storage/g/v/v2/v2raya/dists/v2ray-rules-dat/geosite.dat", translate("OSDN-Version")..translate("(Default)"))
 o.default = "https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
 o:depends("geosite_auto_update", "1")
 
@@ -1289,7 +1284,7 @@ end
 ds = m:section(TypedSection, "dns_servers", translate("Add Custom DNS Servers")..translate("(Take Effect After Choose Above)"))
 ds.anonymous = true
 ds.addremove = true
-ds.sortable = false
+ds.sortable = true
 ds.template = "cbi/tblsection"
 ds.extedit = luci.dispatcher.build_url("admin/services/openclash/custom-dns-edit/%s")
 function ds.create(...)
@@ -1306,14 +1301,6 @@ o.rmempty     = false
 o.default     = o.enabled
 o.cfgvalue    = function(...)
     return Flag.cfgvalue(...) or "1"
-end
-
----- Node Domain Resolve
-o = ds:option(Flag, "node_resolve", translate("Node Domain Resolve"))
-o.rmempty     = false
-o.default     = o.disbled
-o.cfgvalue    = function(...)
-    return Flag.cfgvalue(...) or "0"
 end
 
 ---- group
