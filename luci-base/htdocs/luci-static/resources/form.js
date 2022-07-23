@@ -287,9 +287,13 @@ var CBIAbstractElement = baseclass.extend(/** @lends LuCI.form.AbstractElement.p
 		if (typeof(s) == 'string' && !s.match(/[<>]/))
 			return s;
 
-		var x = dom.parse('<div>' + s + '</div>');
+		var x = dom.elem(s) ? s : dom.parse('<div>' + s + '</div>');
 
-		return x.textContent || x.innerText || '';
+		x.querySelectorAll('br').forEach(function(br) {
+			x.replaceChild(document.createTextNode('\n'), br);
+		});
+
+		return (x.textContent || x.innerText || '').replace(/([ \t]*\n)+/g, '\n');
 	},
 
 	/**
@@ -2273,10 +2277,7 @@ var CBITypedSection = CBIAbstractSection.extend(/** @lends LuCI.form.TypedSectio
 
 	/** @private */
 	renderSectionPlaceholder: function() {
-		return E([
-			E('em', _('This section contains no values yet')),
-			E('br'), E('br')
-		]);
+		return E('em', _('This section contains no values yet'));
 	},
 
 	/** @private */
@@ -2583,8 +2584,7 @@ var CBITableSection = CBITypedSection.extend(/** @lends LuCI.form.TableSection.p
 
 		if (nodes.length == 0)
 			tableEl.appendChild(E('tr', { 'class': 'tr cbi-section-table-row placeholder' },
-				E('td', { 'class': 'td' },
-					E('em', {}, _('This section contains no values yet')))));
+				E('td', { 'class': 'td' }, this.renderSectionPlaceholder())));
 
 		sectionEl.appendChild(tableEl);
 
@@ -3363,7 +3363,7 @@ var CBIGridSection = CBITableSection.extend(/** @lends LuCI.form.GridSection.pro
 			'data-title': (title != '') ? title : null,
 			'data-description': (descr != '') ? descr : null,
 			'data-name': opt.option,
-			'data-widget': opt.typename || opt.__name__
+			'data-widget': 'CBI.DummyValue'
 		}, (value != null) ? value : E('em', _('none')));
 	},
 
@@ -3705,7 +3705,7 @@ var CBIValue = CBIAbstractValue.extend(/** @lends LuCI.form.Value.prototype */ {
 
 		if (!in_table && typeof(this.description) === 'string' && this.description !== '')
 			dom.append(optionEl.lastChild || optionEl,
-				E('div', { 'class': 'cbi-value-description' }, this.description));
+				E('div', { 'class': 'cbi-value-description' }, this.description.trim()));
 
 		if (depend_list && depend_list.length)
 			optionEl.classList.add('hidden');
