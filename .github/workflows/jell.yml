@@ -169,8 +169,7 @@ jobs:
         git_clone https://github.com/4IceG/luci-app-3ginfo op3ginfo  && mv -n op3ginfo/{3ginfo,luci-app-3ginfo} ./;rm -rf op3ginfo
         git_clone https://github.com/sundaqiang/openwrt-packages && mv -n openwrt-packages/luci-* ./; rm -rf openwrt-packages
         git_clone https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
-		    git_clone https://github.com/kenzok78/luci-theme-argonne
-
+        git_clone https://github.com/kenzok78/luci-theme-argonne
         git_clone https://github.com/kenzok78/luci-app-argonne-config
         git_clone https://github.com/thinktip/luci-theme-neobird
         git clone --depth 1 -b lede https://github.com/pymumu/luci-app-smartdns	
@@ -223,9 +222,9 @@ jobs:
         mv -n applications/* luciapp/; rm -rf applications
 
         for ipk in $(ls -d luciapp/!(luci-app-rclone|luci-app-mwan3|luci-app-transmission)/); do
-        	if [[ $(ls $ipk/po | wc -l) -gt 3 ]]; then
+                if [[ $(ls $ipk/po | wc -l) -gt 3 ]]; then
             rm -rf $ipk
-        	fi
+                fi
         done
 
         git_sparse_clone master "https://github.com/coolsnowwolf/lede" "leanlede" package/lean package/network/services/shellsync package/network/config/netifd
@@ -322,7 +321,7 @@ jobs:
         sed -i 's/+rclone\( \|$\)/+rclone +fuse-utils\1/g' luci-app-rclone/Makefile
         sed -i 's/+libcap /+libcap +libcap-bin /' luci-app-openclash/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argon/' luci-app-argon-config/Makefile
-		    sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile
+        sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile		
         sed -i 's/+vsftpd$/+vsftpd-alt/' luci-app-vsftpd/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
