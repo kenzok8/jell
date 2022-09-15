@@ -187,7 +187,7 @@
  						opkg="$opkg $1"
  						shift
  					;;
-@@ -33,10 +33,51 @@ case "$action" in
+@@ -33,10 +33,55 @@ case "$action" in
  			done
  
  			if flock -x 200; then
@@ -200,9 +200,9 @@
 +					if [ $code == 0 ]; then
 +						. /etc/profile.d/opkg.sh
 +						if [[ "$(cat `opkg export au`)" ]] && lock -n /var/lock/opkg-upgrade; then
-+						opkg upgr </dev/null >>/tmp/opkg.out 2>>/tmp/opkg.err
-+						code=$?
-+						lock -u /var/lock/opkg-upgrade
++						 opkg upgr </dev/null >>/tmp/opkg.out 2>>/tmp/opkg.err
++						 code=$?
++						 lock -u /var/lock/opkg-upgrade
 +						else
 +							echo "🎉 所有软件包已是最新~" >>/tmp/opkg.out
 +							code=0
@@ -212,21 +212,25 @@
 +					$opkg $action "$@" </dev/null >/tmp/opkg.out 2>/tmp/opkg.err
 +					code=$?
 +				fi
-+				if [[ $@ == luci-app-* && "$(opkg list | grep luci-i18n-"$(echo $@ | cut -d - -f 3-)"-zh-cn)" ]]; then
-+					$opkg install luci-i18n-"$(echo $@ | cut -d - -f 3-)"-zh-cn </dev/null >>/tmp/opkg.out 2>/dev/null || true
-+				fi
++				pkgn="$(echo $@ | cut -d - -f 3-)"
 +				case "$action" in
 +					install|upgrade)
-+						[ "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ] && {
++					if [ "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ]; then
++							if [[ "$@" == luci-app-* && "$(opkg list | grep luci-i18n-$pkgn-zh-cn)" && ! -f /usr/lib/lua/luci/i18n/$pkgn.zh-cn.lmo ]]; then
++								$opkg install luci-i18n-$pkgn-zh-cn </dev/null >>/tmp/opkg.out 2>/dev/null || true
++							fi
 +							rm -f /tmp/opkg.err
 +							([ -f /etc/profile.d/opkg.sh ] && . /etc/profile.d/opkg.sh && opkg save) &
-+						}
++					fi
 +					;;
 +					remove)
-+						[ ! "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ] && {
++						if [ ! "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ]; then
 +							rm -f /tmp/opkg.err
++							if [[ "$@" == luci-app-* && "$(opkg list-installed | grep luci-i18n-$pkgn-zh-cn)" ]]; then
++								$opkg remove luci-i18n-$pkgn-zh-cn </dev/null >>/tmp/opkg.out 2>/dev/null || true
++							fi
 +							([ -f /etc/profile.d/opkg.sh ] && . /etc/profile.d/opkg.sh && opkg save) &
-+						}
++						fi
 +					;;
 +				esac
 +				grep -q "wget returned 8" /tmp/opkg.err && {
@@ -242,7 +246,7 @@
  			else
  				code=255
  				stderr="Failed to acquire lock"
-@@ -53,7 +92,7 @@ case "$action" in
+@@ -53,7 +98,7 @@ case "$action" in
  	;;
  	*)
  		echo "Usage: $0 {list-installed|list-available}"       >&2

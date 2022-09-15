@@ -34,18 +34,6 @@
  
  PKG_MAINTAINER:=Xingwang Liao <kuoruan@gmail.com>
 
---- a/luci-app-transmission/Makefile
-+++ b/luci-app-transmission/Makefile
-@@ -7,7 +7,7 @@
- include $(TOPDIR)/rules.mk
- 
- LUCI_TITLE:=LuCI Support for Transmission
--LUCI_DEPENDS:=+transmission-daemon
-+LUCI_DEPENDS:=+transmission-daemon +transmission-web-control
- 
- include ../../luci.mk
- 
-
 --- a/luci-app-samba4/Makefile
 +++ b//luci-app-samba4/Makefile
 @@ -3,7 +3,7 @@
@@ -71,15 +59,36 @@
  
 --- a/firewall/Makefile
 +++ b/firewall/Makefile
-@@ -28,7 +28,7 @@ define Package/firewall
+@@ -28,9 +28,8 @@ define Package/firewall
    SECTION:=net
    CATEGORY:=Base system
    TITLE:=OpenWrt C Firewall
 -  DEPENDS:=+libubox +libubus +libuci +libip4tc +IPV6:libip6tc +libiptext +IPV6:libiptext6 +libxtables +kmod-ipt-core +kmod-ipt-conntrack +IPV6:kmod-nf-conntrack6 +kmod-ipt-nat
-+  DEPENDS:=+libubox +libubus +libuci +libip4tc +IPV6:libip6tc +libiptext +IPV6:libiptext6 +libxtables +kmod-ipt-core +kmod-ipt-conntrack +IPV6:kmod-nf-conntrack6 +kmod-ipt-nat +iptables-mod-fullconenat
++  DEPENDS:=+libubox +libubus +libuci +libip4tc +IPV6:libip6tc +libiptext +IPV6:libiptext6 +libxtables +kmod-ipt-core +kmod-ipt-conntrack +IPV6:kmod-nf-conntrack6 +kmod-ipt-nat +kmod-ipt-nat6 +iptables-mod-fullconenat +ip6tables-mod-fullconenat +iptables +ip6tables +kmod-ipt-offload
    PROVIDES:=uci-firewall
-   CONFLICTS:=firewall4
+-  CONFLICTS:=firewall4
  endef
+ 
+ define Package/firewall/description
+
+--- a/miniupnpd-nft/Makefile
++++ b/miniupnpd-nft/Makefile
+@@ -39,7 +39,6 @@ define Package/miniupnpd/Default
+ 	+libcap-ng \
+ 	+libmnl \
+ 	+libuuid
+-  PROVIDES:=miniupnpd
+   TITLE:=Lightweight UPnP IGD, NAT-PMP & PCP daemon
+   SUBMENU:=Firewall
+   URL:=https://miniupnp.tuxfamily.org/
+@@ -62,6 +61,7 @@ define Package/miniupnpd-nftables
+   DEPENDS+= \
+ 	+libnftnl
+   TITLE+= (nftables)
++  PROVIDES:=miniupnpd
+   VARIANT:=nftables
+   DEFAULT_VARIANT:=1
+   CONFLICTS:=miniupnpd-iptables
 
 --- a/firewall4/Makefile
 +++ b/firewall4/Makefile
@@ -89,7 +98,7 @@
  	+nftables-json \
 -	+ucode +ucode-mod-fs +ucode-mod-ubus +ucode-mod-uci
 +	+ucode +ucode-mod-fs +ucode-mod-ubus +ucode-mod-uci \
-+	+kmod-nft-fullcone +iptables-nft +ip6tables-nft
++	+kmod-nft-fullcone +iptables-nft +ip6tables-nft +arptables-nft +ebtables-nft +xtables-nft +nftables-json
    EXTRA_DEPENDS:=ucode (>= 2022-03-22)
    PROVIDES:=uci-firewall
  endef
@@ -149,3 +158,97 @@
    TITLE+= (with SSL support)
    VARIANT:=ssl
    DEFAULT_VARIANT:=1
+
+--- a/luci-app-homeassistant/Makefile
++++ b/luci-app-homeassistant/Makefile
+@@ -7,7 +7,7 @@ PKG_RELEASE:=
+ 
+ LUCI_TITLE:=LuCI support for homeassistant
+ LUCI_PKGARCH:=all
+-LUCI_DEPENDS:=+docker +luci-lib-taskd
++LUCI_DEPENDS:=@(aarch64||arm||x86_64) +luci-app-dockerman +luci-lib-taskd
+ 
+ define Package/luci-app-homeassistant/conffiles
+ /etc/config/homeassistant
+
+--- a/luci-app-unblockneteasemusic/Makefile
++++ b/luci-app-unblockneteasemusic/Makefile
+@@ -5,7 +5,7 @@
+ include $(TOPDIR)/rules.mk
+ 
+ LUCI_TITLE:=LuCI support for UnblockNeteaseMusic (JavaScript)
+-LUCI_DEPENDS:=+busybox +dnsmasq-full +ipset +jsonfilter +node +uclient-fetch +ucode \
++LUCI_DEPENDS:=+busybox +dnsmasq-full +ipset +jsonfilter +node +uclient-fetch +ucode +UnblockNeteaseMusic \
+ 	@(PACKAGE_libustream-mbedtls||PACKAGE_libustream-openssl||PACKAGE_libustream-wolfssl)
+ LUCI_PKGARCH:=all
+ 
+
+--- a/k3screenctrl/Makefile
++++ b/k3screenctrl/Makefile
+@@ -19,7 +19,7 @@ TARGET_CFLAGS+= -D_GNU_SOURCE
+ define Package/k3screenctrl
+   SECTION:=utils
+   CATEGORY:=Utilities
+-  DEPENDS:=@TARGET_bcm53xx_generic_DEVICE_phicomm_k3 +@KERNEL_DEVMEM
++  DEPENDS:=@(TARGET_bcm53xx_generic_DEVICE_phicomm_k3||TARGET_DEVICE_bcm53xx_generic_DEVICE_phicomm_k3) +@KERNEL_DEVMEM
+   TITLE:=LCD screen controller on PHICOMM K3
+   URL:=https://github.com/updateing/k3-screen-ctrl
+ endef
+
+--- a/dockerd/Makefile
++++ b/dockerd/Makefile
+@@ -95,14 +95,14 @@ define Build/Prepare
+ 	$(Build/Prepare/Default)
+ 
+ 	# Verify dependencies are the vendored version
+-	$(call EnsureVendoredVersion,../containerd/Makefile,containerd.installer)
+-	$(call EnsureVendoredCommit,../libnetwork/Makefile,proxy.installer)
+-	$(call EnsureVendoredVersion,../runc/Makefile,runc.installer)
+-	$(call EnsureVendoredVersion,../tini/Makefile,tini.installer)
++	$(call EnsureVendoredVersion,../../packages/utils/containerd/Makefile,containerd.installer)
++	$(call EnsureVendoredCommit,../../packages/utils/libnetwork/Makefile,proxy.installer)
++	$(call EnsureVendoredVersion,../../packages/utils/runc/Makefile,runc.installer)
++	$(call EnsureVendoredVersion,../../packages/utils/tini/Makefile,tini.installer)
+ 
+ 	# Verify CLI is the same version
+ 	( \
+-		CLI_MAKEFILE="../docker/Makefile"; \
++		CLI_MAKEFILE="../../packages/utils/docker/Makefile"; \
+ 		CLI_VERSION=$$$$( grep --only-matching --perl-regexp '(?<=PKG_VERSION:=)(.*)' "$$$${CLI_MAKEFILE}" ); \
+ 		if [ "$$$${CLI_VERSION}" != "$(PKG_VERSION)" ]; then \
+ 			echo "ERROR: Expected 'PKG_VERSION:=$(PKG_VERSION)' in '$$$${CLI_MAKEFILE}', found 'PKG_VERSION:=$$$${CLI_VERSION}'"; \
+
+--- a/transmission-web-control/Makefile
++++ b/transmission-web-control/Makefile
+@@ -19,7 +19,6 @@ define Package/transmission-web-control
+   SECTION:=net
+   CATEGORY:=Network
+   SUBMENU:=BitTorrent
+-  DEPENDS:=+transmission-daemon
+   CONFLICTS:=transmission-web
+   TITLE:=Transmission Web Control
+   URL:=https://github.com/ronggang/transmission-web-control
+
+--- a/fullconenat/Makefile
++++ b/fullconenat/Makefile
+@@ -36,7 +36,7 @@ define Package/ip6tables-mod-fullconenat
+   SECTION:=net
+   CATEGORY:=Network
+   TITLE:=FULLCONENAT ip6tables extension
+-  DEPENDS:=ip6tables +kmod-nf-nat6 +kmod-ipt-fullconenat +ip6tables-mod-nat
++  DEPENDS:=+ip6tables +kmod-nf-nat6 +kmod-ipt-fullconenat +ip6tables-mod-nat
+ endef
+ 
+ define KernelPackage/ipt-fullconenat
+
+--- a/luci-app-easymesh/Makefile
++++ b/luci-app-easymesh/Makefile
+@@ -5,7 +5,7 @@
+ include $(TOPDIR)/rules.mk
+ 
+ LUCI_TITLE:=LuCI Support for easymesh
+-LUCI_DEPENDS:=+kmod-cfg80211 +batctl-default +kmod-batman-adv +wpad-openssl +dawn
++LUCI_DEPENDS:=+kmod-cfg80211 +batctl-default +kmod-batman-adv +wpad-wolfssl +dawn
+ LUCI_PKGARCH:=all
+ 
+ PKG_NAME:=luci-app-easymesh

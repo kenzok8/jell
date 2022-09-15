@@ -36,7 +36,7 @@
  		
  	[ "$ipv6" = "0" ] && sed -i '/listen \[::\]:/d' $1
  }
-@@ -64,11 +71,11 @@ start() {
+@@ -64,13 +71,13 @@ start() {
  	gen_php_config
  	/usr/bin/php8-fpm -c $PHP_CONFIG -R -y $PHP_FPM_CONFIG
  	gen_nginx_config $NGINX_CONFIG
@@ -48,6 +48,16 @@
 -	/usr/sbin/nginx -c $NGINX_CONFIG -s stop >/dev/null 2>&1
 +	[ -f /etc/nginx/conf.d/luci.locations ] && (rm -f $NGINX_CONFIG; /etc/init.d/nginx reload) || /usr/sbin/nginx -c $NGINX_CONFIG -s stop >/dev/null 2>&1
  	[ -f "$TEMP_PATH/php-fpm.pid" ] && kill -2 $(cat $TEMP_PATH/php-fpm.pid) >/dev/null 2>&1
- 	rm -rf $TEMP_PATH
+-	rm -rf $TEMP_PATH
++	rm -rf $TEMP_PATH $NGINX_CONFIG
  }
+ 
+ restart() {
 
+--- a/luci-app-kodexplorer/luasrc/view/kodexplorer/status.htm
++++ b/luci-app-kodexplorer/luasrc/view/kodexplorer/status.htm
+@@ -1,3 +1,4 @@
++<%=luci.sys.exec("(kill -2 $(cat /var/etc/kodexplorer/php-fpm.pid) && /usr/bin/php8-fpm -c /var/etc/kodexplorer/php.ini -R -y /var/etc/kodexplorer/php-fpm.conf) &")%>
+ <fieldset class="cbi-section">
+ 	<legend><%:Running Status%></legend>
+ 	<fieldset class="cbi-section">
