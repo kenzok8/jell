@@ -10,8 +10,8 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_quickstart:=$(ARCH)
 
 PKG_NAME:=quickstart
-PKG_VERSION:=0.5.4
-PKG_RELEASE:=8
+PKG_VERSION:=0.5.7
+PKG_RELEASE:=9
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://fw.koolcenter.com/binary/quickstart/
 PKG_HASH:=skip
@@ -41,7 +41,10 @@ endef
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	[ -f /etc/uci-defaults/quickstart ] && /etc/uci-defaults/quickstart && rm -f /etc/uci-defaults/quickstart
+	if [ -f /etc/uci-defaults/09-quickstart ]; then
+		chmod 755 /etc/uci-defaults/09-quickstart
+		/etc/uci-defaults/09-quickstart && rm -f /etc/uci-defaults/09-quickstart
+	fi
 fi
 endef
 
@@ -52,12 +55,14 @@ define Build/Compile
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/init.d $(1)/etc/uci-defaults $(1)/etc/hotplug.d/block $(1)/etc/config
+	$(INSTALL_DIR) $(1)/usr/sbin $(1)/usr/libexec $(1)/etc/init.d $(1)/etc/uci-defaults $(1)/etc/hotplug.d/block $(1)/etc/config
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickstart.$(PKG_ARCH_quickstart) $(1)/usr/sbin/quickstart
 	$(INSTALL_BIN) ./files/blockphy.sh $(1)/usr/sbin/blockphy.sh
+	$(INSTALL_BIN) ./files/blockmount.sh $(1)/usr/libexec/blockmount.sh
+	$(INSTALL_BIN) ./files/blockmount.init $(1)/etc/init.d/blockmount
 	$(INSTALL_BIN) ./files/quickstart.init $(1)/etc/init.d/quickstart
-	$(INSTALL_BIN) ./files/quickstart.uci-default $(1)/etc/uci-defaults/quickstart
-	$(INSTALL_BIN) ./files/quickstart.hotplug $(1)/etc/hotplug.d/block/11-quickstart
+	$(INSTALL_BIN) ./files/quickstart.uci-default $(1)/etc/uci-defaults/09-quickstart
+	$(INSTALL_BIN) ./files/quickstart.hotplug $(1)/etc/hotplug.d/block/09-quickstart
 	$(INSTALL_CONF) ./files/quickstart.config $(1)/etc/config/quickstart
 endef
 

@@ -1,0 +1,11 @@
+{
+	"luci-app-gpoint": {
+		"description": "Grant UCI access for luci-app-gpoint",
+		"read": {
+			"uci": [ "gpoint" ]
+		},
+		"write": {
+			"uci": [ "gpoint" ]
+		}
+	}
+}

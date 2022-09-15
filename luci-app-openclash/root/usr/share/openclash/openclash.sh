@@ -24,6 +24,7 @@ dns_port=$(uci -q get openclash.config.dns_port)
 enable_redirect_dns=$(uci -q get openclash.config.enable_redirect_dns)
 disable_masq_cache=$(uci -q get openclash.config.disable_masq_cache)
 default_resolvfile=$(uci -q get openclash.config.default_resolvfile)
+FW4="$(command -v fw4)"
 if_restart=0
 only_download=0
 set_lock
@@ -33,7 +34,7 @@ urlencode() {
    if [ "$#" -eq 1 ]; then
       data=$(curl -s -o /dev/null -w %{url_effective} --get --data-urlencode "key=$1" "")
       if [ ! -z "$data" ]; then
-         echo "$(echo ${data##/?key=} |sed 's/\//%2f/g' |sed 's/:/%3a/g' |sed 's/?/%3f/g' |sed 's/(/%28/g' |sed 's/)/%29/g' |sed 's/\^/%5e/g' |sed 's/=/%3d/g' |sed 's/|/%7c/g' |sed 's/+/%20/g')"
+         echo -n "$(echo ${data##/?key=} |sed 's/\//%2f/g' |sed 's/:/%3a/g' |sed 's/?/%3f/g' |sed 's/(/%28/g' |sed 's/)/%29/g' |sed 's/\^/%5e/g' |sed 's/=/%3d/g' |sed 's/|/%7c/g' |sed 's/+/%20/g')"
       fi
    fi
 }
@@ -76,7 +77,7 @@ config_cus_up()
 	if [ -z "$subscribe_url_param" ]; then
 	   if [ -n "$key_match_param" ] || [ -n "$key_ex_match_param" ]; then
 	      LOG_OUT "Config File【$name】is Replaced Successfully, Start Picking Nodes..."	      
-	      ruby -ryaml -E UTF-8 -e "
+	      ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
 	      begin
 	         Value = YAML.load_file('$CONFIG_FILE');
 	         if Value.has_key?('proxies') and not Value['proxies'].to_a.empty? then
@@ -170,7 +171,7 @@ config_su_check()
          cp "$CFG_FILE" "$BACKPACK_FILE"
          #保留规则部分
          if [ "$servers_update" -eq 1 ] && [ "$only_download" -eq 0 ]; then
-   	        ruby -ryaml -E UTF-8 -e "
+   	        ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
                Value = YAML.load_file('$CONFIG_FILE');
                Value_1 = YAML.load_file('$CFG_FILE');
                if Value.key?('rules') or Value.key?('script') or Value.key?('rule-providers') then
@@ -237,10 +238,28 @@ change_dns()
          uci commit dhcp
          /etc/init.d/dnsmasq restart >/dev/null 2>&1
       fi
-      iptables -t nat -D OUTPUT -j openclash_output >/dev/null 2>&1
-      iptables -t mangle -D OUTPUT -j openclash_output >/dev/null 2>&1
-      iptables -t nat -I OUTPUT -j openclash_output >/dev/null 2>&1
-      iptables -t mangle -I OUTPUT -j openclash_output >/dev/null 2>&1
+      
+      if [ -n "$FW4" ]; then
+         for nft in "nat_output" "mangle_output"; do
+            local handles=$(nft -a list chain inet fw4 ${nft} |grep -E "openclash|OpenClash" |awk -F '# handle ' '{print$2}')
+            for handle in $handles; do
+               nft delete rule inet fw4 ${nft} handle ${handle}
+            done
+         done >/dev/null 2>&1
+         echo "$nat_output_rules" |while read line
+         do >/dev/null 2>&1
+            nft add rule inet fw4 nat_output ${line}
+         done
+         echo "$mangle_output_rules" |while read line
+         do
+            nft add rule inet fw4 mangle_output ${line}
+         done >/dev/null 2>&1
+      else
+         iptables -t nat -D OUTPUT -j openclash_output >/dev/null 2>&1
+         iptables -t mangle -D OUTPUT -j openclash_output >/dev/null 2>&1
+         iptables -t nat -A OUTPUT -j openclash_output >/dev/null 2>&1
+         iptables -t mangle -A OUTPUT -j openclash_output >/dev/null 2>&1
+      fi
       [ "$(unify_ps_status "openclash_watchdog.sh")" -eq 0 ] && [ "$(unify_ps_prevent)" -eq 0 ] && nohup /usr/share/openclash/openclash_watchdog.sh &
    fi
 }
@@ -248,7 +267,7 @@ change_dns()
 field_name_check()
 {
    #检查field名称（不兼容旧写法）
-   ruby -ryaml -E UTF-8 -e "
+   ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
       Value = YAML.load_file('$CFG_FILE');
       if Value.key?('Proxy') or Value.key?('Proxy Group') or Value.key?('Rule') or Value.key?('rule-provider') then
          if Value.key?('Proxy') then
@@ -304,14 +323,25 @@ EOF
          uci commit dhcp
          /etc/init.d/dnsmasq restart >/dev/null 2>&1
       fi
-      iptables -t nat -D OUTPUT -j openclash_output >/dev/null 2>&1
-      iptables -t mangle -D OUTPUT -j openclash_output >/dev/null 2>&1
+      if [ -n "$FW4" ]; then
+         nat_output_rules=$(nft -a list chain inet fw4 nat_output |grep -E "openclash|OpenClash" |awk -F '# handle ' '{print$1}' |sed 's/^[ \t]*//g')
+         mangle_output_rules=$(nft -a list chain inet fw4 mangle_output |grep -E "openclash|OpenClash" |awk -F '# handle ' '{print$1}' |sed 's/^[ \t]*//g')
+         for nft in "nat_output" "mangle_output"; do
+            local handles=$(nft -a list chain inet fw4 ${nft} |grep -E "openclash|OpenClash" |awk -F '# handle ' '{print$2}')
+            for handle in $handles; do
+               nft delete rule inet fw4 ${nft} handle ${handle}
+            done
+         done >/dev/null 2>&1
+      else
+         iptables -t nat -D OUTPUT -j openclash_output >/dev/null 2>&1
+         iptables -t mangle -D OUTPUT -j openclash_output >/dev/null 2>&1
+      fi
       sleep 3
 
       config_download
       
       if [ "$?" -eq 0 ] && [ -s "$CFG_FILE" ]; then
-         ruby -ryaml -E UTF-8 -e "
+         ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
          begin
          YAML.load_file('$CFG_FILE');
          rescue Exception => e
@@ -489,7 +519,7 @@ sub_info_get()
    config_download
 
    if [ "$?" -eq 0 ] && [ -s "$CFG_FILE" ]; then
-   	  ruby -ryaml -E UTF-8 -e "
+   	ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
       begin
       YAML.load_file('$CFG_FILE');
       rescue Exception => e

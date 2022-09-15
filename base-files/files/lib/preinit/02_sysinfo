@@ -5,6 +5,9 @@ do_sysinfo_generic() {
 		echo "$(strings /proc/device-tree/compatible | head -1)" > /tmp/sysinfo/board_name
 	[ ! -e /tmp/sysinfo/model -a -e /proc/device-tree/model ] && \
 		echo "$(cat /proc/device-tree/model)" > /tmp/sysinfo/model
+	sed -i "s/friendlyelec/friendlyarm/" /tmp/sysinfo/board_name
+	[ "$(cat /tmp/sysinfo/model)" == "FriendlyElec NanoPi R4SE" ] && \
+		echo "friendlyarm,nanopi-r4se" > /tmp/sysinfo/board_name
 }
 
 boot_hook_add preinit_main do_sysinfo_generic

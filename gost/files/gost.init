@@ -18,5 +18,5 @@ start()
 
 stop()
 {
-	killall -9 "gost" > "/dev/null" 2>&1
+	killall -q -9 "`which gost`"
 }

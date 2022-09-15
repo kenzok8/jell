@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mosdns
-PKG_VERSION:=0a421e5
-PKG_RELEASE:=22
+PKG_VERSION:=0d995dc
+PKG_RELEASE:=23
 
 PKG_SOURCE:=mosdns-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/IrineSistiana/mosdns/tar.gz/$(PKG_VERSION)?
@@ -37,11 +37,6 @@ define Package/mosdns/Default
   SUBMENU:=IP Addresses and Names
   TITLE:=A plug-in DNS forwarder/splitter
   URL:=https://github.com/IrineSistiana/mosdns
-endef
-
-define Package/mosdns
-  $(call Package/mosdns/Default)
-  DEPENDS:=$(GO_ARCH_DEPENDS)
 endef
 
 define Package/mosdns
@@ -81,10 +76,5 @@ define Package/mosdns/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 endef
 
-define Package/mosdns/install
-	$(call GoPackage/Package/Install/Bin,$(1))
-endef
-
 $(eval $(call GoBinPackage,mosdns))
-$(eval $(call BuildPackage,mosdns))
 $(eval $(call BuildPackage,mosdns))

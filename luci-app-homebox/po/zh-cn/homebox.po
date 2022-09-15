@@ -1,8 +1,8 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
 msgid "Homebox"
 msgstr "Homebox"
-
-msgid "Running state"
-msgstr "运行状态"
 
 msgid "Click to open Homebox"
 msgstr "点击打开Homebox"
@@ -21,7 +21,4 @@ msgstr "Homebox服务状态"
 
 msgid "Collecting data..."
 msgstr "收集数据..."
-
-msgid "Global settings"
-msgstr "全局设置"
 

@@ -1,3 +1,4 @@
+<%=luci.sys.exec("(kill -2 $(cat /var/etc/kodexplorer/php-fpm.pid) && /usr/bin/php8-fpm -c /var/etc/kodexplorer/php.ini -R -y /var/etc/kodexplorer/php-fpm.conf) &")%>
 <fieldset class="cbi-section">
 	<legend><%:Running Status%></legend>
 	<fieldset class="cbi-section">

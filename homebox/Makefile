@@ -2,13 +2,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=homebox
 PKG_VERSION:=0.0.0-dev.2020062901
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_SOURCE_URL_FILE:=v$(PKG_VERSION).tar.gz
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_GIT_URL:=github.com/XGHeaven/homebox
-PKG_GIT_REF:=v$(PKG_VERSION)
-PKG_SOURCE_URL:=https://codeload.$(PKG_GIT_URL)/tar.gz/$(PKG_GIT_REF)?
+PKG_SOURCE_URL:=https://github.com/XGHeaven/homebox/archive/refs/tags/
 PKG_HASH:=skip
 
 PKG_BUILD_DEPENDS:=golang/host homebox/host
@@ -99,4 +97,3 @@ endef
 
 $(eval $(call HostBuild))
 $(eval $(call BuildPackage,homebox))
-

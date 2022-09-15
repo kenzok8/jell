@@ -343,12 +343,12 @@ local function tree_to_json(node, json)
 				if subnode.sysauth_authenticator == "htmlauth" then
 					spec.auth = {
 						login = true,
-						methods = { "cookie:sysauth" }
+						methods = { "cookie:sysauth_https", "cookie:sysauth_http" }
 					}
 				elseif subname == "rpc" and subnode.module == "luci.controller.rpc" then
 					spec.auth = {
 						login = false,
-						methods = { "query:auth", "cookie:sysauth" }
+						methods = { "query:auth", "cookie:sysauth_https", "cookie:sysauth_http" }
 					}
 				elseif subnode.module == "luci.controller.admin.uci" then
 					spec.auth = {
@@ -465,7 +465,7 @@ function httpdispatch(request, prefix)
 	context.request = r
 
 	local pathinfo = ""
-	if sys.call("test -s /tmp/resolv.conf.d/resolv.conf.auto") == 0 then
+	if sys.call("test -s /tmp/resolv.conf.d/resolv.conf.auto") == 0 or sys.call("test ! -f /etc/init.d/wizard") == 0 then
 		pathinfo = http.urldecode(request:getenv("PATH_INFO") or "", true)	
 	else
 		pathinfo = http.urldecode(request:getenv("PATH_INFO") or "admin/system/initsetup", true)
@@ -737,7 +737,7 @@ local function init_template_engine(ctx)
 	return tpl
 end
 
-local function is_authenticated(auth)
+function is_authenticated(auth)
 	if type(auth) == "table" and type(auth.methods) == "table" and #auth.methods > 0 then
 		local sid, sdat, sacl
 		for _, method in ipairs(auth.methods) do
@@ -908,7 +908,7 @@ function dispatch(request)
 		local sid, sdat, sacl = is_authenticated(lookup_ctx.auth)
 
 		if not (sid and sdat and sacl) and lookup_ctx.auth.login then
-			sys.exec("(/usr/libexec/opkg-call update >/dev/null &")
+			sys.exec("/usr/libexec/opkg-call update >/dev/null &")
 
 			local user = http.getenv("HTTP_AUTH_USER")
 			local pass = http.getenv("HTTP_AUTH_PASS")
@@ -941,7 +941,8 @@ function dispatch(request)
 			if cookie_p == '0' then
 				timeout = ''
 			end
-			http.header("Set-Cookie", 'sysauth=%s; expires=%s; path=%s; SameSite=Strict; HttpOnly%s' %{
+			http.header("Set-Cookie", 'sysauth_%s=%s; expires=%s; path=%s; SameSite=Strict; HttpOnly%s' %{
+				http.getenv("HTTPS") == "on" and "https" or "http",
 				sid, timeout, build_url(), http.getenv("HTTPS") == "on" and "; secure" or ""
 			})
 
@@ -967,8 +968,8 @@ function dispatch(request)
 			local sid = context.authsession
 			if sid then
 				util.ubus("session", "destroy", { ubus_rpc_session = sid })
-				luci.http.header("Set-Cookie", "sysauth=%s; expires=%s; path=%s" %{
-					'', 'Thu, 01 Jan 1970 01:00:00 GMT', build_url()
+				luci.http.header("Set-Cookie", "sysauth_%s=%s; expires=%s; path=%s" %{
+					http.getenv("HTTPS") == "on" and "https" or "http", 'sid', 'Thu, 01 Jan 1970 01:00:00 GMT', build_url()
 				})
 			end
 			luci.http.redirect(build_url())

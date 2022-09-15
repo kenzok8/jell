@@ -1,11 +1,4 @@
 #!/bin/sh
 
-uci -q batch <<-EOF >/dev/null
-	delete ucitrack.@ddnsto[-1]
-	add ucitrack ddnsto
-	set ucitrack.@ddnsto[-1].init=ddnsto
-	commit ucitrack
-EOF
-
 rm -f /tmp/luci-indexcache
 exit 0

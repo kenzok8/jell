@@ -45,9 +45,9 @@ update_core() {
 	mkdir -p "/usr/share/$NAME/core"
 	rm -rf "/usr/share/$NAME/core"/*
 
-	for url in $(uclient-fetch -qO- "https://api.github.com/repos/UnblockNeteaseMusic/server/contents/precompiled" |jsonfilter -e '@[*].download_url')
+	for file in $(uclient-fetch -qO- "https://api.github.com/repos/UnblockNeteaseMusic/server/contents/precompiled" | jsonfilter -e '@[*].path')
 	do
-		uclient-fetch "${url}" -qO "/usr/share/$NAME/core/${url##*/}"
+		uclient-fetch "https://fastly.jsdelivr.net/gh/UnblockNeteaseMusic/server@$core_latest_ver/$file" -qO "/usr/share/$NAME/core/${file##*/}"
 		[ -s "/usr/share/$NAME/core/${url##*/}" ] || {
 			echo -e "Failed to download ${url##*/}." >> "/tmp/$NAME.log"
 			rm -f "$LOCK"
@@ -57,7 +57,7 @@ update_core() {
 
 	for cert in "ca.crt" "server.crt" "server.key"
 	do
-		uclient-fetch "https://raw.githubusercontent.com/UnblockNeteaseMusic/server/enhanced/${cert}" -qO "/usr/share/$NAME/core/${cert}"
+		uclient-fetch "https://fastly.jsdelivr.net/gh/UnblockNeteaseMusic/server@enhanced/${cert}" -qO "/usr/share/$NAME/core/${cert}"
 		[ -s "/usr/share/$NAME/core/${cert}" ] || {
 			echo -e "Failed to download ${cert}." >> "/tmp/$NAME.log"
 			rm -f "$LOCK"
@@ -65,7 +65,6 @@ update_core() {
 		}
 	done
 
-	[ -z "${update_core_from_luci}" ] || touch "/usr/share/$NAME/update_core_successfully"
 	echo -e "${core_latest_ver}" > "/usr/share/$NAME/core_local_ver"
 	[ -n "${non_restart}" ] || /etc/init.d/"$NAME" restart
 
@@ -75,6 +74,17 @@ update_core() {
 }
 
 case "$1" in
+	"check_version")
+		if [ ! -e "/usr/share/$NAME/core_local_ver" ] || [ ! -e "/usr/share/$NAME/core/app.js" ]; then
+			echo -e "Not installed."
+			exit 2
+		else
+			version="$(node "/usr/share/$NAME/core/app.js" -v)"
+			commit="$(cat "/usr/share/$NAME/core_local_ver" | head -c7)"
+			echo "$version ($commit)"
+			exit 0
+		fi
+		;;
 	"update_core")
 		check_core_if_already_running
 		check_core_latest_version
@@ -84,12 +94,11 @@ case "$1" in
 		check_core_if_already_running
 		check_core_latest_version
 		;;
-	"update_core_from_luci")
-		update_core_from_luci=1
-		check_core_if_already_running
-		check_core_latest_version
+	"remove_core")
+		/etc/init.d/"$NAME" stop
+		rm -rf "/usr/share/$NAME/core" "/usr/share/$NAME/core_local_ver"
 		;;
 	*)
-		echo -e "Usage: $0/update.sh update_core"
+		echo -e "Usage: $0/update.sh check_version | update_core | remove_core"
 		;;
 esac

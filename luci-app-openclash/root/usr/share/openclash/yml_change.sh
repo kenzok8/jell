@@ -81,6 +81,7 @@ yml_auth_get()
    if [ -z "$username" ] || [ -z "$password" ]; then
       return
    else
+      LOG_OUT "Tip: You have seted the authentication of SOCKS5/HTTP(S) proxy with【$username:$password】"
       echo "  - $username:$password" >>/tmp/yaml_openclash_auth
    fi
 }
@@ -201,7 +202,11 @@ yml_dns_get()
    fi
 
    if [ -n "$port" ] && [ -n "$ip" ]; then
-      dns_address="$ip:$port"
+      if [ ${ip%%/*} != ${ip#*/} ]; then
+         dns_address="${ip%%/*}:$port/${ip#*/}"
+      else
+         dns_address="$ip:$port"
+      fi
    elif [ -z "$port" ] && [ -n "$ip" ]; then
       dns_address="$ip"
    else
@@ -214,7 +219,7 @@ yml_dns_get()
    fi
 
    if [ "$specific_group" != "Disable" ] && [ -n "$specific_group" ] && [ "$enable_meta_core" = "1" ]; then
-      group_check=$(ruby -ryaml -E UTF-8 -e "
+      group_check=$(ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
       begin
          Thread.new{
             Value = YAML.load_file('$2');
@@ -279,11 +284,16 @@ yml_dns_get()
             echo "  nameserver:" >/tmp/yaml_config.namedns.yaml
          fi
          echo "    - \"$dns_type$dns_address\"" >>/tmp/yaml_config.namedns.yaml
-      else
+      elif [ "$group" = "fallback" ]; then
          if [ -z "$(grep "^ \{0,\}fallback:$" /tmp/yaml_config.falldns.yaml 2>/dev/null)" ]; then
             echo "  fallback:" >/tmp/yaml_config.falldns.yaml
          fi
          echo "    - \"$dns_type$dns_address\"" >>/tmp/yaml_config.falldns.yaml
+      elif [ "$group" = "default" ]; then
+         if [ -z "$(grep "^ \{0,\}default-nameserver:$" /tmp/yaml_config.defaultdns.yaml 2>/dev/null)" ]; then
+            echo "  default-nameserver:" >/tmp/yaml_config.defaultdns.yaml
+         fi
+         echo "    - \"$dns_type$dns_address\"" >>/tmp/yaml_config.defaultdns.yaml
       fi
    else
       return
@@ -294,7 +304,7 @@ config_load "openclash"
 config_foreach yml_auth_get "authentication"
 yml_dns_custom "$enable_custom_dns" "$5" "$append_wan_dns" "${16}"
 
-ruby -ryaml -E UTF-8 -e "
+ruby -ryaml -rYAML -I "/usr/share/openclash" -E UTF-8 -e "
 begin
    Value = YAML.load_file('$5');
 rescue Exception => e
@@ -483,14 +493,20 @@ Thread.new{
    if '$enable_custom_dns' == '1' or '$append_wan_dns' == '1' then
       if File::exist?('/tmp/yaml_config.namedns.yaml') then
          Value_1 = YAML.load_file('/tmp/yaml_config.namedns.yaml');
-         Value_1['nameserver'] = Value_1['nameserver'].uniq;
-         Value['dns']['nameserver'] = Value_1['nameserver'];
-         if File::exist?('/tmp/yaml_config.falldns.yaml') then
-            Value_2 = YAML.load_file('/tmp/yaml_config.falldns.yaml');
-            Value_2['fallback'] = Value_2['fallback'].uniq;
-            Value['dns']['fallback'] = Value_2['fallback'];
+         if '$enable_custom_dns' == '1' then
+            Value['dns']['nameserver'] = Value_1['nameserver'].uniq;
+         elsif '$append_wan_dns' == '1' then
+            if Value['dns'].has_key?('nameserver') then
+               Value['dns']['nameserver'] = Value['dns']['nameserver'] | Value_1['nameserver'];
+            else
+               Value['dns']['nameserver'] = Value_1['nameserver'].uniq;
+            end;
          end;
-      else
+         if File::exist?('/tmp/yaml_config.falldns.yaml') and '$enable_custom_dns' == '1' then
+            Value_2 = YAML.load_file('/tmp/yaml_config.falldns.yaml');
+            Value['dns']['fallback'] = Value_2['fallback'].uniq;
+         end;
+      elsif '$enable_custom_dns' == '1' then
          puts '${LOGTIME} Error: Nameserver Option Must Be Setted, Stop Customing DNS Servers';
       end;
    end;
@@ -513,6 +529,16 @@ end;
 #default-nameserver
 begin
 Thread.new{
+   if '$enable_custom_dns' == '1' then
+      if File::exist?('/tmp/yaml_config.defaultdns.yaml') then
+         Value_1 = YAML.load_file('/tmp/yaml_config.defaultdns.yaml');
+         if Value['dns'].has_key?('default-nameserver') then
+            Value['dns']['default-nameserver'] = Value['dns']['default-nameserver'] | Value_1['default-nameserver'];
+         else
+            Value['dns']['default-nameserver'] = Value_1['default-nameserver'].uniq;
+         end;
+      end;
+   end;
    if ${28} == 1 then
       if ${20} == 1 then
          reg = /(^https:\/\/|^tls:\/\/|^quic:\/\/)?((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(?::(?:[0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?/;
@@ -615,6 +641,12 @@ Thread.new{
             Value['dns'].merge!({'fake-ip-filter'=>['+.nflxvideo.net', '+.media.dssott.com']});
          end;
       end;
+      if Value['dns'].has_key?('fake-ip-filter') and not Value['dns']['fake-ip-filter'].to_a.empty? then
+         Value['dns']['fake-ip-filter'].insert(-1,'+.dns.google');
+         Value['dns']['fake-ip-filter']=Value['dns']['fake-ip-filter'].uniq;
+      else
+         Value['dns'].merge!({'fake-ip-filter'=>['+.dns.google']});
+      end;
    elsif ${19} == 1 then
       if Value['dns'].has_key?('fake-ip-filter') and not Value['dns']['fake-ip-filter'].to_a.empty? then
          Value['dns']['fake-ip-filter'].insert(-1,'+.*');
@@ -642,6 +674,7 @@ Thread.new{
                Value['hosts']=Value_3;
             end;
             Value['hosts'].uniq;
+            puts '${LOGTIME} Warning: You May Need to Turn off The Rebinding Protection Option of Dnsmasq When Hosts Has Set a Reserved Address';
          end;
       rescue
          Value_3 = IO.readlines('/etc/openclash/custom/openclash_custom_hosts.list');
@@ -654,6 +687,7 @@ Thread.new{
                Value_3.each{|x| Value['hosts'].merge!(x)};
             end;
             Value['hosts'].uniq;
+            puts '${LOGTIME} Warning: You May Need to Turn off The Rebinding Protection Option of Dnsmasq When Hosts Has Set a Reserved Address';
          end;
       end;
    end;

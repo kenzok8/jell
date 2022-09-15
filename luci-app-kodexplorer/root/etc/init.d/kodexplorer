@@ -77,7 +77,7 @@ start() {
 stop() {
 	[ -f /etc/nginx/conf.d/luci.locations ] && (rm -f $NGINX_CONFIG; /etc/init.d/nginx reload) || /usr/sbin/nginx -c $NGINX_CONFIG -s stop >/dev/null 2>&1
 	[ -f "$TEMP_PATH/php-fpm.pid" ] && kill -2 $(cat $TEMP_PATH/php-fpm.pid) >/dev/null 2>&1
-	rm -rf $TEMP_PATH
+	rm -rf $TEMP_PATH $NGINX_CONFIG
 }
 
 restart() {

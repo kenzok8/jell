@@ -1323,7 +1323,7 @@ return view.extend({
 
 				var crypto_modes = [];
 
-				if (hwtype == 'mac80211') {
+				if (hwtype != 'broadcom') {
 					var has_supplicant = L.hasSystemFeature('wpasupplicant'),
 					    has_hostapd = L.hasSystemFeature('hostapd');
 
@@ -1604,8 +1604,8 @@ return view.extend({
 
 					o = ss.taboption('encryption', form.ListValue, 'ft_over_ds', _('FT protocol'));
 					o.depends({ ieee80211r: '1' });
-					o.value('1', _('FT over DS'));
 					o.value('0', _('FT over the Air'));
+					o.value('1', _('FT over DS'));
 					o.rmempty = true;
 
 					o = ss.taboption('encryption', form.Flag, 'ft_psk_generate_local', _('Generate PMK locally'), _('When using a PSK, the PMK can be automatically generated. When enabled, the R0/R1 key options below are not applied. Disable this to use the R0 and R1 key options.'));

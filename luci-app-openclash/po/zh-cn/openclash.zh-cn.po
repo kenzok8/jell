@@ -240,10 +240,10 @@ msgid "Specify DNS Server For List and Server Nodes With Fake-IP Mode, Only One 
 msgstr "指定下方列表中域名和 Fake-IP 模式下非代理集内节点的DNS服务器，只支持填写一个IP地址"
 
 msgid "Domain Names In The List Do Not Return Fake-IP, One rule per line"
-msgstr "每行请只填写一个域名，列表中的域名在（Fake-IP模式）下查询DNS时将返回真实IP地址，更改后点击上方按钮生效"
+msgstr "每行请只填写一个域名，列表中的域名在（Fake-IP模式）下查询DNS时将返回真实IP地址"
 
-msgid "Domain Names In The List Use The Custom DNS Server, One rule per line"
-msgstr "每行请只填写一个域名，列表中的域名将使用上方指定的DNS进行查询"
+msgid "Domain Names In The List Use The Custom DNS Server, One rule per line, Depend on Dnsmasq"
+msgstr "每行请只填写一个域名，列表中的域名将使用上方指定的DNS进行查询，此功能依赖于 Dnsmasq"
 
 
 msgid "Domain Names In The List Use The Custom DNS Server, But Still Return Fake-IP Results, One rule per line"
@@ -256,7 +256,7 @@ msgid "DNS Server Group"
 msgstr "服务器分组"
 
 msgid "NameServer Group Must Be Set"
-msgstr "NameServer 组必须设置"
+msgstr "NameServer 组必须设置至少一个"
 
 msgid "DNS Server Address"
 msgstr "服务器地址"
@@ -1945,6 +1945,9 @@ msgstr "提示: 检测到内核文件不存在，准备开始下载..."
 msgid "Tip: Detected that the Chnroute Cidr List is not Installed, Ready to Download..."
 msgstr "提示: 检测到大陆白名单列表不存在，准备开始下载..."
 
+msgid "Tip: Detected that the Chnroute Cidr List Format is wrong, Ready to Reformat..."
+msgstr "提示: 检测到大陆白名单列表格式错误，准备重新格式化..."
+
 msgid "Error: Could Not Load The Capsh Library, Please Verify The Capsh Shell Library Work Well..."
 msgstr "错误：Capsh 异常，请尝试重新安装依赖【libcap】和相应的Capsh库，终止启动..."
 
@@ -2572,6 +2575,9 @@ msgstr "提示：开始自动选择（检测）Discovery Plus 解锁节点..."
 msgid "Tip: Start Auto Select Proxy For Bilibili Unlock..."
 msgstr "提示：开始自动选择（检测）Bilibili 解锁节点..."
 
+msgid "Tip: Start Auto Select Proxy For Google Not CN Unlock..."
+msgstr "提示：开始自动选择（检测）Google 非送中节点..."
+
 msgid "Netflix Group:"
 msgstr "Netflix 策略组："
 
@@ -2607,6 +2613,9 @@ msgstr "Discovery Plus 策略组："
 
 msgid "Bilibili Group:"
 msgstr "Bilibili 策略组："
+
+msgid "Google Group:"
+msgstr "Google 策略组："
 
 msgid "full support."
 msgstr "完整解锁。"
@@ -2713,7 +2722,7 @@ msgstr "Redir-Host 模式强制进行远程域名解析"
 msgid "Bypass Gateway Compatible"
 msgstr "旁路网关（旁路由）兼容"
 
-msgid "If The Ntwork Cannot be Connected in Bypass Gateway Mode, Please Try to Enable."
+msgid "If The Network Cannot be Connected in Bypass Gateway Mode, Please Try to Enable."
 msgstr "旁路网关（旁路由）模式下网络无法连接时请尝试启用。"
 
 msgid "Suggestion: If The Device Does Not Have WLAN, Please Disable The Lan Interface's Bridge Option"
@@ -3096,3 +3105,39 @@ msgstr "仅备份规则集"
 
 msgid "Backup Proxy Provider"
 msgstr "仅备份代理集"
+
+msgid "Chnroute Bypassed List"
+msgstr "绕过中国大陆 IPv4 黑名单"
+
+msgid "Chnroute6 Bypassed List"
+msgstr "绕过中国大陆 IPv6 黑名单"
+
+msgid "Domains or IPs in The List Will Not be Affected by The China IP Route Option, Depend on Dnsmasq"
+msgstr "列表中的域名或 IP 将不会受到绕过中国大陆 IP 选项的影响，此功能依赖于 Dnsmasq"
+
+msgid "Warning: You May Need to Turn off The Rebinding Protection Option of Dnsmasq When Hosts Has Set a Reserved Address"
+msgstr "警告：Hosts 设置了保留地址时可能需要关闭 dnsmasq 的重绑定保护选项才能生效"
+
+msgid "LAN Block Google DNS IP List"
+msgstr "实验性：屏蔽 Google DNS 的局域网设备 IP"
+
+msgid "LAN Block Google DNS Mac List"
+msgstr "实验性：屏蔽 Google DNS 的局域网设备 Mac"
+
+msgid "Auto Select Logic"
+msgstr "自动选择逻辑"
+
+msgid "Urltest"
+msgstr "低延迟优先"
+
+msgid "Random"
+msgstr "随机选择"
+
+msgid "Tip: You have seted the authentication of SOCKS5/HTTP(S) proxy with"
+msgstr "提示：您为 SOCKS5/HTTP(S) 代理设置的账户密码为"
+
+msgid "Google Not CN"
+msgstr "Google 非送中"
+
+msgid "In Fake-ip Mode, Even If This Option is Turned Off, Domain Type Connections Still Pass Through The Core For The Availability"
+msgstr "在 Fake-IP 模式时，即使关闭此选项，域名类型的连接仍将通过核心以保证可用性"

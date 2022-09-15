@@ -19,7 +19,7 @@
         window.vue_lang = '<%=lang%>';
         window.token = "<%=token%>";
         window.device_id = {arch:"<%=id.arch%>",uid:"<%=id.uid%>",version:"<%=id.version%>"};
-        window.istore_features = <%=jsonc.stringify(features)%>;
+        window.istore_features = <%=jsonc.stringify(features)%>.filter(f => f !== '_lua_force_array_');
     })();
 </script>
 <h2 name="content"><%:iStore%> 
@@ -49,7 +49,7 @@
 <%
 local taskd = require "luci.model.tasks"
 local status = taskd.status("istore")
-if status.running then
+if status.running or status.exit_code ~= 404 then
 -%>
     window.istore_log(true);
 <%

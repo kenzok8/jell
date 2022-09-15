@@ -1,0 +1,64 @@
+name: C/C++ CI
+
+on:
+  push:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYYMMDDTHHmmss
+          utcOffset: "+08:00"
+
+      - name: Setup Environment
+        run: |
+          sudo apt-fast update
+          sudo apt-fast -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync
+
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: openwrt-sdk-21.02.0-rc1-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64
+          key: ${{ runner.os }}-openwrt
+          restore-keys: |
+            ${{ runner.os }}-openwrt
+
+      - name: Setup OpenWRT SDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          wget https://downloads.openwrt.org/releases/21.02.0-rc1/targets/ramips/mt7620/openwrt-sdk-21.02.0-rc1-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+          tar -xvJf openwrt-sdk-21.02.0-rc1-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+          cd openwrt-sdk-21.02.0-rc1-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: openwrt-sdk-21.02.0-rc1-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64/package/UA2F
+
+      - name: Compile Package
+        working-directory: ./openwrt-sdk-21.02.0-rc1-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64
+        run: |
+          make defconfig
+          make package/UA2F/compile -j2 V=s
+
+      - name: Release Package
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ steps.current-time.outputs.formattedTime }}"
+          prerelease: true
+          files: |
+            openwrt-sdk-21.02.0-rc1-ramips-mt7620_gcc-8.4.0_musl.Linux-x86_64/bin/packages/mipsel_24kc/base/ua2f*
+
+
+
+

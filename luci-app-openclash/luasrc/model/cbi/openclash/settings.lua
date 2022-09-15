@@ -66,7 +66,7 @@ o.default = "fake-ip"
 end
 
 o = s:taboption("op_mode", Flag, "enable_udp_proxy", font_red..bold_on..translate("Proxy UDP Traffics")..bold_off..font_off)
-o.description = translate("The Servers Must Support UDP forwarding")..", "..font_red..bold_on..translate("If Docker is Installed, UDP May Not Forward Normally")..bold_off..font_off
+o.description = translate("The Servers Must Support UDP forwarding").."<br>"..font_red..bold_on.."1."..translate("If Docker is Installed, UDP May Not Forward Normally").."<br>2."..translate("In Fake-ip Mode, Even If This Option is Turned Off, Domain Type Connections Still Pass Through The Core For The Availability")..bold_off..font_off
 o:depends("en_mode", "redir-host")
 o:depends("en_mode", "fake-ip")
 o.default = 1
@@ -130,7 +130,7 @@ o.description = translate("When Enabled, The Control Panel And The Connection Br
 o.default = 1
 
 o = s:taboption("op_mode", Flag, "bypass_gateway_compatible", translate("Bypass Gateway Compatible"))
-o.description = translate("If The Ntwork Cannot be Connected in Bypass Gateway Mode, Please Try to Enable.")..font_red..bold_on..translate("Suggestion: If The Device Does Not Have WLAN, Please Disable The Lan Interface's Bridge Option")..bold_off..font_off
+o.description = translate("If The Network Cannot be Connected in Bypass Gateway Mode, Please Try to Enable.")..font_red..bold_on..translate("Suggestion: If The Device Does Not Have WLAN, Please Disable The Lan Interface's Bridge Option")..bold_off..font_off
 o.default = 0
 
 o = s:taboption("op_mode", Flag, "small_flash_memory", translate("Small Flash Memory"))
@@ -327,7 +327,7 @@ o:depends("dns_advanced_setting", "1")
 
 custom_domain_dns = s:taboption("dns", Value, "custom_domain_dns")
 custom_domain_dns.template = "cbi/tvalue"
-custom_domain_dns.description = translate("Domain Names In The List Use The Custom DNS Server, One rule per line")
+custom_domain_dns.description = translate("Domain Names In The List Use The Custom DNS Server, One rule per line, Depend on Dnsmasq")
 custom_domain_dns.rows = 20
 custom_domain_dns.wrap = "off"
 custom_domain_dns:depends("dns_advanced_setting", "1")
@@ -597,7 +597,7 @@ o.description = translate("In The Fake-IP Mode, Only Pure IP Requests Are Suppor
 o = s:taboption("lan_ac", DynamicList, "lan_ac_black_ports", translate("Lan Bypassed Port List"))
 o.datatype = "port"
 o:value("5000", translate("5000(NAS)"))
-o.description = translate("The Traffic From The Local Specified Port Will Not Pass The Core, Try To Set When The Bypass Gateway Forwarding Fails")
+o.description = "1."..translate("The Traffic From The Local Specified Port Will Not Pass The Core, Try To Set When The Bypass Gateway Forwarding Fails").."<br>".."2."..translate("In The Fake-IP Mode, Only Pure IP Requests Are Supported")
 
 o = s:taboption("lan_ac", Value, "local_network_pass", translate("Local IPv4 Network Bypassed List"))
 o.template = "cbi/tvalue"
@@ -637,6 +637,45 @@ function o.write(self, section, value)
 	end
 end
 
+if op_mode == "redir-host" then
+o = s:taboption("lan_ac", Value, "chnroute_pass", translate("Chnroute Bypassed List"))
+o.template = "cbi/tvalue"
+o.description = translate("Domains or IPs in The List Will Not be Affected by The China IP Route Option, Depend on Dnsmasq")
+o.rows = 20
+o.wrap = "off"
+
+function o.cfgvalue(self, section)
+	return NXFS.readfile("/etc/openclash/custom/openclash_custom_chnroute_pass.list") or ""
+end
+function o.write(self, section, value)
+	if value then
+		value = value:gsub("\r\n?", "\n")
+		local old_value = NXFS.readfile("/etc/openclash/custom/openclash_custom_chnroute_pass.list")
+	  if value ~= old_value then
+			NXFS.writefile("/etc/openclash/custom/openclash_custom_chnroute_pass.list", value)
+		end
+	end
+end
+
+o = s:taboption("lan_ac", Value, "chnroute6_pass", translate("Chnroute6 Bypassed List"))
+o.template = "cbi/tvalue"
+o.description = translate("Domains or IPs in The List Will Not be Affected by The China IP Route Option, Depend on Dnsmasq")
+o.rows = 20
+o.wrap = "off"
+
+function o.cfgvalue(self, section)
+	return NXFS.readfile("/etc/openclash/custom/openclash_custom_chnroute6_pass.list") or ""
+end
+function o.write(self, section, value)
+	if value then
+		value = value:gsub("\r\n?", "\n")
+		local old_value = NXFS.readfile("/etc/openclash/custom/openclash_custom_chnroute6_pass.list")
+	  if value ~= old_value then
+			NXFS.writefile("/etc/openclash/custom/openclash_custom_chnroute6_pass.list", value)
+		end
+	end
+end
+end
 ---- Rules Settings
 o = s:taboption("rules", Flag, "rule_source", translate("Enable Other Rules"))
 o.description = translate("Use Other Rules")
@@ -691,6 +730,38 @@ function custom_rules_2.write(self, section, value)
 end
 
 --Stream Enhance
+se_dns_ip = s:taboption("stream_enhance", DynamicList, "lan_block_google_dns_ips", font_red..bold_on..translate("LAN Block Google DNS IP List")..bold_off..font_off)
+se_dns_ip:depends("proxy_mode", "global")
+se_dns_ip:depends("proxy_mode", "direct")
+se_dns_ip:depends("proxy_mode", "script")
+se_dns_ip:depends({router_self_proxy = "1", proxy_mode = "rule"})
+se_dns_ip.datatype = "ipaddr"
+se_dns_ip.rmempty  = true
+
+se_dns_mac = s:taboption("stream_enhance", DynamicList, "lan_block_google_dns_macs", font_red..bold_on..translate("LAN Block Google DNS Mac List")..bold_off..font_off)
+se_dns_mac.datatype = "list(macaddr)"
+se_dns_mac.rmempty  = true
+se_dns_mac:depends("proxy_mode", "global")
+se_dns_mac:depends("proxy_mode", "direct")
+se_dns_mac:depends("proxy_mode", "script")
+se_dns_mac:depends({router_self_proxy = "1", proxy_mode = "rule"})
+
+luci.ip.neighbors({ family = 4 }, function(n)
+	if n.mac and n.dest then
+		se_dns_ip:value(n.dest:string())
+		se_dns_mac:value(n.mac, "%s (%s)" %{ n.mac, n.dest:string() })
+	end
+end)
+
+if string.len(SYS.exec("/usr/share/openclash/openclash_get_network.lua 'gateway6'")) ~= 0 then
+luci.ip.neighbors({ family = 6 }, function(n)
+	if n.mac and n.dest then
+		se_dns_ip:value(n.dest:string())
+		se_dns_mac:value(n.mac, "%s (%s)" %{ n.mac, n.dest:string() })
+	end
+end)
+end
+
 o = s:taboption("stream_enhance", Flag, "stream_domains_prefetch", font_red..bold_on..translate("Prefetch Netflix, Disney Plus Domains")..bold_off..font_off)
 o.description = translate("Prevent Some Devices From Directly Using IP Access To Cause Unlocking Failure, Recommend Use meta Sniffer Function")
 o.default = 0
@@ -720,6 +791,12 @@ o:depends("proxy_mode", "script")
 o = s:taboption("stream_enhance", Value, "stream_auto_select_interval", translate("Auto Select Interval(min)"))
 o.default = "30"
 o.datatype = "uinteger"
+o:depends("stream_auto_select", "1")
+
+o = s:taboption("stream_enhance", ListValue, "stream_auto_select_logic", font_red..bold_on..translate("Auto Select Logic")..bold_off..font_off)
+o.default = "urltest"
+o:value("urltest", translate("Urltest"))
+o:value("random", translate("Random"))
 o:depends("stream_auto_select", "1")
 
 o = s:taboption("stream_enhance", Flag, "stream_auto_select_expand_group", font_red..bold_on..translate("Expand Group")..bold_off..font_off)
@@ -1130,6 +1207,28 @@ o.template = "openclash/other_stream_option"
 o.value = "Bilibili"
 o:depends("stream_auto_select_bilibili", "1")
 
+--Google not cn
+o = s:taboption("stream_enhance", Flag, "stream_auto_select_google_not_cn", font_red..translate("Google Not CN")..font_off)
+o.default = 0
+o:depends("stream_auto_select", "1")
+
+o = s:taboption("stream_enhance", Value, "stream_auto_select_group_key_google_not_cn", translate("Group Filter"))
+o.default = "Google"
+o.placeholder = "Google"
+o.description = translate("It Will Be Searched According To The Regex When Auto Search Group Fails")
+o:depends("stream_auto_select_google_not_cn", "1")
+
+o = s:taboption("stream_enhance", Value, "stream_auto_select_node_key_google_not_cn", translate("Unlock Nodes Filter"))
+o.default = ""
+o.description = translate("It Will Be Selected Nodes According To The Regex")
+o:depends("stream_auto_select_google_not_cn", "1")
+
+o = s:taboption("stream_enhance", DummyValue, "Google", translate("Manual Test"))
+o.rawhtml = true
+o.template = "openclash/other_stream_option"
+o.value = "Google"
+o:depends("stream_auto_select_google_not_cn", "1")
+
 ---- update Settings
 o = s:taboption("rules_update", Flag, "other_rule_auto_update", translate("Auto Update"))
 o.description = font_red..bold_on..translate("Auto Update Other Rules")..bold_off..font_off
@@ -1403,6 +1502,7 @@ end
 o = ds:option(ListValue, "group", translate("DNS Server Group"))
 o:value("nameserver", translate("NameServer "))
 o:value("fallback", translate("FallBack "))
+o:value("default", translate("Default-NameServer"))
 o.default     = "nameserver"
 o.rempty      = false
 

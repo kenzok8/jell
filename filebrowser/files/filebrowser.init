@@ -30,5 +30,5 @@ start() {
 
 stop() {
 	echo "${db_dir}/${db_name}" > "/lib/upgrade/keep.d/filebrowser"
-	kill -9 $(ps -w | grep ${db_name} | grep -v grep | awk '{print$1}') 2>/dev/null
+	killall -q -9 "`which filebrowser`"
 }

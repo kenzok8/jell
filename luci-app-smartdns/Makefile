@@ -9,7 +9,7 @@ PKG_MAINTAINER:=Nick Peng <pymumu@gmail.com>
 
 LUCI_TITLE:=LuCI for smartdns
 LUCI_DESCRIPTION:=Provides Luci for smartdns
-LUCI_DEPENDS:=+smartdns
+LUCI_DEPENDS:=+smartdns +luci-compat
 LUCI_PKGARCH:=all
 
 define Package/$(PKG_NAME)/config

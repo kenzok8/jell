@@ -2,6 +2,7 @@
 'require baseclass';
 'require fs';
 'require network';
+'require rpc';
 
 function progressbar(value, max, byte) {
 	var vn = parseInt(value) || 0,
@@ -59,6 +60,11 @@ function renderbox(ifc, ipv6) {
 	]);
 }
 
+var callUserInfo = rpc.declare({
+    object: 'luci',
+    method: 'getOnlineUsers'
+});
+
 return baseclass.extend({
 	title: _('Network'),
 
@@ -67,7 +73,8 @@ return baseclass.extend({
 			fs.trimmed('/proc/sys/net/netfilter/nf_conntrack_count'),
 			fs.trimmed('/proc/sys/net/netfilter/nf_conntrack_max'),
 			network.getWANNetworks(),
-			network.getWAN6Networks()
+			network.getWAN6Networks(),
+			L.resolveDefault(callUserInfo(), {})
 		]);
 	},
 
@@ -75,7 +82,8 @@ return baseclass.extend({
 		var ct_count  = +data[0],
 		    ct_max    = +data[1],
 		    wan_nets  = data[2],
-		    wan6_nets = data[3];
+		    wan6_nets = data[3],
+		    userinfo = data[4];
 
 		var fields = [
 			_('Active Connections'), ct_max ? ct_count : null
@@ -89,6 +97,10 @@ return baseclass.extend({
 				E('td', { 'class': 'td left' }, [
 					(fields[i + 1] != null) ? progressbar(fields[i + 1], ct_max) : '?'
 				])
+			]));
+			ctstatus.appendChild(E('div', { 'class': 'tr' }, [
+				E('div', { 'class': 'td left' }, _('Online Users')),
+				E('div', { 'class': 'td left' },  userinfo.onlineusers)
 			]));
 		}
 

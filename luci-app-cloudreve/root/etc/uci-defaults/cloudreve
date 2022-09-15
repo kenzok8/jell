@@ -1,0 +1,11 @@
+#!/bin/sh
+
+uci -q batch <<-EOF >/dev/null
+	delete ucitrack.@cloudreve[-1]
+	add ucitrack cloudreve
+	set ucitrack.@cloudreve[-1].init=cloudreve
+	commit ucitrack
+EOF
+
+rm -f /tmp/luci-indexcache
+exit 0

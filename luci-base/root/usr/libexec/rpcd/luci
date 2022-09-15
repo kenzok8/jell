@@ -207,6 +207,8 @@ local methods = {
 	getFeatures = {
 		call = function()
 			local fs = require "nixio.fs"
+			local sys = require "luci.sys"
+			local kernel_version = sys.exec("echo -n $(uname -r)")
 			local rv = {}
 			local ok, fd
 
@@ -214,6 +216,7 @@ local methods = {
 			rv.firewall4     = fs.access("/sbin/fw4")
 			rv.opkg          = fs.access("/bin/opkg")
 			rv.offloading    = fs.access("/sys/module/xt_FLOWOFFLOAD/refcnt") or fs.access("/sys/module/nft_flow_offload/refcnt")
+			rv.fullconenat   = fs.access("/lib/modules/" .. kernel_version .. "/xt_FULLCONENAT.ko") or fs.access("/lib/modules/" .. kernel_version .. "/nft_fullcone.ko")
 			rv.br2684ctl     = fs.access("/usr/sbin/br2684ctl")
 			rv.swconfig      = fs.access("/sbin/swconfig")
 			rv.odhcpd        = fs.access("/usr/sbin/odhcpd")
@@ -617,6 +620,66 @@ local methods = {
 				res[#res + 1] = v
 			end
 			return { result = res }
+		end
+	},
+
+	getCPUBench = {
+		call = function()
+			local sys = require "luci.sys"
+			local cpubench = {}
+
+			cpubench.cpubench = sys.exec("cat /etc/bench.log 2>/dev/null")
+			return cpubench
+		end
+	},
+
+	getCPUInfo = {
+		call = function()
+			local sys = require "luci.sys"
+			local cpuinfo = {}
+
+			cpuinfo.cpuinfo = sys.exec("/sbin/cpuinfo")
+
+			return cpuinfo
+		end
+	},
+
+	getCPUUsage = {
+		call = function()
+			local sys = require "luci.sys"
+			local cpuusage = {}
+
+			cpuusage.cpuusage = sys.exec("top -n1 | awk '/^CPU/ {printf(\"%d%\", 100 - $8)}'") or "6%"
+			return cpuusage
+		end
+	},
+
+	getETHInfo = {
+		call = function()
+			local sys = require "luci.sys"
+			local result = sys.exec("ethinfo 2>/dev/null")
+			return { result = result }
+		end
+	},
+
+	getOnlineUsers = {
+		call = function()
+			local sys = require "luci.sys"
+			local onlineusers = {}
+
+			onlineusers.onlineusers = sys.exec("cat /proc/net/arp | grep 'br-lan' | grep '0x2' | wc -l")
+			return onlineusers
+
+		end
+	},
+
+	getTempInfo = {
+		call = function()
+			local sys = require "luci.sys"
+			local tempinfo = {}
+
+			tempinfo.tempinfo = sys.exec("/sbin/tempinfo 2>/dev/null")
+			return tempinfo
 		end
 	}
 }
