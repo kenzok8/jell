@@ -6,7 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for ddnsto
-LUCI_DEPENDS:=+ddnsto
+LUCI_DEPENDS:=+ddnsto +block-mount
 LUCI_PKGARCH:=all
 
 include $(TOPDIR)/feeds/luci/luci.mk
