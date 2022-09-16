@@ -10,8 +10,8 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_LINKEASE:=$(ARCH)
 
 PKG_NAME:=linkease
-PKG_VERSION:=0.9.7
-PKG_RELEASE:=7
+PKG_VERSION:=0.9.8
+PKG_RELEASE:=8
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://fw.koolcenter.com/binary/LinkEase/LinuxStorage/
 PKG_HASH:=skip
