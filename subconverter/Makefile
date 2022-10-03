@@ -5,11 +5,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=subconverter
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/tindy2013/subconverter.git
-PKG_SOURCE_DATE:=2022-02-28
+PKG_SOURCE_DATE:=2022-08-31
 PKG_SOURCE_VERSION:=7703d551bd873cbc0e15fd2d7fb175528dbe012e
 PKG_MIRROR_HASH:=skip
 PKG_VERSION:=0.7.2
@@ -20,7 +20,6 @@ PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
 
 PKG_BUILD_DEPENDS:=jpcre2 rapidjson toml11
 PKG_BUILD_PARALLEL:=1
-PKG_INSTALL:=0
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk

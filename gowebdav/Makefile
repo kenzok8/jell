@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gowebdav
 PKG_VERSION:=0.0.4
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/1715173329/gowebdav/tar.gz/v$(PKG_VERSION)?
@@ -30,6 +30,10 @@ define Package/gowebdav
   TITLE:=A simple WebDav server written in Go
   URL:=https://github.com/1715173329/gowebdav
   DEPENDS:=$(GO_ARCH_DEPENDS)
+endef
+
+define Package/gowebdav/conffiles
+/etc/config/gowebdav
 endef
 
 define Package/gowebdav/install

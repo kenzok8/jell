@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2022 OpenWrt.org
+# Copyright (C) 2006-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,77 +8,117 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
-PKG_VERSION:=3.0.20180503
-PKG_RELEASE:=3
+PKG_VERSION:=20220908
 
-# Content-Encoding conflict, can refer to this [issue](https://github.com/miniupnp/miniupnp/issues/605)
-# so switch mirror repo to http://miniupnp.tuxfamily.org
-# PKG_SOURCE_URL:=http://miniupnp.free.fr/files
-PKG_SOURCE_URL:=http://miniupnp.tuxfamily.org/files
-PKG_SOURCE:=$(PKG_NAME)-2.0.20180503.tar.gz
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-2.0.20180503
+PKG_SOURCE_URL:=https://codeload.github.com/x-wrt/miniupnp/tar.gz/$(PKG_VERSION)?
 PKG_HASH:=skip
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)/miniupnpd
 
-PKG_MAINTAINER:=Markus Stenberg <fingon@iki.fi>
+PKG_RELEASE:=4
+
+PKG_MAINTAINER:=
 PKG_LICENSE:=BSD-3-Clause
+PKG_LICENSE_FILES:=LICENSE
+PKG_CPE_ID:=cpe:/a:miniupnp_project:miniupnpd
+
+PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/version.mk
 
-define Package/miniupnpd
+TAR_OPTIONS+= --strip-components 1
+TAR_CMD=$(HOST_TAR) -C $(1)/.. $(TAR_OPTIONS)
+
+define Package/miniupnpd/Default
   SECTION:=net
   CATEGORY:=Network
-  DEPENDS:=+iptables +libip4tc +libuuid
+  DEPENDS:= \
+	+libcap \
+	+libmnl \
+	+libuuid
+  PROVIDES:=miniupnpd
   TITLE:=Lightweight UPnP IGD, NAT-PMP & PCP daemon
   SUBMENU:=Firewall
-  URL:=http://miniupnp.free.fr/
+  URL:=https://miniupnp.tuxfamily.org/
 endef
 
-define Package/miniupnpd/config
-config MINIUPNPD_IGDv2
-	bool
-	default n
-	prompt "Enable IGDv2"
+define Package/miniupnpd-iptables
+  $(call Package/miniupnpd/Default)
+  DEPENDS+= \
+	+IPV6:ip6tables \
+	+IPV6:libip6tc \
+	+iptables \
+	+libip4tc \
+	+libnetfilter-conntrack
+  TITLE+= (iptables)
+  VARIANT:=iptables
 endef
 
-define Package/miniupnpd/conffiles
+define Package/miniupnpd-nftables
+  $(call Package/miniupnpd/Default)
+  DEPENDS+= \
+	+libnftnl
+  TITLE+= (nftables)
+  VARIANT:=nftables
+  DEFAULT_VARIANT:=1
+  CONFLICTS:=miniupnpd-iptables
+endef
+
+define Package/miniupnpd/conffiles/Default
 /etc/config/upnpd
 endef
 
-define Package/miniupnpd/postinst
-#!/bin/sh
-
-if [ -z "$$IPKG_INSTROOT" ]; then
-  ( . /etc/uci-defaults/99-miniupnpd )
-  rm -f /etc/uci-defaults/99-miniupnpd
-fi
-
-exit 0
-endef
+Package/miniupnpd-iptables/conffiles = $(Package/miniupnpd/conffiles/Default)
+Package/miniupnpd-nftables/conffiles = $(Package/miniupnpd/conffiles/Default)
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
-	echo "OpenWrt" | tr \(\)\  _ >$(PKG_BUILD_DIR)/os.openwrt
+	echo "$(VERSION_NUMBER)" | tr '() ' '_' >$(PKG_BUILD_DIR)/os.openwrt
 endef
 
-MAKE_FLAGS += \
-	TARGET_OPENWRT=1 TEST=0 \
-	LIBS="" \
-	CC="$(TARGET_CC) -DIPTABLES_143 \
-		-lip4tc -luuid" \
-	CONFIG_OPTIONS="--portinuse --leasefile \
-		$(if $(CONFIG_MINIUPNPD_IGDv2),--igd2)" \
-	-f Makefile.linux \
-	miniupnpd
+CONFIGURE_ARGS = \
+	$(if $(CONFIG_IPV6),--ipv6) \
+	--igd2 \
+	--leasefile \
+	--portinuse \
+	--firewall=$(BUILD_VARIANT) \
+	--disable-fork
 
+TARGET_CFLAGS += $(FPIC)
+TARGET_LDFLAGS += -Wl,--gc-sections,--as-needed
 
-define Package/miniupnpd/install
-	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/init.d $(1)/etc/config $(1)/etc/uci-defaults $(1)/etc/hotplug.d/iface $(1)/usr/share/miniupnpd
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/miniupnpd $(1)/usr/sbin/miniupnpd
+ifeq ($(BUILD_VARIANT),iptables)
+	TARGET_CFLAGS += -flto
+endif
+
+define Package/miniupnpd/install/Default
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/miniupnpd $(1)/usr/sbin/miniupnpd
 	$(INSTALL_BIN) ./files/miniupnpd.init $(1)/etc/init.d/miniupnpd
 	$(INSTALL_CONF) ./files/upnpd.config $(1)/etc/config/upnpd
 	$(INSTALL_DATA) ./files/miniupnpd.hotplug $(1)/etc/hotplug.d/iface/50-miniupnpd
-	$(INSTALL_DATA) ./files/miniupnpd.defaults $(1)/etc/uci-defaults/99-miniupnpd
-	$(INSTALL_DATA) ./files/firewall.include $(1)/usr/share/miniupnpd/firewall.include
+	$(INSTALL_DIR) $(1)/usr/share/miniupnpd
+	$(INSTALL_DATA) ./files/core.sh $(1)/usr/share/miniupnpd/core.sh
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_BIN) ./files/miniupnpd.defaults.nftables $(1)/etc/uci-defaults/99-miniupnpd-nft
 endef
 
-$(eval $(call BuildPackage,miniupnpd))
+define Package/miniupnpd-iptables/install
+	$(call Package/miniupnpd/install/Default,$1)
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_DIR) $(1)/usr/share/miniupnpd
+	$(INSTALL_BIN) ./files/miniupnpd.defaults.iptables $(1)/etc/uci-defaults/99-miniupnpd
+	$(INSTALL_DATA) ./files/firewall3.include $(1)/usr/share/miniupnpd/firewall.include
+endef
+
+define Package/miniupnpd-nftables/install
+	$(call Package/miniupnpd/install/Default,$1)
+endef
+
+$(eval $(call BuildPackage,miniupnpd-iptables))
+$(eval $(call BuildPackage,miniupnpd-nftables))

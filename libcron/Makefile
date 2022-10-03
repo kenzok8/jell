@@ -5,11 +5,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libcron
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/PerMalmberg/libcron.git
-PKG_SOURCE_DATE:=2021-12-20
+PKG_SOURCE_DATE:=2022-08-27
 PKG_SOURCE_VERSION:=0dd9df49d7833a2d2119e4a6ff8282df58b12d5d
 PKG_MIRROR_HASH:=skip
 
