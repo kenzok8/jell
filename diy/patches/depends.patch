@@ -71,25 +71,6 @@
  
  define Package/firewall/description
 
---- a/miniupnpd-nft/Makefile
-+++ b/miniupnpd-nft/Makefile
-@@ -39,7 +39,6 @@ define Package/miniupnpd/Default
- 	+libcap-ng \
- 	+libmnl \
- 	+libuuid
--  PROVIDES:=miniupnpd
-   TITLE:=Lightweight UPnP IGD, NAT-PMP & PCP daemon
-   SUBMENU:=Firewall
-   URL:=https://miniupnp.tuxfamily.org/
-@@ -62,6 +61,7 @@ define Package/miniupnpd-nftables
-   DEPENDS+= \
- 	+libnftnl
-   TITLE+= (nftables)
-+  PROVIDES:=miniupnpd
-   VARIANT:=nftables
-   DEFAULT_VARIANT:=1
-   CONFLICTS:=miniupnpd-iptables
-
 --- a/firewall4/Makefile
 +++ b/firewall4/Makefile
 @@ -25,7 +25,8 @@ define Package/firewall4
@@ -252,3 +233,25 @@
  LUCI_PKGARCH:=all
  
  PKG_NAME:=luci-app-easymesh
+
+--- a/phtunnel/Makefile
++++ b/phtunnel/Makefile
+@@ -36,7 +36,6 @@ PKG_SOURCE:=phtunnel
+ PKG_SOURCE_URL:=https://mirrors.oray.com/orayos/packages/$(PKG_NAME)/$(PKG_ARCH_PHT)/$(PKG_VERSION)/bin
+ PKG_HASH:=skip
+ 
+-PKG_FLAGS:=nonshared
+ PKG_MAINTAINER:=Oray <developer@oray.com>
+ 
+ include $(INCLUDE_DIR)/package.mk
+
+--- a/pgyvpn/Makefile
++++ b/pgyvpn/Makefile
+@@ -36,7 +36,6 @@ PKG_SOURCE:=pgyvpnsvr
+ PKG_SOURCE_URL:=https://mirrors.oray.com/orayos/packages/$(PKG_NAME)/$(PKG_ARCH_PGYYPN)/$(PKG_VERSION)/bin
+ PKG_HASH:=skip
+ 
+-PKG_FLAGS:=nonshared
+ PKG_MAINTAINER:=Oray <developer@oray.com>
+ 
+ include $(INCLUDE_DIR)/package.mk
