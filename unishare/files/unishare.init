@@ -69,9 +69,9 @@ add_samba_user() {
     group_add_user "unishare" "$username"
     config_get password $1 password
     if [ -z "$password" ]; then
-        smbpasswd -L -a -n "$username" >/dev/null 2>&1
+        smbpasswd -L -c /var/etc/smb.conf -a -n "$username" >/dev/null 2>&1
     else
-        { echo "$password" ; echo "$password" ; } | smbpasswd -L -a -s "$username" >/dev/null 2>&1
+        { echo "$password" ; echo "$password" ; } | smbpasswd -L -c /var/etc/smb.conf -a -s "$username" >/dev/null 2>&1
     fi
 }
 
@@ -103,6 +103,12 @@ EOF
 config_samba() {
     local gid=`group_add_next unishare`
     [ -z "$gid" ] && return 1
+    [ -f "/var/etc/smb.conf" ] || cat <<-EOF >/var/etc/smb.conf
+[global]
+	security = user
+	null passwords = yes
+	passdb backend = smbpasswd
+EOF
     config_foreach add_samba_user user $gid
     config_foreach validate_share share samba add_samba_share samba4
 }

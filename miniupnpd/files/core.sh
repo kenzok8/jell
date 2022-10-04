@@ -6,7 +6,8 @@
 cmd=$1
 
 test -e /usr/share/miniupnpd/nft.include || \
-ln -s /tmp/run/miniupnpd.nft /usr/share/miniupnpd/nft.include
+ln -s /tmp/run/miniupnpd.nft /usr/share/miniupnpd/nft.include && \
+touch /tmp/run/miniupnpd.nft
 
 case $cmd in
 	addrule)
