@@ -6,8 +6,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sing-box
-PKG_VERSION:=1.1-beta8
-PKG_RELEASE:=2
+PKG_VERSION:=1.1-beta9
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/SagerNet/sing-box/tar.gz/v$(PKG_VERSION)?
@@ -66,7 +66,7 @@ define Package/$(PKG_NAME)/config
 
     config TAG_$(PKG_NAME)_GRPC
       bool "Build with standard gRPC support"
-      default y
+      default n
 
     config TAG_$(PKG_NAME)_GVISOR
       bool "Build with gVisor support"
