@@ -86,15 +86,15 @@
 
 --- a/luci-app-passwall/Makefile
 +++ b/luci-app-passwall/Makefile
-@@ -33,7 +33,7 @@ LUCI_TITLE:=LuCI support for PassWall
+@@ -35,7 +35,7 @@ LUCI_TITLE:=LuCI support for PassWall
  LUCI_PKGARCH:=all
  LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
  	+dns2socks +dns2tcp +ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc \
--	+microsocks +resolveip +tcping +unzip \
-+	+microsocks +resolveip +tcping +unzip +ipset +iptables-mod-iprange +iptables-mod-socket +iptables-mod-tproxy +iptables-mod-conntrack-extra +kmod-ipt-nat \
- 	+PACKAGE_$(PKG_NAME)_INCLUDE_Brook:brook \
- 	+PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG:chinadns-ng \
- 	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
+-	+microsocks +resolveip +tcping +unzip
++	+microsocks +resolveip +tcping +unzip +ipset +ipt2socks +iptables-mod-iprange +iptables-mod-socket +iptables-mod-tproxy +iptables-mod-conntrack-extra +kmod-ipt-nat
+ 
+ define Package/$(PKG_NAME)/config
+ 	if PACKAGE_$(PKG_NAME)
 
 --- a/luci-app-passwall2/Makefile
 +++ b/luci-app-passwall2/Makefile
