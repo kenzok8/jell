@@ -44,7 +44,7 @@ jobs:
       run: |
         shopt -s extglob
         git rm -r --cache * >/dev/null 2>&1 &
-        rm -rf `find ./* -maxdepth 0 -type d ! -name "diy"` >/dev/null 2>&1
+        rm -rf `find ./* -maxdepth 0 -type d ! -name ".diy"` >/dev/null 2>&1
         function git_clone() (
           git clone --depth 1 $1 $2 || true
         )
@@ -171,23 +171,25 @@ jobs:
         git_clone https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
         git_clone https://github.com/kenzok78/luci-theme-argonne
         git_clone https://github.com/kenzok78/luci-app-argonne-config
-        git_clone https://github.com/thinktip/luci-theme-neobird
-        git clone --depth 1 -b lede https://github.com/pymumu/luci-app-smartdns 
+        git_clone https://github.com/pymumu/luci-app-smartdns
+        git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go && mvdir ddns-go
+        # git_clone https://github.com/wiwizcom/WiFiPortal && mvdir WiFiPortal
+        # git_clone https://github.com/lazywalker/mmdvm-openwrt && mvdir mmdvm-openwrt
         ) &
         (
         svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
         svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/luci-app-irqbalance
         svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-control-speedlimit
-        svn export https://github.com/x-wrt/packages/trunk/net/miniupnpd
         ) &
         (
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/packages" "oppackages" \
         utils/cgroupfs-mount utils/coremark utils/watchcat utils/dockerd net/nginx net/uwsgi net/ddns-scripts net/smartdns \
         net/ariang admin/netdata net/transmission-web-control
-        git_sparse_clone master "https://github.com/coolsnowwolf/packages" "leanpkg" net/mwan3 multimedia/UnblockNeteaseMusic-Go \
+        git_sparse_clone master "https://github.com/coolsnowwolf/packages" "leanpkg" net/miniupnpd net/mwan3 multimedia/UnblockNeteaseMusic-Go \
         multimedia/UnblockNeteaseMusic net/amule net/baidupcs-web net/frp multimedia/gmediarender net/go-aliyundrive-webdav \
         net/qBittorrent-static net/qBittorrent net/transmission net/phtunnel libs/qtbase libs/qttools libs/rblibtorrent \
         net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/nps net/tcpping net/redsocks2 net/netatalk net/pgyvpn sound/forked-daapd
+        mv -f miniupnpd miniupnpd-iptables
         ) &
         (
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/openwrt" "openwrt" \
@@ -195,13 +197,13 @@ jobs:
         package/network/services/dnsmasq package/libs/openssl
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/luci" "opluci" applications/luci-app-attendedsysupgrade applications/luci-app-aria2 \
         applications/luci-app-ddns applications/luci-app-acme applications/luci-app-opkg applications/luci-app-firewall \
-        applications/luci-app-ksmbd applications/luci-app-samba4 applications/luci-app-watchcat modules/luci-base modules/luci-mod-network \
+        applications/luci-app-ksmbd applications/luci-app-samba4 applications/luci-app-watchcat applications/luci-app-upnp modules/luci-base modules/luci-mod-network \
         modules/luci-mod-status modules/luci-mod-system
         ) &
         (
         git_sparse_clone master "https://github.com/immortalwrt/packages" "immpkgs" net/mwol \
         net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest \
-        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/gowebdav \
+        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/gowebdav net/xfrpc \
         admin/bpytop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 \
         utils/cpulimit utils/filebrowser net/udp2raw
         git_sparse_clone master "https://github.com/xiaoqingfengATGH/feeds-xiaoqingfeng" "xiaoqingfeng" homeredirect luci-app-homeredirect
@@ -210,7 +212,7 @@ jobs:
         git_sparse_clone develop "https://github.com/Ysurac/openmptcprouter-feeds" "openmptcp" luci-app-snmpd \
         luci-app-packet-capture luci-app-mail msmtp
         git_sparse_clone master "https://github.com/immortalwrt/immortalwrt" "immortal" package/kernel/rtl88x2bu \
-        package/kernel/r8168 package/emortal/autocore  package/emortal/automount package/network/utils/fullconenat \
+        package/kernel/r8168 package/kernel/rtl8821cu package/emortal/autocore  package/emortal/automount package/network/utils/fullconenat \
         package/network/utils/nftables package/libs/libnftnl package/firmware/wireless-regdb
         ) &
 
@@ -235,7 +237,7 @@ jobs:
         mv -n lean/* ./ ; rm -Rf lean
         mv -n liep/* ./ ; rm -Rf liep
         mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
-        cp -rf diy/.packages/* ./ || true
+        cp -rf .diy/packages/* ./ || true
         rm -Rf */.git
 
     - name: SSH connection to Actions
@@ -244,7 +246,7 @@ jobs:
 
     - name: Apply patches
       run: |
-        find "diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || (curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=❌ 软件包更新失败 😂 https://github.com/kenzok8/jell/actions" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage";exit 1)
+        find ".diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || (curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=❌ 软件包更新失败 😂 https://github.com/kenzok8/jell/actions" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage";exit 1)
 
     - name: Modify
       run: |
@@ -259,7 +261,7 @@ jobs:
              -H "Authorization: Bearer ${{ secrets.REPO_TOKEN }}" \
              -X POST -d '{ "query": "query {repository(owner: \"'"$1"'\", name: \"'"$2"'\"){latestRelease{tagName tagCommit{oid}}refs(refPrefix:\"refs/tags/\",last:1,orderBy:{field:TAG_COMMIT_DATE,direction:ASC}){edges{node{name target{oid}}}}defaultBranchRef{target{...on Commit {oid}}}}}"}' https://api.github.com/graphql)
         }
-        for pkg in $(ls !(luci-*|rblibtorrent|shadowsocksr-libev|containerd|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|mosdns|r8168|coremark|mbedtls|rtl8821cu|rtl8188eu|rtl8812au-ac|rtl88x2bu|quickjspp|libcups)/Makefile); do
+        for pkg in $(ls !(luci-*|rblibtorrent|shadowsocksr-libev|mmdvm-host|libwxwidgets|ysf-clients|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|mosdns|r8168|coremark|mbedtls|rtl8821cu|rtl8188eu|rtl8812au-ac|rtl88x2bu|quickjspp|libcups)/Makefile); do
           repo="$(grep PKG_SOURCE_URL $pkg | grep github | cut -f 4-5 -d '/' | sed -e 's/.git//' | grep -E '[0-9a-zA-Z_-]+$')" || true
           if [ "$repo" ]; then
             owner="$(echo $repo | cut -f 1 -d '/')"
@@ -308,11 +310,11 @@ jobs:
         ) &
 
         (
-        bash diy/create_acl_for_luci.sh -a >/dev/null 2>&1 || true
-        bash diy/convert_translation.sh -a >/dev/null 2>&1 || true
+        bash .diy/create_acl_for_luci.sh -a >/dev/null 2>&1 || true
+        bash .diy/convert_translation.sh -a >/dev/null 2>&1 || true
         
         #sed -i 's?"http://" + window.location.hostname?window.location.protocol + "//" + window.location.hostname?g' `find luci-app*/luasrc/view/ -maxdepth 2 -name "*.htm"`
-        rm -f miniupnpd/patches/106-spam-syslog*
+        rm -f miniupnpd-iptables/patches/106-spam-syslog*
         sed -i "/minisign:minisign/d" luci-app-dnscrypt-proxy2/Makefile
         sed -i 's/+libstdcpp/+libstdcpp +zlib/' ngrokc/Makefile
         sed -i 's/+dockerd/+dockerd +cgroupfs-mount/' luci-app-docker*/Makefile
@@ -324,12 +326,10 @@ jobs:
         sed -i 's/+vsftpd$/+vsftpd-alt/' luci-app-vsftpd/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
-        sed -i "/DISTRIB_DESCRIPTION/c\DISTRIB_DESCRIPTION=\"%D %C by kenzo'\"" base-files/files/etc/openwrt_release
-        sed -i 's?admin/status/channel_analysis??' luci-mod-status/root/usr/share/luci/menu.d/luci-mod-status.json
+        sed -i "/DISTRIB_DESCRIPTION/c\DISTRIB_DESCRIPTION=\"%D %C by Kiddin'\"" base-files/files/etc/openwrt_release
         sed -i "s/PKG_VERSION:=2/PKG_VERSION:=3/" mwan3/Makefile
         sed -i "s/default n/default y/" dockerd/Config.in
         sed -i "/+uhttpd/d" ariang/Makefile
-        sed -i "s/PKG_VERSION:=2.0/PKG_VERSION:=3.0/" miniupnpd/Makefile
         cp -f autocore/files/generic/10_system.js luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
         sed -i -e '$a /etc/bench.log' \
         -e '/\/etc\/profile/d' \
