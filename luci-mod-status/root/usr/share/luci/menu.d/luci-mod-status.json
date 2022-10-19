@@ -101,7 +101,7 @@
 		}
 	},
 
-	"": {
+	"admin/status/channel_analysis": {
 		"title": "Channel Analysis",
 		"order": 7,
 		"action": {
