@@ -10,7 +10,7 @@ on:
     paths:
       - '.github/workflows/jell.yml'
       - '.gitignore'
-      - 'diy/**'
+      - '.diy/**'
   schedule:
     - cron: 0 */12 * * *
   workflow_dispatch:
