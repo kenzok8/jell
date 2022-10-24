@@ -6,11 +6,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autocore
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_TARGET_bcm27xx \
-	CONFIG_TARGET_bcm53xx
+	CONFIG_TARGET_bcm53xx \
+	CONFIG_TARGET_mvebu
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/target.mk
@@ -21,7 +22,8 @@ define Package/autocore-arm
   DEPENDS:=@(arm||aarch64) \
     +ethtool \
     +TARGET_bcm27xx:bcm27xx-userland \
-    +TARGET_bcm53xx:nvram
+    +TARGET_bcm53xx:nvram \
+    +TARGET_mvebu:mhz
   VARIANT:=arm
 endef
 
