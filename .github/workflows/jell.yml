@@ -170,9 +170,11 @@ jobs:
         git_clone https://github.com/sundaqiang/openwrt-packages && mv -n openwrt-packages/luci-* ./; rm -rf openwrt-packages
         git_clone https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
         git_clone https://github.com/kenzok78/luci-theme-argonne
-        git_clone https://github.com/kenzok78/luci-app-argonne-config
+        git_clone https://github.com/kenzok78/luci-app-argonne-config		
         git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go && mvdir ddns-go
+        git_clone https://github.com/CHN-beta/rkp-ipid
+        git_clone https://github.com/Erope/openwrt_nezha nezha && mvdir nezha
         # git_clone https://github.com/wiwizcom/WiFiPortal && mvdir WiFiPortal
         # git_clone https://github.com/lazywalker/mmdvm-openwrt && mvdir mmdvm-openwrt
         ) &
@@ -213,7 +215,7 @@ jobs:
         luci-app-packet-capture luci-app-mail msmtp
         git_sparse_clone master "https://github.com/immortalwrt/immortalwrt" "immortal" package/kernel/rtl88x2bu \
         package/kernel/r8168 package/kernel/rtl8821cu package/emortal/autocore  package/emortal/automount package/network/utils/fullconenat \
-        package/network/utils/nftables package/libs/libnftnl package/firmware/wireless-regdb
+        package/network/utils/nftables package/utils/mhz package/libs/libnftnl package/firmware/wireless-regdb
         ) &
 
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" "leluci" applications libs/luci-lib-fs
@@ -240,13 +242,14 @@ jobs:
         cp -rf .diy/packages/* ./ || true
         rm -Rf */.git
 
+
     - name: SSH connection to Actions
       uses: kenzok78/debugger-action@master
       if: github.event.inputs.ssh == 'true'
 
     - name: Apply patches
       run: |
-        find ".diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || (curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=❌ 软件包更新失败 😂 https://github.com/kenzok8/jell/actions" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage";exit 1)
+        find ".diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || (curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=❌ 软件包更新失败 😂 https://github.com/kiddin9/openwrt-packages/actions" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage";exit 1)
 
     - name: Modify
       run: |
@@ -261,7 +264,7 @@ jobs:
              -H "Authorization: Bearer ${{ secrets.REPO_TOKEN }}" \
              -X POST -d '{ "query": "query {repository(owner: \"'"$1"'\", name: \"'"$2"'\"){latestRelease{tagName tagCommit{oid}}refs(refPrefix:\"refs/tags/\",last:1,orderBy:{field:TAG_COMMIT_DATE,direction:ASC}){edges{node{name target{oid}}}}defaultBranchRef{target{...on Commit {oid}}}}}"}' https://api.github.com/graphql)
         }
-        for pkg in $(ls !(luci-*|rblibtorrent|shadowsocksr-libev|mmdvm-host|libwxwidgets|ysf-clients|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|mosdns|r8168|coremark|mbedtls|rtl8821cu|rtl8188eu|rtl8812au-ac|rtl88x2bu|quickjspp|libcups)/Makefile); do
+        for pkg in $(ls !(luci-*|rblibtorrent|shadowsocksr-libev|mmdvm-host|libwxwidgets|ysf-clients|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|mosdns|r8168|coremark|mbedtls|rtl8821cu|rtl8188eu|rtl8812au-ac|rtl88x2bu|quickjspp|libcups)/Makefile); do
           repo="$(grep PKG_SOURCE_URL $pkg | grep github | cut -f 4-5 -d '/' | sed -e 's/.git//' | grep -E '[0-9a-zA-Z_-]+$')" || true
           if [ "$repo" ]; then
             owner="$(echo $repo | cut -f 1 -d '/')"
@@ -322,7 +325,7 @@ jobs:
         sed -i 's/+rclone\( \|$\)/+rclone +fuse-utils\1/g' luci-app-rclone/Makefile
         sed -i 's/+libcap /+libcap +libcap-bin /' luci-app-openclash/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argon/' luci-app-argon-config/Makefile
-        sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile 
+        sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile		
         sed -i 's/+vsftpd$/+vsftpd-alt/' luci-app-vsftpd/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
@@ -375,10 +378,10 @@ jobs:
         git add .
         git commit -m "update $(date +%Y-%m-%d" "%H:%M:%S)"
         git push -f
-
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@main
       continue-on-error: true
       with:
         retain_days: 1
         keep_minimum_runs: 3
+
