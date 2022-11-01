@@ -10,7 +10,7 @@ on:
     paths:
       - '.github/workflows/jell.yml'
       - '.gitignore'
-      - 'diy/**'
+      - '.diy/**'
   schedule:
     - cron: 0 */12 * * *
   workflow_dispatch:
@@ -26,7 +26,7 @@ on:
 jobs:
   merge:
     if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
-    runs-on: Ubuntu-22.04
+    runs-on: Ubuntu-20.04
 
     steps:
     - name: Checkout
@@ -39,14 +39,11 @@ jobs:
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
         sudo timedatectl set-timezone "Asia/Shanghai"
-        ( sudo -E apt-get -qq update
-        sudo -E apt-get -qq install rename ) &
-
     - name: Syn jell
       run: |
         shopt -s extglob
         git rm -r --cache * >/dev/null 2>&1 &
-        rm -rf `find ./* -maxdepth 0 -type d ! -name "diy"` >/dev/null 2>&1
+        rm -rf `find ./* -maxdepth 0 -type d ! -name ".diy"` >/dev/null 2>&1
         function git_clone() (
           git clone --depth 1 $1 $2 || true
         )
@@ -172,12 +169,12 @@ jobs:
         git_clone https://github.com/sundaqiang/openwrt-packages && mv -n openwrt-packages/luci-* ./; rm -rf openwrt-packages
         git_clone https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
         git_clone https://github.com/kenzok78/luci-theme-argonne
-        git_clone https://github.com/kenzok78/luci-app-argonne-config
+        git_clone https://github.com/kenzok78/luci-app-argonne-config		
         git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go && mvdir ddns-go
         git_clone https://github.com/CHN-beta/rkp-ipid
         git_clone https://github.com/Erope/openwrt_nezha nezha && mvdir nezha
-        git_clone https://github.com/immortalwrt/homeproxy
+	git_clone https://github.com/immortalwrt/homeproxy
         # git_clone https://github.com/wiwizcom/WiFiPortal && mvdir WiFiPortal
         # git_clone https://github.com/lazywalker/mmdvm-openwrt && mvdir mmdvm-openwrt
         ) &
@@ -220,21 +217,17 @@ jobs:
         package/kernel/r8168 package/kernel/rtl8821cu package/emortal/autocore  package/emortal/automount package/network/utils/fullconenat \
         package/network/utils/nftables package/utils/mhz package/libs/libnftnl package/firmware/wireless-regdb
         ) &
-
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" "leluci" applications libs/luci-lib-fs
         mv -f applications luciapp
         rm -rf luciapp/{luci-app-qbittorrent,luci-app-cpufreq}
         git_sparse_clone master "https://github.com/immortalwrt/luci" "immluci" applications protocols/luci-proto-minieap
         mv -n applications/* luciapp/; rm -rf applications
-
         for ipk in $(ls -d luciapp/!(luci-app-rclone|luci-app-mwan3|luci-app-transmission)/); do
         	if [[ $(ls $ipk/po | wc -l) -gt 3 ]]; then
             rm -rf $ipk
         	fi
         done
-
         git_sparse_clone master "https://github.com/coolsnowwolf/lede" "leanlede" package/lean package/network/services/shellsync package/network/config/netifd
-
     - name: Delete duplicated packages
       run: |
         shopt -s extglob
@@ -242,19 +235,15 @@ jobs:
         mv -n lean/* ./ ; rm -Rf lean
         mv -n liep/* ./ ; rm -Rf liep
         mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
-        rename -f "s/Makefile.k/Makefile/" diy/packages/*/Makefile.k
-        cp -rf diy/packages/* ./ || true
-        rename -f "s/Makefile/Makefile.k/" diy/packages/*/Makefile
+        cp -rf .diy/packages/* ./ || true
         rm -Rf */.git
-
     - name: SSH connection to Actions
       uses: kenzok78/debugger-action@master
       if: github.event.inputs.ssh == 'true'
 
     - name: Apply patches
       run: |
-        find "diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || (curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=❌ 软件包更新失败 😂 https://github.com/kenzok8/jell/actions" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage";exit 1)
-
+        find ".diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || (curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=❌ 软件包更新失败 😂 https://github.com/kiddin9/openwrt-packages/actions" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage";exit 1)
     - name: Modify
       run: |
         shopt -s extglob
@@ -303,7 +292,6 @@ jobs:
             sed -i 's/index()/index()\n\tentry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false/' $pkg/luasrc/controller/*.lua
         done
         ) &
-
         (
         for pkg in $(ls -d */); do
           if [[ "$(grep "PKG_VERSION" $pkg/Makefile)" && ! "$(grep "PKG_RELEASE" $pkg/Makefile)" ]]; then
@@ -315,10 +303,9 @@ jobs:
         done
         touch /tmp/ok2
         ) &
-
         (
-        bash diy/create_acl_for_luci.sh -a >/dev/null 2>&1 || true
-        bash diy/convert_translation.sh -a >/dev/null 2>&1 || true
+        bash .diy/create_acl_for_luci.sh -a >/dev/null 2>&1 || true
+        bash .diy/convert_translation.sh -a >/dev/null 2>&1 || true
         
         #sed -i 's?"http://" + window.location.hostname?window.location.protocol + "//" + window.location.hostname?g' `find luci-app*/luasrc/view/ -maxdepth 2 -name "*.htm"`
         rm -f miniupnpd-iptables/patches/106-spam-syslog*
@@ -329,7 +316,7 @@ jobs:
         sed -i 's/+rclone\( \|$\)/+rclone +fuse-utils\1/g' luci-app-rclone/Makefile
         sed -i 's/+libcap /+libcap +libcap-bin /' luci-app-openclash/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argon/' luci-app-argon-config/Makefile
-	sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile
+        sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile		
         sed -i 's/+vsftpd$/+vsftpd-alt/' luci-app-vsftpd/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
@@ -368,8 +355,6 @@ jobs:
             echo "wait"
           sleep 1
         done
-
-
     - name: update jell
       run: |
         git add .
