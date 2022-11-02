@@ -1,0 +1,28 @@
+
+config homeproxy 'config'
+	option main_node 'nil'
+	option main_udp_node 'same'
+	option routing_mode 'gfwlist'
+	option routing_port 'common'
+	option dns_server '8.8.8.8'
+
+config homeproxy 'routing'
+	option sniff_override '1'
+	option default_outbound 'direct-out'
+
+config homeproxy 'dns'
+	option dns_strategy 'prefer_ipv4'
+	option disable_cache '0'
+	option disable_cache_expire '0'
+	option default_server 'local-dns'
+
+config homeproxy 'subscription'
+	option dns_strategy 'prefer_ipv4'
+	option default_server 'local-dns'
+	option disable_cache '0'
+	option disable_cache_expire '0'
+
+config homeproxy 'server'
+	option enabled '0'
+	option auto_firewall '0'
+

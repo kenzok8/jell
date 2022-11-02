@@ -1,0 +1,27 @@
+{
+	"luci-app-homeproxy": {
+		"description": "Grant access to homeproxy configuration",
+		"read": {
+			"file": {
+				"/bin/mkdir -p /etc/homeproxy/certs/": [ "exec" ],
+				"/etc/homeproxy/scripts/update_geodata.sh": [ "exec" ],
+				"/etc/homeproxy/scripts/update_subscribe.lua": [ "exec" ],
+				"/usr/bin/sing-box version": [ "exec" ],
+				"/var/run/homeproxy/homeproxy.log": [ "read" ],
+				"/var/run/homeproxy/sing-box.log": [ "read" ]
+			},
+			"ubus": {
+				"service": [ "list" ]
+			},
+			"uci": [ "homeproxy" ]
+		},
+		"write": {
+			"file": {
+				"/etc/homeproxy/certs/client_ca.pem": [ "write" ],
+				"/etc/homeproxy/certs/server_publickey.pem": [ "write" ],
+				"/etc/homeproxy/certs/server_privatekey.pem": [ "write" ]
+			},
+			"uci": [ "homeproxy" ]
+		}
+	}
+}
