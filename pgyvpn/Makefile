@@ -9,7 +9,7 @@ ifeq ($(ARCH),arm)
   endif
 endif
 ifeq ($(ARCH),aarch64)
-  ifeq ($(CPU_TYPE),cortex-a53) # To do: add a72 etc.
+  ifneq ($(findstring $(CPU_TYPE), cortex-a53 cortex-a72),)
 	PKG_ARCH_PGYYPN:=aarch64_$(CPU_TYPE)-musl-unknown
   else
 	PKG_ARCH_PGYYPN:=aarch64_generic-musl-unknown
@@ -21,16 +21,14 @@ endif
 ifeq ($(BOARD),x86)
   ifeq ($(ARCH),x86_64)
 	PKG_ARCH_PGYYPN:=x86_64-musl-unknown
-  else ifeq ($(CPU_TYPE),pentium4)
-	PKG_ARCH_PGYYPN:=i386_pentium4-musl-unknown
   else
 	PKG_ARCH_PGYYPN:=i386_pentium-mmx-musl-unknown
   endif
 endif
 
 PKG_NAME:=pgyvpn
-PKG_VERSION:=3.0.9
-PKG_RELEASE:=1
+PKG_VERSION:=3.1.0
+PKG_RELEASE:=2
 
 PKG_SOURCE:=pgyvpnsvr
 PKG_SOURCE_URL:=https://mirrors.oray.com/orayos/packages/$(PKG_NAME)/$(PKG_ARCH_PGYYPN)/$(PKG_VERSION)/bin
