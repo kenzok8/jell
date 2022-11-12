@@ -8,8 +8,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=alist
 PKG_VERSION:=3.4.0
-PKG_WEB_VERSION:=3.3.0
-PKG_RELEASE:=11
+PKG_WEB_VERSION:=3.4.0
+PKG_RELEASE:=12
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/alist-org/alist/tar.gz/v$(PKG_VERSION)?
@@ -23,7 +23,7 @@ define Download/$(PKG_NAME)-web
   FILE:=$(PKG_NAME)-web-$(PKG_WEB_VERSION).tar.gz
   URL_FILE:=dist.tar.gz
   URL:=https://github.com/alist-org/alist-web/releases/download/$(PKG_WEB_VERSION)/
-  HASH:=f8e93a269da150507f8b156aab0d58918a6b1b365e8494b3fd0225de884b0af8
+  HASH:=8f2b4f154cf3361cfd862fc8513f26b1fd34e27844c6c1afafefd900d2d3f084
 endef
 
 PKG_CONFIG_DEPENDS:= \
