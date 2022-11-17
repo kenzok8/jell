@@ -21,7 +21,3 @@ start_service() {
     procd_close_instance
 	fi
 }
-
-service_triggers() {
-        procd_add_reload_trigger "uuplugin"
-}

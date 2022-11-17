@@ -464,12 +464,7 @@ function httpdispatch(request, prefix)
 	local r = {}
 	context.request = r
 
-	local pathinfo = ""
-	if sys.call("test -s /tmp/resolv.conf.d/resolv.conf.auto") == 0 or sys.call("test ! -f /etc/init.d/wizard") == 0 then
-		pathinfo = http.urldecode(request:getenv("PATH_INFO") or "", true)	
-	else
-		pathinfo = http.urldecode(request:getenv("PATH_INFO") or "admin/system/initsetup", true)
-	end
+	local pathinfo = http.urldecode(request:getenv("PATH_INFO") or "", true)
 
 	if prefix then
 		for _, node in ipairs(prefix) do
@@ -908,8 +903,6 @@ function dispatch(request)
 		local sid, sdat, sacl = is_authenticated(lookup_ctx.auth)
 
 		if not (sid and sdat and sacl) and lookup_ctx.auth.login then
-			sys.exec("/usr/libexec/opkg-call update >/dev/null &")
-
 			local user = http.getenv("HTTP_AUTH_USER")
 			local pass = http.getenv("HTTP_AUTH_PASS")
 
@@ -936,14 +929,9 @@ function dispatch(request)
 				return tpl.render("sysauth", scope)
 			end
 
-			local cookie_p = uci:get("wizard", "default", "cookie_p")
-			local timeout = 'Thu, 01 Jan 3000 01:00:00 GMT'
-			if cookie_p == '0' then
-				timeout = ''
-			end
-			http.header("Set-Cookie", 'sysauth_%s=%s; expires=%s; path=%s; SameSite=Strict; HttpOnly%s' %{
+			http.header("Set-Cookie", 'sysauth_%s=%s; path=%s; SameSite=Strict; HttpOnly%s' %{
 				http.getenv("HTTPS") == "on" and "https" or "http",
-				sid, timeout, build_url(), http.getenv("HTTPS") == "on" and "; secure" or ""
+				sid, build_url(), http.getenv("HTTPS") == "on" and "; secure" or ""
 			})
 
 			http.redirect(build_url(unpack(ctx.requestpath)))
@@ -965,14 +953,8 @@ function dispatch(request)
 	if #lookup_ctx.acls > 0 then
 		local perm = check_acl_depends(lookup_ctx.acls, ctx.authacl and ctx.authacl["access-group"])
 		if perm == nil then
-			local sid = context.authsession
-			if sid then
-				util.ubus("session", "destroy", { ubus_rpc_session = sid })
-				luci.http.header("Set-Cookie", "sysauth_%s=%s; expires=%s; path=%s" %{
-					http.getenv("HTTPS") == "on" and "https" or "http", 'sid', 'Thu, 01 Jan 1970 01:00:00 GMT', build_url()
-				})
-			end
-			luci.http.redirect(build_url())
+			http.status(403, "Forbidden")
+			return
 		end
 
 		if page then

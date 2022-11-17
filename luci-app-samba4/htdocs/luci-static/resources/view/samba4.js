@@ -113,10 +113,6 @@ return view.extend({
 		o.rmempty = false;
 
 		s.option(form.Flag, 'force_root', _('Force Root'));
-		o.enabled = 'yes';
-		o.disabled = 'no';
-		o.default = 'yes';
-		o.rmempty = false;
 
 		o = s.option(form.Value, 'users', _('Allowed users'));
 		o.rmempty = true;

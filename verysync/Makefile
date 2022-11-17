@@ -4,31 +4,32 @@
 
 include $(TOPDIR)/rules.mk
 
-ifeq ($(ARCH),x86_64)
-	PKG_ARCH_VERYSYNC:=amd64
-endif
-ifeq ($(ARCH),mipsel)
-	PKG_ARCH_VERYSYNC:=mipsle
-endif
-ifeq ($(ARCH),mips)
-	PKG_ARCH_VERYSYNC:=mips
-endif
-ifeq ($(ARCH),i386)
-	PKG_ARCH_VERYSYNC:=386
-endif
-ifeq ($(ARCH),arm)
-	PKG_ARCH_VERYSYNC:=arm
-endif
 ifeq ($(ARCH),aarch64)
-	PKG_ARCH_VERYSYNC:=arm64
-endif
-ifeq ($(ARCH),powerpc64)
-	PKG_ARCH_VERYSYNC:=ppc64
+  PKG_ARCH_VERYSYNC:=arm64
+  PKG_HASH:=skip
+else ifeq ($(ARCH),arm)
+  PKG_ARCH_VERYSYNC:=arm
+  PKG_HASH:=skip
+else ifeq ($(ARCH),i386)
+  PKG_ARCH_VERYSYNC:=386
+  PKG_HASH:=skip
+else ifeq ($(ARCH),mips)
+  PKG_ARCH_VERYSYNC:=mips
+  PKG_HASH:=skip
+else ifeq ($(ARCH),mipsel)
+  PKG_ARCH_VERYSYNC:=mipsle
+  PKG_HASH:=skip
+else ifeq ($(ARCH),powerpc64)
+  PKG_ARCH_VERYSYNC:=ppc64
+  PKG_HASH:=skip
+else ifeq ($(ARCH),x86_64)
+  PKG_ARCH_VERYSYNC:=amd64
+  PKG_HASH:=skip
 endif
 
 PKG_NAME:=verysync
-PKG_VERSION:=2.13.2
-PKG_RELEASE:=1
+PKG_VERSION:=2.14.0
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-linux-$(PKG_ARCH_VERYSYNC)-v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://dl.verysync.com/releases/v$(PKG_VERSION)/ \
@@ -43,6 +44,7 @@ define Package/verysync
   CATEGORY:=Network
   TITLE:=A efficient data transmission tool
   URL:=http://www.verysync.com
+  DEPENDS:=@(aarch64||arm||i386||mips||mipsel||powerpc64||x86_64)
 endef
 
 define Build/Compile

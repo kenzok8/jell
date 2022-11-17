@@ -6,7 +6,6 @@ uci_write_config() {
 	uci -q set "cpufreq.cpufreq.maxfreq$1"="$4"
 	[ -n "$5" ] && uci -q set "cpufreq.cpufreq.sdfactor$1"="$5"
 	[ -n "$6" ] && uci -q set "cpufreq.cpufreq.upthreshold$1"="$6"
-	uci -q set cpufreq.global.set=1
 	uci -q commit cpufreq
 }
 
@@ -68,8 +67,6 @@ case "$DISTRIB_TARGET" in
 			# RK3399
 			uci_write_config 0 schedutil 600000 1608000
 			uci_write_config 4 schedutil 600000 2016000
-		elif [[ "$(board_name)" == *nanopi-r5s ]]; then
-			uci_write_config 0 schedutil 816000 1992000
 		else
 			if echo "$CPU_FREQS" | grep -q "1992000"; then
 				# RK3568

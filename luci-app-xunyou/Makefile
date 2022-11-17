@@ -2,7 +2,6 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-xunyou
 LUCI_DEPENDS:=xunyou
 
 LUCI_TITLE:=LuCI support for xunyou

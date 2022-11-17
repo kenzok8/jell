@@ -30,12 +30,13 @@ endif
 
 PKG_NAME:=phtunnel
 PKG_VERSION:=1.0.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=phtunnel
 PKG_SOURCE_URL:=https://mirrors.oray.com/orayos/packages/$(PKG_NAME)/$(PKG_ARCH_PHT)/$(PKG_VERSION)/bin
 PKG_HASH:=skip
 
+PKG_FLAGS:=nonshared
 PKG_MAINTAINER:=Oray <developer@oray.com>
 
 include $(INCLUDE_DIR)/package.mk

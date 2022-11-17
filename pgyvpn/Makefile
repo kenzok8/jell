@@ -28,12 +28,13 @@ endif
 
 PKG_NAME:=pgyvpn
 PKG_VERSION:=3.1.0
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE:=pgyvpnsvr
 PKG_SOURCE_URL:=https://mirrors.oray.com/orayos/packages/$(PKG_NAME)/$(PKG_ARCH_PGYYPN)/$(PKG_VERSION)/bin
 PKG_HASH:=skip
 
+PKG_FLAGS:=nonshared
 PKG_MAINTAINER:=Oray <developer@oray.com>
 
 include $(INCLUDE_DIR)/package.mk

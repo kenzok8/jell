@@ -1,7 +1,0 @@
-#!/bin/sh /etc/rc.common
-
-START=01
-
-boot() {
-	cgroupfs-mount
-}

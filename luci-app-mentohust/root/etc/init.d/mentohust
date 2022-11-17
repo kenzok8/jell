@@ -73,7 +73,7 @@ start()
 
 stop()
 {
-    killall -q `which mentohust`
+    killall mentohust
 }
 
 restart()

@@ -143,6 +143,3 @@ start_service() {
 	config_foreach transmission 'transmission'
 }
 
-service_triggers() {
-	procd_add_reload_trigger "transmission"
-}
