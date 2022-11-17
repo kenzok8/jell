@@ -126,7 +126,7 @@
  #: applications/luci-app-attendedsysupgrade/htdocs/luci-static/resources/view/attendedsysupgrade/overview.js:437
  #: applications/luci-app-attendedsysupgrade/root/usr/share/luci/menu.d/luci-app-attendedsysupgrade.json:3
  msgid "Attended Sysupgrade"
--msgstr "参与式系统升级"
+-msgstr "值守式系统更新"
 +msgstr "定制系统升级"
 +
 +msgid "Force Sysupgrade"
@@ -147,7 +147,7 @@
  msgid ""
  "The attended sysupgrade service allows to easily upgrade vanilla and custom "
  "firmware images."
--msgstr "attended 系统升级服务允许轻松升级 vanilla 和自定义固件镜像。"
+-msgstr "值守式系统升级服务可让您轻松升级原版和自定义固件镜像。"
 +msgstr "定制和更新适用于您设备的OpenWrt固件。"
  
  #: applications/luci-app-attendedsysupgrade/htdocs/luci-static/resources/view/attendedsysupgrade/overview.js:401

@@ -1,0 +1,9 @@
+--- a/luci-base/root/www/index.html
++++ b/luci-base/root/www/index.html
+@@ -15,6 +15,5 @@
+ 		</style>
+ 	</head>
+ 	<body>
+-		<a href="cgi-bin/luci/">LuCI - Lua Configuration Interface</a>
+ 	</body>
+ </html>
