@@ -11,7 +11,7 @@ PKG_ARCH_LINKEASE:=$(ARCH)
 
 PKG_NAME:=linkease
 PKG_VERSION:=1.0.9
-PKG_RELEASE:=15
+PKG_RELEASE:=16
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://fw.koolcenter.com/binary/LinkEase/LinuxStorage/
 PKG_HASH:=skip
