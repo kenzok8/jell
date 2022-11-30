@@ -3,16 +3,13 @@
 START=90
 STOP=10
 
-enabled="$(uci get baidupcs-web.config.enabled)"
-port="$(uci get baidupcs-web.config.port)"
-download_dir="$(uci get baidupcs-web.config.download_dir)"
-max_download_rate="$(uci get baidupcs-web.config.max_download_rate || echo '0')"
-max_upload_rate="$(uci get baidupcs-web.config.max_upload_rate || echo '0')"
-max_download_load="$(uci get baidupcs-web.config.max_download_load || echo '1')"
-max_parallel="$(uci get baidupcs-web.config.max_parallel || echo '8')"
-aria2="$(uci get baidupcs-web.config.aria2)"
-aria2_RPC="$(uci get baidupcs-web.config.aria2_RPC)"
-aria2_secret="$(uci get baidupcs-web.config.aria2_secret)"
+enabled="$(uci -q get baidupcs-web.config.enabled)"
+port="$(uci -q get baidupcs-web.config.port)"
+download_dir="$(uci -q get baidupcs-web.config.download_dir)"
+max_download_rate="$(uci -q get baidupcs-web.config.max_download_rate || echo '0')"
+max_upload_rate="$(uci -q get baidupcs-web.config.max_upload_rate || echo '0')"
+max_download_load="$(uci -q get baidupcs-web.config.max_download_load || echo '1')"
+max_parallel="$(uci -q get baidupcs-web.config.max_parallel || echo '8')"
 
 start() {
 	stop
@@ -26,12 +23,10 @@ start() {
 	--max_parallel          "${max_parallel}"       \
 	--max_upload_parallel   "${max_parallel}"       \
 	>/dev/null 2>&1
-	[ $aria2 == '1' ] && {
-	baidupcs-web -a -au "${aria2_RPC}" -as "${aria2_secret}" >/dev/null 2>&1 &
-	} ||
+
 	baidupcs-web web --port "${port}" --access >/dev/null 2>&1 &
 }
 
 stop() {
-	killall `which baidupcs-web` >/dev/null 2>&1
+	killall baidupcs-web >/dev/null 2>&1
 }
