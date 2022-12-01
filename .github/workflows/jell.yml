@@ -183,6 +183,7 @@ jobs:
         git_clone https://github.com/immortalwrt/homeproxy
         git_clone https://github.com/mchome/openwrt-dogcom
         git_clone https://github.com/mchome/luci-app-dogcom
+        git_clone https://github.com/jerrykuku/lua-maxminddb
         ) &
         (
         svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
