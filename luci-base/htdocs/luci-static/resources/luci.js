@@ -2183,7 +2183,7 @@
 			}).render() : E([]);
 
 			if (this.handleSaveApply || this.handleSave || this.handleReset) {
-				footer.appendChild(E('div', { 'class': 'cbi-page-actions control-group' }, [
+				footer.appendChild(E('div', { 'class': 'cbi-page-actions' }, [
 					saveApplyBtn, ' ',
 					this.handleSave ? E('button', {
 						'class': 'cbi-button cbi-button-save',
@@ -2219,6 +2219,8 @@
 		session: Session,
 		view: View
 	};
+
+	var naturalCompare = new Intl.Collator(undefined, { numeric: true }).compare;
 
 	var LuCI = Class.extend(/** @lends LuCI.prototype */ {
 		__name__: 'LuCI',
@@ -2965,15 +2967,52 @@
 			}).filter(function(e) {
 				return (e[1] != null);
 			}).sort(function(a, b) {
-				if (a[1] < b[1])
-					return -1;
-				else if (a[1] > b[1])
-					return 1;
-				else
-					return 0;
+				return naturalCompare(a[1], b[1]);
 			}).map(function(e) {
 				return e[0];
 			});
+		},
+
+		/**
+		 * Compares two values numerically and returns -1, 0 or 1 depending
+		 * on whether the first value is smaller, equal to or larger than the
+		 * second one respectively.
+		 *
+		 * This function is meant to be used as comparator function for
+		 * Array.sort().
+		 *
+		 * @type {function}
+		 *
+		 * @param {*} a
+		 * The first value
+		 *
+		 * @param {*} b
+		 * The second value.
+		 *
+		 * @return {number}
+		 * Returns -1 if the first value is smaller than the second one.
+		 * Returns 0 if both values are equal.
+		 * Returns 1 if the first value is larger than the second one.
+		 */
+		naturalCompare: naturalCompare,
+
+		/**
+		 * Converts the given value to an array using toArray() if needed,
+		 * performs a numerical sort using naturalCompare() and returns the
+		 * result. If the input already is an array, no copy is being made
+		 * and the sorting is performed in-place.
+		 *
+		 * @see toArray
+		 * @see naturalCompare
+		 *
+		 * @param {*} val
+		 * The input value to sort (and convert to an array if needed).
+		 *
+		 * @return {Array<*>}
+		 * Returns the resulting, numerically sorted array.
+		 */
+		sortedArray: function(val) {
+			return this.toArray(val).sort(naturalCompare);
 		},
 
 		/**
