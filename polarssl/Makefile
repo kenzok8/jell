@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=polarssl
 SRC_PKG_NAME:=mbedtls
 PKG_VERSION:=1.3.16
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 PKG_USE_MIPS16:=0
 
 PKG_SOURCE:=$(SRC_PKG_NAME)-$(PKG_VERSION)-gpl.tgz
@@ -19,7 +19,6 @@ PKG_MD5SUM:=skip
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(SRC_PKG_NAME)-$(PKG_VERSION)
 
-PKG_BUILD_PARALLEL:=1
 PKG_LICENSE:=GPL-2.0+
 
 include $(INCLUDE_DIR)/package.mk
@@ -48,8 +47,6 @@ define Package/libpolarssl/description
 $(call Package/polarssl/Default/description)
 This package contains the PolarSSL library.
 endef
-
-PKG_INSTALL:=1
 
 CMAKE_OPTIONS += \
 	-DCMAKE_BUILD_TYPE:String="Release" \
