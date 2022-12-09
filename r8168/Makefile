@@ -8,7 +8,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=r8168
 PKG_VERSION:=8.051.02
-PKG_RELEASE:=5
+PKG_RELEASE:=6
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/BROBIRD/openwrt-r8168.git
@@ -29,7 +29,7 @@ define KernelPackage/r8168
   CONFLICTS:=kmod-r8169
 endef
 
-define Package/r8168/description
+define KernelPackage/r8168/description
   This package contains a driver for Realtek r8168 chipsets.
 endef
 
