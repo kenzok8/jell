@@ -11,6 +11,11 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-webdav
 
+define Package/$(PKG_NAME)/conffiles
+/etc/config/webdav
+/etc/webdav/
+endef
+
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
