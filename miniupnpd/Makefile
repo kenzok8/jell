@@ -9,11 +9,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
 PKG_VERSION:=2.0.20170421
-PKG_RELEASE:=7
+PKG_RELEASE:=8
 
-# Content-Encoding conflict, can refer to this [issue](https://github.com/miniupnp/miniupnp/issues/605)
-# so switch mirror repo to http://miniupnp.tuxfamily.org
-# PKG_SOURCE_URL:=http://miniupnp.free.fr/files
 PKG_SOURCE_URL:=http://miniupnp.tuxfamily.org/files
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_HASH:=skip
