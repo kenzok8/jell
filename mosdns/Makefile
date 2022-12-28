@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mosdns
 PKG_VERSION:=f130472
-PKG_RELEASE:=30
+PKG_RELEASE:=31
 
 PKG_SOURCE:=mosdns-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/IrineSistiana/mosdns/tar.gz/$(PKG_VERSION)?
@@ -20,7 +20,7 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_MOSDNS_COMPRESS_GOPROXY \
 	CONFIG_MOSDNS_COMPRESS_UPX
 
-PKG_BUILD_DEPENDS:=golang/host
+PKG_BUILD_DEPENDS:=golang/host upx/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
