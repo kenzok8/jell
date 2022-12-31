@@ -50,31 +50,31 @@
 
 <script type="text/javascript">
 (function( window, document, undefined ) {
-    // é€‰å– DOM å…ƒç´ 
+    // Ñ¡È¡ DOM ÔªËØ
     var selector, section = document.querySelector("[id$='refresh_token']");
 
-    // é®ç½©å®¹å™¨
+    // ÕÚÕÖÈİÆ÷
     var mask = document.createElement('div');
     mask.id = 'mask-box';
 
-    // äºŒç»´ç å®¹å™¨
+    // ¶şÎ¬ÂëÈİÆ÷
     var code = document.createElement('div');
     code.id = 'code-box';
-    code.innerHTML = "è¯·ä½¿ç”¨ é˜¿é‡Œäº‘ç›˜ App è¿›è¡Œæ‰«ç è®¤è¯";
+    code.innerHTML = "ÇëÊ¹ÓÃ °¢ÀïÔÆÅÌ App ½øĞĞÉ¨ÂëÈÏÖ¤";
 
-    // åˆ·æ–°æŒ‰é’®
+    // Ë¢ĞÂ°´Å¥
     var load = document.createElement('a');
     load.id = 'load-link';
-    load.innerHTML = "åˆ·æ–°";
+    load.innerHTML = "Ë¢ĞÂ";
 
-    // åˆ›å»ºäºŒç»´ç 
+    // ´´½¨¶şÎ¬Âë
     var make = new QRCode( code, { correctLevel: QRCode.CorrectLevel.L });
     make.clear = function() {
         code.getElementsByTagName("img").item(0).removeAttribute('src');
         this._oDrawing.clear();
     }
 
-    // å…³é—­æŒ‰é’®
+    // ¹Ø±Õ°´Å¥
     var link = document.createElement('a');
     link.id = 'close-link';
     link.addEventListener('click', ( e ) => {
@@ -84,12 +84,12 @@
         return false;
     });
 
-    // äºŒç»´ç å±‚å±…ä¸­
+    // ¶şÎ¬Âë²ã¾ÓÖĞ
     var center = function() {
-        // è°ƒæ•´é®ç½©å±‚è¦†ç›–èŒƒå›´
+        // µ÷ÕûÕÚÕÖ²ã¸²¸Ç·¶Î§
         mask.style.width = section.clientWidth + "px";
         mask.style.height = section.clientHeight + "px";
-        // äºŒç»´ç å±‚å±…ä¸­
+        // ¶şÎ¬Âë²ã¾ÓÖĞ
         var top = selector.offsetTop - selector.parentNode.offsetTop;
         if ( selector.offsetTop <= 380 ) {
             code.style.top = top + selector.offsetHeight + "px";
@@ -99,27 +99,27 @@
         code.style.left = ( ( section.offsetWidth - code.offsetWidth ) / 2 ) + parseInt( ( selector.currentStyle || window.getComputedStyle( selector ) ).marginLeft ) + "px";
     };
 
-    // è·å–äºŒç»´ç 
+    // »ñÈ¡¶şÎ¬Âë
     var feedback = function() {
-        // æ¸…é™¤äºŒç»´ç 
+        // Çå³ı¶şÎ¬Âë
         make.clear();
-        // è·å–é€šä¿¡æ•°æ®
+        // »ñÈ¡Í¨ĞÅÊı¾İ
         XHR.get( '<%=luci.dispatcher.build_url("admin", "services", "aliyundrive-webdav","qrcode")%>', null, ( x, d ) => {
             if ( x.status != 200 ) {
-                alert('è·å–äºŒç»´ç å¤±è´¥!');
+                alert('»ñÈ¡¶şÎ¬ÂëÊ§°Ü!');
                 return false;
             }
-            // ç§»é™¤åˆ·æ–°
+            // ÒÆ³ıË¢ĞÂ
             load.remove();
-            // åˆ›å»ºäºŒç»´ç 
+            // ´´½¨¶şÎ¬Âë
             make.makeCode( d.codeContent );
-            // ç›‘å¬æ‰«ç åé¦ˆ
+            // ¼àÌıÉ¨Âë·´À¡
             XHR.poll( 3, '<%=luci.dispatcher.build_url("admin", "services", "aliyundrive-webdav", "query")%>', { t: d.t, ck: d.ck }, ( x, d ) => {
                 if ( d.refresh_token.trim() ) {
-                    // æ¸…é™¤çº¿ç¨‹
+                    // Çå³ıÏß³Ì
                     XHR.halt();
                     XHR._q = [];
-                    // å›å†™ Cookie æ•°æ®
+                    // »ØĞ´ Cookie Êı¾İ
                     mask.remove();
                     selector.value = d.refresh_token.trim();
                 }
@@ -127,9 +127,9 @@
         });
     };
 
-    // é¼ æ ‡äº‹ä»¶
+    // Êó±êÊÂ¼ş
     var event = function( e ) {
-        // åŒºåˆ†å•å‡»ã€åŒå‡»äº‹ä»¶
+        // Çø·Öµ¥»÷¡¢Ë«»÷ÊÂ¼ş
         if ( e.target.tagName == "INPUT" && e.type == "dblclick" ) {
             selector = e.target;
         } else if ( e.target.tagName == "IMG" && e.type == "click" && /add/ig.test( e.target.src ) ) {
@@ -138,18 +138,18 @@
         } else {
             return false;
         }
-        // æ’å…¥å®¹å™¨
+        // ²åÈëÈİÆ÷
         if ( !document.contains( mask ) ) {
             section.prepend( mask );
             mask.prepend( code );
             code.prepend( link );
             center();
         }
-        // è·å–åŠç›‘å¬æ‰«ç äº‹ä»¶
+        // »ñÈ¡¼°¼àÌıÉ¨ÂëÊÂ¼ş
         feedback();
     };
 
-    // ç»‘å®šäº‹ä»¶
+    // °ó¶¨ÊÂ¼ş
     section.addEventListener( 'click', event );
     section.addEventListener( 'dblclick', event );
 })( window, document );
