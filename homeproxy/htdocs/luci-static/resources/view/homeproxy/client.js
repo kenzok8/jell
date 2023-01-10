@@ -1,6 +1,6 @@
-/* SPDX-License-Identifier: GPL-3.0-only
+/* SPDX-License-Identifier: GPL-2.0-only
  *
- * Copyright (C) 2022 ImmortalWrt.org
+ * Copyright (C) 2022-2023 ImmortalWrt.org
  */
 
 'use strict';
@@ -104,7 +104,7 @@ return view.extend({
 		/* Cache all configured proxy nodes, they will be called multiple times. */
 		var proxy_nodes = {};
 		uci.sections(data[0], 'node', (res) => {
-			proxy_nodes[res['.name']] = 
+			proxy_nodes[res['.name']] =
 				String.format('[%s] %s', res.type, res.label || res.server + ':' + res.server_port);
 		});
 
@@ -145,6 +145,7 @@ return view.extend({
 		o.value('all', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
 		o.default = 'common';
+		o.rmempty = false;
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
@@ -156,7 +157,7 @@ return view.extend({
 					if (!stubValidator.apply('port', i))
 						return _('Expecting: %s').format(_('valid port value'));
 					if (ports.includes(i))
-						return _('Port %s alrealy exists, please enter other ones.').format(port);
+						return _('Port %s alrealy exists!').format(i);
 					ports = ports.concat(i);
 				}
 			}
@@ -175,11 +176,12 @@ return view.extend({
 		o.value('119.29.29.29', _('Tencent Public DNS (119.29.29.29)'));
 		o.value('114.114.114.114', _('Xinfeng Public DNS (114.114.114.114)'));
 		o.default = '8.8.8.8';
+		o.rmempty = false;
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && !['local', 'wan'].includes(value)) {
 				if (!value)
-					return _('Expecting: %s').fomrat(_('non-empty value'));
+					return _('Expecting: %s').format(_('non-empty value'));
 				else if (!stubValidator.apply('ipaddr', value))
 					return _('Expecting: %s').format(_('valid IP address'));
 			}
@@ -220,7 +222,7 @@ return view.extend({
 		so.noaliases = true;
 		so.nobridges = true;
 
-		so = ss.option(form.ListValue, 'default_tun_stack', _('Default TUN stack'),
+		so = ss.option(form.ListValue, 'tcpip_stack', _('TCP/IP stack'),
 			_('TCP/IP stack.'));
 		so.value('gvisor', _('gVisor'));
 		so.value('system', _('System'));
@@ -233,6 +235,12 @@ return view.extend({
 			else
 				desc.innerHTML = _('Less compatibility and sometimes better performance.');
 		}
+
+		so = ss.option(form.Flag, 'endpoint_independent_nat', _('Enable endpoint-independent NAT'),
+			_('Performance may degrade slightly, so it is not recommended to enable on when it is not needed.'));
+		so.default = so.enabled;
+		so.depends('tcpip_stack', 'gvisor');
+		so.rmempty = false;
 
 		o = s.option(form.SectionValue, '_routing_node', form.GridSection, 'routing_node', _('Routing nodes'));
 		o.depends('routing_mode', 'custom');
@@ -251,6 +259,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
@@ -323,7 +332,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = so.disabled;
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
@@ -347,7 +356,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
@@ -385,12 +393,10 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'source_geoip', _('Source GeoIP'),
 			_('Match source geoip.'));
-		so.datatype = 'ipaddr("nomask")';
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'geoip', _('GeoIP'),
 			_('Match geoip.'));
-		so.datatype = 'ipaddr("nomask")';
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'source_ip_cidr', _('Source IP CIDR'),
@@ -480,12 +486,10 @@ return view.extend({
 
 		so = ss.option(form.Flag, 'disable_cache', _('Disable DNS cache'));
 		so.default = so.disabled;
-		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'disable_cache_expire', _('Disable cache expire'));
 		so.default = so.disabled;
 		so.depends('disable_cache', '0');
-		so.rmempty = false;
 
 		o = s.option(form.SectionValue, '_dns_server', form.GridSection, 'dns_server', _('DNS servers'));
 		o.depends('routing_mode', 'custom');
@@ -504,7 +508,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = so.disabled;
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
@@ -589,7 +593,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = so.disabled;
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
@@ -606,7 +610,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
@@ -724,7 +727,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'dns_disable_cache', _('Disable dns cache'),
 			_('Disable cache and save cache in this query.'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		return m.render();

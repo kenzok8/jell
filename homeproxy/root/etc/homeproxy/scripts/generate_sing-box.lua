@@ -1,7 +1,7 @@
 #!/usr/bin/lua
--- SPDX-License-Identifier: GPL-3.0-only
+-- SPDX-License-Identifier: GPL-2.0-only
 --
--- Copyright (C) 2022 ImmortalWrt.org
+-- Copyright (C) 2022-2023 ImmortalWrt.org
 
 require "luci.i18n"
 require "luci.jsonc"
@@ -69,7 +69,8 @@ local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 local main_node, main_udp_node, default_outbound
 local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
 local sniff_override, default_interface
-local default_tun_stack = "gvisor"
+local tcpip_stack = "gvisor"
+local endpoint_independent_nat = "1"
 if routing_mode ~= "custom" then
 	main_node = uci:get(uciconfig, ucimain, "main_node") or "nil"
 	main_udp_node = uci:get(uciconfig, ucimain, "main_udp_node") or "nil"
@@ -84,11 +85,12 @@ else
 	sniff_override = uci:get(uciconfig, uciroutingsetting, "sniff_override")
 	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound")
 	default_interface = uci:get(uciconfig, uciroutingsetting, "default_interface")
-	default_tun_stack = uci:get(uciconfig, uciroutingnode, "default_tun_stack")
+	tcpip_stack = uci:get(uciconfig, uciroutingsetting, "tcpip_stack")
+	endpoint_independent_nat = uci:get(uciconfig, uciroutingsetting, "endpoint_independent_nat")
 end
 
 if routing_port == "common" then
-	routing_port = { 22, 53, 80, 143, 443, 465, 587, 853, 995, 993, 8080, 8443, 9418 }
+	routing_port = { 22, 53, 80, 143, 443, 465, 587, 853, 993, 995, 8080, 8443, 9418 }
 elseif table.contains({"all", "nil"}, routing_port) then
 	routing_port = nil
 else
@@ -177,7 +179,7 @@ local function generate_outbound(node)
 			certificate_path = node.tls_cert_path,
 			ech = (node.enable_ech == "1") and {
 				enabled = true,
-				dynamic_record_sizing_disabled = (node.tls_ech_tls_enable_drs ~= "1"),
+				dynamic_record_sizing_disabled = (node.tls_ech_tls_disable_drs == "1"),
 				pq_signature_schemes_enabled = (node.tls_ech_enable_pqss == "1"),
 				config = node.tls_ech_config
 			} or nil,
@@ -321,7 +323,7 @@ elseif notEmpty(default_outbound) then
 	config.dns.rules = {}
 	uci:foreach(uciconfig, ucidnsrule, function(cfg)
 		if cfg.enabled == "1" then
-			config.dns.rules[#config.dns.rules] = {
+			config.dns.rules[#config.dns.rules+1] = {
 				invert = cfg.invert,
 				network = cfg.network,
 				protocol = cfg.protocol,
@@ -340,7 +342,7 @@ elseif notEmpty(default_outbound) then
 				user = cfg.user,
 				invert = (cfg.invert == "1"),
 				outbound = get_outbound(cfg.outbound),
-				server = cfg.server,
+				server = get_resolver(cfg.server),
 				disable_cache = (cfg.disable_cache == "1")
 			}
 		end
@@ -349,7 +351,7 @@ elseif notEmpty(default_outbound) then
 		config.dns.rules = nil
 	end
 
-	config.dns.final = dns_default_server
+	config.dns.final = get_resolver(dns_default_server)
 end
 -- DNS end
 
@@ -365,8 +367,8 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 		inet6_address = "fdfe:dcba:9876::1/126",
 		mtu = 9000,
 		auto_route = true,
-		endpoint_independent_nat = true,
-		stack = default_tun_stack,
+		endpoint_independent_nat = (endpoint_independent_nat == "1") or nil,
+		stack = tcpip_stack,
 		sniff = true,
 		sniff_override_destination = (sniff_override == "1"),
 		domain_strategy = dns_strategy
@@ -400,7 +402,7 @@ if enable_server == "1" then
 				recv_window_conn = tonumber(cfg.hysteria_recv_window_conn),
 				recv_window_client = tonumber(cfg.hysteria_revc_window_client),
 				max_conn_client = tonumber(cfg.hysteria_max_conn_client),
-				disable_mtu_discovery = cfg.hysteria_disable_mtu_discovery and (cfg.hysteria_disable_mtu_discovery == "1") or nil,
+				disable_mtu_discovery = (cfg.hysteria_disable_mtu_discovery == "1") or nil,
 
 				-- Shadowsocks
 				method = (cfg.type == "shadowsocks") and cfg.shadowsocks_encrypt_method or nil,
@@ -500,7 +502,7 @@ if notEmpty(default_outbound) then
 			config.outbounds[index].domain_strategy = cfg.domain_strategy
 			config.outbounds[index].bind_interface = cfg.bind_interface
 			config.outbounds[index].detour = get_outbound(cfg.outbound)
-			
+
 		end
 	end)
 end

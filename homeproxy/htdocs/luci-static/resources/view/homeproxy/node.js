@@ -389,14 +389,12 @@ return view.extend({
 		}
 		/* Import subscription links end */
 
-		so = ss.option(form.Button, '_apply', _('Apply'));
-		so.editable = true;
-		so.modalonly = false;
-		so.inputstyle = 'apply';
-		so.inputtitle = function(section_id) {
-			if (routing_mode === 'custom')
-				this.readonly = true;
-			else {
+		if (routing_mode !== 'custom') {
+			so = ss.option(form.Button, '_apply', _('Apply'));
+			so.editable = true;
+			so.modalonly = false;
+			so.inputstyle = 'apply';
+			so.inputtitle = function(section_id) {
 				if (main_node == section_id) {
 					this.readonly = true;
 					return _('Applied');
@@ -405,12 +403,12 @@ return view.extend({
 					return _('Apply');
 				}
 			}
-		}
-		so.onclick = function(ev, section_id) {
-			uci.set(data[0], 'config', 'main_node', section_id);
-			ui.changes.apply(true);
+			so.onclick = function(ev, section_id) {
+				uci.set(data[0], 'config', 'main_node', section_id);
+				ui.changes.apply(true);
 
-			return this.map.save(null, true);
+				return this.map.save(null, true);
+			}
 		}
 
 		so = ss.option(form.Value, 'label', _('Label'));
@@ -562,7 +560,6 @@ return view.extend({
 			_('Disables Path MTU Discovery (RFC 8899). Packets will then be at most 1252 (IPv4) / 1232 (IPv6) bytes in size.'));
 		so.default = so.disabled;
 		so.depends('type', 'hysteria');
-		so.rmempty = false;
 		so.modalonly = true;
 		/* Hysteria config end */
 
@@ -593,7 +590,8 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'shadowsocks_plugin_opts', _('Plugin opts'));
-		so.depends({'shadowsocks_plugin': '', '!reverse': true});
+		so.depends('shadowsocks_plugin', 'obfs-local');
+		so.depends('shadowsocks_plugin', 'v2ray-plugin');
 		so.modalonly = true;
 		/* Shadowsocks config end */
 
@@ -881,6 +879,7 @@ return view.extend({
 		so.depends('type', 'hysteria');
 		so.depends('type', 'shadowtls');
 		so.depends('type', 'trojan');
+		so.depends('type', 'vless');
 		so.depends('type', 'vmess');
 		so.modalonly = true;
 
@@ -905,20 +904,18 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
 			_('The minimum TLS version that is acceptable.'));
+		so.value('', _('default'));
 		for (var i of hp.tls_versions)
 			so.value(i);
-		so.default = '1.2';
 		so.depends('tls', '1');
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'tls_max_version', _('Maximum TLS version'),
 			_('The maximum TLS version that is acceptable.'));
+		so.value('', _('default'));
 		for (var i of hp.tls_versions)
 			so.value(i);
-		so.default = '1.3';
 		so.depends('tls', '1');
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.MultiValue, 'tls_cipher_suites', _('Cipher suites'),
@@ -933,7 +930,6 @@ return view.extend({
 			_('If you have the root certificate, use this option instead of allowing insecure.'));
 		so.default = so.disabled;
 		so.depends('tls_insecure', '0');
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'tls_cert_path', _('Certificate path'),
@@ -956,19 +952,16 @@ return view.extend({
 				_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
 			so.depends('tls', '1');
 			so.default = so.disabled;
-			so.rmempty = false;
 			so.modalonly = true;
 
-			so = ss.option(form.Flag, 'tls_ech_tls_enable_drs', _('Enable dynamic record sizing'));
+			so = ss.option(form.Flag, 'tls_ech_tls_disable_drs', _('Disable dynamic record sizing'));
 			so.depends('tls_ech', '1');
-			so.default = so.enabled;
-			so.rmempty = false;
+			so.default = so.disabled;
 			so.modalonly = true;
 
 			so = ss.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
 			so.depends('tls_ech', '1');
 			so.default = so.disabled;
-			so.rmempty = false;
 			so.modalonly = true;
 
 			so = ss.option(form.Value, 'tls_ech_config', _('ECH config'));
@@ -993,13 +986,11 @@ return view.extend({
 		/* Extra settings start */
 		so = ss.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'udp_fragment', _('UDP Fragment'),
 			_('Enable UDP fragmentation.'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'udp_over_tcp', _('UDP over TCP'),
@@ -1007,7 +998,6 @@ return view.extend({
 		so.default = so.disabled;
 		so.depends('type', 'socks');
 		so.depends({'type': 'shadowsocks', 'multiplex': '0'});
-		so.rmempty = false;
 		so.modalonly = true;
 		/* Extra settings end */
 		/* Nodes settings end */
@@ -1031,7 +1021,7 @@ return view.extend({
 		o.default = o.disabled;
 		o.rmempty = false;
 
-		o = s.taboption('subscription', form.DynamicList, 'subscription_url', _('Subscription URL'),
+		o = s.taboption('subscription', form.DynamicList, 'subscription_url', _('Subscription URL-s'),
 			_('Support Hysteria, Shadowsocks(R), Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value) {
@@ -1062,7 +1052,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.taboption('subscription', form.Flag, 'allow_insecure', _('Allow insecure'),
-			_('Allow insecure connection by default when add nodes form subscriptions.') +
+			_('Allow insecure connection by default when add nodes from subscriptions.') +
 			'<br/>' +
 			_('This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
 		o.default = o.disabled;

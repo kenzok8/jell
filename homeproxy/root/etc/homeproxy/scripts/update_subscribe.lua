@@ -1,7 +1,7 @@
 #!/usr/bin/lua
--- SPDX-License-Identifier: GPL-3.0-only
+-- SPDX-License-Identifier: GPL-2.0-only
 --
--- Copyright (C) 2022 ImmortalWrt.org
+-- Copyright (C) 2022-2023 ImmortalWrt.org
 
 require "luci.i18n"
 require "luci.jsonc"
@@ -372,7 +372,7 @@ local function parse_uri(uri)
 			if config.transport == "grpc" then
 				config.grpc_servicename = uri.path
 			elseif config.transport == "h2" or uri.type == "http" then
-				config.transport == "http"
+				config.transport = "http"
 				config.http_host = notEmpty(uri.host) and uri.host:split(",") or nil
 				config.http_path = uri.path
 			elseif config.transport == "ws" then
