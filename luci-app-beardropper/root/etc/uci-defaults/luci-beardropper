@@ -7,5 +7,6 @@ uci -q batch <<-EOF >/dev/null
 	commit ucitrack
 EOF
 
+touch /tmp/beardropper.bddb
 rm -rf /tmp/luci-*
 exit 0
