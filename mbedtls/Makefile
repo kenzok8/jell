@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mbedtls
 PKG_VERSION:=2.28.2
-PKG_RELEASE:=7
+PKG_RELEASE:=8
 PKG_USE_MIPS16:=0
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -111,9 +111,6 @@ define Build/Configure
 	     END { exit(rc) }' $(PKG_BUILD_DIR)/include/mbedtls/config.h \
 	     >$(PKG_BUILD_DIR)/include/mbedtls/config.h.new && \
 	mv $(PKG_BUILD_DIR)/include/mbedtls/config.h.new $(PKG_BUILD_DIR)/include/mbedtls/config.h
-
-	sed -i '/fuzz/d' $(PKG_BUILD_DIR)/programs/CMakeLists.txt
-	sed -i '/test/d' $(PKG_BUILD_DIR)/programs/CMakeLists.txt
 endef
 
 define Build/InstallDev
