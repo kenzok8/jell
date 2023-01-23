@@ -152,9 +152,10 @@ end
 -- Log start
 nixio.fs.mkdirr("/var/run/homeproxy")
 
-local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
 local function log(...)
+	local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
 	logfile:write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE] ") .. table.concat({...}, " ") .. "\n")
+	logfile:close()
 end
 -- Log end
 
@@ -256,9 +257,9 @@ local function parse_uri(uri)
 			}
 		elseif uri[1] == "ssr" then
 			-- https://coderschool.cn/2498.html
-			uri = b64decode(uri[2]):split("/")
+			uri = b64decode(uri[2]):split("/?")
 			local userinfo = uri[1]:split(":")
-			local params = URL.parseQuery(uri[2]:gsub("^\?", ""))
+			local params = URL.parseQuery(uri[2])
 
 			if not sing_features.with_shadowsocksr then
 				log(translatef("Skipping unsupported %s node: %s.", "ShadowsocksR", b64decode(params.remarks) or userinfo[1]))
@@ -476,7 +477,6 @@ local function main()
 			sysinit.start(uciconfig)
 		end
 
-		logfile:close()
 		return false
 	end
 
@@ -538,7 +538,6 @@ local function main()
 
 	log(translatef("%s nodes added, %s removed.", added, removed))
 	log(translate("Successfully updated subscriptions."))
-	logfile:close()
 end
 
 if notEmpty(subscription_urls) then
@@ -550,7 +549,5 @@ if notEmpty(subscription_urls) then
 		log(translate("Reloading service..."))
 		sysinit.stop(uciconfig)
 		sysinit.start(uciconfig)
-
-		logfile:close()
 	end)
 end
