@@ -186,6 +186,7 @@ jobs:
         git_clone https://github.com/jerrykuku/lua-maxminddb
         ) &
         (
+        svn export https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-adguardhome
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
         svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-bypass
         svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
