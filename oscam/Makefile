@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=oscam
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/nx111/oscam.git
@@ -16,7 +16,7 @@ PKG_SOURCE_VERSION:=aafda4bca3c347698ef1dc32f7ebeff76378d55a
 PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=GPL-3.0
-PKG_LICENSE_FILE:=COPYING
+PKG_LICENSE_FILES:=COPYING
 PKG_MAINTAINER:=Tomasz Maciej Nowak <tomek_n@o2.pl>
 
 PKG_BUILD_PARALLEL:=1
