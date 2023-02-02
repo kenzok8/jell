@@ -172,6 +172,7 @@ jobs:
         git_clone https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
         git_clone https://github.com/kenzok78/luci-theme-argonne
         git_clone https://github.com/kenzok78/luci-app-argonne-config
+        git_clone https://github.com/kenzok8/wall && mvdir wall
         git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go && mvdir ddns-go
         git_clone https://github.com/CHN-beta/rkp-ipid
