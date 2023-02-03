@@ -54,7 +54,6 @@ local ucinode = "node"
 local uciserver = "server"
 
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
-local routing_port = uci:get(uciconfig, ucimain, "routing_port") or "nil"
 
 local wan_dns = luci.sys.exec("ifstatus wan | jsonfilter -e '@[\"dns-server\"][0]'"):trim()
 if isEmpty(wan_dns) then
@@ -92,14 +91,6 @@ else
 	tun_name = uci:get(uciconfig, uciinfra, "tun_name") or "singtun0"
 	tcpip_stack = uci:get(uciconfig, uciroutingsetting, "tcpip_stack") or "gvisor"
 	endpoint_independent_nat = uci:get(uciconfig, uciroutingsetting, "endpoint_independent_nat")
-end
-
-if routing_port == "common" then
-	routing_port = { 22, 53, 80, 143, 443, 465, 587, 853, 993, 995, 8080, 8443, 9418 }
-elseif table.contains({"all", "nil"}, routing_port) then
-	routing_port = nil
-else
-	routing_port = routing_port:split(",")
 end
 -- UCI config end
 
@@ -301,7 +292,6 @@ if notEmpty(main_node) then
 		config.dns.rules = {
 			{
 				geosite = dns_geosite,
-				port = parse_port(routing_port),
 				server = "main-dns"
 			}
 		}
@@ -579,52 +569,28 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 end
 
 if notEmpty(main_node) then
-	-- Routing ports
-	if parse_port(routing_port) then
-		config.route.rules[#config.route.rules+1] = {
-			port = parse_port(routing_port),
-			outbound = "direct-out",
-			invert = true
-		}
-	end
-
 	-- Routing rules
-	local routing_geosite, routing_geosite, routing_invert
-	if routing_mode == "bypass_mainland_china" then
-		routing_geosite = { "cn" }
-		routing_geoip = { "cn", "private" }
-		routing_invert = true
-	elseif routing_mode == "proxy_mainland_china" then
-		routing_geosite = { "cn" }
-		routing_geoip = { "cn" }
-	elseif routing_mode == "gfwlist" then
+	local routing_geosite, routing_geosite, final_node
+	if routing_mode == "gfwlist" then
 		routing_geosite = { "gfw" }
 		routing_geoip = { "telegram" }
+		final_node = "direct-out"
+	else
+		final_node = "main-out"
 	end
 
-	-- Main out
-	config.route.rules[#config.route.rules+1] = {
-		geosite = routing_geosite and table.clone(routing_geosite) or nil,
-		geoip = routing_geoip and table.clone(routing_geoip) or nil,
-		outbound = "main-out",
-		invert = routing_invert
-	}
-
 	-- Main UDP out
-	if isEmpty(main_udp_node) then
-		config.route.rules[#config.route.rules].network = "tcp"
-	elseif main_udp_node ~= "same" and main_udp_node ~= main_node then
-		config.route.rules[#config.route.rules].network = "tcp"
+	if notEmpty(main_udp_node) and main_udp_node ~= "same" and main_udp_node ~= main_node then
 		config.route.rules[#config.route.rules+1] = {
 			geosite = routing_geosite,
 			geoip = routing_geoip,
 			network = "udp",
 			outbound = "main-udp-out",
-			invert = routing_invert
 		}
 	end
 
-	config.route.final = "direct-out"
+	-- Main out
+	config.route.final = final_node
 elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
