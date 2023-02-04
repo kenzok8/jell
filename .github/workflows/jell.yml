@@ -13,15 +13,13 @@ on:
       - '.github/diy/**'
   schedule:
     - cron: 0 */12 * * *
+  repository_dispatch:  
   workflow_dispatch:
     inputs:
       ssh:
-        description: 'ssh'
+        description: 'SSH connection to Actions'
         required: false
-        default: 'true'
-  watch:
-    types: started
-  repository_dispatch:
+        default: 'false'
 
 jobs:
   merge:
