@@ -379,7 +379,7 @@ return view.extend({
 		so.validate = function(section_id, value) {
 			if (section_id && value) {
 				for (var i of value.split('\n')) {
-					if (!stubValidator.apply('hostname', i))
+					if (i && !stubValidator.apply('hostname', i))
 						return _('Expecting: %s').format(_('valid hostname'));
 				}
 			}
@@ -409,7 +409,7 @@ return view.extend({
 		so.validate = function(section_id, value) {
 			if (section_id && value) {
 				for (var i of value.split('\n')) {
-					if (!stubValidator.apply('hostname', i))
+					if (i && !stubValidator.apply('hostname', i))
 						return _('Expecting: %s').format(_('valid hostname'));
 				}
 			}
@@ -452,7 +452,6 @@ return view.extend({
 			_('Bind outbound connections to the specified NIC by default.<br/>Auto detect if leave empty.'));
 		so.multiple = false;
 		so.noaliases = true;
-		so.nobridges = true;
 
 		so = ss.option(form.ListValue, 'tcpip_stack', _('TCP/IP stack'),
 			_('TCP/IP stack.'));
@@ -515,7 +514,6 @@ return view.extend({
 			_('The network interface to bind to.'));
 		so.multiple = false;
 		so.noaliases = true;
-		so.nobridges = true;
 		so.depends('outbound', '');
 		so.modalonly = true;
 
