@@ -10,49 +10,20 @@
 import { access, error, lstat, mkstemp, popen, readfile, writefile } from 'fs';
 import { cursor } from 'uci';
 
-/* Kanged from luci-app-commands */
-function is_binary(str) {
-	for (let off = 0, byte = ord(str); off < length(str); byte = ord(str, ++off))
-		if (byte <= 8 || (byte >= 14 && byte <= 31))
-			return true;
-
-	return false;
-}
-
-function execute_command(...args) {
-	let outfd = mkstemp();
-	let errfd = mkstemp();
-
-	const exitcode = system(`${join(' ', args)} >&${outfd.fileno()} 2>&${errfd.fileno()}`);
-
-	outfd.seek(0);
-	errfd.seek(0);
-
-	const stdout = outfd.read(1024 * 512) ?? '';
-	const stderr = errfd.read(1024 * 512) ?? '';
-
-	outfd.close();
-	errfd.close();
-
-	const binary = is_binary(stdout);
-
-	return {
-		command: join(' ', args),
-		stdout: binary ? null : stdout,
-		stderr,
-		exitcode,
-		binary
-	};
+/* Kanged from ucode/luci */
+function shellquote(s) {
+	return `'${replace(s, "'", "'\\''")}'`;
 }
 
 const HP_DIR = '/etc/homeproxy';
+const RUN_DIR = '/var/run/homeproxy';
 
 const methods = {
 	acllist_read: {
 		args: { type: 'type' },
 		call: function(req) {
 			if (index(['direct_list', 'proxy_list'], req.args?.type) === -1)
-				return { content: null, error: 'type is wrong or empty' };
+				return { content: null, error: 'illegal type' };
 
 			const filecontent = readfile(`${HP_DIR}/resources/${req.args?.type}.txt`);
 			return { content: filecontent };
@@ -62,7 +33,7 @@ const methods = {
 		args: { type: 'type', content: 'content' },
 		call: function(req) {
 			if (index(['direct_list', 'proxy_list'], req.args?.type) === -1)
-				return { result: false, error: 'type is wrong or empty' };
+				return { result: false, error: 'illegal type' };
 
 			const file = `${HP_DIR}/resources/${req.args?.type}.txt`;
 			let content = req.args?.content;
@@ -147,6 +118,19 @@ const methods = {
 		}
 	},
 
+	log_clean: {
+		args: { type: 'type' },
+		call: function(req) {
+			if (!(req.args?.type in ['homeproxy', 'sing-box']))
+				return { result: false, error: 'illegal type' };
+
+			const filestat = lstat(`${RUN_DIR}/${req.args?.type}.log`);
+			if (filestat)
+				writefile(`${RUN_DIR}/${req.args?.type}.log`, '');
+			return { result: true };
+		}
+	},
+
 	singbox_get_features: {
 		call: function() {
 			let features = {};
@@ -173,14 +157,18 @@ const methods = {
 		args: { type: 'type' },
 		call: function(req) {
 			const version = trim(readfile(`${HP_DIR}/resources/${req.args?.type}.ver`));
-			return { version: version };
+			return { version: version, error: error() };
 		}
 	},
 	resources_update: {
 		args: { type: 'type' },
 		call: function(req) {
-			const exit_code = system(`${HP_DIR}/scripts/update_geodata.sh ${req.args?.type}`);
-			return { status: exit_code };
+			if (req.args?.type) {
+				const type = shellquote(req.args?.type);
+				const exit_code = system(`${HP_DIR}/scripts/update_geodata.sh ${type}`);
+				return { status: exit_code };
+			} else
+				return { status: 255, error: "argument 'type' is empty" };
 		}
 	}
 };
