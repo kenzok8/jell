@@ -72,7 +72,7 @@ function parseShareLink(uri, features) {
 					userinfo = [url.username, decodeURIComponent(url.password)];
 				else if (url.username)
 					/* User info encoded with base64 */
-					userinfo = hp.decodeBase64Str(url.username).split(':');
+					userinfo = hp.decodeBase64Str(decodeURIComponent(url.username)).split(':');
 
 				if (!hp.shadowsocks_encrypt_methods.includes(userinfo[0]))
 					return null;
@@ -219,6 +219,8 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocols */
 			else if (uri.net === 'kcp')
 				return null;
+			else if (url.net === 'quic' && ((url.type && url.type !== 'none') || url.path || !features.with_quic))
+				return null;
 			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			 * else if (uri.aid && parseInt(uri.aid) !== 0)
 			 * 	return null;
@@ -243,14 +245,14 @@ function parseShareLink(uri, features) {
 				break;
 			case 'h2':
 			case 'tcp':
-				if (config.transport === 'h2' || uri.type === 'http') {
+				if (uri.net === 'h2' || uri.type === 'http') {
 					config.transport = 'http';
 					config.http_host = uri.host ? uri.host.split(',') : null;
 					config.http_path = uri.path;
 				}
 				break;
 			case 'ws':
-				config.ws_host = config.tls !== '1' ? uri.host : null;
+				config.ws_host = (config.tls !== '1') ? uri.host : null;
 				config.ws_path = uri.path;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
 					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';
@@ -269,6 +271,8 @@ function parseShareLink(uri, features) {
 			return null;
 		else if (!config.label)
 			config.label = config.address + ':' + config.port;
+
+		config.address = config.address.replace(/\[|\]/, '');
 	}
 
 	return config;
@@ -481,7 +485,7 @@ return view.extend({
 						else if (encmode === '2022-blake3-aes-128-gcm')
 							return hp.validateBase64Key(24, section_id, value);
 						else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
-							return hp.validateBase64Key(45, section_id, value);
+							return hp.validateBase64Key(44, section_id, value);
 					}
 					if (!value)
 						return _('Expecting: %s').format(_('non-empty value'));

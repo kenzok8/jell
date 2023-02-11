@@ -7,91 +7,11 @@
 
 'use strict';
 
-import { mkstemp, readfile, writefile } from 'fs';
+import { readfile, writefile } from 'fs';
 import { cursor } from 'uci';
 
-/* Global variables start */
-const hp_dir = '/etc/homeproxy';
-const run_dir = '/var/run/homeproxy';
-/* Global variables end */
-
-/* Utilities start */
-/* Kanged from luci-app-commands */
-function isBinary(str) {
-	for (let off = 0, byte = ord(str); off < length(str); byte = ord(str, ++off))
-		if (byte <= 8 || (byte >= 14 && byte <= 31))
-			return true;
-
-	return false;
-}
-
-function executeCommand(...args) {
-	let outfd = mkstemp();
-	let errfd = mkstemp();
-
-	const exitcode = system(`${join(' ', args)} >&${outfd.fileno()} 2>&${errfd.fileno()}`);
-
-	outfd.seek(0);
-	errfd.seek(0);
-
-	const stdout = outfd.read(1024 * 512) ?? '';
-	const stderr = errfd.read(1024 * 512) ?? '';
-
-	outfd.close();
-	errfd.close();
-
-	const binary = isBinary(stdout);
-
-	return {
-		command: join(' ', args),
-		stdout: binary ? null : stdout,
-		stderr,
-		exitcode,
-		binary
-	};
-}
-/* Utilities end */
-
-/* String helper start */
-function isEmpty(res) {
-	return !res || res === 'nil' || (type(res) in ['array', 'object'] && length(res) === 0);
-}
-
-function strToInt(str) {
-	return !isEmpty(str) ? int(str) || null : null;
-}
-
-function validateHostname(hostname) {
-	return (match(hostname, /^[a-zA-Z0-9_]+$/) != null ||
-		(match(hostname, /^[a-zA-Z0-9_][a-zA-Z0-9_%-.]*[a-zA-Z0-9]$/) &&
-			match(hostname, /[^0-9.]/)));
-}
-
-function removeBlankAttrs(res) {
-	let content;
-
-	if (type(res) === 'object') {
-		content = {};
-		map(keys(res), (k) => {
-			if (type(res[k]) in ['array', 'object'])
-				content[k] = removeBlankAttrs(res[k]);
-			else if (res[k] !== null && res[k] !== '')
-				content[k] = res[k];
-		});
-	} else if (type(res) === 'array') {
-		content = [];
-		map(res, (k, i) => {
-			if (type(k) in ['array', 'object'])
-				push(content, removeBlankAttrs(k));
-			else if (k !== null && k !== '')
-				push(content, k);
-		});
-	} else
-		return res;
-
-	return content;
-}
-/* String helper end */
+import { executeCommand, isEmpty, strToInt, removeBlankAttrs, validateHostname } from 'homeproxy';
+import { HP_DIR, RUN_DIR } from 'homeproxy';
 
 /* UCI config start */
 const uci = cursor();
@@ -127,8 +47,8 @@ const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
 let main_node, main_udp_node, dedicated_udp_node, ipv6_support, default_outbound, default_interface,
     dns_server, dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire,
-    redirect_port, tproxy_port, self_mark, proxy_domain_list, direct_domain_list,
-    sniff_override, tun_name, tcpip_stack, endpoint_independent_nat;
+    wan_proxy_ips, proxy_domain_list, wan_direct_ips, direct_domain_list,
+    redirect_port, tproxy_port, self_mark, sniff_override, tun_name, tcpip_stack, endpoint_independent_nat;
 
 if (routing_mode !== 'custom') {
 	main_node = uci.get(uciconfig, ucimain, 'main_node') || 'nil';
@@ -146,8 +66,31 @@ if (routing_mode !== 'custom') {
 	if (isEmpty(dns_server) || dns_server === 'wan')
 		dns_server = wan_dns;
 
-	proxy_domain_list = trim(readfile(hp_dir + '/resources/proxy_list.txt'));
-	direct_domain_list = trim(readfile(hp_dir + '/resources/direct_list.txt'));
+	for (let i in ['wan_proxy_ipv4_ips', 'wan_proxy_ipv6_ips']) {
+		const proxy_ips = uci.get(uciconfig, ucicontrol, i);
+		if (length(proxy_ips)) {
+			if (!wan_proxy_ips)
+				wan_proxy_ips = [];
+			map(proxy_ips, (v) => push(wan_proxy_ips, v));
+		}
+	}
+
+	for (let i in ['wan_direct_ipv4_ips', 'wan_direct_ipv6_ips']) {
+		const direct_ips = uci.get(uciconfig, ucicontrol, i);
+		if (length(direct_ips)) {
+			if (!wan_direct_ips)
+				wan_direct_ips = [];
+			map(direct_ips, (v) => push(wan_direct_ips, v));
+		}
+	}
+
+	proxy_domain_list = split(trim(readfile(HP_DIR + '/resources/proxy_list.txt')), /[\r\n]/);
+	direct_domain_list = split(trim(readfile(HP_DIR + '/resources/direct_list.txt')), /[\r\n]/);
+	if (proxy_domain_list)
+		proxy_domain_list = split(proxy_domain_list, /[\r\n]/);
+	if (direct_domain_list)
+		direct_domain_list = split(direct_domain_list, /[\r\n]/);
+
 } else {
 	/* DNS settings */
 	dns_strategy = uci.get(uciconfig, ucidnssetting, 'dns_strategy');
@@ -308,7 +251,7 @@ const config = {};
 config.log = {
 	disabled: false,
 	level: 'warn',
-	output: run_dir + '/sing-box.log',
+	output: RUN_DIR + '/sing-box.log',
 	timestamp: true
 };
 
@@ -536,7 +479,7 @@ if (server_enabled === '1')
 				key_path: cfg.tls_key_path,
 				acme: (cfg.tls_acme === '1') ? {
 					domain: cfg.tls_acme_domains,
-					data_directory: hp_dir + '/certs',
+					data_directory: HP_DIR + '/certs',
 					default_server_name: cfg.tls_acme_dsn,
 					email: cfg.tls_acme_email,
 					provider: cfg.tls_acme_provider,
@@ -616,12 +559,12 @@ if (!isEmpty(main_node)) {
 if (!isEmpty(main_node) || !isEmpty(default_outbound))
 	config.route = {
 		geoip: {
-			path: hp_dir + '/resources/geoip.db',
+			path: HP_DIR + '/resources/geoip.db',
 			download_url: 'https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db',
 			download_detour: get_outbound(default_outbound) || (routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out'
 		},
 		geosite: {
-			path: hp_dir + '/resources/geosite.db',
+			path: HP_DIR + '/resources/geosite.db',
 			download_url: 'https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db',
 			download_detour: get_outbound(default_outbound) || (routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out'
 		},
@@ -641,37 +584,39 @@ if (!isEmpty(main_node) || !isEmpty(default_outbound))
 
 if (!isEmpty(main_node)) {
 	/* Routing rules */
-	/* Proxy domain list */
-	if (proxy_domain_list) {
+	/* Proxy list */
+	if (length(proxy_domain_list) || length(wan_proxy_ips)) {
 		push(config.route.rules, {
-			domain_keyword: split(proxy_domain_list, /[\r\n]/),
+			domain_keyword: proxy_domain_list,
+			ip_cidr: wan_proxy_ips,
 			network: dedicated_udp_node ? 'tcp' : null,
 			outbound: 'main-out'
 		});
 
-		if (dedicated_udp_node)
+		if (dedicated_udp_node) {
 			push(config.route.rules, {
-				domain_keyword: split(proxy_domain_list, /[\r\n]/),
+				domain_keyword: proxy_domain_list,
+				ip_cidr: wan_proxy_ips,
 				network: 'udp',
 				outbound: 'main-udp-out'
 			});
+		}
 	}
 
-	/* Direct domain list */
-	if (direct_domain_list)
+	/* Direct list */
+	if (length(direct_domain_list) || length(wan_direct_ips))
 		push(config.route.rules, {
-			domain_keyword: split(direct_domain_list, /[\r\n]/),
+			domain_keyword: direct_domain_list,
+			ip_cidr: wan_direct_ips,
 			outbound: 'direct-out'
 		});
 
 	let routing_geosite, routing_geoip;
 	if (routing_mode === 'gfwlist') {
 		routing_geosite = [ 'gfw', 'greatfire' ];
-		routing_geoip = [ 'telegram' ];
 
 		push(config.route.rules, {
 			geosite: routing_geosite,
-			geoip: routing_geoip,
 			network: dedicated_udp_node ? 'tcp' : null,
 			outbound: 'main-out'
 		});
@@ -729,5 +674,5 @@ if (!isEmpty(main_node)) {
 }
 /* Routing rules end */
 
-system('mkdir -p ' + run_dir);
-writefile(run_dir + '/sing-box.json', sprintf('%.J\n', removeBlankAttrs(config)));
+system('mkdir -p ' + RUN_DIR);
+writefile(RUN_DIR + '/sing-box.json', sprintf('%.J\n', removeBlankAttrs(config)));

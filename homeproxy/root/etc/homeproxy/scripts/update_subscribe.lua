@@ -207,7 +207,7 @@ local function parse_uri(uri)
 			config = {
 				label = urldecode(url.fragment, true),
 				type = "hysteria",
-				address = url.hostname,
+				address = url.host,
 				port = url.port,
 				hysteria_protocol = params.protocol or "udp",
 				hysteria_auth_type = params.auth and "string" or nil,
@@ -242,7 +242,7 @@ local function parse_uri(uri)
 				userinfo = { url.user, urldecode(url.password) }
 			elseif url.user then
 				-- User info encoded with base64
-				userinfo = b64decode(url.user):split(":")
+				userinfo = b64decode(urldecode(url.user)):split(":")
 			end
 
 			local plugin, plugin_opts
@@ -270,9 +270,9 @@ local function parse_uri(uri)
 			}
 		elseif uri[1] == "ssr" then
 			-- https://coderschool.cn/2498.html
-			uri = b64decode(uri[2]):split("/?")
+			uri = b64decode(uri[2]):split("/")
 			local userinfo = uri[1]:split(":")
-			local params = URL.parseQuery(uri[2])
+			local params = URL.parseQuery(uri[2]:gsub("^\?", ""))
 
 			if not sing_features.with_shadowsocksr then
 				log(translatef("Skipping unsupported %s node: %s.", "ShadowsocksR", b64decode(params.remarks) or userinfo[1]))
@@ -359,9 +359,9 @@ local function parse_uri(uri)
 				log(translatef("Skipping unsupported %s format.", "vmess"))
 				return nil
 			-- Unsupported protocols
-			elseif params.net == "kcp" or (params.net == "quic" and (not sing_features.with_quic or notEmpty(params.type) or notEmpty(params.path))) then
+			elseif uri.net == "kcp" or (uri.net == "quic" and (not sing_features.with_quic or (notEmpty(uri.type) and uri.type ~= "none") or notEmpty(uri.path))) then
 				log(translatef("Skipping unsupported %s node: %s.", "VMess", notEmpty(uri.ps) or uri.add))
-				if params.net == "quic" and not sing_features.with_quic then
+				if uri.net == "quic" and not sing_features.with_quic then
 					log(translatef("Please rebuild sing-box with %s support!", "QUIC"))
 				end
 				return nil
@@ -403,6 +403,10 @@ local function parse_uri(uri)
 	end
 
 	if notEmpty(config) then
+		if config.address then
+			config.address = config.address:gsub("%[?%]?", "")
+		end
+
 		if not (validation.host(config.address) and validation.port(config.port)) then
 			log(translatef("Skipping invalid %s node: %s.", config.type, config.label or "NULL"))
 			return nil

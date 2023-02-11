@@ -8,7 +8,6 @@
 'use strict';
 
 import { access, error, lstat, mkstemp, popen, readfile, writefile } from 'fs';
-import { cursor } from 'uci';
 
 /* Kanged from ucode/luci */
 function shellquote(s) {
@@ -112,7 +111,7 @@ const methods = {
 				return writeCertificate(filename, true);
 				break;
 			default:
-				return { result: false, error: 'invalid certificate filename' };
+				return { result: false, error: 'illegal cerificate filename' };
 				break;
 			}
 		}
@@ -168,7 +167,7 @@ const methods = {
 				const exit_code = system(`${HP_DIR}/scripts/update_resources.sh ${type}`);
 				return { status: exit_code };
 			} else
-				return { status: 255, error: "argument 'type' is empty" };
+				return { status: 255, error: 'illegal type' };
 		}
 	}
 };
