@@ -56,7 +56,7 @@ export function calcStringMD5(str) {
 	if (!str || type(str) !== 'string')
 		return null;
 
-	const output = executeCommand(`echo -n ${shellQuote(urlencode(str))} | md5sum | awk '{print $1}'`) || {};
+	const output = executeCommand(`echo -n ${shellQuote(str)} | md5sum | awk '{print $1}'`) || {};
 	return trim(output.stdout);
 };
 
@@ -108,6 +108,14 @@ export function validateHostname(hostname) {
 		(match(hostname, /^[a-zA-Z0-9_][a-zA-Z0-9_%-.]*[a-zA-Z0-9]$/) &&
 			match(hostname, /[^0-9.]/)));
 };
+
+export function validation(datatype, data) {
+	if (!datatype || !data)
+		return null;
+
+	const ret = system(`/sbin/validate_data ${shellQuote(datatype)} ${shellQuote(data)} 2>/dev/null`);
+	return ret;
+};
 /* String helper end */
 
 /* String parser start */
@@ -125,4 +133,9 @@ export function decodeBase64Str(str) {
 
 	return b64dec(str);
 };
+
+export function urlparse(url) {
+	if (type(url) !== 'string')
+		return null;
+}
 /* String parser start */
