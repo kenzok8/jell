@@ -10,7 +10,8 @@
 'require uci';
 'require ui';
 'require view';
-'require tools.homeproxy as hp';
+
+'require homeproxy as hp';
 'require tools.widgets as widgets';
 
 function allowInsecureConfirm(ev, section_id, value) {
@@ -167,6 +168,8 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocol */
 			if (params.get('type') === 'kcp')
 				return null;
+			else if (params.get('type') === 'quic' && ((params.get('quicSecurity') && params.get('quicSecurity') !== 'none' || !features.with_quic)))
+				return null;
 			/* Check if uuid and type exist */
 			if (!url.username || !params.get('type'))
 				return null;
@@ -195,7 +198,7 @@ function parseShareLink(uri, features) {
 				}
 				break;
 			case 'ws':
-				config.ws_host = config.tls !== '1' ? (params.get('host') ? decodeURIComponent(params.get('host')) : null) : null;
+				config.ws_host = (config.tls !== '1' && params.get('host')) ? decodeURIComponent(params.get('host')) : null;
 				config.ws_path = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
 					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';
@@ -219,7 +222,7 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocols */
 			else if (uri.net === 'kcp')
 				return null;
-			else if (uri.net === 'quic' && ((uri.type && uri.type !== 'none') || uri.path || !features.with_quic))
+			else if (uri.net === 'quic' && ((uri.type && uri.type !== 'none') || !features.with_quic))
 				return null;
 			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			 * else if (uri.aid && parseInt(uri.aid) !== 0)
@@ -272,7 +275,7 @@ function parseShareLink(uri, features) {
 		else if (!config.label)
 			config.label = config.address + ':' + config.port;
 
-		config.address = config.address.replace(/\[|\]/, '');
+		config.address = config.address.replace(/\[|\]/g, '');
 	}
 
 	return config;
@@ -1057,7 +1060,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.taboption('subscription', form.DynamicList, 'filter_keywords', _('Filter keywords'),
-			_('Drop/keep nodes that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
+			_('Drop/keep nodes that contain the specific keywords. <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions">Regex</a> is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 		o.rmempty = false;
 
@@ -1096,7 +1099,7 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
-			return fs.exec('/etc/homeproxy/scripts/update_subscribe.lua').then((res) => {
+			return fs.exec('/etc/homeproxy/scripts/update_subscriptions.uc').then((res) => {
 				return location.reload();
 			}).catch((err) => {
 				ui.addNotification(null, E('p', _('An error occurred during updating subscriptions: %s').format(err)));

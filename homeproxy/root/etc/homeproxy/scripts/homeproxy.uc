@@ -5,7 +5,7 @@
  */
 
 import { mkstemp } from 'fs';
-import { urldecode, urlencode, urldecode_params } from 'luci.http';
+import { urldecode, urldecode_params } from 'luci.http';
 
 /* Global variables start */
 export const HP_DIR = '/etc/homeproxy';
@@ -56,7 +56,7 @@ export function calcStringMD5(str) {
 	if (!str || type(str) !== 'string')
 		return null;
 
-	const output = executeCommand(`echo -n ${shellQuote(str)} | md5sum | awk '{print $1}'`) || {};
+	const output = executeCommand(`/bin/echo -n ${shellQuote(str)} | /usr/bin/md5sum | /usr/bin/awk '{print $1}'`) || {};
 	return trim(output.stdout);
 };
 
@@ -64,7 +64,7 @@ export function CURL(url) {
 	if (!url || type(url) !== 'string')
 		return null;
 
-	const output = executeCommand(`curl -fsL --connect-timeout '10' --retry '3' ${shellQuote(url)}`) || {};
+	const output = executeCommand(`/usr/bin/curl -fsL --connect-timeout '10' --retry '3' ${shellQuote(url)}`) || {};
 	return trim(output.stdout);
 };
 /* Utilities end */
@@ -134,8 +134,80 @@ export function decodeBase64Str(str) {
 	return b64dec(str);
 };
 
-export function urlparse(url) {
+export function parseURL(url) {
 	if (type(url) !== 'string')
 		return null;
-}
+
+	const services = {
+		http: '80',
+		https: '443'
+	};
+
+	const objurl = {};
+
+	objurl.href = url;
+
+	url = replace(url, /#(.+)$/, (_, val) => {
+		objurl.hash = val;
+		return '';
+	});
+
+	url = replace(url, /^(\w[A-Za-z0-9\+\-\.]+):/, (_, val) => {
+		objurl.protocol = val;
+		return '';
+	});
+
+	url = replace(url, /\?(.+)/, (_, val) => {
+		objurl.search = val;
+		objurl.searchParams = urldecode_params(val);
+		return '';
+	});
+
+	url = replace(url, /^\/\/([^\/]+)/, (_, val) => {
+		val = replace(val, /^([^@]+)@/, (_, val) => {
+			objurl.userinfo = val;
+			return '';
+		});
+
+		val = replace(val, /:(\d+)$/, (_, val) => {
+			objurl.port = val;
+			return '';
+		});
+
+		if (validation('ip4addr', val) === 0 ||
+		    validation('ip6addr', replace(val, /\[|\]/g, '')) === 0 ||
+		    validation('hostname', val) === 0)
+			objurl.hostname = val;
+
+		return '';
+	});
+
+	objurl.pathname = url || '/';
+
+	if (!objurl.protocol || !objurl.hostname)
+		return null;
+
+	if (objurl.userinfo) {
+		objurl.userinfo = replace(objurl.userinfo, /:([^:]+)$/, (_, val) => {
+			objurl.password = val;
+			return '';
+		});
+
+		if (match(objurl.userinfo, /^[A-Za-z0-9\+\-\_\.]+$/)) {
+			objurl.username = objurl.userinfo;
+			delete objurl.userinfo;
+		} else {
+			delete objurl.userinfo;
+			delete objurl.password;
+		}
+	};
+
+	if (!objurl.port)
+		objurl.port = services[objurl.protocol];
+
+	objurl.host = objurl.hostname + (objurl.port ? `:${objurl.port}` : '');
+	objurl.origin = `${objurl.protocol}://${objurl.host}`;
+
+	return objurl;
+};
 /* String parser start */

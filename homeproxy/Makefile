@@ -6,16 +6,14 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-homeproxy
 PKG_VERSION:=1.0-dev-testing1
-PKG_RELEASE:=24
+PKG_RELEASE:=25
 
 LUCI_TITLE:=The modern ImmortalWrt proxy platform for ARM64/AMD64
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
 	+sing-box \
 	+@SING_BOX_BUILD_GVISOR \
-	+curl \
-	+luci-lua-runtime \
-	+lua-neturl
+	+curl
 
 define Package/luci-app-homeproxy/conffiles
 /etc/config/homeproxy

@@ -1,21 +1,21 @@
 -- Copyright (C) 2018-2020 L-WRT Team
--- Copyright (C) 2021-2022 xiaorouji
+-- Copyright (C) 2021-2023 xiaorouji
 
 module("luci.controller.passwall", package.seeall)
-local api = require "luci.model.cbi.passwall.api.api"
+local api = require "luci.passwall.api"
 local appname = api.appname
 local ucic = luci.model.uci.cursor()
 local http = require "luci.http"
 local util = require "luci.util"
 local i18n = require "luci.i18n"
-local brook = require("luci.model.cbi." .. appname ..".api.brook")
-local v2ray = require("luci.model.cbi." .. appname ..".api.v2ray")
-local xray = require("luci.model.cbi." .. appname ..".api.xray")
-local trojan_go = require("luci.model.cbi." .. appname ..".api.trojan_go")
-local hysteria = require("luci.model.cbi." .. appname ..".api.hysteria")
+local brook = require("luci.passwall.brook")
+local v2ray = require("luci.passwall.v2ray")
+local xray = require("luci.passwall.xray")
+local trojan_go = require("luci.passwall.trojan_go")
+local hysteria = require("luci.passwall.hysteria")
 
 function index()
-	appname = require "luci.model.cbi.passwall.api.api".appname
+	appname = require "luci.passwall.api".appname
 	entry({"admin", "services", appname}).dependent = true
 	entry({"admin", "services", appname, "reset_config"}, call("reset_config")).leaf = true
 	entry({"admin", "services", appname, "show"}, call("show_menu")).leaf = true
@@ -119,11 +119,19 @@ end
 function autoswitch_add_node()
 	local key = luci.http.formvalue("key")
 	if key and key ~= "" then
-		for k, e in ipairs(api.get_valid_nodes()) do
-			if e.node_type == "normal" and e["remark"]:find(key) then
-				luci.sys.call(string.format("uci -q del_list passwall.@auto_switch[0].tcp_node='%s' && uci -q add_list passwall.@auto_switch[0].tcp_node='%s'", e.id, e.id))
+		local new_list = ucic:get(appname, "@auto_switch[0]", "tcp_node") or {}
+		for i = #new_list, 1, -1 do
+			if (ucic:get(appname, new_list[i], "remarks") or ""):find(key) then
+				table.remove(new_list, i)
 			end
 		end
+		for k, e in ipairs(api.get_valid_nodes()) do
+			if e.node_type == "normal" and e["remark"]:find(key) then
+				table.insert(new_list, e.id)
+			end
+		end
+		ucic:set_list(appname, "@auto_switch[0]", "tcp_node", new_list)
+		ucic:commit(appname)
 	end
 	luci.http.redirect(api.url("auto_switch"))
 end
@@ -131,11 +139,14 @@ end
 function autoswitch_remove_node()
 	local key = luci.http.formvalue("key")
 	if key and key ~= "" then
-		for k, e in ipairs(ucic:get(appname, "@auto_switch[0]", "tcp_node") or {}) do
-			if e and (ucic:get(appname, e, "remarks") or ""):find(key) then
-				luci.sys.call(string.format("uci -q del_list passwall.@auto_switch[0].tcp_node='%s'", e))
+		local new_list = ucic:get(appname, "@auto_switch[0]", "tcp_node") or {}
+		for i = #new_list, 1, -1 do
+			if (ucic:get(appname, new_list[i], "remarks") or ""):find(key) then
+				table.remove(new_list, i)
 			end
 		end
+		ucic:set_list(appname, "@auto_switch[0]", "tcp_node", new_list)
+		ucic:commit(appname)
 	end
 	luci.http.redirect(api.url("auto_switch"))
 end
@@ -331,11 +342,12 @@ function delete_select_nodes()
 	local ids = luci.http.formvalue("ids")
 	local auto_switch_tcp_node_list = ucic:get(appname, "@auto_switch[0]", "tcp_node") or {}
 	string.gsub(ids, '[^' .. "," .. ']+', function(w)
-		for k, v in ipairs(auto_switch_tcp_node_list) do
-			if v == w then
-				luci.sys.call(string.format("uci -q del_list passwall.@auto_switch[0].tcp_node='%s'", w))
+		for i = #auto_switch_tcp_node_list, 1, -1 do
+			if w == auto_switch_tcp_node_list[i] then
+				table.remove(auto_switch_tcp_node_list, i)
 			end
 		end
+		ucic:set_list(appname, "@auto_switch[0]", "tcp_node", auto_switch_tcp_node_list)
 		if (ucic:get(appname, "@global[0]", "tcp_node") or "nil") == w then
 			ucic:set(appname, '@global[0]', "tcp_node", "nil")
 		end
