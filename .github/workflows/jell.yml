@@ -1,8 +1,5 @@
 #
 # This is free software, lisence use MIT.
-# 
-# 
-#
 
 name: Merge-jell
 on:
@@ -383,6 +380,9 @@ jobs:
             sed -i "s/pkg_release:=.*/pkg_release:=$(git rev-list --count main $pkg)/" $pkg/makefile || true
           fi
         done
+        git reset --soft HEAD^
+        git add .
+        git commit -m "update $(date +%Y-%m-%d" "%H:%M:%S)"
         git push -f
 
     - name: Delete workflow runs
