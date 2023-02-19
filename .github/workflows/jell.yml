@@ -376,14 +376,14 @@ jobs:
 
     - name: update jell
       run: |
-      git add .
-      git commit -m "update $(date +%y-%m-%d" "%h:%m:%s)"
-      for pkg in $(git diff-tree --no-commit-id --name-only head); do
-        if [ "$(grep "pkg_release" $pkg/makefile)" ]; then
-          sed -i "s/pkg_release:=.*/pkg_release:=$(git rev-list --count main $pkg)/" $pkg/makefile || true
-        fi
-      done
-      git push -f
+        git add .
+        git commit -m "update $(date +%y-%m-%d" "%h:%m:%s)"
+        for pkg in $(git diff-tree --no-commit-id --name-only head); do
+          if [ "$(grep "pkg_release" $pkg/makefile)" ]; then
+            sed -i "s/pkg_release:=.*/pkg_release:=$(git rev-list --count main $pkg)/" $pkg/makefile || true
+          fi
+        done
+        git push -f
 
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@main
