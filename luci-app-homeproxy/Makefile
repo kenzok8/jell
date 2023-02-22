@@ -4,10 +4,6 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-homeproxy
-PKG_VERSION:=1.0-usertesting-0222
-PKG_RELEASE:=28
-
 LUCI_TITLE:=The modern ImmortalWrt proxy platform for ARM64/AMD64
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
