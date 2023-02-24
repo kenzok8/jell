@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netmaker
 PKG_VERSION:=0.9.4
-PKG_RELEASE:=89
+PKG_RELEASE:=90
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/gravitl/netmaker.git
