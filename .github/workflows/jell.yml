@@ -59,6 +59,7 @@ jobs:
         rm -rf $1
         }
         (
+        git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
         git_clone https://github.com/kiddin9/openwrt-bypass && mvdir openwrt-bypass
         git_clone https://github.com/kiddin9/luci-app-dnsfilter
         git_clone https://github.com/kiddin9/aria2
@@ -88,11 +89,15 @@ jobs:
         git_clone https://github.com/shanglanxin/luci-app-homebridge
         git_clone https://github.com/jerrykuku/luci-theme-argon
         git_clone https://github.com/jerrykuku/luci-app-argon-config
+        git_clone https://github.com/jerrykuku/luci-app-go-aliyundrive-webdav        
         git_clone https://github.com/jerrykuku/luci-app-vssr
         git_clone https://github.com/jerrykuku/luci-app-ttnode
         git_clone https://github.com/jerrykuku/luci-app-jd-dailybonus
         git_clone https://github.com/sirpdboy/luci-app-advanced
         git_clone https://github.com/sirpdboy/luci-app-autotimeset
+        git_clone https://github.com/sirpdboy/luci-app-lucky oplucky && mv -f oplucky/*/ ./ && rm -rf oplucky
+        git_clone https://github.com/sirpdboy/luci-app-partexp
+        git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go && mvdir ddns-go
         git_clone https://github.com/sirpdboy/netspeedtest && mv -n netspeedtest/luci-app-netspeedtest ./ ; rm -rf netspeedtest
         ) &
         (
@@ -112,7 +117,6 @@ jobs:
         git_clone https://github.com/esirplayground/LingTiGameAccforked-daapd
         git_clone https://github.com/esirplayground/luci-app-LingTiGameAcc
         git_clone https://github.com/zxlhhyccc/luci-app-v2raya
-        git_clone https://github.com/jerrykuku/luci-app-go-aliyundrive-webdav
         git_clone https://github.com/SSSSSimon/tencentcloud-openwrt-plugin-ddns && mv -n tencentcloud-openwrt-plugin-ddns/tencentcloud_ddns ./luci-app-tencentddns; rm -rf tencentcloud-openwrt-plugin-ddns
         git_clone https://github.com/Tencent-Cloud-Plugins/tencentcloud-openwrt-plugin-cos && mv -n tencentcloud-openwrt-plugin-cos/tencentcloud_cos ./luci-app-tencentcloud-cos; rm -rf tencentcloud-openwrt-plugin-cos
         git_clone https://github.com/doushang/luci-app-shortcutmenu luci-shortcutmenu && mv -n luci-shortcutmenu/luci-app-shortcutmenu ./ ; rm -rf luci-shortcutmenu
@@ -134,7 +138,6 @@ jobs:
         git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
         ) &
         (
-        git_clone https://github.com/fullcone-nat-nftables/nft-fullcone
         git_clone https://github.com/KyleRicardo/MentoHUST-OpenWrt-ipk
         git_clone https://github.com/frainzy1477/luci-app-clash
         git_clone https://github.com/yichya/openwrt-cloudflared
@@ -168,7 +171,6 @@ jobs:
         git_clone https://github.com/kenzok78/luci-app-argonne-config
         git_clone https://github.com/kenzok8/wall && mvdir wall
         git_clone https://github.com/pymumu/luci-app-smartdns
-        git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go && mvdir ddns-go
         git_clone https://github.com/CHN-beta/rkp-ipid
         git_clone https://github.com/Erope/openwrt_nezha nezha && mvdir nezha
         # git_clone https://github.com/wiwizcom/WiFiPortal && mvdir WiFiPortal
@@ -178,51 +180,67 @@ jobs:
         git_clone https://github.com/immortalwrt/homeproxy
         git_clone https://github.com/mchome/openwrt-dogcom
         git_clone https://github.com/mchome/luci-app-dogcom
+        git_clone https://github.com/koshev-msk/modemfeed && mv -n modemfeed/*/*/* ./ && rm -rf modemfeed
+        git_clone https://github.com/zzsj0928/luci-app-pushbot
+        git_clone https://github.com/shanglanxin/luci-app-homebridge
+        git_clone https://github.com/ykxVK8yL5L/luci-app-synology synology && mv -n synology/luci-app-synology ./ && rm -rf synology
+        git_clone https://github.com/htynkn/openwrt-switch-lan-play && mv -n openwrt-switch-lan-play/package/* ./ && rm -rf openwrt-switch-lan-play
         git_clone https://github.com/jerrykuku/lua-maxminddb
+        git_clone https://github.com/Ausaci/luci-app-nat6-helper
+        git_clone https://github.com/honwen/luci-app-shadowsocks-rust        
+        git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages        
         ) &
         (
-        svn export https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-adguardhome
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
         svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-bypass
         svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
         svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/luci-app-irqbalance
-        svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-control-speedlimit
+        svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-control-speedlimit        
         ) &
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" "leanpkg" net/miniupnpd net/mwan3 multimedia/UnblockNeteaseMusic-Go \
-        multimedia/UnblockNeteaseMusic net/amule net/baidupcs-web net/frp multimedia/gmediarender net/go-aliyundrive-webdav \
+        multimedia/UnblockNeteaseMusic net/amule net/antileech net/baidupcs-web net/frp multimedia/gmediarender net/go-aliyundrive-webdav \
         net/qBittorrent-static net/qBittorrent net/transmission net/phtunnel libs/qtbase libs/qttools libs/rblibtorrent \
-        net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/nps net/tcpping net/redsocks2 net/netatalk net/pgyvpn
+        net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/nps net/tcpping net/netatalk net/pgyvpn
         mv -f miniupnpd miniupnpd-iptables
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/packages" "oppackages" \
         utils/cgroupfs-mount utils/coremark utils/watchcat utils/dockerd net/nginx net/uwsgi net/ddns-scripts net/smartdns \
-        net/ariang admin/netdata net/transmission-web-control
+        net/ariang admin/netdata net/transmission-web-control net/rp-pppoe net/tailscale
+        ) &
+        (
+        git_sparse_clone master "https://github.com/openwrt/packages" "oppackages1" \
+        net/basicstation net/bpfcountd net/gsocket net/openappid net/telnet-bsd net/wifi-presence net/xfrpc
+        git_sparse_clone master "https://github.com/openwrt/luci" "opluci1" \
+        applications/luci-app-natmap
         ) &
         (
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/openwrt" "openwrt" \
-        package/base-files package/network/config/firewall4 package/network/config/firewall package/system/opkg package/libs/mbedtls package/network/services/ppp \
+        package/base-files package/network/config/firewall4 package/network/config/firewall package/system/opkg package/network/services/ppp \
         package/network/services/dnsmasq package/libs/openssl
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/luci" "opluci" applications/luci-app-attendedsysupgrade applications/luci-app-aria2 \
         applications/luci-app-ddns applications/luci-app-acme applications/luci-app-opkg applications/luci-app-firewall \
-        applications/luci-app-ksmbd applications/luci-app-samba4 applications/luci-app-watchcat applications/luci-app-upnp modules/luci-base modules/luci-mod-network \
+        applications/luci-app-ksmbd applications/luci-app-samba4 applications/luci-app-watchcat applications/luci-app-upnp
+        ) &
+        (
+        git_sparse_clone2 396f4048bd1f4cae7cb6f085d360081d81ad2d9a "https://github.com/openwrt/luci" "opluci2" \
+        modules/luci-base modules/luci-mod-network \
         modules/luci-mod-status modules/luci-mod-system
         ) &
         (
-        git_sparse_clone master "https://github.com/immortalwrt/packages" "immpkgs" net/mwol \
-        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest \
-        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/gowebdav net/xfrpc \
+        git_sparse_clone master "https://github.com/immortalwrt/packages" "immpkgs" net/mwol net/n2n \
+        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived net/microsocks \
+        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/gowebdav \
         admin/bpytop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 \
-        utils/cpulimit utils/filebrowser utils/cups net/udp2raw
+        utils/cpulimit utils/filebrowser utils/cups net/udp2raw net/msd_lite
         git_sparse_clone master "https://github.com/xiaoqingfengATGH/feeds-xiaoqingfeng" "xiaoqingfeng" homeredirect luci-app-homeredirect
         ) &
         (
         git_sparse_clone develop "https://github.com/Ysurac/openmptcprouter-feeds" "openmptcp" luci-app-snmpd \
         luci-app-packet-capture luci-app-mail msmtp
         git_sparse_clone master "https://github.com/immortalwrt/immortalwrt" "immortal" package/kernel/rtl88x2bu \
-        package/kernel/r8168 package/kernel/rtl8821cu package/emortal/autocore  package/emortal/automount package/network/utils/fullconenat \
-        package/network/utils/nftables package/utils/mhz package/libs/libnftnl package/firmware/wireless-regdb
+        package/kernel/r8168 package/kernel/rtl8821cu package/kernel/rtl8189es package/emortal/autocore  package/emortal/automount package/network/utils/fullconenat package/network/utils/fullconenat-nft \
+        package/network/utils/nftables package/utils/mhz package/libs/mbedtls package/libs/libnftnl package/firmware/wireless-regdb
         ) &
-
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" "leluci" applications libs/luci-lib-fs
         mv -f applications luciapp
         rm -rf luciapp/{luci-app-qbittorrent,luci-app-cpufreq}
@@ -240,14 +258,18 @@ jobs:
     - name: Delete duplicated packages
       run: |
         shopt -s extglob
-        mv -n luciapp/!(luci-app-noddos|luci-app-cshark|luci-app-dnscrypt-proxy|luci-app-https-dns-proxy) ./ ; rm -Rf luciapp
+        mv -n luciapp/!(luci-app-noddos|luci-app-cshark|luci-app-dnscrypt-proxy|luci-app-https-dns-proxy|luci-app-ssr-mudb-server|luci-app-ledtrig-*) ./ ; rm -Rf luciapp
         mv -n lean/* ./ ; rm -Rf lean
         mv -n liep/* ./ ; rm -Rf liep
         mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
-        rename -f "s/Makefile.k/Makefile/" .github/diy/packages/*/Makefile.k
-        cp -rf .github/diy/packages/* ./ || true
-        rename -f "s/Makefile/Makefile.k/" .github/diy/packages/*/Makefile
         rm -Rf */.git
+        for pkg in $(ls -d .github/diy/packages/*); do
+          mv -f $pkg/Makefile.k $pkg/Makefile >/dev/null 2>&1 || true
+        done
+        cp -rf .github/diy/packages/* ./ || true
+        for pkg in $(ls -d .github/diy/packages/*); do
+          mv -f $pkg/Makefile $pkg/Makefile.k >/dev/null 2>&1 || true
+        done
 
     - name: SSH connection to Actions
       uses: kenzok78/debugger-action@master
@@ -319,6 +341,8 @@ jobs:
         ) &
 
         (
+        rm -rf luci-app-partexp/po/zh_Hans
+        cp -f .github/diy/packages/files/usr/lib/lua/luci/view/admin_status/index/links.htm my-default-settings/files/usr/lib/lua/luci/view/admin_status/index/links.htm        
         bash .github/diy/create_acl_for_luci.sh -a >/dev/null 2>&1 || true
         bash .github/diy/convert_translation.sh -a >/dev/null 2>&1 || true
         
@@ -355,6 +379,9 @@ jobs:
         sed -i 's/ if aarch64||arm||i386||x86_64//' luci-app-ssr-plus/Makefile
         sed -i 's/PKG_SOURCE_DATE:=2021/PKG_SOURCE_DATE:=2023/' netifd/Makefile
         sed -i 's/PKG_SOURCE_DATE:=2/PKG_SOURCE_DATE:=3/' transmission-web-control/Makefile
+        mkdir -p luci-app-passwall/root/www/luci-static/passwall
+        cp -rf luci-app-bypass/root/www/luci-static/bypass/* luci-app-passwall/root/www/luci-static/passwall/
+        cp -rf luci-app-bypass/root/usr/share/bypass/GeoLite2-Country.mmdb luci-app-passwall/root/usr/share/passwall/
         
         sed -i \
           -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' \
