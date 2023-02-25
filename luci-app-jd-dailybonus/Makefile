@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-jd-dailybonus
 PKG_VERSION:=1.0.6
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 LUCI_TITLE:=Luci for JD dailybonus Script
 LUCI_PKGARCH:=all

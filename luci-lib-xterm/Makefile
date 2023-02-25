@@ -13,7 +13,7 @@ LUCI_DEPENDS:=
 
 PKG_LICENSE:=MIT
 PKG_VERSION:=4.18.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_MAINTAINER:=jjm2473 <jjm2473@gmail.com>
 
 include $(TOPDIR)/feeds/luci/luci.mk

@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=accel-ppp
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 PKG_VERSION:=1.11.2
 
 PKG_SOURCE_PROTO:=git

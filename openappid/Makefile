@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=openappid
 PKG_VERSION:=20220617
 URL_CODE:=26425
-PKG_RELEASE:=0
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.snort.org/downloads/openappid/$(URL_CODE)?
