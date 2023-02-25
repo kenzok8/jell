@@ -24,7 +24,7 @@
 - fix auth_chain_a UDP bug
 - add "additional_ports_only"
 - add interface legendsockssr
-- run with newest python3 version
+- run with newest python version
 - parse comment in hosts
 - update mujson_mgr
 - add cymysql setup script

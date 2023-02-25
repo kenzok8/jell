@@ -1,7 +1,6 @@
 module("luci.controller.baidupcs-web", package.seeall)
 
 function index()
-	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
 	if not nixio.fs.access("/etc/config/baidupcs-web") then
 		return
 	end

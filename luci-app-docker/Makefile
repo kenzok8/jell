@@ -11,6 +11,8 @@ LUCI_DEPENDS:=+dockerd +cgroupfs-mount +docker +e2fsprogs +fdisk
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-docker
+PKG_VERSION:=1
+PKG_RELEASE:=3
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

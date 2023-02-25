@@ -235,15 +235,24 @@ do_save_conffiles() {
 	ask_bool 0 "Edit config file list" && vi "$CONFFILES"
 
 	if [ "$SAVE_INSTALLED_PKGS" -eq 1 ]; then
-		. /etc/profile.d/opkg.sh && opkg save
-		[ -f /rom/etc/uci-defaults/zz-asu-defaults ] && {
-		 cp -f /rom/etc/uci-defaults/zz-asu-defaults /etc/uci-defaults/zz-asu-defaults
-		 echo "/etc/uci-defaults/zz-asu-defaults" >> $CONFFILES
-		}
-	else
-		uci -q del opkg.auto
-		uci -q del opkg.custom
-		uci commit opkg
+		echo "${INSTALLED_PACKAGES}" >> "$CONFFILES"
+		mkdir -p "$ETCBACKUP_DIR"
+		# Avoid touching filesystem on each backup
+		RAMFS="$(mktemp -d -t sysupgrade.XXXXXX)"
+		mkdir -p "$RAMFS/upper" "$RAMFS/work"
+		mount -t overlay overlay -o lowerdir=$ETCBACKUP_DIR,upperdir=$RAMFS/upper,workdir=$RAMFS/work $ETCBACKUP_DIR &&
+			UMOUNT_ETCBACKUP_DIR=1 || {
+				echo "Cannot mount '$ETCBACKUP_DIR' as tmpfs to avoid touching disk while saving the list of installed packages." >&2
+				ask_bool 0 "Abort" && exit
+			}
+
+		# Format: pkg-name<TAB>{rom,overlay,unkown}
+		# rom is used for pkgs in /rom, even if updated later
+		find /usr/lib/opkg/info -name "*.control" \( \
+			\( -exec test -f /rom/{} \; -exec echo {} rom \; \) -o \
+			\( -exec test -f /overlay/upper/{} \; -exec echo {} overlay \; \) -o \
+			\( -exec echo {} unknown \; \) \
+			\) | sed -e 's,.*/,,;s/\.control /\t/' > ${INSTALLED_PACKAGES}
 	fi
 
 	v "Saving config files..."

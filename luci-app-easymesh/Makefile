@@ -9,6 +9,8 @@ LUCI_DEPENDS:=+kmod-cfg80211 +batctl-default +kmod-batman-adv +wpad-openssl +daw
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-easymesh
+PKG_VERSION:=2.0
+PKG_RELEASE:=3
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

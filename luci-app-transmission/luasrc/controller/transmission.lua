@@ -4,7 +4,6 @@
 module("luci.controller.transmission", package.seeall)
 
 function index()
-	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
 	if not nixio.fs.access("/etc/config/transmission") then
 		return
 	end

@@ -7,6 +7,8 @@ include $(TOPDIR)/rules.mk
 LUCI_TITLE:=Luci for irqbalance
 LUCI_DEPENDS:=+irqbalance
 LUCI_PKGARCH:=all
+PKG_VERSION:=V22.6.4
+PKG_RELEASE:=5
 
 define Package/luci-app-irqbalance/preinst
 exit 0

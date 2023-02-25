@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python3
+﻿#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
 def load(name):

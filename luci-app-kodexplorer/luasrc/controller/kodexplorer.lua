@@ -6,7 +6,6 @@ local http = require "luci.http"
 local api = require "luci.model.cbi.kodexplorer.api"
 
 function index()
-	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
 	if not nixio.fs.access("/etc/config/kodexplorer") then
 		return
 	end

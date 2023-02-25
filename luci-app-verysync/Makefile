@@ -10,6 +10,8 @@ LUCI_DEPENDS:=+verysync
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-verysync
+PKG_VERSION:=1.0
+PKG_RELEASE:=2
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

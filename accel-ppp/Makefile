@@ -13,7 +13,7 @@ PKG_VERSION:=1.11.2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL=https://github.com/xebd/accel-ppp.git
-PKG_SOURCE_VERSION:=cc8f2bada5635768d425e2fa2bafb095acda8ca9
+PKG_SOURCE_VERSION:=04aaeb9bb66c7150bcfea7aadf48663624676316
 
 PKG_MAINTAINER:=Alex Paraskeva <sim201010@gmail.com>
 PKG_LICENSE:=GPL-2.0

@@ -12,7 +12,7 @@ SERVER=$!
 
 sleep 3
 
-python3 tests/test_udp_src.py
+python tests/test_udp_src.py
 r=$?
 
 kill -s SIGINT $LOCAL

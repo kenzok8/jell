@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
 # Copyright 2015 breakwall
@@ -42,7 +42,7 @@ class MainThread(threading.Thread):
 		self.obj.thread_db_stop()
 
 def main():
-	shell.check_python3()
+	shell.check_python()
 	if False:
 		db_transfer.DbTransfer.thread_db()
 	else:
