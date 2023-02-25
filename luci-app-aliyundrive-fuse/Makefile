@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-aliyundrive-fuse
 PKG_VERSION:=0.1.14
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 PKG_PO_VERSION:=$(PKG_VERSION)-$(PKG_RELEASE)
 
 PKG_LICENSE:=MIT

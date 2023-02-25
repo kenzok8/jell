@@ -11,7 +11,7 @@ LUCI_PKGARCH:=all
 
 PKG_VERSION:=0.6.8-1
 # PKG_RELEASE MUST be empty for luci.mk
-PKG_RELEASE:=23
+PKG_RELEASE:=24
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

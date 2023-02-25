@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 LUCI_TITLE:=LuCI Support for cupsd
 LUCI_DEPENDS:= +cups
 PKG_VERSION:=1.2
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
