@@ -11,7 +11,7 @@ LUCI_DESCRIPTION:=LuCI JS interface for the modemband. The package allows set LT
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+sms-tool +modemband
 PKG_VERSION:=1.0.17-20230223
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

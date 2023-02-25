@@ -4,7 +4,7 @@ LUCI_TITLE:=TelegramBot simple webUI
 LUCI_DEPENDS:=+telegrambot
 PKG_LICENSE:=GPLv3
 PKG_VERSION:=0.0.1
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
