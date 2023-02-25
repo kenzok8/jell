@@ -134,7 +134,7 @@ jobs:
         git_clone https://github.com/linkease/nas-packages && mv -n nas-packages/{network/services/*,multimedia/*} ./; rm -rf nas-packages
         git_clone https://github.com/linkease/nas-packages-luci && mv -n nas-packages-luci/luci/* ./; rm -rf nas-packages-luci
         git_clone https://github.com/linkease/istore && mv -n istore/luci/* ./; rm -rf istore
-        git_clone https://github.com/linkease/openwrt-app-actions
+        git_clone https://github.com/linkease/openwrt-app-actions && mv -n openwrt-app-actions/applications ./;rm -rf openwrt-app-actions
         git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
         ) &
         (
@@ -261,7 +261,6 @@ jobs:
         mv -n luciapp/!(luci-app-noddos|luci-app-cshark|luci-app-dnscrypt-proxy|luci-app-https-dns-proxy|luci-app-ssr-mudb-server|luci-app-ledtrig-*) ./ ; rm -Rf luciapp
         mv -n lean/* ./ ; rm -Rf lean
         mv -n liep/* ./ ; rm -Rf liep
-        mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
         rm -Rf */.git
         for pkg in $(ls -d .github/diy/packages/*); do
           mv -f $pkg/Makefile.k $pkg/Makefile >/dev/null 2>&1 || true
