@@ -10,7 +10,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-easymesh
 PKG_VERSION:=2.0
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

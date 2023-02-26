@@ -12,7 +12,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-frpc
 PKG_VERSION:=1.4
-PKG_RELEASE:=10
+PKG_RELEASE:=11
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
