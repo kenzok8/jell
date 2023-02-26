@@ -11,7 +11,7 @@ LUCI_DESCRIPTION:=LuCI interface for the sms-tool. The user interface supports S
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+sms-tool +kmod-usb-serial +kmod-usb-serial-option +comgt
 PKG_VERSION:=1.9.5-20221207
-PKG_RELEASE:=9
+PKG_RELEASE:=10
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

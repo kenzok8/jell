@@ -3,7 +3,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=1.0.0-20221212
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
 LUCI_TITLE:=LuCI support for Excalidraw
 LUCI_PKGARCH:=all

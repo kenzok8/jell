@@ -12,7 +12,7 @@ LUCI_EXTRA_DEPENDS:=taskd (>=1.0.3-1)
 LUCI_PKGARCH:=all
 
 PKG_VERSION:=1.0.17
-PKG_RELEASE:=7
+PKG_RELEASE:=8
 PKG_MAINTAINER:=jjm2473 <jjm2473@gmail.com>
 
 include $(TOPDIR)/feeds/luci/luci.mk

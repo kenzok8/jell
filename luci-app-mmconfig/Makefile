@@ -4,7 +4,7 @@ LUCI_TITLE:=Configrure modem bands via mmcli utility
 LUCI_DEPENDS:=+modemmanager +luci-compat
 PKG_LICENSE:=GPLv3
 PKG_VERSION:=0.0.5-1
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
 define Package/luci-app-mmconfig/conffiles
 	/etc/config/modemconfig

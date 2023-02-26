@@ -10,7 +10,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=my-default-settings
 PKG_VERSION:=1
-PKG_RELEASE:=39
+PKG_RELEASE:=40
 
 include $(INCLUDE_DIR)/package.mk
 
