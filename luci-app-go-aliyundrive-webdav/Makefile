@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-go-aliyundrive-webdav
 PKG_VERSION:=1.0.2
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_MAINTAINER:=jerrykuku <jerrykuku@qq.com>
 

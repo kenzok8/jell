@@ -8,7 +8,7 @@ LUCI_TITLE:=Luci for irqbalance
 LUCI_DEPENDS:=+irqbalance
 LUCI_PKGARCH:=all
 PKG_VERSION:=V22.6.4
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 define Package/luci-app-irqbalance/preinst
 exit 0

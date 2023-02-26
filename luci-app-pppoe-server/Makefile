@@ -9,7 +9,7 @@ LUCI_TITLE:=LuCI support for PPPoE Server
 LUCI_DEPENDS:=+rp-pppoe-common +rp-pppoe-server
 LUCI_PKGARCH:=all
 PKG_VERSION:=20211223
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
 define Package/luci-app-pppoe-server/preinst
 #!/bin/sh

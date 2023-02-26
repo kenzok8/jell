@@ -9,7 +9,7 @@ LUCI_TITLE:=LuCI support for homebox
 LUCI_DEPENDS:=+homebox
 LUCI_PKGARCH:=all
 PKG_VERSION:=1.0.1-3
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

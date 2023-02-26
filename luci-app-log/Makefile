@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=0.6-2
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 LUCI_TITLE:=Advanced syslog and kernel log (tail, search, etc)
 LUCI_PKGARCH:=all
 PKG_LICENSE:=MIT
