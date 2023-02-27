@@ -134,7 +134,7 @@ jobs:
         git_clone https://github.com/linkease/nas-packages && mv -n nas-packages/{network/services/*,multimedia/*} ./; rm -rf nas-packages
         git_clone https://github.com/linkease/nas-packages-luci && mv -n nas-packages-luci/luci/* ./; rm -rf nas-packages-luci
         git_clone https://github.com/linkease/istore && mv -n istore/luci/* ./; rm -rf istore
-        git_clone https://github.com/linkease/openwrt-app-actions && mv -n openwrt-app-actions/applications ./;rm -rf openwrt-app-actions
+        git_clone https://github.com/linkease/openwrt-app-actions && mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
         git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
         ) &
         (
@@ -346,10 +346,11 @@ jobs:
         sed -i 's/+libcap /+libcap +libcap-bin /' luci-app-openclash/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argon/' luci-app-argon-config/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile
+        sed -i -e 's/nas/system/g' -e 's/NAS/System/g' $(grep -rl 'nas\|NAS' luci-app-fileassistant)
         sed -i 's/+vsftpd$/+vsftpd-alt/' luci-app-vsftpd/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
-        sed -i "/DISTRIB_DESCRIPTION/c\DISTRIB_DESCRIPTION=\"%D %C by Kenzo'\"" base-files/files/etc/openwrt_release
+        sed -i "/DISTRIB_DESCRIPTION/c\DISTRIB_DESCRIPTION=\"%D %C by kenzo'\"" base-files/files/etc/openwrt_release
         sed -i "s/PKG_VERSION:=2/PKG_VERSION:=3/" mwan3/Makefile
         sed -i "s/default n/default y/" dockerd/Config.in
         sed -i "/+uhttpd/d" ariang/Makefile
@@ -375,6 +376,7 @@ jobs:
         
         sed -i \
           -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' \
+          -e 's?2. Clash For OpenWRT?3. Applications?' \
           -e "s/\(PKG_HASH\|PKG_MD5SUM\|PKG_MIRROR_HASH\).*/\1:=skip/" \
           -e 's?\.\./\.\./luci.mk?$(TOPDIR)/feeds/luci/luci.mk?' \
           -e 's/ca-certificates/ca-bundle/' \
@@ -391,9 +393,9 @@ jobs:
       run: |
         git add .
         git commit -m "update $(date +%y-%m-%d" "%h:%m:%s)"
-        for pkg in $(git diff-tree --no-commit-id --name-only head); do
-          if [ "$(grep "pkg_release" $pkg/makefile)" ]; then
-            sed -i "s/pkg_release:=.*/pkg_release:=$(git rev-list --count main $pkg)/" $pkg/makefile || true
+        for pkg in $(git diff-tree --no-commit-id --name-only HEAD); do
+          if [ "$(grep "PKG_RELEASE" $pkg/Makefile)" ]; then
+            sed -i "s/PKG_RELEASE:=.*/PKG_RELEASE:=$(git rev-list --count main $pkg)/" $pkg/Makefile || true
           fi
         done
         git reset --soft HEAD^
