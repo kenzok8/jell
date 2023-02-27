@@ -12,7 +12,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-ssrserver-python
 PKG_VERSION:=3.2.0
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

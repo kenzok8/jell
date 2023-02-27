@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-socat
 PKG_VERSION:=20200824
-PKG_RELEASE:=7
+PKG_RELEASE:=8
 
 PKG_MAINTAINER:=Lienol <lawlienol@gmail.com>
 

@@ -12,7 +12,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-arpbind
 PKG_VERSION:=1
-PKG_RELEASE:=9
+PKG_RELEASE:=10
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

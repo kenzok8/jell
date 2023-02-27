@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=IstoreX
 PKG_VERSION:=0.5.8
-PKG_RELEASE:=12
+PKG_RELEASE:=13
 LUCI_DEPENDS:=+luci-app-quickstart +luci-app-store +luci-lib-taskd
 LUCI_EXTRA_DEPENDS:=luci-lib-taskd (>=1.0.15)
 LUCI_MINIFY_CSS:=0

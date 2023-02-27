@@ -12,7 +12,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-dnsforwarder
 PKG_VERSION:=3.0.0
-PKG_RELEASE:=7
+PKG_RELEASE:=8
 
 PKG_LICENSE:=GPL-3.0
 PKG_MAINTAINER:=Dennis <openwrt@tossp.com>

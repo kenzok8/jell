@@ -15,7 +15,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-baidupcs-web
 PKG_VERSION:=1.0
-PKG_RELEASE:=10
+PKG_RELEASE:=11
 
 PKG_MAINTAINER:=KFERMercer <KFER.Mercer@gmail.com>
 

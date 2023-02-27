@@ -15,6 +15,7 @@ EXTRA_COMMANDS="rules healthcheck"
 EXTRA_HELP="	rules		Start IPTABLES inject\n	healthcheck	Check if service health"
 CRON_FILE=/etc/crontabs/root
 WATCHDOG_ENDPOINT='accounts.gstatic.com'
+# WATCHDOG_ENDPOINT='cp.cloudflare.com'
 
 DNSMASQDIR=$(sed -n 's+conf-dir=++p' /var/etc/dnsmasq.conf.* 2>/dev/null)
 [ "V$DNSMASQDIR" = "V" ] && DNSMASQDIR=/var/dnsmasq.d
@@ -377,9 +378,15 @@ healthcheck() {
 		retry=${2:-1}
 		timeout=5
 		[ $retry -lt 1 ] && return 1
-		ret_code=$(curl -s --connect-timeout $timeout "$target" -w %{http_code} -o /dev/null | tail -n1)
-		# echo -n "[ $retry $ret_code ] "
-		[ "x$ret_code" = "x200" -o "x$ret_code" = "x204" ] && return 0 || sleep 1 && cat_connect $target $((retry - 1))
+		if which wait4x >/dev/null 2>&1; then # use [wait4x]
+			wait4x http $target || cat_connect $target $((retry - 1))
+		elif which wait-for >/dev/null 2>&1; then # use [wait-for]
+			wait-for -t=10s http --url=$target >/dev/null 2>&1 || cat_connect $target $((retry - 1))
+		else # use [curl]
+			ret_code=$(curl -s --connect-timeout $timeout "$target" -w %{http_code} -o /dev/null | tail -n1)
+			# echo -n "[ $retry $ret_code ] "
+			[ "x$ret_code" = "x200" -o "x$ret_code" = "x204" ] && return 0 || sleep 1 && cat_connect $target $((retry - 1))
+		fi
 	}
 
 	TRPORT=$(uci_get_by_type transparent_proxy local_port 1234)

@@ -6,7 +6,7 @@ LUCI_TITLE:=LuCI support for iPerf3
 LUCI_DEPENDS:=+iperf3
 LUCI_PKGARCH:=all
 PKG_VERSION:=2.0
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
