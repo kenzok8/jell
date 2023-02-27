@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-webd
 PKG_VERSION:=1.3
-PKG_RELEASE:=7
+PKG_RELEASE:=9
 
 LUCI_TITLE:=LuCI support for Webd Netdisk
 LUCI_PKGARCH:=all

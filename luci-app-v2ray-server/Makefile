@@ -11,7 +11,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-v2ray-server
 PKG_VERSION:=13
-PKG_RELEASE:=8
+PKG_RELEASE:=10
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

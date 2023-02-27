@@ -8,7 +8,7 @@ LUCI_TITLE:=LuCI panel for 3ginfo
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+3ginfo-text +luci-compat
 PKG_VERSION:=1.3.3
-PKG_RELEASE:=9
+PKG_RELEASE:=11
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-alist
 PKG_VERSION:=1.0.8
-PKG_RELEASE:=14
+PKG_RELEASE:=16
 
 LUCI_TITLE:=LuCI support for alist
 LUCI_DEPENDS:=+alist +luci-compat

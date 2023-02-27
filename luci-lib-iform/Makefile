@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=1.1.1
-PKG_RELEASE:=9
+PKG_RELEASE:=11
 PKG_MAINTAINER:=xiaobao <xiaobao@linkease.com>
 
 LUCI_TITLE:=LuCI library for json form

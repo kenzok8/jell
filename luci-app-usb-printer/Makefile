@@ -11,7 +11,7 @@ LUCI_DEPENDS:=+p910nd +kmod-usb-printer
 
 PKG_NAME:=luci-app-usb-printer
 PKG_VERSION:=1.0
-PKG_RELEASE:=8
+PKG_RELEASE:=10
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

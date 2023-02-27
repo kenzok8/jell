@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=rp-pppoe
 PKG_VERSION:=3.14
-PKG_RELEASE:=7
+PKG_RELEASE:=9
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://dianne.skoll.ca/projects/rp-pppoe/download

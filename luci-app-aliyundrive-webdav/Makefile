@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-aliyundrive-webdav
 PKG_VERSION:=1.11.0
-PKG_RELEASE:=83
+PKG_RELEASE:=85
 
 PKG_LICENSE:=MIT
 PKG_MAINTAINER:=messense <messense@icloud.com>

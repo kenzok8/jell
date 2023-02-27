@@ -3,7 +3,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=1.1.1-20230108
-PKG_RELEASE:=15
+PKG_RELEASE:=17
 
 LUCI_TITLE:=LuCI support for homeassistant
 LUCI_PKGARCH:=all

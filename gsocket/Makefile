@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gsocket
 PKG_VERSION:=1.4.39
-PKG_RELEASE:=7
+PKG_RELEASE:=9
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/hackerschoice/gsocket/releases/download/v$(PKG_VERSION)/

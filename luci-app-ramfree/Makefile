@@ -10,7 +10,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-ramfree
 PKG_VERSION:=1.0
-PKG_RELEASE:=9
+PKG_RELEASE:=11
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

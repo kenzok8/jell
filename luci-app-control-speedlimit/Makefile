@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-control-speedlimit
 PKG_VERSION:=v4.0.4
-PKG_RELEASE:=7
+PKG_RELEASE:=9
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
