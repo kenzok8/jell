@@ -40,6 +40,7 @@ define Package/qbittorrent
 		+qt5-network \
 		+qt5-sql \
 		+qt5-xml \
+		+qt5-sql \
 		+zlib
 	TITLE:=bittorrent client programmed in C++ / Qt
 	URL:=https://www.qbittorrent.org/
@@ -85,11 +86,14 @@ endif
 
 define Package/qbittorrent/conffiles
 /etc/config/qbittorrent
+/etc/qBittorrent
 endef
 
 define Package/qbittorrent/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/qbittorrent-nox $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/etc/qBittorrent
+	$(INSTALL_DATA) ./files/ipfilter.dat $(1)/etc/qBittorrent/ipfilter.dat
 endef
 
 $(eval $(call BuildPackage,qbittorrent))

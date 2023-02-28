@@ -300,10 +300,13 @@ default_postinst() {
 			if [ "$PKG_UPGRADE" != "1" ]; then
 				"$i" enable
 			fi
-			"$i" start
+			if "$i" enabled; then
+				"$i" start
+			fi
 		fi
 	done
 
+	[ -x /etc/init.d/ucitrack ] && /etc/init.d/ucitrack reload
 	return $ret
 }
 

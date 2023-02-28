@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=automount
 PKG_FLAGS:=nonshared
-PKG_RELEASE:=5
+PKG_RELEASE:=6
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_LINUX_5_10 \
@@ -21,6 +21,8 @@ define Package/automount
   TITLE:=Mount autoconfig hotplug script.
   MAINTAINER:=Lean
   DEPENDS:= \
+    +kmod-usb3 \
+    +kmod-usb2 \
     +block-mount \
     +kmod-usb-storage \
     +kmod-usb-storage-extras \
@@ -58,4 +60,3 @@ define Package/ntfs3-mount/install
 endef
 
 $(eval $(call BuildPackage,automount))
-$(eval $(call BuildPackage,ntfs3-mount))

@@ -6,8 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autocore
-PKG_FLAGS:=nonshared
-PKG_RELEASE:=5
+PKG_RELEASE:=6
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_TARGET_bcm27xx \
@@ -21,6 +20,7 @@ define Package/autocore-arm
   TITLE:=ARM auto core script.
   MAINTAINER:=CN_SZTL
   DEPENDS:=@(arm||aarch64) \
+    +ethtool \
     +TARGET_bcm27xx:bcm27xx-userland \
     +TARGET_bcm53xx:nvram \
     +TARGET_mvebu:mhz

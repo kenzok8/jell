@@ -11,7 +11,7 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-kodexplorer
 PKG_VERSION:=20220109
-PKG_RELEASE:=15
+PKG_RELEASE:=16
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

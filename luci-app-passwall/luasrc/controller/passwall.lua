@@ -20,6 +20,7 @@ function index()
 	entry({"admin", "services", appname, "reset_config"}, call("reset_config")).leaf = true
 	entry({"admin", "services", appname, "show"}, call("show_menu")).leaf = true
 	entry({"admin", "services", appname, "hide"}, call("hide_menu")).leaf = true
+	entry({"admin", "services", appname, "ip"}, call('check_ip')).leaf = true
 	if not nixio.fs.access("/etc/config/passwall") then return end
 	if nixio.fs.access("/etc/config/passwall_show") then
 		e = entry({"admin", "services", appname}, alias("admin", "services", appname, "settings"), _("Pass Wall"), -1)
@@ -203,6 +204,58 @@ function status()
 	end
 	luci.http.prepare_content("application/json")
 	luci.http.write_json(e)
+end
+
+function get_iso(ip)
+    local mm = require 'maxminddb'
+    local db = mm.open('/usr/share/passwall/GeoLite2-Country.mmdb')
+    local res = db:lookup(ip)
+    return string.lower(res:get('country', 'iso_code'))
+end
+
+function get_cname(ip)
+    local mm = require 'maxminddb'
+    local db = mm.open('/usr/share/passwall/GeoLite2-Country.mmdb')
+    local res = db:lookup(ip)
+    return string.lower(res:get('country', 'names', 'zh-CN'))
+end
+
+function check_site(host, port)
+    local nixio = require "nixio"
+    local socket = nixio.socket("inet", "stream")
+    socket:setopt("socket", "rcvtimeo", 2)
+    socket:setopt("socket", "sndtimeo", 2)
+    local ret = socket:connect(host, port)
+    socket:close()
+    return ret
+end
+
+-- 获取当前代理状态 与节点ip
+function check_ip()
+    local e = {}
+    local d = {}
+    local port = 80
+    local ip = luci.sys.exec('curl --retry 3 -m 10 -LfsA "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36" http://api.ipify.org/')
+    d.flag = 'un'
+    d.country = 'Unknown'
+    if (ip ~= '') then
+        local status, code = pcall(get_iso, ip)
+        if (status) then
+            d.flag = code
+        end
+        local status1, country = pcall(get_cname, ip)
+        if (status1) then
+            d.country = country
+        end
+    end
+    e.outboard = ip
+    e.outboardip = d
+    e.baidu = check_site('www.baidu.com', port)
+    e.taobao = check_site('www.taobao.com', port)
+    e.google = check_site('www.google.com', port)
+    e.youtube = check_site('www.youtube.com', port)
+    luci.http.prepare_content('application/json')
+    luci.http.write_json(e)
 end
 
 function haproxy_status()

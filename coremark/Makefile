@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=coremark
 PKG_SOURCE_DATE:=2022-01-03
 PKG_SOURCE_VERSION:=b24e397f7103061b3673261d292a0667bd3bc1b8
-PKG_RELEASE:=12
+PKG_RELEASE:=13
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_DATE).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/eembc/coremark/tar.gz/$(PKG_SOURCE_VERSION)?
@@ -48,14 +48,14 @@ define Package/coremark/config
 	config COREMARK_ENABLE_MULTITHREADING
 		bool "Enable multithreading support"
 		depends on PACKAGE_coremark
-		default n
+		default y
 		help
 			This enables multithreading support
 
 	config COREMARK_NUMBER_OF_THREADS
 		int "Number of threads"
 		depends on COREMARK_ENABLE_MULTITHREADING
-		default 2
+		default 10
 		help
 			Number of threads to run in parallel
 endef
