@@ -188,7 +188,9 @@ jobs:
         git_clone https://github.com/jerrykuku/lua-maxminddb
         git_clone https://github.com/Ausaci/luci-app-nat6-helper
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust        
-        git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages        
+        git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
+        git_clone https://github.com/gngpp/luci-theme-design -b js --depth 1
+
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
