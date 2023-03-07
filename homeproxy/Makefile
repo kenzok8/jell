@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-homeproxy
-PKG_VERSION:=1.0-usertesting-0222
-PKG_RELEASE:=48
+PKG_VERSION:=usertesting-0337
+PKG_RELEASE:=49
 
 LUCI_TITLE:=The modern ImmortalWrt proxy platform for ARM64/AMD64
 LUCI_PKGARCH:=all
