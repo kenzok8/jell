@@ -9,9 +9,9 @@ LUCI_TITLE:=LuCI support for quickstart
 LUCI_DEPENDS:=+quickstart +luci-app-store
 LUCI_PKGARCH:=all
 
-PKG_VERSION:=0.6.9-1
+PKG_VERSION:=0.6.9-2
 # PKG_RELEASE MUST be empty for luci.mk
-PKG_RELEASE:=31
+PKG_RELEASE:=32
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
