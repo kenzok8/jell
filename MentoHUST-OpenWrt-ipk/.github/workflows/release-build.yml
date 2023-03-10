@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - aarch64_cortex-a53
+          - mipsel_24kc
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: './mentohust'
+          fetch-depth: 0
+
+      - name: Building packages
+        uses: openwrt/gh-action-sdk@master
+        env:
+          ARCH: ${{ matrix.arch }}
+          FEEDNAME: packages_ci
+          PACKAGES: mentohust
+          NO_REFRESH_CHECK: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.arch }}
+          path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+
+      - name: Upload packages
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
