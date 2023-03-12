@@ -3,11 +3,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=1.0.0-20221212
-PKG_RELEASE:=11
+PKG_RELEASE:=12
 
 LUCI_TITLE:=LuCI support for Excalidraw
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+docker +luci-lib-taskd +luci-lib-docker +docker-compose
+LUCI_DEPENDS:=+lsblk +docker +luci-lib-taskd +luci-lib-docker +docker-compose
 
 define Package/luci-app-excalidraw/conffiles
 /etc/config/excalidraw

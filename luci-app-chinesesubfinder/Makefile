@@ -3,11 +3,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=1.0.2-20230215
-PKG_RELEASE:=15
+PKG_RELEASE:=16
 
 LUCI_TITLE:=LuCI support for ChineseSubFinder
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+docker +luci-lib-taskd
+LUCI_DEPENDS:=+lsblk +docker +luci-lib-taskd
 
 define Package/luci-app-chinesesubfinder/conffiles
 /etc/config/chinesesubfinder

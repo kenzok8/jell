@@ -3,11 +3,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=1.1.2-20230108
-PKG_RELEASE:=21
+PKG_RELEASE:=22
 
 LUCI_TITLE:=LuCI support for wxedge
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+docker +luci-lib-taskd
+LUCI_DEPENDS:=+lsblk +docker +luci-lib-taskd
 
 define Package/luci-app-wxedge/conffiles
 /etc/config/wxedge

@@ -3,11 +3,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=1.0.1-20230108
-PKG_RELEASE:=13
+PKG_RELEASE:=14
 
 LUCI_TITLE:=LuCI support for PhotoPrism
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+docker +luci-lib-taskd
+LUCI_DEPENDS:=+lsblk +docker +luci-lib-taskd
 
 define Package/luci-app-photoprism/conffiles
 /etc/config/photoprism
