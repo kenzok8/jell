@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'dev'
     paths:
       - 'htdocs/**'
       - 'root/**'
@@ -12,7 +13,8 @@ on:
 
   pull_request:
     branch:
-      - 'js'
+      - 'master'
+      - 'dev'
     types:
       - opened
       - synchronize
