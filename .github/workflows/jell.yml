@@ -70,7 +70,6 @@ jobs:
         git_clone https://github.com/kiddin9/qBittorrent-Enhanced-Edition
         git_clone https://github.com/kiddin9/openwrt-amule-dlp && mvdir openwrt-amule-dlp
         git_clone https://github.com/kiddin9/luci-app-wizard
-        git_clone https://github.com/kiddin9/openwrt-adguardhome && mvdir openwrt-adguardhome
         git_clone https://github.com/kiddin9/openwrt-cloudreve && mvdir openwrt-cloudreve
         ) &
         (
@@ -190,6 +189,7 @@ jobs:
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust        
         git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
         git_clone --depth 1 -b js https://github.com/gngpp/luci-theme-design
+        git_clone https://github.com/kiddin9/openwrt-adguardhome && mvdir openwrt-adguardhome
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
