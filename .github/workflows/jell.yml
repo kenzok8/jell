@@ -70,6 +70,7 @@ jobs:
         git_clone https://github.com/kiddin9/qBittorrent-Enhanced-Edition
         git_clone https://github.com/kiddin9/openwrt-amule-dlp && mvdir openwrt-amule-dlp
         git_clone https://github.com/kiddin9/luci-app-wizard
+        git_clone https://github.com/kiddin9/openwrt-adguardhome && mvdir openwrt-adguardhome
         git_clone https://github.com/kiddin9/openwrt-cloudreve && mvdir openwrt-cloudreve
         ) &
         (
@@ -168,7 +169,7 @@ jobs:
         git_clone https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
         git_clone https://github.com/kenzok78/luci-theme-argonne
         git_clone https://github.com/kenzok78/luci-app-argonne-config
-        git_clone https://github.com/kenzok8/wall && mvdir wall
+        git_clone https://github.com/kenzok8/wall && mv -n wall/* ./ ; rm -rf adguardhome && rm -rf wall
         git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/CHN-beta/rkp-ipid
         git_clone https://github.com/Erope/openwrt_nezha nezha && mvdir nezha
@@ -188,8 +189,7 @@ jobs:
         git_clone https://github.com/Ausaci/luci-app-nat6-helper
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust        
         git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
-        git_clone https://github.com/kiddin9/openwrt-adguardhome && mvdir openwrt-adguardhome
-        git_clone https://github.com/gngpp/luci-theme-design -b js --depth 1
+        git_clone --depth 1 -b js https://github.com/gngpp/luci-theme-design
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
@@ -229,8 +229,8 @@ jobs:
         ) &
         (
         git_sparse_clone master "https://github.com/immortalwrt/packages" "immpkgs" net/mwol net/n2n \
-        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived net/microsocks \
-        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/gowebdav \
+        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived  \
+        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gowebdav \
         admin/bpytop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar libs/libdouble-conversion libs/qt6base \
         utils/cpulimit utils/filebrowser utils/cups net/udp2raw net/msd_lite
         git_sparse_clone master "https://github.com/xiaoqingfengATGH/feeds-xiaoqingfeng" "xiaoqingfeng" homeredirect luci-app-homeredirect
@@ -349,6 +349,7 @@ jobs:
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argon/' luci-app-argon-config/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argonne/' luci-app-argonne-config/Makefile
         sed -i -e 's/nas/system/g' -e 's/NAS/System/g' $(grep -rl 'nas\|NAS' luci-app-fileassistant)
+        sed -i -e 's/nas/services/g' -e 's/NAS/Services/g' $(grep -rl 'nas\|NAS' luci-app-alist)
         sed -i 's/+vsftpd$/+vsftpd-alt/' luci-app-vsftpd/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
