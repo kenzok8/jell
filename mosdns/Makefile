@@ -5,11 +5,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mosdns
-PKG_VERSION:=5.1.3
-PKG_RELEASE:=97
+PKG_VERSION:=ac99eb1
+PKG_RELEASE:=98
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/IrineSistiana/mosdns/tar.gz/v$(PKG_VERSION)?
+PKG_SOURCE:=mosdns-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/IrineSistiana/mosdns/tar.gz/$(PKG_VERSION)?
 PKG_HASH:=skip
 
 PKG_LICENSE:=GPL-3.0
@@ -56,7 +56,7 @@ config MOSDNS_COMPRESS_GOPROXY
 
 config MOSDNS_COMPRESS_UPX
 	bool "Compress executable files with UPX"
-	default y
+	default n
 endef
 
 ifeq ($(CONFIG_MOSDNS_COMPRESS_GOPROXY),y)
