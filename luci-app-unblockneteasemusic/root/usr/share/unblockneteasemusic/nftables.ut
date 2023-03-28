@@ -1,32 +1,24 @@
 #!/usr/bin/utpl -S
 
-{% if (acl_http_addr): -%}
 set acl_neteasemusic_http {
 	type ipv4_addr;
 	flags interval;
 	auto-merge;
 
-	elements = {
-		{% for (let addr in split(trim(acl_http_addr), '\n')): %}
-		{{ addr }},
-		{% endfor %}
-	};
+	{% if (acl_http_addr): %}
+	elements = { {{ join(', ', split(trim(acl_http_addr), '\n')) }} }
+	{% endif %}
 }
-{% endif -%}
 
-{% if (acl_https_addr): %}
 set acl_neteasemusic_https {
 	type ipv4_addr;
 	flags interval;
 	auto-merge;
 
-	elements = {
-		{% for (let addr in split(trim(acl_https_addr), '\n')): %}
-		{{ addr }},
-		{% endfor %}
-	};
+	{% if (acl_https_addr): %}
+	elements = { {{ join(', ', split(trim(acl_https_addr), '\n')) }} }
+	{% endif %}
 }
-{% endif -%}
 
 {% if (hijack_ways === 'use_ipset'): %}
 set neteasemusic {
@@ -35,17 +27,20 @@ set neteasemusic {
 	auto-merge;
 
 	{% if (neteasemusic_addr): %}
-	elements = {
-		{% for (let addr in split(trim(neteasemusic_addr), '\n')): %}
-		{{ addr }},
-		{% endfor %}
-	}
+	elements = { {{ join(', ', split(trim(neteasemusic_addr), '\n')) }} }
 	{% endif %}
+}
+
+set neteasemusic6 {
+	type ipv6_addr;
+	flags interval;
+	auto-merge;
 }
 
 chain netease_cloud_music {
 	type nat hook prerouting priority -1; policy accept;
-	meta l4proto tcp ip daddr @neteasemusic jump netease_cloud_music_redir;
+	meta l4proto tcp ip daddr @neteasemusic counter jump netease_cloud_music_redir;
+	meta l4proto tcp ip6 daddr @neteasemusic6 counter jump netease_cloud_music_redir;
 }
 
 chain netease_cloud_music_redir {
@@ -56,12 +51,12 @@ chain netease_cloud_music_redir {
 		198.18.0.0/15, 198.51.100.0/24, 203.0.113.0/24,
 		224.0.0.0/4, 240.0.0.0/4 } counter return;
 
-	{% if (acl_http_addr): %}
+	ip6 daddr { ::/128, ::1/128, ::ffff:0:0/96, 100::/64, 64:ff9b::/96,
+		2001::/32, 2001:10::/28, 2001:20::/28, 2001:db8::/28, 2002::/16,
+		fc00::/7, fe80::/10, ff00::/8 } counter return;
+
 	ip saddr @acl_neteasemusic_http tcp dport 80 counter return;
-	{% endif %}
-	{% if (acl_https_addr): %}
 	ip saddr @acl_neteasemusic_https tcp dport 443 counter return;
-	{% endif %}
 
 	tcp dport 80 counter redirect to :{{ http_port }};
 	tcp dport 443 counter redirect to :{{ https_port }};
