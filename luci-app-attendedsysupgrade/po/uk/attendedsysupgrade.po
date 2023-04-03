@@ -224,8 +224,8 @@ msgid "Server response: %s"
 msgstr "Відповідь сервера: %s"
 
 #: applications/luci-app-attendedsysupgrade/htdocs/luci-static/resources/view/attendedsysupgrade/configuration.js:27
-msgid "Show advanced options like packge list modification"
-msgstr ""
+msgid "Show advanced options like package list modification"
+msgstr "Показати розширені опції, такі як зміна списку пакетів"
 
 #: applications/luci-app-attendedsysupgrade/htdocs/luci-static/resources/view/attendedsysupgrade/overview.js:152
 msgid "Successfully created firmware image"
