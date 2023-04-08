@@ -11,7 +11,7 @@ PKG_NAME:=qt6base
 PKG_BASE:=6.4
 PKG_BUGFIX:=2
 PKG_VERSION:=$(PKG_BASE).$(PKG_BUGFIX)
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE:=qtbase-everywhere-src-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://mirrors.tencent.com/qt/archive/qt/$(PKG_BASE)/$(PKG_VERSION)/submodules/ \
@@ -29,7 +29,7 @@ PKG_CPE_ID:=cpe:/a:qt:qt
 
 PKG_BUILD_DEPENDS:=qt6base/host
 PKG_BUILD_PARALLEL:=1
-PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 CMAKE_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
