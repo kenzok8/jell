@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wifi-presence
 PKG_VERSION:=0.3.0
-PKG_RELEASE:=9
+PKG_RELEASE:=10
 
 PKG_SOURCE:=-$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/awilliams/wifi-presence/tar.gz/v$(PKG_VERSION)?
@@ -13,7 +13,7 @@ PKG_MAINTAINER:=Adam Williams <pwnfactory@gmail.com>
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=github.com/awilliams/wifi-presence
 GO_PKG_BUILD_PKG:=$(GO_PKG)/cmd/wifi-presence
