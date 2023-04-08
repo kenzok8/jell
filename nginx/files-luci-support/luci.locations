@@ -17,11 +17,3 @@ location ~ /cgi-bin/cgi-(backup|download|upload|exec) {
 location /luci-static {
 		error_log stderr crit;
 }
-
-location = / {
-		return 301 $scheme://$http_host/cgi-bin/luci/;
-}
-
-location = /luci/ {
-		return 301 $scheme://$http_host/cgi-bin/luci/;
-}

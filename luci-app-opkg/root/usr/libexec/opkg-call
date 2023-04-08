@@ -55,9 +55,6 @@ case "$action" in
 				case "$action" in
 					install|upgrade)
 					if [ "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ]; then
-							if [[ "$@" == luci-app-* && "$(opkg list | grep luci-i18n-$pkgn-zh-cn)" && ! -f /usr/lib/lua/luci/i18n/$pkgn.zh-cn.lmo ]]; then
-								$opkg install luci-i18n-$pkgn-zh-cn </dev/null >>/tmp/opkg.out 2>/dev/null || true
-							fi
 							rm -f /tmp/opkg.err
 							([ -f /etc/profile.d/opkg.sh ] && . /etc/profile.d/opkg.sh && opkg save) &
 					fi
@@ -65,9 +62,6 @@ case "$action" in
 					remove)
 						if [ ! "$(opkg list-installed | cut -f 1 -d ' ' | grep -w $@)" ]; then
 							rm -f /tmp/opkg.err
-							if [[ "$@" == luci-app-* && "$(opkg list-installed | grep luci-i18n-$pkgn-zh-cn)" ]]; then
-								$opkg remove luci-i18n-$pkgn-zh-cn </dev/null >>/tmp/opkg.out 2>/dev/null || true
-							fi
 							([ -f /etc/profile.d/opkg.sh ] && . /etc/profile.d/opkg.sh && opkg save) &
 						fi
 					;;

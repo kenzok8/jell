@@ -277,9 +277,6 @@ function display(pattern)
 			}, _('Remove…'));
 		}
 		else {
-			if (pkg.name.includes('luci-i18n'))
-			   continue;
-
 			var inst = packages.installed.pkgs[name];
 
 			ver = truncateVersion(pkg.version || '-');
@@ -672,7 +669,7 @@ function handleReset(ev)
 function handleInstall(ev)
 {
 	var name = ev.target.getAttribute('data-package'),
-		action = ev.target.getAttribute('action'),
+	    action = ev.target.getAttribute('action'),
 	    pkg = packages.available.pkgs[name],
 	    depcache = {},
 	    size;
@@ -798,7 +795,8 @@ function handleInstall(ev)
 						'id': 'overwrite-cb',
 						'type': 'checkbox',
 						'name': 'overwrite',
-						'disabled': isReadonlyView
+						'disabled': isReadonlyView,
+						'checked': true
 					}), ' ',
 					E('label', { 'for': 'overwrite-cb' }), ' ',
 					_('Allow overwriting conflicting package files')
@@ -997,7 +995,7 @@ function handleOpkg(ev)
 		]);
 
 		var argv = [ cmd, '--force-removal-of-dependent-packages' ];
-		
+
 		argv.push('--force-checksum');
 		
 		argv.push('--force-depends');
@@ -1107,8 +1105,8 @@ function updateLists(data)
 		    mount = L.toArray(data[0].filter(function(m) { return m.mount == '/' || m.mount == '/overlay' }))
 		    	.sort(function(a, b) { return a.mount > b.mount })[0] || { size: 0, free: 0 };
 
-		pg.firstElementChild.style.width = Math.floor(mount.size ? ((100 / mount.size) * mount.free) : 100) + '%';
-		pg.setAttribute('title', '%s (%1024mB)'.format(pg.firstElementChild.style.width, mount.free));
+		pg.firstElementChild.style.width = Math.floor(mount.size ? ((100 / mount.size) * (mount.size-mount.free)) : 100) + '%';
+		pg.setAttribute('title', '%.1024mB / %.1024mB (%s)'.format((mount.size-mount.free), mount.size, pg.firstElementChild.style.width));
 
 		parseList(data[1], packages.available);
 		parseList(data[2], packages.installed);
@@ -1249,14 +1247,6 @@ return view.extend({
 
 			E('div', { 'class': 'controls', 'style': 'display:none' }, [
 				E('div', { 'class': 'pager center' }, [
-					E('button', { 'class': 'btn cbi-button-neutral prev', 'aria-label': _('Previous page'), 'click': handlePage }, [ '«' ]),
-					E('div', { 'class': 'text' }, [ 'dummy' ]),
-					E('button', { 'class': 'btn cbi-button-neutral next', 'aria-label': _('Next page'), 'click': handlePage }, [ '»' ])
-				])
-			]),
-			
-			E('div', { 'class': 'controls', 'style': 'display:none' }, [
-				E('div', { 'id': 'pager', 'class': 'center' }, [
 					E('button', { 'class': 'btn cbi-button-neutral prev', 'aria-label': _('Previous page'), 'click': handlePage }, [ '«' ]),
 					E('div', { 'class': 'text' }, [ 'dummy' ]),
 					E('button', { 'class': 'btn cbi-button-neutral next', 'aria-label': _('Next page'), 'click': handlePage }, [ '»' ])
