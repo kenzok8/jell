@@ -9,11 +9,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=xfrpc
 PKG_VERSION:=2.1.606
-PKG_RELEASE:=36
+PKG_RELEASE:=37
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/liudf0716/xfrpc.git
-PKG_SOURCE_VERSION:=dc2f8298e7484eee36f5e7540937ea9d9d52a662
+PKG_SOURCE_VERSION:=dd90cbd5ae7dbeb3f848a210dd665210d79a6adb
 PKG_MIRROR_HASH:=skip
 
 PKG_MAINTAINER:=Dengfeng Liu <liudf0716@gmail.com>
