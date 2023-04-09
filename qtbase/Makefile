@@ -10,7 +10,7 @@ PKG_NAME:=qtbase
 PKG_BASE:=5.15
 PKG_BUGFIX:=6
 PKG_VERSION:=$(PKG_BASE).$(PKG_BUGFIX)
-PKG_RELEASE:=5
+PKG_RELEASE:=6
 
 PKG_SOURCE:=$(PKG_NAME)-everywhere-opensource-src-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:= \
@@ -22,7 +22,7 @@ PKG_HASH:=skip
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-everywhere-src-$(PKG_VERSION)
 
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 PKG_CPE_ID:=cpe:/a:qt:qt
 
 include $(INCLUDE_DIR)/package.mk

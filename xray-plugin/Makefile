@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=xray-plugin
 PKG_VERSION:=1.8.0
-PKG_RELEASE:=18
+PKG_RELEASE:=19
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/teddysun/xray-plugin/tar.gz/v$(PKG_VERSION)?
@@ -18,7 +18,7 @@ PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 
 GO_PKG:=github.com/teddysun/xray-plugin
 

@@ -11,7 +11,7 @@ PKG_ARCH_DDNSTO:=$(ARCH)
 
 PKG_NAME:=ddnsto
 PKG_VERSION:=3.0.2
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://fw.koolcenter.com/binary/ddnsto/
 PKG_HASH:=skip
@@ -19,7 +19,7 @@ PKG_HASH:=skip
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-binary-$(PKG_VERSION)
 
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 
 include $(INCLUDE_DIR)/package.mk
 

@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=simple-obfs
 PKG_VERSION:=0.0.5
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/shadowsocks/simple-obfs.git
@@ -26,7 +26,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)/$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSI
 
 PKG_INSTALL:=1
 PKG_FIXUP:=autoreconf
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_DEPENDS:=libev
 

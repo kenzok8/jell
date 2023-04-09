@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=naiveproxy
 PKG_VERSION:=111.0.5563.64-1
-PKG_RELEASE:=31
+PKG_RELEASE:=32
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/klzgrad/naiveproxy/tar.gz/v$(PKG_VERSION)?
@@ -21,7 +21,7 @@ ifneq ($(wildcard $(TOPDIR)/feeds/packages/devel/ninja/ninja.mk),)
 PKG_BUILD_DEPENDS+= ninja/host
 endif
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 
 ifneq ($(CONFIG_CPU_TYPE)," ")
   CPU_TYPE:=$(word 1, $(subst +," ,$(CONFIG_CPU_TYPE)))

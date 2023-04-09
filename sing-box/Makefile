@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sing-box
 PKG_VERSION:=1.2.3
-PKG_RELEASE:=55
+PKG_RELEASE:=56
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/SagerNet/sing-box/tar.gz/v$(PKG_VERSION)?
@@ -18,7 +18,7 @@ PKG_LICENSE_FILES:=LICENSE
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 
 GO_PKG:=github.com/sagernet/sing-box
 GO_PKG_BUILD_PKG:=$(GO_PKG)/cmd/sing-box

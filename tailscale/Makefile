@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tailscale
 PKG_VERSION:=1.38.4
-PKG_RELEASE:=14
+PKG_RELEASE:=15
 
 PKG_SOURCE:=tailscale-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/tailscale/tailscale/tar.gz/v$(PKG_VERSION)?
@@ -22,7 +22,7 @@ PKG_LICENSE_FILES:=LICENSE
 PKG_BUILD_DIR:=$(BUILD_DIR)/tailscale-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 
 GO_PKG:=\
 	tailscale.com/cmd/tailscale \

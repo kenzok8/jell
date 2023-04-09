@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=speedtest-web
 PKG_VERSION:=1.1.5
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/ZeaKyX/speedtest-go.git
@@ -22,7 +22,7 @@ PKG_CONFIG_DEPENDS:= \
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 
 GO_PKG:=github.com/librespeed/speedtest
 GO_PKG_LDFLAGS:=-s -w

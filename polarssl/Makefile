@@ -10,8 +10,8 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=polarssl
 SRC_PKG_NAME:=mbedtls
 PKG_VERSION:=1.3.16
-PKG_RELEASE:=4
-PKG_BUILD_FLAGS:=no-mips16
+PKG_RELEASE:=5
+PKG_USE_MIPS16:=0
 
 PKG_SOURCE:=$(SRC_PKG_NAME)-$(PKG_VERSION)-gpl.tgz
 PKG_SOURCE_URL:=https://polarssl.org/download/
