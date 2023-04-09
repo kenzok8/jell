@@ -374,7 +374,6 @@ jobs:
         sed -i 's/ if aarch64||arm||i386||x86_64//' luci-app-ssr-plus/Makefile
         sed -i 's/PKG_SOURCE_DATE:=2021/PKG_SOURCE_DATE:=2023/' netifd/Makefile
         sed -i 's/PKG_SOURCE_DATE:=2/PKG_SOURCE_DATE:=3/' transmission-web-control/Makefile
-        find . -type f -name Makefile -exec sed -i 's/PKG_USE_MIPS16:=0/PKG_BUILD_FLAGS:=no-mips16/g' {} +
         mkdir -p luci-app-passwall/root/www/luci-static/passwall
         cp -rf luci-app-bypass/root/www/luci-static/bypass/* luci-app-passwall/root/www/luci-static/passwall/
         cp -rf luci-app-bypass/root/usr/share/bypass/GeoLite2-Country.mmdb luci-app-passwall/root/usr/share/passwall/
