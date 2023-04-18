@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wxbase
 PKG_VERSION:=3.2.2.1
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=wxWidgets-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=https://github.com/wxWidgets/wxWidgets/releases/download/v$(PKG_VERSION)
@@ -21,6 +21,8 @@ PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
+
+DISABLE_NLS:=
 
 define Package/libwxbase
   SECTION:=libs
@@ -94,8 +96,6 @@ CONFIGURE_ARGS += \
 	--without-wine \
 	--without-x \
 	--without-x11
-
-CONFIGURE_ARGS := $(filter-out --disable-nls, $(CONFIGURE_ARGS))
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/bin

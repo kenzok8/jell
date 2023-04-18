@@ -12,7 +12,7 @@ LUCI_TITLE:=LuCI Support for netspeedtest
 LUCI_DEPENDS:=+python3 +iperf3 +homebox +netperf
 LUCI_PKGARCH:=all
 PKG_VERSION:=2.1.3
-PKG_RELEASE:=20
+PKG_RELEASE:=21
 PKG_MAINTAINER:=<https://github.com/sirpdboy/netspeedtest>
 
 include $(TOPDIR)/feeds/luci/luci.mk
