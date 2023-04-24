@@ -51,9 +51,10 @@ end
 
 function action_query_qrcode()
 	local data = luci.http.formvalue()
-	local sid = data.sid
+	local t = data.t
+	local ck = data.ck
 	local output = {}
-	output.refresh_token = luci.sys.exec("aliyundrive-webdav qr query --sid " .. sid)
+	output.refresh_token = luci.sys.exec("aliyundrive-webdav qr query --t " .. t .. " --ck " .. ck)
 	luci.http.prepare_content("application/json")
 	luci.http.write_json(output)
 end
