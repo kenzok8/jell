@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wxbase
 PKG_VERSION:=3.2.2.1
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_SOURCE:=wxWidgets-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=https://github.com/wxWidgets/wxWidgets/releases/download/v$(PKG_VERSION)
@@ -29,7 +29,7 @@ define Package/libwxbase
   CATEGORY:=Libraries
   TITLE:=Cross-platform C++ framework
   URL:=http://www.wxwidgets.org/
-  DEPENDS:=+libexpat +libstdcpp +zlib +libpthread +libcurl
+  DEPENDS:=+libexpat +libstdcpp +zlib +libpcre2-32 +libcurl
 endef
 
 define Package/libwxbase/description
