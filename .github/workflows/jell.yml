@@ -191,7 +191,6 @@ jobs:
         git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
         git_clone https://github.com/derisamedia/luci-theme-alpha
         git_clone https://github.com/gngpp/luci-theme-design -b js --depth 1
-        git_clone https://github.com/gngpp/luci-theme-design luci-theme-desige && mvdir luci-theme-desige
         git_clone https://github.com/kenzok78/luci-app-adguardhome
         ) &
         (
