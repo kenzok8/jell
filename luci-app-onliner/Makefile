@@ -6,11 +6,10 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support arp online
-LUCI_DEPENDS:= 
 LUCI_PKGARCH:=all
 PKG_NAME:=luci-app-onliner
-PKG_VERSION:=1.1
-PKG_RELEASE:=16
+PKG_VERSION:=1.2
+PKG_RELEASE:=17
 
 define Package/luci-app-onliner/install
     $(INSTALL_DIR) $(1)/usr/lib/lua/luci
