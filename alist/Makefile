@@ -7,9 +7,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=alist
-PKG_VERSION:=3.16.0
-PKG_WEB_VERSION:=3.16.0
-PKG_RELEASE:=52
+PKG_VERSION:=3.16.1
+PKG_WEB_VERSION:=3.16.1
+PKG_RELEASE:=53
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/alist-org/alist/tar.gz/v$(PKG_VERSION)?
@@ -23,7 +23,7 @@ define Download/$(PKG_NAME)-web
   FILE:=$(PKG_NAME)-web-$(PKG_WEB_VERSION).tar.gz
   URL_FILE:=dist.tar.gz
   URL:=https://github.com/alist-org/alist-web/releases/download/$(PKG_WEB_VERSION)/
-  HASH:=0a08e205887dcaf17f5e57af5a2024021e35e3d29878259d372d980bbea3eedd
+  HASH:=0d3414a9e36bd3abf29082c6e70a5aafd31d0a57ef5a8754367f1602455547dd
 endef
 
 PKG_BUILD_DEPENDS:=golang/host
