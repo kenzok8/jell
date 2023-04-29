@@ -32,6 +32,7 @@ PKG_CONFIG_DEPENDS:= \
 LUCI_TITLE:=LuCI support for PassWall
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
+	+lua-maxminddb +ipset +ipt2socks +iptables-mod-conntrack-extra +iptables-mod-iprange +iptables-mod-socket +iptables-mod-tproxy +kmod-ipt-nat \
 	+chinadns-ng +dns2socks +dns2tcp +ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc \
 	+microsocks +resolveip +tcping +unzip \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Brook:brook \

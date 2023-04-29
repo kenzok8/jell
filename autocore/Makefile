@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autocore
 PKG_FLAGS:=nonshared
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_TARGET_bcm27xx \
@@ -24,7 +24,7 @@ define Package/autocore
     +TARGET_bcm27xx:bcm27xx-userland \
     +TARGET_bcm53xx:nvram \
     +TARGET_mvebu:mhz \
-    +TARGET_x86:ethtool \
+    +ethtool \
     +TARGET_x86:lm-sensors
   PROVIDES:=autocore-arm autocore-x86
 endef
