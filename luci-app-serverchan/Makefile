@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-serverchan
-PKG_VERSION:=2.01.4
-PKG_RELEASE:=12
+PKG_VERSION:=2.02.0
+PKG_RELEASE:=13
 
 PKG_MAINTAINER:=tty228 <tty228@yeah.net>
 
