@@ -1,6 +1,7 @@
 module("luci.controller.alist", package.seeall)
 
 function index()
+	entry({"admin", "services"}, firstchild(), _("Services") , 45).dependent = false
 	if not nixio.fs.access("/etc/config/alist") then
 		return
 	end

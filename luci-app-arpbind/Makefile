@@ -11,8 +11,6 @@ LUCI_DEPENDS:=+ip-full
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-arpbind
-PKG_VERSION:=1
-PKG_RELEASE:=12
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

@@ -11,8 +11,6 @@ LUCI_DEPENDS:=+n2n
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-n2n
-PKG_VERSION:=3.0.0
-PKG_RELEASE:=11
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

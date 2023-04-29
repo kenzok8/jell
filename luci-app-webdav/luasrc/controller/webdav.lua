@@ -1,6 +1,7 @@
 module("luci.controller.webdav", package.seeall)
 
 function index()
+	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
 	if not nixio.fs.access("/etc/config/webdav") then
 		return
 	end

@@ -4,8 +4,6 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-omcproxy
-PKG_VERSION:=0.1.0
-PKG_RELEASE:=10
 
 PKG_MAINTAINER:=Shun Li <riverscn@gmail.com>
 PKG_LICENSE:=Apache-2.0

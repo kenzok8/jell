@@ -9,9 +9,7 @@ LUCI_TITLE:=LuCI mac to vendor map
 LUCI_DESCRIPTION:=provide a js for mac address to vendor mapping
 LUCI_PKGARCH:=all
 
-PKG_VERSION:=1.0.0-2
 # PKG_RELEASE MUST be empty for luci.mk
-PKG_RELEASE:=10
 
 LIB_VERSION:=1.0.2
 PKG_HASH:=skip

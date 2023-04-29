@@ -11,8 +11,6 @@ LUCI_DEPENDS:=+alsa-utils +shairport-sync-openssl
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-airplay2
-PKG_VERSION:=1
-PKG_RELEASE:=10
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

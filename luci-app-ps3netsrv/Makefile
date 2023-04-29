@@ -11,8 +11,6 @@ LUCI_DEPENDS:=+ps3netsrv
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-ps3netsrv
-PKG_VERSION:=1
-PKG_RELEASE:=10
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

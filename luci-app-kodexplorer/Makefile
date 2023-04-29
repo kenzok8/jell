@@ -10,8 +10,6 @@ LUCI_DEPENDS:=+nginx-ssl +unzip +zoneinfo-asia +php8 +php8-fastcgi +php8-fpm +ph
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-kodexplorer
-PKG_VERSION:=20220109
-PKG_RELEASE:=16
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

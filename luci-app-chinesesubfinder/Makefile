@@ -2,8 +2,6 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_VERSION:=1.0.2-20230215
-PKG_RELEASE:=16
 
 LUCI_TITLE:=LuCI support for ChineseSubFinder
 LUCI_PKGARCH:=all
