@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Argonne kenzo
-LUCI_DEPENDS:=
+LUCI_DEPENDS:=+curl +jsonfilter
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
