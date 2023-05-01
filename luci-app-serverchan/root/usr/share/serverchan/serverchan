@@ -1094,24 +1094,24 @@ function login_send(){
 	for login_ip in `cat ${dir}ssh_login|awk '{print $3}'|grep -v "^$"|sort -u|sed -nr 's#^(.*):.[0-9]{1,5}#\1#gp'`; do
 		[ -z "$login_ip" ] && continue
 		add_ip_white ${login_ip}
-		local ssh_login_time=`cat ${dir}ssh_login|grep -w ${login_ip}|awk '{print $1}'|grep -v "^$"|sort -u|head -n1`
-		local ssh_login_mode=`cat ${dir}ssh_login|grep -w ${login_ip}|awk '{print $2}'|grep -v "^$"|sort -u|head -n1`
-		echo "$ip_white_list"|grep -w -q "$login_ip" && echo "`date "+%Y-%m-%d"` ${login_time} 【info】设备 ${login_ip} 通过 SSH ${ssh_login_mode} 登陆了路由器 " >> ${logfile} && continue
-		[ ! -z "$ssh_login_mode" ] && local content_mode="${str_linefeed}${str_tab}登录方式： ${str_space}${str_space}${str_space}${str_space}${ssh_login_mode}"
+		local login_time=`cat ${dir}ssh_login|grep -w ${login_ip}|awk '{print $1}'|grep -v "^$"|sort -u|head -n1`
+		local login_mode=`cat ${dir}ssh_login|grep -w ${login_ip}|awk '{print $2}'|grep -v "^$"|sort -u|head -n1`
+		echo "$ip_white_list"|grep -w -q "$login_ip" && echo "`date "+%Y-%m-%d"` ${login_time} 【info】设备 ${login_ip} 通过 SSH ${login_mode} 登陆了路由器 " >> ${logfile} && continue
+		[ ! -z "$login_mode" ] && local content_mode="${str_linefeed}${str_tab}登录方式： ${str_space}${str_space}${str_space}${str_space}${login_mode}"
 		if [ ! -z "$ssh_logged" ] && [ "$ssh_logged" -eq "1" ]; then
 			if [ -z "$title" ]; then
 				title="${login_ip} 通过 SSH 登陆了路由器"
-				content="${content}${str_splitline}${str_title_start} 登陆信息${str_title_end}${str_linefeed}${str_tab}时间：${str_space}${str_space}${str_space}${str_space}${str_space}${ssh_login_time}${str_linefeed}${str_tab}设备 IP： ${str_space}${str_space}${str_space}${str_space}${login_ip}${content_mode}"
+				content="${content}${str_splitline}${str_title_start} 登陆信息${str_title_end}${str_linefeed}${str_tab}时间：${str_space}${str_space}${str_space}${str_space}${str_space}${login_time}${str_linefeed}${str_tab}设备 IP： ${str_space}${str_space}${str_space}${str_space}${login_ip}${content_mode}"
 			elif ( echo "$title"|grep -q "登陆了路由器" ); then
 				title="${login_ip} ${title}"
-				content="${content}${str_splitline}${str_tab}时间：${str_space}${str_space}${str_space}${str_space}${str_space}${ssh_login_time}${str_linefeed}${str_tab}设备 IP： ${str_space}${str_space}${str_space}${str_space}${login_ip}${content_mode}"
+				content="${content}${str_splitline}${str_tab}时间：${str_space}${str_space}${str_space}${str_space}${str_space}${login_time}${str_linefeed}${str_tab}设备 IP： ${str_space}${str_space}${str_space}${str_space}${login_ip}${content_mode}"
 			else
 				title="设备状态变化"
-				content="${content}${str_splitline}${str_title_start} 登陆信息${str_title_end}${str_linefeed}${str_tab}时间：${str_space}${str_space}${str_space}${str_space}${str_space}${ssh_login_time}${str_linefeed}${str_tab}设备 IP： ${str_space}${str_space}${str_space}${str_space}${login_ip}${content_mode}"
+				content="${content}${str_splitline}${str_title_start} 登陆信息${str_title_end}${str_linefeed}${str_tab}时间：${str_space}${str_space}${str_space}${str_space}${str_space}${login_time}${str_linefeed}${str_tab}设备 IP： ${str_space}${str_space}${str_space}${str_space}${login_ip}${content_mode}"
 			fi
 		fi
 		sed -i "/^${login_ip}$/d" ${dir}ssh_failed
-		echo "`date "+%Y-%m-%d"` ${ssh_login_time} ${disturb_text}设备 ${login_ip} 通过 SSH ${ssh_login_mode} 登陆了路由器 " >> ${logfile}
+		echo "`date "+%Y-%m-%d"` ${login_time} ${disturb_text}设备 ${login_ip} 通过 SSH ${login_mode} 登陆了路由器 " >> ${logfile}
 	done
 	echo "" > ${dir}ssh_login
 	unset login_ip login_time login_mode
