@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2019 Jerrykuku
+# Copyright (C) 2008-2019 kenzok78
 #
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
