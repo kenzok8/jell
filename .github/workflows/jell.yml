@@ -14,9 +14,9 @@ on:
   workflow_dispatch:
     inputs:
       ssh:
-        description: 'SSH connection to Actions'
+        description: 'ssh'
         required: false
-        default: 'false'
+        default: 'true'
 
 jobs:
   merge:
@@ -203,18 +203,12 @@ jobs:
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" "leanpkg" net/miniupnpd net/mwan3 multimedia/UnblockNeteaseMusic-Go \
         multimedia/UnblockNeteaseMusic net/amule net/antileech net/baidupcs-web net/frp multimedia/gmediarender net/go-aliyundrive-webdav \
-        net/qBittorrent-static net/qBittorrent net/transmission net/phtunnel libs/qtbase libs/qttools libs/rblibtorrent \
+        net/qBittorrent-static net/transmission net/phtunnel \
         net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/nps net/tcpping net/netatalk net/pgyvpn
         mv -f miniupnpd miniupnpd-iptables
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/packages" "oppackages" \
-        utils/cgroupfs-mount utils/coremark utils/watchcat utils/dockerd net/nginx net/uwsgi net/ddns-scripts net/smartdns \
+        utils/coremark utils/watchcat utils/dockerd net/nginx net/uwsgi net/ddns-scripts net/smartdns net/curl \
         net/ariang admin/netdata net/transmission-web-control net/rp-pppoe net/tailscale
-        ) &
-        (
-        git_sparse_clone master "https://github.com/openwrt/packages" "oppackages1" \
-        net/basicstation net/bpfcountd net/gsocket net/openappid net/telnet-bsd net/wifi-presence net/xfrpc
-        git_sparse_clone master "https://github.com/openwrt/luci" "opluci1" \
-        applications/luci-app-natmap
         ) &
         (
         git_sparse_clone openwrt-22.03 "https://github.com/openwrt/openwrt" "openwrt" \
@@ -225,25 +219,31 @@ jobs:
         applications/luci-app-ksmbd applications/luci-app-samba4 applications/luci-app-watchcat applications/luci-app-upnp
         ) &
         (
-        git_sparse_clone2 396f4048bd1f4cae7cb6f085d360081d81ad2d9a "https://github.com/openwrt/luci" "opluci2" \
+        git_sparse_clone2 0b38d70fbd47b0c702d5001de623213eb301a6fe "https://github.com/openwrt/luci" "opluci2" \
         modules/luci-base modules/luci-mod-network \
         modules/luci-mod-status modules/luci-mod-system
-        ) &
-        (
-        git_sparse_clone master "https://github.com/immortalwrt/packages" "immpkgs" net/mwol net/n2n \
-        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived  \
-        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gowebdav \
-        admin/bpytop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar libs/libdouble-conversion libs/qt6base \
-        utils/cpulimit utils/filebrowser utils/cups net/udp2raw net/msd_lite
         git_sparse_clone master "https://github.com/xiaoqingfengATGH/feeds-xiaoqingfeng" "xiaoqingfeng" homeredirect luci-app-homeredirect
+        ) &
+
+        (
+        git_sparse_clone master "https://github.com/immortalwrt/packages" "immpkgs" net/mwol net/n2n net/dae \
+        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived net/microsocks \
+        net/go-nats net/go-wol net/simple-torrent net/bitsrunlogin-go net/transfer \
+        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/gowebdav net/qBittorrent-Enhanced-Edition \
+        admin/btop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar \
+        libs/libdouble-conversion libs/qt6base libs/cxxopts libs/jpcre2 libs/alac \
+        utils/qt6tools utils/cpulimit utils/filebrowser utils/cups utils/cups-bjnp utils/joker net/udp2raw net/msd_lite \
+        multimedia/you-get multimedia/lux multimedia/ykdl multimedia/gallery-dl devel/go-rice admin/gotop
         ) &
         (
         git_sparse_clone develop "https://github.com/Ysurac/openmptcprouter-feeds" "openmptcp" luci-app-snmpd \
         luci-app-packet-capture luci-app-mail msmtp
         git_sparse_clone master "https://github.com/immortalwrt/immortalwrt" "immortal" package/kernel/rtl88x2bu \
-        package/kernel/r8168 package/kernel/rtl8821cu package/kernel/rtl8189es package/emortal/autocore  package/emortal/automount package/network/utils/fullconenat package/network/utils/fullconenat-nft \
-        package/network/utils/nftables package/utils/mhz package/libs/mbedtls package/libs/libnftnl package/firmware/wireless-regdb
+        package/kernel/r8168 package/kernel/rtl8821cu package/kernel/rtl8189es package/emortal/autocore package/emortal/automount \
+        package/network/utils/fullconenat package/network/utils/fullconenat-nft \
+        package/network/utils/nftables package/utils/mhz package/libs/libnftnl package/firmware/wireless-regdb
         ) &
+
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" "leluci" applications libs/luci-lib-fs
         mv -f applications luciapp
         rm -rf luciapp/{luci-app-qbittorrent,luci-app-cpufreq}
@@ -256,7 +256,7 @@ jobs:
         	fi
         done
 
-        git_sparse_clone master "https://github.com/coolsnowwolf/lede" "leanlede" package/lean package/network/services/shellsync package/network/config/netifd
+        git_sparse_clone master "https://github.com/coolsnowwolf/lede" "leanlede" package/lean package/wwan package/network/services/shellsync
 
     - name: Delete duplicated packages
       run: |
