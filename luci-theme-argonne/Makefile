@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2019 kenzok78
+# Copyright (C) 2008-2019 Jerrykuku
 #
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Argonne kenzo
-LUCI_DEPENDS:=+curl +jsonfilter
+LUCI_DEPENDS:=
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
