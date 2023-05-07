@@ -189,7 +189,7 @@ ss_injectdns() {
 	tmpDNSconf=$DNSMASQDIR/ss.conf
 	echo "all-servers" >$tmpDNSconf
 	config_load $NAME
-	for server in $(config_foreach get_server_ips servers | sort -u); do
+	for server in $(config_foreach get_server_ips servers | sort -u | grep -v '[0-9]$'); do
 		cat <<-EOF >>$tmpDNSconf
 			ipset=/${server}/ss_spec_dst_sp
 			server=/${server}/#
