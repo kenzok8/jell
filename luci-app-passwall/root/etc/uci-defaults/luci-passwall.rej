@@ -1,0 +1,11 @@
+--- luci-app-passwall/root/etc/uci-defaults/luci-passwall
++++ luci-app-passwall/root/etc/uci-defaults/luci-passwall
+@@ -27,6 +27,8 @@ uci -q batch <<-EOF >/dev/null
+ 	commit uhttpd
+ EOF
+ 
++grep -q api.ipify.org /usr/share/passwall/rules/proxy_host ||
++	sed -i '$a api.ipify.org' /usr/share/passwall/rules/proxy_host
+ [ ! -s "/etc/config/passwall" ] && cp -f /usr/share/passwall/0_default_config /etc/config/passwall
+ touch /etc/config/passwall_show >/dev/null 2>&1
+ rm -f /tmp/luci-indexcache
