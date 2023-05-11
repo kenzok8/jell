@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nezha-agent
 PKG_VERSION:=1
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -54,7 +54,7 @@ endif
 
 PKG_SOURCE:=nezha-agent_linux_$(PKG_ARCH_NEZHA-AGENT).zip
 
-PKG_SOURCE_URL:=https://github.com/naiba/nezha/releases/latest/download/
+PKG_SOURCE_URL:=https://github.com/nezhahq/agent/releases/latest/download/
 
 TAR_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)/$(PKG_NAME)-TAR
 
