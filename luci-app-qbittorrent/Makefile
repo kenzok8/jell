@@ -9,8 +9,6 @@ LUCI_TITLE:=qbittorrent-nox for LuCI
 LUCI_DEPENDS:=+qBittorrent-Enhanced-Edition
 LUCI_PKGARCH:=all
 
-PKG_NAME:=luci-app-qbittorrent
-
 define Package/luci-app-qbittorrent/conffiles
 /etc/qBittorrent/
 endef
