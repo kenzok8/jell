@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=UA2F
-PKG_VERSION:=4.0.6
+PKG_VERSION:=4.1.0
 PKG_RELEASE:=1
 
 PKG_LICENSE:=GPL-3.0-only
@@ -28,6 +28,30 @@ define Package/ua2f
     +PACKAGE_firewall:iptables-mod-conntrack-extra \
     +PACKAGE_firewall:iptables-mod-filter \
     +PACKAGE_firewall:iptables-mod-nfqueue
+endef
+
+define Package/ua2f/config
+  config UA2F_CUSTOM_USER_AGENT
+    bool "Enable custom User-Agent"
+    depends on PACKAGE_ua2f
+    default n
+    help
+      Enable this option to use a custom User-Agent string.
+
+  config UA2F_USER_AGENT_STRING
+    string "Custom User-Agent string"
+    depends on UA2F_CUSTOM_USER_AGENT
+    default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68"
+    help
+      Specify the custom User-Agent string to use when UA2F_CUSTOM_USER_AGENT is enabled.
+endef
+
+define Build/Configure
+	$(call Build/Configure/Default, \
+		-DUA2F_CUSTOM_USER_AGENT=$(if $(CONFIG_UA2F_CUSTOM_USER_AGENT),ON,OFF), \
+		-DUA2F_USER_AGENT_STRING="$(CONFIG_UA2F_USER_AGENT_STRING)" \
+		-DUA2F_VERSION="$(PKG_VERSION)" \
+	)
 endef
 
 define Package/ua2f/description
