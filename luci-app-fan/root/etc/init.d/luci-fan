@@ -4,6 +4,7 @@ START=20
 
 boot() {
     /usr/libexec/fan-control init
+    start
 }
 
 start_instance() {
