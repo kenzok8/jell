@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mentohust
 PKG_VERSION:=0.3.1
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_FIXUP:=autoreconf
 
