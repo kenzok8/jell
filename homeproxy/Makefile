@@ -4,10 +4,6 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-homeproxy
-PKG_VERSION:=dev-230414
-PKG_RELEASE:=67
-
 LUCI_TITLE:=The modern ImmortalWrt proxy platform for ARM64/AMD64
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
@@ -15,6 +11,8 @@ LUCI_DEPENDS:= \
 	+chinadns-ng \
 	+firewall4 \
 	+kmod-nft-tproxy
+
+PKG_NAME:=luci-app-homeproxy
 
 define Package/luci-app-homeproxy/conffiles
 /etc/config/homeproxy
