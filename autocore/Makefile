@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autocore
 PKG_FLAGS:=nonshared
-PKG_RELEASE:=13
+PKG_RELEASE:=14
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_TARGET_bcm27xx \
@@ -50,7 +50,6 @@ endif
 	$(CP) ./files/luci-mod-status-autocore.json $(1)/usr/share/rpcd/acl.d/
 
 ifeq ($(filter ipq806x%, $(TARGETID)),)
-	$(INSTALL_BIN) ./files/ethinfo $(1)/sbin/
 	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/status/include
 	$(INSTALL_DATA) ./files/29_ethinfo.js $(1)/www/luci-static/resources/view/status/include/
 endif
