@@ -4,9 +4,9 @@ PKG_NAME:=luci-app-argon-config
 
 PKG_MAINTAINER:=jerrykuku <jerrykuku@qq.com>
 
-LUCI_TITLE:=LuCI page for Argon Config
+LUCI_TITLE:=LuCI app for Argon theme configuration
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+luci-compat +luci-theme-argon +luci-lib-ipkg +luci-theme-argon
+LUCI_DEPENDS:=+luci-theme-argon
 
 define Package/$(PKG_NAME)/conffiles
 /etc/config/argon
