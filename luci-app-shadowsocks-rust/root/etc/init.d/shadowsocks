@@ -214,10 +214,11 @@ ss_injectdns() {
 		echo "server=/${WATCHDOG_ENDPOINT}/80.80.80.80" >>$DNSconf
 	}
 
+	DNSPROBE_DOMAIN='t.cn'
 	cat <<-EOF >>$DNSconf
-		server=/t.cn/223.5.5.5
-		server=/t.cn/119.29.29.29
-		server=/t.cn/114.114.114.114
+		server=/$DNSPROBE_DOMAIN/223.5.5.5
+		server=/$DNSPROBE_DOMAIN/119.29.29.29
+		server=/$DNSPROBE_DOMAIN/114.114.114.114
 	EOF
 
 	/etc/init.d/dnsmasq reload >/dev/null 2>&1
