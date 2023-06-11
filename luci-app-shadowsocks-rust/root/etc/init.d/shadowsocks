@@ -167,6 +167,7 @@ gen_config_file() {
 		      "local_address": "0.0.0.0",
 		      "local_port": $3
 		    }],$(get_udp_config)
+				"outbound_fwmark": 255,
 		    "nofile": 51200
 		}
 	EOF
