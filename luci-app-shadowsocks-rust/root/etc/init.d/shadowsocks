@@ -167,7 +167,7 @@ gen_config_file() {
 		      "local_address": "0.0.0.0",
 		      "local_port": $3
 		    }],$(get_udp_config)
-				"outbound_fwmark": 255,
+		    "outbound_fwmark": 255,
 		    "nofile": 51200
 		}
 	EOF
@@ -178,6 +178,7 @@ ss_cleandns() {
 	uci_bool_by_type general no_dns_injection && return 0
 
 	rm -f $DNSMASQDIR/ss.conf $DNSMASQDIR/ss-servers.conf 2>/dev/null
+	([ -x /etc/init.d/dnsmasq-extra ] && /etc/init.d/dnsmasq reload || /etc/init.d/dnsmasq restart) >/dev/null 2>&1
 }
 
 ss_injectdns() {
@@ -262,6 +263,7 @@ start_redir() {
 		-c=$(gen_config_file "$1" "redir$2" $(uci_get_by_type transparent_proxy local_port 1234)) \
 		--daemonize-pid=/var/run/ss-redir$2.pid
 	cd - >/dev/null
+	for _ in $(seq 10); do if pgrep -f sslocal >/dev/null; then break; else sleep 1; fi; done
 }
 
 ss_redir() {
@@ -314,11 +316,15 @@ ss_tunnel() {
 start() {
 	pidof sslocal >/dev/null && return 0
 	mkdir -p /var/run/ssservice /var/etc
+	local t0=$(date '+%s')
+	echo >&2 "# Info: starting..."
+
 	has_valid_server $(uci_get_by_type transparent_proxy main_server) && ss_injectdns
 	ss_redir && rules
 	ss_local
 	ss_tunnel
 	has_valid_server $(uci_get_by_type transparent_proxy main_server) && add_cron
+	echo >&2 "# Info: started. CostTime: $(($(date '+%s') - $t0))s"
 }
 
 boot() {
