@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autocore
 PKG_FLAGS:=nonshared
-PKG_RELEASE:=15
+PKG_RELEASE:=16
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_TARGET_bcm27xx \
@@ -42,7 +42,7 @@ endif
 
 	$(INSTALL_DIR) $(1)/sbin
 	$(INSTALL_BIN) ./files/cpuinfo $(1)/sbin/
-ifneq ($(filter ipq% mediatek%, $(TARGETID)),)
+ifneq ($(filter ipq% mediatek% qualcommax%, $(TARGETID)),)
 	$(INSTALL_BIN) ./files/tempinfo $(1)/sbin/
 endif
 
