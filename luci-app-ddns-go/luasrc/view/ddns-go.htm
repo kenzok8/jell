@@ -1,6 +1,6 @@
 <%#
  Copyright 2021-2022 sirpdboy Wich <sirpdboy@qq.com>
- https://github.com/sirpdboy/luci-app-ddnsgo
+ https://github.com/sirpdboy/luci-app-ddns-go
  Licensed to the public under the Apache License 2.0.
 -%>
 
@@ -13,7 +13,7 @@
 
 </div>
 <script type="text/javascript">
-        document.getElementById("ddnsgo").src = window.location.protocol + "//" + window.location.hostname + ":<%=luci.model.uci.cursor():get("ddnsgo", "ddnsgo", "port") %>";
+        document.getElementById("ddnsgo").src = window.location.protocol + "//" + window.location.hostname + ":<%=luci.model.uci.cursor():get_first("ddns-go", "basic", "port") %>";
  		document.getElementById("ddnsgo").height = document.documentElement.clientHeight;
         window.onresize = function(){
             document.getElementById("ddnsgo").height = document.documentElement.clientHeight;
