@@ -78,6 +78,7 @@ config PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy
 config PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy
 	bool "Nftables Transparent Proxy"
 	select PACKAGE_dnsmasq-full
+	select PACKAGE_ipt2socks
 	select PACKAGE_nftables
 	select PACKAGE_kmod-nft-socket
 	select PACKAGE_kmod-nft-tproxy
