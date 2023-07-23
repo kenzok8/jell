@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ykdl
-PKG_VERSION:=1.8.1.post1
-PKG_RELEASE:=1
+PKG_VERSION:=1.8.2
+PKG_RELEASE:=2
 
 PYPI_NAME:=ykdl
 PKG_HASH:=skip

@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gallery-dl
-PKG_VERSION:=1.25.4
-PKG_RELEASE:=2
+PKG_VERSION:=1.25.8
+PKG_RELEASE:=3
 
 PYPI_NAME:=gallery_dl
 PKG_HASH:=skip
