@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019-2020 OpenWrt.org
+# Copyright (C) 2019 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,62 +8,45 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ucl
 PKG_VERSION:=1.03
-PKG_RELEASE:=12
-
-PKG_MAINTAINER:=Xingwang Liao <kuoruan@gmail.com>
-PKG_LICENSE:=GPL-2.0-only
-PKG_LICENSE_FILES:=COPYING
+PKG_RELEASE:=13
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://www.oberhumer.com/opensource/ucl/download
+PKG_SOURCE_URL:=http://www.oberhumer.com/opensource/ucl/download/$(PKG_SOURCE)
 PKG_HASH:=skip
 
-PKG_FIXUP:=autoreconf
-PKG_BUILD_PARALLEL:=1
-PKG_INSTALL:=1
-
-HOST_FIXUP:=autoreconf
-HOST_BUILD_PARALLEL:=1
+HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/host-build.mk
-include $(INCLUDE_DIR)/package.mk
 
-HOST_BUILD_PREFIX:=$(STAGING_DIR_HOST)
+HOSTCC :=gcc
+HOST_CFLAGS +=-std=gnu89
 
-HOST_CFLAGS += -std=gnu89
-TARGET_CFLAGS += -std=gnu89
-
-CONFIGURE_ARGS += \
-	--enable-static \
-	--enable-shared \
-	--disable-asm
-
-define Package/libucl
-  SECTION:=libs
-  CATEGORY:=Libraries
-  TITLE:=Portable lossless data compression library
-  URL:=http://www.oberhumer.com/opensource/ucl/
+define Host/Prepare
+	$(Host/Prepare/Default)
+	mkdir -p $(STAGING_DIR_HOST)/include/ucl
 endef
 
-define Package/libucl/description
-UCL is a portable lossless data compression library written in ANSI C. UCL
-implements a number of compression algorithms that achieve an excellent
-compression ratio while allowing *very* fast decompression. Decompression
-requires no additional memory.
+define Host/Configure
+	(cd $(HOST_BUILD_DIR); \
+	CC="$(HOSTCC)" \
+	CFLAGS="$(HOST_CFLAGS)" \
+	./configure --prefix=$(STAGING_DIR_HOST) \
+	);
+	$(call Host/Configure/Default)
 endef
 
-define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/include/ucl
-	$(CP) $(PKG_INSTALL_DIR)/usr/include/ucl/ucl{,conf}.h $(1)/usr/include/ucl/
-
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libucl.{a,so*} $(1)/usr/lib/
+define Host/Compile
+	$(MAKE) -C $(HOST_BUILD_DIR)
 endef
 
-define Package/libucl/install
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libucl.so.* $(1)/usr/lib/
+define Host/Install
+	$(MAKE) -C $(HOST_BUILD_DIR) install
+endef
+
+define Host/Clean
+	$(MAKE) -C $(HOST_BUILD_DIR) uninstall
+	rm -rf $(HOST_BUILD_DIR)
+	rm -rf $(STAGING_DIR_HOST)/include/ucl
 endef
 
 $(eval $(call HostBuild))
-$(eval $(call BuildPackage,libucl))
