@@ -93,7 +93,7 @@ jobs:
         git_clone https://github.com/jerrykuku/luci-app-jd-dailybonus
         git_clone https://github.com/sirpdboy/luci-app-advanced
         git_clone https://github.com/sirpdboy/luci-app-autotimeset
-        git_clone https://github.com/sirpdboy/luci-app-lucky oplucky && mv -f oplucky/*/ ./ && rm -rf oplucky
+        git_clone https://github.com/sirpdboy/luci-app-lucky lucik && mv -n lucik/luci-app-lucky ./ ; rm -rf lucik
         git_clone https://github.com/sirpdboy/luci-app-partexp
         git_clone https://github.com/sirpdboy/chatgpt-web
         git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go && mvdir ddns-go
@@ -169,7 +169,7 @@ jobs:
         git_clone https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
         git_clone https://github.com/kenzok78/luci-theme-argone
         git_clone https://github.com/kenzok78/luci-app-argone-config
-        git_clone https://github.com/kenzok8/wall && mv -n wall/* ./ ; rm -rf wall
+        git_clone https://github.com/kenzok8/wall && && mv -n wall/{adguardhome,lucky} ./; rm -rf wall
         git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/CHN-beta/rkp-ipid
         git_clone https://github.com/Erope/openwrt_nezha nezha && mvdir nezha
