@@ -193,6 +193,7 @@ jobs:
         git clone --depth 1 -b js https://github.com/gngpp/luci-theme-design
         git_clone https://github.com/gngpp/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
+        git_clone https://github.com/rosywrt/luci-theme-rosy
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
