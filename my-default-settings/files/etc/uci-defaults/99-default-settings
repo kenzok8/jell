@@ -125,7 +125,7 @@ if [[ ! "$version" || "$version" -lt 1 ]]; then
 		fi
 	}
 
-	if [ -f /etc/config/wireless ]; then
+	if [[ -f /etc/config/wireless && "$DISTRIB_TARGET" != 'ipq50xx/arm' ]]; then
 		SSID=${hostname}
 		SSID_PASSWD=""
 		[ "$(uci -q get wireless.radio1.band)" == "5g" ] && uci -q set wireless.radio0.band="2g"
