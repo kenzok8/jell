@@ -5,7 +5,7 @@ LUCI_DEPENDS:=+atinout +luci-compat
 PKG_LICENSE:=GPLv3
 	
 define Package/luci-app-atinout/postrm
-	rm -f /tmp/luci-indexcache
+	rm -rf /etc/config/atinout
 endef
 	
 include $(TOPDIR)/feeds/luci/luci.mk
