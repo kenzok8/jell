@@ -3,8 +3,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=upx-static
-PKG_VERSION:=4.1.0
-PKG_RELEASE:=102
+PKG_VERSION:=3.9.6
+PKG_RELEASE:=103
 
 ifeq ($(ARCH),x86_64)
 	PKG_ARCH:=amd64
