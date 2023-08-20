@@ -10,8 +10,8 @@ THEME_NAME:=alpha
 THEME_TITLE:=Alpha
 
 PKG_NAME:=luci-theme-$(THEME_NAME)
-PKG_VERSION:=0.0.2
-PKG_RELEASE:=1
+PKG_VERSION:=0.3.8-beta
+PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -20,7 +20,7 @@ define Package/luci-theme-$(THEME_NAME)
   CATEGORY:=LuCI
   SUBMENU:=9. Themes
   DEPENDS:=+libc
-  TITLE:=LuCI Theme - $(THEME_TITLE)
+  TITLE:=Tema LuCi - $(THEME_TITLE)
   URL:=http://facebook.com/derisamedia/
   PKGARCH:=all
 endef

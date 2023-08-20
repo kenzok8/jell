@@ -1,1 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#888" d="M8,0c-4.355,0-7.898,3.481-7.998,7.812,0.092-3.779,2.966-6.812,6.498-6.812,3.59,0,6.5,3.134,6.5,7,0,0.828,0.672,1.5,1.5,1.5s1.5-0.672,1.5-1.5c0-4.418-3.582-8-8-8zM8,16c4.355,0,7.898-3.481,7.998-7.812-0.092,3.779-2.966,6.812-6.498,6.812-3.59,0-6.5-3.134-6.5-7,0-0.828-0.672-1.5-1.5-1.5s-1.5,0.672-1.5,1.5c0,4.418,3.582,8,8,8z"/></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW X7 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="36px" height="36px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 36 36"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .str0 {stroke:white;stroke-width:2.99987;stroke-linecap:round}
+    .fil0 {fill:none}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <path class="fil0 str0" d="M30 29c-3,3 -8,5 -12,5 -9,0 -16,-7 -16,-16 0,-9 7,-16 16,-16 9,0 16,7 16,16"/>
+ </g>
+</svg>

@@ -1,6 +1,6 @@
 
 /*--------------------
-General Style
+catatan usahakan untuk mengganti bg pakai format png, kalo jpg ganti aja di bagian body, sesuaikan aja nama formatnya
 ---------------------*/
 *,
 *::before,
@@ -17,14 +17,12 @@ html {
 }
 
 body {
-  background: rgba(30,29,31,1);
-background: -moz-linear-gradient(-45deg, rgb(33, 20, 211) 0%, rgba(223,64,90,1) 100%);
-background: -webkit-gradient(left top, right bottom, color-stop(0%, rgb(33, 35, 197)), color-stop(100%, rgb(204, 33, 61)));
-background: -webkit-linear-gradient(-45deg, rgb(119, 32, 206) 0%, rgba(223,64,90,1) 100%);
-background: -o-linear-gradient(-45deg, rgb(67, 150, 29) 0%, rgba(223,64,90,1) 100%);
-background: -ms-linear-gradient(-45deg, rgba(30,29,31,1) 0%, rgba(223,64,90,1) 100%);
-background: linear-gradient(135deg, rgb(34, 83, 187) 0%, rgb(197, 24, 67) 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e1d1f', endColorstr='#df405a', GradientType=1 );
+background: url('backgroundfanspage.png');
+height: 100%;
+background-position: center;
+background-repeat: no-repeat;
+background-size: cover;
+background-attachment: fixed;
 }
 
 
@@ -39,7 +37,7 @@ h2, h3 {
 }
 
 h2 {
-	color: #747474;
+	color: #fff;
 	text-align: center;
 }
 
@@ -124,11 +122,12 @@ Login Box
 .box-login-tab {
 	width: 50%;
 	height: 40px;
-	background: #fdfdfd;
+	background: #00000044;
 	position: relative;
 	float: left;
 	z-index: 1;
-  
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   -webkit-border-radius: 6px 6px 0 0;
      -moz-border-radius: 6px 6px 0 0;
           border-radius: 6px 6px 0 0;
@@ -157,10 +156,12 @@ Login Box
   position: relative;
   top: -4px;
   width: 320px;
-  background: #fdfdfd;
+  background: #00000044;
   text-align: center;
   overflow: hidden;
   z-index: 2;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   
   -webkit-border-top-right-radius: 6px;
   -webkit-border-bottom-left-radius: 6px;
@@ -286,7 +287,7 @@ label {
 	float: left;
   width: 100%;
 	top: 0px;
-	color: #032942;
+	color: #fff;
 	font-size: 13px;
 	font-weight: 700;
 	text-align: center;
@@ -304,17 +305,14 @@ input[type=password] {
     width: auto;
     height: 32px;
     padding: 0px 10px;
-    background-color: rgba(0,0,0,0.03);
+    background-color:rgb(0 0 0 / 28%);
     border: none;
     display: inline;
-    color: #303030;
+    color: #bdbdbd;
     font-size: 16px;
     font-weight: 400;
     float: none;
-    
-    -webkit-box-shadow: inset 1px 1px 0px rgba(0,0,0,0.05), 1px 1px 0px rgba(255,255,255,1);
-    -moz-box-shadow: inset 1px 1px 0px rgba(0,0,0,0.05), 1px 1px 0px rgba(255,255,255,1);
-    box-shadow: inset 1px 1px 0px rgba(0,0,0,0.05), 1px 1px 0px rgba(255,255,255,1);
+    border-radius: 10px;
 }
 
 input[type=text]:focus,
