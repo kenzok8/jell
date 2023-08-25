@@ -117,10 +117,6 @@ if [[ ! "$version" || "$version" -lt 1 ]]; then
 			else
 				uci -q set wireless.default_${radio}.encryption='none'
 			fi
-			if uci get wireless.${radio}.path | grep -q bcma || iwinfo wlan${radio:5} info | grep -qi Cypress; then
-				WLAN_IDX=${radio:5}
-				uci set wireless.default_${radio}.ifname="wlan${WLAN_IDX}"
-			fi
 		fi
 	}
 
