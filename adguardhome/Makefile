@@ -7,10 +7,10 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=adguardhome
 PKG_VERSION:=0.107.36
-PKG_RELEASE:=228
+PKG_RELEASE:=229
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=aac36a2d2ff80fc82fb9aefb54dbe5e9d06c5a21
+PKG_SOURCE_VERSION:=a325c9b6bb702c2c44d1d9f11b05d47882a72bc2
 PKG_SOURCE_URL:=https://github.com/AdguardTeam/AdGuardHome
 PKG_MIRROR_HASH:=skip
 
