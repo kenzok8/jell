@@ -66,6 +66,8 @@ setup_firewall() {
 				chain prerouting {
 					type filter hook prerouting priority mangle -5; policy accept;
 
+          meta l4proto != tcp counter return comment "!ua2f: not tcp";
+
 					ip daddr @localaddr_v4 counter return;
 					ip6 daddr @localaddr_v6 counter return;
 
@@ -73,7 +75,7 @@ setup_firewall() {
 					$([ "$handle_tls" -eq "1" ] || echo 'tcp dport 443 counter return comment "!ua2f: bypass HTTPS";')
 					tcp dport 80 counter ct mark set 44;
 					ct mark 43 counter return comment "!ua2f: bypass non-http stream";
-					ct original counter queue num 10010 bypass;
+					ct direction original counter queue num 10010 bypass;
 				}
 			}
 		EOF
