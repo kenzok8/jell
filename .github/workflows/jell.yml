@@ -394,10 +394,11 @@ jobs:
         sed -i \
           -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' \
           -e 's?2. Clash For OpenWRT?3. Applications?' \
-          -e "s/\(PKG_HASH\|PKG_MD5SUM\|PKG_MIRROR_HASH\).*/\1:=skip/" \
+          -e "s/\(\(^\| \|	\)\(PKG_HASH\|PKG_MD5SUM\|PKG_MIRROR_HASH\|HASH\):=\).*/\1skip/" \
           -e 's?\.\./\.\./luci.mk?$(TOPDIR)/feeds/luci/luci.mk?' \
-          -e 's/ca-certificates/ca-bundle/' \
+          -e 's/+ca-certificates/+ca-bundle/' \
           -e 's/php7/php8/g' \
+          -e 's/+docker /+docker +dockerd /g' \
           */Makefile
         ) &
         
