@@ -398,7 +398,6 @@ jobs:
           -e 's?\.\./\.\./luci.mk?$(TOPDIR)/feeds/luci/luci.mk?' \
           -e 's/+ca-certificates/+ca-bundle/' \
           -e 's/php7/php8/g' \
-          -e 's/+docker /+docker +dockerd /g' \
           */Makefile
         ) &
         
