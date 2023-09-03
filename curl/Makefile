@@ -10,7 +10,7 @@ include $(INCLUDE_DIR)/nls.mk
 
 PKG_NAME:=curl
 PKG_VERSION:=8.2.1
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://github.com/curl/curl/releases/download/curl-$(subst .,_,$(PKG_VERSION))/ \
@@ -120,7 +120,7 @@ CONFIGURE_ARGS += \
 	--without-ca-path \
 	--without-libpsl \
 	--without-zstd \
-	--with-ca-bundle=/etc/ssl/certs/ca-bundle.crt \
+	--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
 	\
 	$(call autoconf_bool,CONFIG_IPV6,ipv6) \
 	\

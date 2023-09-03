@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tuic-client
 PKG_VERSION:=1.0.0
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
@@ -45,7 +45,7 @@ define Download/tuic-client
 	URL:=https://github.com/EAimTY/tuic/releases/download/$(TUIC_TYPE)/
 	URL_FILE:=$(TUIC_ARCH)
 	FILE:=$(TUIC_ARCH)
-	HASH:=$(PKG_HASH:=skip
+	HASH:=skip
 endef
 
 define Package/tuic-client
