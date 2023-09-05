@@ -437,9 +437,9 @@ function to_check()
 		check_update()
 		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mvebu-cortexa9-linksys_wrt32x-squashfs-sysupgrade.bin"
     elseif board_name:match("qihoo,v6$") then
-		model = "ipq60xx_360v6/qihoo_v6"
+		model = "ipq60xx_generic/qihoo_v6"
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-ipq60xx-360v6-qihoo_v6-squashfs-nand-sysupgrade.bin"
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-ipq60xx_generic-qihoo_v6-squashfs-nand-sysupgrade.bin"
     elseif board_name:match("glinet,gl%-axt1800$") then
 		model = "qualcommax_ipq60xx/glinet_gl-axt1800"
 		check_update()
