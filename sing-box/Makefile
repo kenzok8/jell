@@ -6,8 +6,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sing-box
-PKG_VERSION:=1.4.1
-PKG_RELEASE:=68
+PKG_VERSION:=1.5.0-beta.5
+PKG_RELEASE:=69
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/SagerNet/sing-box/tar.gz/v$(PKG_VERSION)?
@@ -66,7 +66,7 @@ define Package/$(PKG_NAME)/config
 
     config SING_BOX_WITH_ECH
       bool "Build with TLS ECH extension support"
-      default n
+      default y
 
     config SING_BOX_WITH_GRPC
       bool "Build with standard gRPC support"
