@@ -1,0 +1,16 @@
+--- luci-app-passwall/Makefile
++++ luci-app-passwall/Makefile
+@@ -151,11 +152,11 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray
+ 	bool "Include V2ray"
+-	default y if aarch64||arm||i386||x86_64
++	default n
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata
+ 	bool "Include V2ray_Geodata"
+-	default n
++	default y if aarch64||i386||x86_64
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin
+ 	bool "Include V2ray-Plugin (Shadowsocks Plugin)"
