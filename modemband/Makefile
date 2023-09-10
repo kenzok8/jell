@@ -1,15 +1,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=modemband
-PKG_VERSION:=20230904
-PKG_RELEASE:=7
+PKG_VERSION:=20230905
+PKG_RELEASE:=8
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/modemband
 	SECTION:=net
 	CATEGORY:=Network
-	TITLE:=Setting LTE bands for selected modems
+	TITLE:=Setting LTE/5G bands for selected modems
 	MAINTAINER:=Cezary Jackiewicz <cezary@eko.one.pl>
 	PKGARCH:=all
 	DEPENDS:=+sms-tool
