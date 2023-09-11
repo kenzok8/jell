@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tailscale
 PKG_VERSION:=1.48.1
-PKG_RELEASE:=26
+PKG_RELEASE:=27
 
 PKG_SOURCE:=tailscale-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/tailscale/tailscale/tar.gz/v$(PKG_VERSION)?
@@ -22,13 +22,13 @@ PKG_LICENSE_FILES:=LICENSE
 PKG_BUILD_DIR:=$(BUILD_DIR)/tailscale-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=\
 	tailscale.com/cmd/tailscale \
 	tailscale.com/cmd/tailscaled
-GO_PKG_LDFLAGS:=-X 'tailscale.com/version.Long=$(PKG_VERSION)-$(PKG_RELEASE) (OpenWrt)'
-GO_PKG_LDFLAGS_X:=tailscale.com/version.Short=$(PKG_VERSION)
+GO_PKG_LDFLAGS:=-X 'tailscale.com/version.longStamp=$(PKG_VERSION)-$(PKG_RELEASE) (OpenWrt)'
+GO_PKG_LDFLAGS_X:=tailscale.com/version.shortStamp=$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
@@ -61,23 +61,43 @@ endef
 
 Package/tailscaled/description:=$(Package/tailscale/description)
 
+define Package/tailscaled/conffiles
+/etc/config/tailscale
+/etc/tailscale/tailscaled.state
+endef
+
+GO_IPTABLES_VERSION:=0.6.0
+GO_IPTABLES_FILE:=$(PKG_NAME)-go-iptables-$(GO_IPTABLES_VERSION).tar.gz
+
+define Download/go-iptables
+  URL:=https://codeload.github.com/coreos/go-iptables/tar.gz/v$(GO_IPTABLES_VERSION)?
+  URL_FILE:=$(GO_IPTABLES_FILE)
+  FILE:=$(GO_IPTABLES_FILE)
+  HASH:=skip
+endef
+
+define Build/Prepare
+	$(PKG_UNPACK)
+	[ ! -d ./src/ ] || $(CP) ./src/. $(PKG_BUILD_DIR)
+	$(eval $(call Download,go-iptables))
+	( \
+		mkdir -p $(PKG_BUILD_DIR)/patched/ ; \
+		gzip -dc $(DL_DIR)/$(GO_IPTABLES_FILE) | $(HOST_TAR) -C $(PKG_BUILD_DIR)/patched $(TAR_OPTIONS) ; \
+		mv $(PKG_BUILD_DIR)/patched/go-iptables-$(GO_IPTABLES_VERSION) $(PKG_BUILD_DIR)/patched/go-iptables ; \
+	)
+	$(Build/Patch)
+endef
+
 define Package/tailscale/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/tailscale $(1)/usr/sbin
 endef
 
 define Package/tailscaled/install
-	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/init.d $(1)/etc/config
 	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/tailscaled $(1)/usr/sbin
-	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) ./files//tailscale.init $(1)/etc/init.d/tailscale
-	$(INSTALL_DIR) $(1)/etc/config/
 	$(INSTALL_DATA) ./files//tailscale.conf $(1)/etc/config/tailscale
-endef
-
-define Package/tailscaled/conffiles
-/etc/config/tailscale
-/etc/tailscale/tailscaled.state
 endef
 
 $(eval $(call BuildPackage,tailscale))

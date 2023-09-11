@@ -404,14 +404,3 @@ msgstr "~%1024mБ сжато"
 #: applications/luci-app-opkg/htdocs/luci-static/resources/view/opkg.js:929
 msgid "~%1024mB installed"
 msgstr "~%1024mБ установлено"
-
-#~ msgid "Require approx. %.1024mB size for %d package(s) to install."
-#~ msgstr ""
-#~ "Требуется примерно %.1024mБ свободного пространства для установки %d "
-#~ "пакетов."
-
-#~ msgid "~%.1024mB compressed"
-#~ msgstr "~%.1024mБ сжато"
-
-#~ msgid "~%.1024mB installed"
-#~ msgstr "~%.1024mБ установлено"

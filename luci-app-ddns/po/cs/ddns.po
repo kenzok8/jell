@@ -940,17 +940,3 @@ msgstr "sekundy/sekund"
 #: applications/luci-app-ddns/htdocs/luci-static/resources/view/ddns/overview.js:780
 msgid "to run HTTPS without verification of server certificates (insecure)"
 msgstr "k použití HTTPS bez ověření serverových certifikátů (nedůvěryhodné)"
-
-#~ msgid "Interval unit to force updates send to DDNS Provider"
-#~ msgstr ""
-#~ "Jednotka intervalu, která vynutí odeslání aktualizací zprostředkovateli "
-#~ "DDNS"
-
-#~ msgid "On Error the script will retry the failed action after given time"
-#~ msgstr "Při chybě skript zopakuje neúspěšnou akci po daném čase"
-
-#~ msgid "On Error the script will stop execution after given number of retrys"
-#~ msgstr "Při chybě skript zastaví provádění po daném počtu opakování"
-
-#~ msgid "The default setting of '0' will retry infinite."
-#~ msgstr "Výchozí nastavení '0' znamená nekonečné opakování."

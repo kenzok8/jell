@@ -147,9 +147,11 @@ msgstr "Chia sẻ mạng"
 
 #: applications/luci-app-samba4/htdocs/luci-static/resources/view/samba4.js:62
 msgid ""
-"On lower-end devices may increase speeds, by forceing synchronous I/O "
-"instead of the default asynchronous."
+"On lower-end devices may increase speeds, by forcing synchronous I/O instead "
+"of the default asynchronous."
 msgstr ""
+"Trên các thiết bị cấu hình thấp hơn, việc bắt buộc I/O đồng bộ thay vì mặc "
+"định là bất đồng bộ có thể tăng tốc độ."
 
 #: applications/luci-app-samba4/htdocs/luci-static/resources/view/samba4.js:99
 msgid "Path"

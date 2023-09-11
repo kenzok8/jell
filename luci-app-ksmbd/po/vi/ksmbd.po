@@ -115,11 +115,14 @@ msgstr "Thư mục đã chia sẻ"
 
 #: applications/luci-app-ksmbd/htdocs/luci-static/resources/view/ksmbd.js:49
 msgid ""
-"This is the content of the file '/etc/ksmbd/smb.conf.template' from which "
+"This is the content of the file '/etc/ksmbd/ksmbd.conf.template' from which "
 "your ksmbd configuration will be generated. Values enclosed by pipe symbols "
 "('|') should not be changed. They get their values from the 'General "
 "Settings' tab."
 msgstr ""
+"Đây là nội dung của tệp '/etc/ksmbd/ksmbd.conf.template' mà cấu hình ksmbd "
+"của bạn sẽ được tạo ra từ đó. Các giá trị được bao quanh bởi dấu | không nên "
+"được thay đổi. Chúng lấy giá trị của chúng từ tab 'Cài đặt chung'."
 
 #: applications/luci-app-ksmbd/htdocs/luci-static/resources/view/ksmbd.js:38
 msgid "Workgroup"

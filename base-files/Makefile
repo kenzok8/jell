@@ -13,7 +13,7 @@ include $(INCLUDE_DIR)/feeds.mk
 
 PKG_NAME:=base-files
 PKG_FLAGS:=nonshared
-PKG_RELEASE:=21
+PKG_RELEASE:=22
 
 PKG_FILE_DEPENDS:=$(PLATFORM_DIR)/ $(GENERIC_PLATFORM_DIR)/base-files/
 PKG_BUILD_DEPENDS:=usign/host ucert/host
@@ -86,6 +86,19 @@ define ImageConfigOptions
 	echo 'pi_preinit_net_messages="$(CONFIG_TARGET_PREINIT_SHOW_NETMSG)"' >>$(1)/lib/preinit/00_preinit.conf
 	echo 'pi_preinit_no_failsafe_netmsg="$(CONFIG_TARGET_PREINIT_SUPPRESS_FAILSAFE_NETMSG)"' >>$(1)/lib/preinit/00_preinit.conf
 	echo 'pi_preinit_no_failsafe="$(CONFIG_TARGET_PREINIT_DISABLE_FAILSAFE)"' >>$(1)/lib/preinit/00_preinit.conf
+ifeq ($(CONFIG_TARGET_DEFAULT_LAN_IP_FROM_PREINIT),y)
+	mkdir -p $(1)/etc/board.d
+	echo '. /lib/functions/uci-defaults.sh' >$(1)/etc/board.d/99-lan-ip
+	echo 'logger -t 99-lan-ip "setting custom default LAN IP"' >>$(1)/etc/board.d/99-lan-ip
+	echo 'board_config_update' >>$(1)/etc/board.d/99-lan-ip
+	echo 'json_select network' >>$(1)/etc/board.d/99-lan-ip
+	echo 'json_select lan' >>$(1)/etc/board.d/99-lan-ip
+	echo 'json_add_string ipaddr $(if $(CONFIG_TARGET_PREINIT_IP),$(CONFIG_TARGET_PREINIT_IP),"192.168.1.1")' >>$(1)/etc/board.d/99-lan-ip
+	echo 'json_add_string netmask $(if $(CONFIG_TARGET_PREINIT_NETMASK),$(CONFIG_TARGET_PREINIT_NETMASK),"255.255.255.0")' >>$(1)/etc/board.d/99-lan-ip
+	echo 'json_select ..' >>$(1)/etc/board.d/99-lan-ip
+	echo 'json_select ..' >>$(1)/etc/board.d/99-lan-ip
+	echo 'board_config_flush' >>$(1)/etc/board.d/99-lan-ip
+endif
 endef
 
 define Build/Prepare

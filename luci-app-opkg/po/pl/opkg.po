@@ -403,12 +403,3 @@ msgstr "~%1024mB skompresowany"
 #: applications/luci-app-opkg/htdocs/luci-static/resources/view/opkg.js:929
 msgid "~%1024mB installed"
 msgstr "~%1024mB zainstalowany"
-
-#~ msgid "Require approx. %.1024mB size for %d package(s) to install."
-#~ msgstr "Wymaga ok. %.1024mB miejsca i instalacji %d pakietów."
-
-#~ msgid "~%.1024mB compressed"
-#~ msgstr "~%.1024mB skompresowany"
-
-#~ msgid "~%.1024mB installed"
-#~ msgstr "~%.1024mB zainstalowany"

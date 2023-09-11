@@ -1,0 +1,13 @@
+--- luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
++++ luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
+@@ -40,6 +60,10 @@ return baseclass.extend({
+ 		return Promise.all([
+ 			L.resolveDefault(callSystemBoard(), {}),
+ 			L.resolveDefault(callSystemInfo(), {}),
++			L.resolveDefault(callCPUBench(), {}),
++			L.resolveDefault(callCPUInfo(), {}),
++			L.resolveDefault(callCPUUsage(), {}),
++			L.resolveDefault(callTempInfo(), {}),
+ 			fs.lines('/usr/lib/lua/luci/version.lua')
+ 		]);
+ 	},

@@ -901,15 +901,3 @@ msgstr "秒"
 #: applications/luci-app-ddns/htdocs/luci-static/resources/view/ddns/overview.js:780
 msgid "to run HTTPS without verification of server certificates (insecure)"
 msgstr "使用 HTTPS 但不檢查伺服器憑證 (不安全)"
-
-#~ msgid "Interval unit to force updates send to DDNS Provider"
-#~ msgstr "強制將更新發送至 DDNS 提供者的間隔時間單位"
-
-#~ msgid "On Error the script will retry the failed action after given time"
-#~ msgstr "當出錯時，指令碼將在給定時間後重試失敗的操作"
-
-#~ msgid "On Error the script will stop execution after given number of retrys"
-#~ msgstr "當出錯時，指令碼將在給定的重試次數執行完成後退出"
-
-#~ msgid "The default setting of '0' will retry infinite."
-#~ msgstr "如果設定為預設值「0」，將無限重試。"

@@ -39,20 +39,7 @@ case "$DISTRIB_TARGET" in
 		# IPQ8064/5
 		echo "$CPU_POLICYS" | grep -q "1" && uci_write_config 1 performance 600000 1200000
 		;;
-	"mediatek/mt7622")
-		uci_write_config 0 ondemand 600000 1350000 10 50
-		;;
-	"qualcommax/ipq60xx")
-		if echo "$CPU_FREQS" | grep -q "1800000"; then
-			# IPQ6010/18/28
-			CPU_MAX_FREQ="1800000"
-		else
-			# IPQ6000
-			CPU_MAX_FREQ="1200000"
-		fi
-		uci_write_config 0 ondemand 864000 "$CPU_MAX_FREQ" 10 50
-		;;
-	"qualcommax/ipq807x")
+	"ipq807x/generic")
 		if echo "$CPU_FREQS" | grep -q "2208000"; then
 			# IPQ8072/4/6/8A
 			CPU_MAX_FREQ="2208000"
@@ -62,13 +49,11 @@ case "$DISTRIB_TARGET" in
 		fi
 		uci_write_config 0 schedutil 1017600 "$CPU_MAX_FREQ"
 		;;
+	"mediatek/mt7622")
+		uci_write_config 0 ondemand 600000 1350000 10 50
+		;;
 	"rockchip/armv8")
-		if echo "$CPU_POLICYS" | grep -q "6"; then
-			# RK3588/S
-			uci_write_config 0 schedutil 1008000 1800000
-			uci_write_config 4 schedutil 816000 2208000
-			uci_write_config 6 schedutil 816000 2208000
-		elif echo "$CPU_POLICYS" | grep -q "4"; then
+		if echo "$CPU_POLICYS" | grep -q "4"; then
 			# RK3399
 			uci_write_config 0 schedutil 600000 1608000
 			uci_write_config 4 schedutil 600000 2016000

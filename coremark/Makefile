@@ -8,9 +8,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=coremark
-PKG_SOURCE_DATE:=2022-01-03
-PKG_SOURCE_VERSION:=b24e397f7103061b3673261d292a0667bd3bc1b8
-PKG_RELEASE:=17
+PKG_SOURCE_DATE:=2023-01-25
+PKG_SOURCE_VERSION:=d5fad6bd094899101a4e5fd53af7298160ced6ab
+PKG_RELEASE:=18
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_DATE).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/eembc/coremark/tar.gz/$(PKG_SOURCE_VERSION)?
@@ -22,7 +22,7 @@ PKG_MAINTAINER:=Lim Guo Wei <limguowei@gmail.com> \
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE.md
 
-PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16 lto
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -59,8 +59,6 @@ define Package/coremark/config
 		help
 			Number of threads to run in parallel
 endef
-
-TARGET_CFLAGS += -flto
 
 ifeq ($(CONFIG_COREMARK_OPTIMIZE_O3),y)
 	TARGET_CFLAGS := $(filter-out -O%,$(TARGET_CFLAGS)) -O3

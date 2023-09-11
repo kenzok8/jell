@@ -947,21 +947,3 @@ msgid "to run HTTPS without verification of server certificates (insecure)"
 msgstr ""
 "HTTPS futtatásához a kiszolgáló tanúsítványainak ellenőrzése nélkül (nem "
 "biztonságos)"
-
-#~ msgid "Interval unit to force updates send to DDNS Provider"
-#~ msgstr ""
-#~ "Időköz mértékegysége a DDNS-szolgáltatónak küldött frissítések "
-#~ "kényszerítéséhez"
-
-#~ msgid "On Error the script will retry the failed action after given time"
-#~ msgstr ""
-#~ "Hiba esetén a parancsfájl újrapróbálja a sikertelen műveletet a megadott "
-#~ "idő után"
-
-#~ msgid "On Error the script will stop execution after given number of retrys"
-#~ msgstr ""
-#~ "Hiba esetén a parancsfájl leállítja a végrehajtást a megadott "
-#~ "újrapróbálkozások száma után"
-
-#~ msgid "The default setting of '0' will retry infinite."
-#~ msgstr "Az alapértelmezett „0” beállítás végtelenszer fog újrapróbálkozni."

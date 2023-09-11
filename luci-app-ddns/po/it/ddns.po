@@ -942,20 +942,3 @@ msgstr "secondi"
 msgid "to run HTTPS without verification of server certificates (insecure)"
 msgstr ""
 "per eseguire HTTPS senza la verifica dei certificati del server (insicuro)"
-
-#~ msgid "Interval unit to force updates send to DDNS Provider"
-#~ msgstr ""
-#~ "Unità dell'intervallo per l'invio forzato di aggiornamento al provider "
-#~ "DDNS"
-
-#~ msgid "On Error the script will retry the failed action after given time"
-#~ msgstr ""
-#~ "In caso di errore lo script riproverà l'azione fallita dopo il tempo dato"
-
-#~ msgid "On Error the script will stop execution after given number of retrys"
-#~ msgstr ""
-#~ "In caso di errori lo script fermerà l'esecuzione dopo il numero di "
-#~ "tentativi dati"
-
-#~ msgid "The default setting of '0' will retry infinite."
-#~ msgstr "L'opzione di default '0' riproverà all'infinito."

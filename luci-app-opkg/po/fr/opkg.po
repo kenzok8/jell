@@ -403,12 +403,3 @@ msgstr "~%1024mB compressé"
 #: applications/luci-app-opkg/htdocs/luci-static/resources/view/opkg.js:929
 msgid "~%1024mB installed"
 msgstr "~%1024mB installé"
-
-#~ msgid "Require approx. %.1024mB size for %d package(s) to install."
-#~ msgstr "Exiger env taille. %.1024mB pour %d paquet(s) à installer."
-
-#~ msgid "~%.1024mB compressed"
-#~ msgstr "~%.1024mB compressé"
-
-#~ msgid "~%.1024mB installed"
-#~ msgstr "~%.1024mB installé"
