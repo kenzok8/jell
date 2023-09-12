@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sing-box
-PKG_VERSION:=1.4.2
-PKG_RELEASE:=73
+PKG_VERSION:=1.5.0-beta.6
+PKG_RELEASE:=74
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/SagerNet/sing-box/tar.gz/v$(PKG_VERSION)?
@@ -100,6 +100,8 @@ define Package/sing-box/config
     config SING_BOX_BUILD_SHADOWSOCKSR
     bool "Build with ShadowsockR support"
     default y
+    help
+      It will be marked deprecated in 1.5.0 and removed entirely in 1.6.0.
 
     config SING_BOX_BUILD_UTLS
     bool "Build with uTLS support"

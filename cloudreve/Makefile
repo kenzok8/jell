@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=cloudreve
 PKG_VERSION:=3.8.2
-PKG_RELEASE:=13
+PKG_RELEASE:=14
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/cloudreve/Cloudreve.git
@@ -35,7 +35,7 @@ define Package/cloudreve
   SUBMENU:=Cloud Manager
   TITLE:=A project helps you build your own cloud in minutes
   URL:=https://cloudreve.org
-  DEPENDS:=@(aarch64||arm||i386||i686||x86_64) +ca-bundle
+  DEPENDS:=@(aarch64||arm||i386||i686||riscv64||x86_64) +ca-bundle
 endef
 
 define Package/cloudreve/description
