@@ -45,4 +45,15 @@ o.description = translate("不要太贪心, 当心被封号")
 o = s:option(Value, "max_parallel", translate("最大并发连接数"))
 o.placeholder = "8"
 
+o = s:option(Flag, "aria2", translate("使用aria2下载"))
+o.rmempty = false
+
+o = s:option(Value, "aria2_RPC", translate("Aria2 RPC地址"))
+o.default = "http://127.0.0.1:6800/jsonrpc"
+o.placeholder = "http://127.0.0.1:6800/jsonrpc"
+o.rmempty = false
+
+o = s:option(Value, "aria2_secret", translate("Aria2 RPC密钥"))
+o.password = true
+
 return m
