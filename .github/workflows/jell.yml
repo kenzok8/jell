@@ -134,11 +134,11 @@ jobs:
         git_clone https://github.com/linkease/nas-packages && mv -n nas-packages/{network/services/*,multimedia/*} ./; rm -rf nas-packages
         git_clone https://github.com/linkease/nas-packages-luci && mv -n nas-packages-luci/luci/* ./; rm -rf nas-packages-luci
         git_clone https://github.com/linkease/istore && mv -n istore/luci/* ./; rm -rf istore
-        git_clone https://github.com/linkease/openwrt-app-actions
-        git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
         ) &
+        git_clone https://github.com/linkease/openwrt-app-actions &
         (
         git_clone https://github.com/KyleRicardo/MentoHUST-OpenWrt-ipk
+        git_clone https://github.com/AlexZhuo/luci-app-bandwidthd        
         git_clone https://github.com/frainzy1477/luci-app-clash
         git_clone https://github.com/yichya/openwrt-cloudflared
         git_clone https://github.com/peter-tank/luci-app-fullconenat
