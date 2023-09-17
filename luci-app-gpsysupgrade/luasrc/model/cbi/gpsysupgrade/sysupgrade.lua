@@ -520,10 +520,10 @@ function to_check()
 		model = "mediatek_filogic/xiaomi_redmi-router-ax6000-ubootmod"
 		check_update()
 		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-filogic-xiaomi_redmi-router-ax6000-ubootmod-squashfs-sysupgrade.bin"
-    elseif board_name:match("mt7981%-360%-t7%-108M$") then
-		model = "mediatek_mt7981/mt7981-360-t7-108M"
+    elseif board_name:match("qihoo,360t7$") then
+		model = "mediatek_filogic/qihoo_360t7"
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-mt7981-360-t7-108M-squashfs-sysupgrade.bin"
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek_filogic-qihoo_360t7-squashfs-sysupgrade.bin"
     elseif board_name:match("linksys,ea4500$") then
 		model = "kirkwood_generic/linksys_ea4500"
 		check_update()
@@ -604,6 +604,34 @@ function to_check()
 		model = "mediatek_mt7981/xiaomi_wr30u-112M"
 		check_update()
 		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-xiaomi_wr30u-112M-squashfs-sysupgrade.bin"
+    elseif board_name:match("zr%-3020$") then
+		model = "mediatek_mt7981/livinet_zr-3020"
+		check_update()
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-livinet_zr-3020-squashfs-sysupgrade.bin"
+    elseif board_name:match("cetron,ct3003$") then
+		model = "mediatek_mt7981/cetron_ct3003"
+		check_update()
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-cetron_ct3003-squashfs-sysupgrade.bin"
+    elseif board_name:match("jcg,q30$") then
+		model = "mediatek_mt7981/jcg_q30"
+		check_update()
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-jcg_q30-squashfs-sysupgrade.bin"
+    elseif board_name:match("mt7981%-clt%-r30b1%-112M$") then
+		model = "mediatek_mt7981/mt7981-clt-r30b1-112M"
+		check_update()
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-mt7981-clt-r30b1-112M-squashfs-sysupgrade.bin"
+    elseif board_name:match("komi%-a31$") then
+		model = "mediatek_mt7981/konka_komi-a31"
+		check_update()
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-konka_komi-a31-squashfs-sysupgrade.bin"
+    elseif board_name:match("lc%-hx3001$") then
+		model = "mediatek_mt7981/imou_lc-hx3001"
+		check_update()
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-imou_lc-hx3001-squashfs-sysupgrade.bin"
+    elseif board_name:match("cmcc,rax3000m$") then
+		model = "mediatek_mt7981/cmcc_rax3000m"
+		check_update()
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-mt7981-cmcc_rax3000m-squashfs-sysupgrade.bin"
     elseif board_name:match("redmi,ax3000$") then
 		model = "ipq50xx_arm/redmi_ax3000"
 		check_update()
