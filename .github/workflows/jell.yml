@@ -225,7 +225,7 @@ jobs:
 
         (
         git_sparse_clone master "https://github.com/immortalwrt/packages" "immpkgs" net/mwol net/n2n net/dae \
-        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived net/microsocks net/naiveproxy \
+        net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived net/microsocks \
         net/go-nats net/go-wol net/simple-torrent net/bitsrunlogin-go net/transfer net/cloudreve net/daed \
         net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gowebdav net/qBittorrent-Enhanced-Edition \
         admin/btop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar \
@@ -247,6 +247,8 @@ jobs:
         ) &
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" "leluci" applications libs/luci-lib-fs
         mv -f applications luciapp
+        rm -rf naiveproxy
+        svn export https://github.com/kenzok8/wall/trunk/naiveproxy
         rm -rf luciapp/{luci-app-qbittorrent,luci-app-cpufreq}
         git_sparse_clone openwrt-23.05 "https://github.com/immortalwrt/luci" "immluci" applications protocols/luci-proto-minieap
         mv -n applications/* luciapp/; rm -rf applications
