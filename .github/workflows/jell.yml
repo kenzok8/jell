@@ -197,10 +197,12 @@ jobs:
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
+        svn export https://github.com/immortalwrt/packages/trunk/devel/gn
         svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-bypass
         svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
         svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/luci-app-irqbalance
-        svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-control-speedlimit        
+        svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-speedlimit
+        
         ) &
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" "leanpkg" net/miniupnpd net/mwan3 multimedia/UnblockNeteaseMusic-Go \
@@ -229,7 +231,7 @@ jobs:
         net/go-nats net/go-wol net/simple-torrent net/bitsrunlogin-go net/transfer net/cloudreve net/daed \
         net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gowebdav net/qBittorrent-Enhanced-Edition \
         admin/btop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar \
-        libs/libdouble-conversion libs/qt6base libs/cxxopts libs/jpcre2 libs/alac devel/gn \
+        libs/libdouble-conversion libs/qt6base libs/cxxopts libs/jpcre2 libs/alac \
         utils/qt6tools utils/cpulimit utils/filebrowser utils/cups utils/cups-bjnp utils/joker net/udp2raw net/msd_lite \
         multimedia/you-get multimedia/lux multimedia/ykdl multimedia/gallery-dl devel/go-rice admin/gotop
         ) &
