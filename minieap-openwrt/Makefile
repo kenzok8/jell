@@ -2,8 +2,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=minieap
 PKG_VERSION:=0.93.7
-PKG_RELEASE:=5
-PKG_MAINTAINER:=lala <2674771438@qq.com>
+PKG_RELEASE:=6
+PKG_MAINTAINER:=lala <maoerpet@foxmail.com>
 PKG_LICENSE:=GPLv3
 PKG_LICENSE_FILES:=LICENSE
 
@@ -19,7 +19,7 @@ define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=Extensible 802.1x client with Ruijie v3 (v4) plugin
-	MAINTAINER:=updateing
+	MAINTAINER:=updateing && lala
 	URL:=https://github.com/ZenZRyan
 endef
 
