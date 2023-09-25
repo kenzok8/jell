@@ -1,7 +1,5 @@
 #!/bin/sh
 
-sed -i '/echo "radio_config_id=${radio_md5sum}" >> $hostapd_conf_file/d' /lib/netifd/wireless/mac80211.sh
-
 sed -i "s/op.supes.top/dl.openwrt.ai/" /etc/opkg/distfeeds.conf
 
 ([ -x /bin/bash ] && ! grep -q "^root.*bash" /etc/passwd) && sed -i "s/^\(root.*\/\)ash/\1bash/g" /etc/passwd
