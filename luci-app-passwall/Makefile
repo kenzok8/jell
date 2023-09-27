@@ -137,7 +137,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
 	bool "Include Sing-Box"
-	default y if aarch64||arm||i386||x86_64
+	default n
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_GO
 	bool "Include Trojan-GO"
@@ -154,7 +154,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata
 	bool "Include V2ray_Geodata"
-	default n
+	default y if aarch64||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin
 	bool "Include V2ray-Plugin (Shadowsocks Plugin)"

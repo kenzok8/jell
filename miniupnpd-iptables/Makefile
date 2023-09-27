@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd-iptables
 PKG_VERSION:=3022-08-31
-PKG_RELEASE:=11
+PKG_RELEASE:=12
 
 # Content-Encoding conflict, can refer to this [issue](https://github.com/miniupnp/miniupnp/issues/605)
 # so switch mirror repo to http://miniupnp.tuxfamily.org

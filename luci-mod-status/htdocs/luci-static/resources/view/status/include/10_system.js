@@ -28,11 +28,6 @@ var callCPUInfo = rpc.declare({
 	method: 'getCPUInfo'
 });
 
-var callCPUUsage = rpc.declare({
-	object: 'luci',
-	method: 'getCPUUsage'
-});
-
 var callTempInfo = rpc.declare({
 	object: 'luci',
 	method: 'getTempInfo'
@@ -45,6 +40,9 @@ return baseclass.extend({
 		return Promise.all([
 			L.resolveDefault(callSystemBoard(), {}),
 			L.resolveDefault(callSystemInfo(), {}),
+			L.resolveDefault(callCPUBench(), {}),
+			L.resolveDefault(callCPUInfo(), {}),
+			L.resolveDefault(callTempInfo(), {}),
 			L.resolveDefault(callLuciVersion(), { revision: _('unknown version'), branch: 'LuCI' })
 		]);
 	},
@@ -54,9 +52,8 @@ return baseclass.extend({
 		    systeminfo  = data[1],
 		    cpubench    = data[2],
 		    cpuinfo     = data[3],
-		    cpuusage    = data[4],
-		    tempinfo    = data[5],
-		    luciversion = data[6];
+		    tempinfo    = data[4],
+		    luciversion = data[5];
 
 		luciversion = luciversion.branch + ' ' + luciversion.revision;
 

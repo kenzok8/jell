@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=dnsmasq
 PKG_UPSTREAM_VERSION:=2.89
 PKG_VERSION:=$(subst test,~~test,$(subst rc,~rc,$(PKG_UPSTREAM_VERSION)))
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_UPSTREAM_VERSION).tar.xz
 PKG_SOURCE_URL:=https://thekelleys.org.uk/dnsmasq/
@@ -113,9 +113,6 @@ define Package/dnsmasq-full/config
 	config PACKAGE_dnsmasq_full_ipset
 		bool "Build with IPset support."
 		default n
-	config PACKAGE_dnsmasq_full_nftset
-		bool "Build with Nftset support."
-		default y
 	config PACKAGE_dnsmasq_full_conntrack
 		bool "Build with Conntrack support."
 		default y

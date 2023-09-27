@@ -1,5 +1,8 @@
 #!/bin/sh
 
+grep -q api.ipify.org /usr/share/passwall/rules/proxy_host ||
+	sed -i '$a api.ipify.org' /usr/share/passwall/rules/proxy_host
+
 uci -q batch <<-EOF >/dev/null
 	set dhcp.@dnsmasq[0].localuse=1
 	commit dhcp
