@@ -197,11 +197,14 @@ jobs:
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
-        svn export https://github.com/immortalwrt/packages/trunk/devel/gn
         svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-bypass
         svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
         svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/luci-app-irqbalance
-        svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-speedlimit
+        svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-control-speedlimit
+        #svn export https://github.com/xiaoxifu64/immortalwrt/trunk/package/rooter/ext-rooter-basic
+        svn export https://github.com/openwrt/luci/branches/openwrt-22.03/applications/luci-app-wireguard
+        svn export https://github.com/lucikap/Brukamen/trunk/luci-app-ua2f
+        svn export https://github.com/HiGarfield/lede-17.01.4-Mod-a/trunk/package/extra/luci-app-openvpn-server
         
         ) &
         (
@@ -229,7 +232,7 @@ jobs:
         git_sparse_clone openwrt-23.05 "https://github.com/immortalwrt/packages" "immpkgs" net/mwol net/n2n net/dae \
         net/sub-web net/dnsproxy net/haproxy net/v2raya net/cdnspeedtest net/keepalived net/microsocks \
         net/go-nats net/go-wol net/simple-torrent net/bitsrunlogin-go net/transfer net/cloudreve net/daed \
-        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gowebdav net/qBittorrent-Enhanced-Edition \
+        net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/gowebdav net/qBittorrent-Enhanced-Edition \
         admin/btop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar \
         libs/libdouble-conversion libs/qt6base libs/cxxopts libs/jpcre2 libs/alac \
         utils/qt6tools utils/cpulimit utils/filebrowser utils/cups utils/cups-bjnp utils/joker net/udp2raw net/msd_lite \
@@ -249,8 +252,6 @@ jobs:
         ) &
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" "leluci" applications libs/luci-lib-fs
         mv -f applications luciapp
-        rm -rf naiveproxy
-        svn export https://github.com/kenzok8/wall/trunk/naiveproxy
         rm -rf luciapp/{luci-app-qbittorrent,luci-app-cpufreq}
         git_sparse_clone openwrt-23.05 "https://github.com/immortalwrt/luci" "immluci" applications protocols/luci-proto-minieap
         mv -n applications/* luciapp/; rm -rf applications
@@ -266,9 +267,10 @@ jobs:
     - name: Delete duplicated packages
       run: |
         shopt -s extglob
-        mv -n luciapp/!(luci-app-noddos|luci-app-cshark|luci-app-dnscrypt-proxy|luci-app-https-dns-proxy|luci-app-ssr-mudb-server|luci-app-ledtrig-*) ./ ; rm -Rf luciapp
+        mv -n luciapp/!(luci-app-noddosluci-app-cshark|luci-app-dnscrypt-proxy|luci-app-https-dns-proxy|luci-app-ssr-mudb-server|luci-app-ledtrig-*) ./ ; rm -Rf luciapp
         mv -n lean/* ./ ; rm -Rf lean
         mv -n liep/* ./ ; rm -Rf liep
+        mv -n wwan/*/* ./; rm -rf wwan
         mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
         rm -Rf */.git
         for pkg in $(ls -d .github/diy/packages/*); do
@@ -297,10 +299,10 @@ jobs:
         (
         function latest() {
           (curl -gs -H 'Content-Type: application/json' \
-             -H "Authorization: Bearer ${{ secrets.REPO_TOKEN }}" \
+             -H "Authorization: Bearer ${{ secrets.TOKEN_KIDDIN9 }}" \
              -X POST -d '{ "query": "query {repository(owner: \"'"$1"'\", name: \"'"$2"'\"){latestRelease{tagName tagCommit{oid}}refs(refPrefix:\"refs/tags/\",last:1,orderBy:{field:TAG_COMMIT_DATE,direction:ASC}){edges{node{name target{oid}}}}defaultBranchRef{target{...on Commit {oid}}}}}"}' https://api.github.com/graphql)
         }
-        for pkg in $(ls !(luci-*|libtorrent-rasterbar|shadowsocksr-libev|mt76|sub-web|mmdvm-host|alist|curl|qBittorrent-Enhanced-Edition|libwxwidgets|ysf-clients|natter|fullconenat|v2raya|r8152|amule|brook|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|mosdns|r8168|coremark|mbedtls|rtl8821cu|rtl8188eu|rtl8812au-ac|rtl88x2bu|rtl8189es|quickjspp|accel-ppp)/Makefile); do
+        for pkg in $(ls !(luci-*|libtorrent-rasterbar|xtables-wgobfs|softethervpn5|shadowsocksr-libev|mt76|sub-web|mmdvm-host|alist|curl|qBittorrent-Enhanced-Edition|libwxwidgets|ysf-clients|natter|fullconenat|v2raya|r8152|amule|brook|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|tailscale|mosdns|r8168|coremark|mbedtls|rtl8821cu|rtl8188eu|rtl8812au-ac|rtl88x2bu|rtl8189es|quickjspp|accel-ppp)/Makefile); do
           repo="$(grep PKG_SOURCE_URL $pkg | grep github | cut -f 4-5 -d '/' | sed -e 's/.git//' | grep -E '[0-9a-zA-Z_-]+$')" || true
           if [ "$repo" ]; then
             owner="$(echo $repo | cut -f 1 -d '/')"
@@ -326,7 +328,6 @@ jobs:
         touch /tmp/ok
         ) &
         
-        
         (
         for pkg in $(find -maxdepth 1 -type d -name "luci-*" ! -name "luci-app-dockerman" ! -name "luci-app-store"); do
           if [ "$(grep "luci.mk" $pkg/Makefile)" ]; then
@@ -343,7 +344,7 @@ jobs:
             sed -i "s/\(PKG_VERSION:=.*\)/\1\nPKG_RELEASE:=/" $pkg/Makefile || true
           fi
           if [ "$(grep "PKG_RELEASE" $pkg/Makefile)" ]; then
-            sed -i "s/PKG_RELEASE:=.*/PKG_RELEASE:=$(git rev-list --count main $pkg)/" $pkg/Makefile || true
+            sed -i "s/PKG_RELEASE:=.*/PKG_RELEASE:=$(git rev-list --count master $pkg)/" $pkg/Makefile || true
           fi
         done
         touch /tmp/ok2
