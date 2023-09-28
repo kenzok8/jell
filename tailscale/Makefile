@@ -9,9 +9,9 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tailscale
 PKG_VERSION:=1.50.0
-PKG_RELEASE:=29
+PKG_RELEASE:=30
 
-PKG_SOURCE:=tailscale-$(PKG_VERSION).tar.gz
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/tailscale/tailscale/tar.gz/v$(PKG_VERSION)?
 PKG_HASH:=skip
 
@@ -63,29 +63,7 @@ Package/tailscaled/description:=$(Package/tailscale/description)
 
 define Package/tailscaled/conffiles
 /etc/config/tailscale
-/etc/tailscale/tailscaled.state
-endef
-
-GO_IPTABLES_VERSION:=0.6.0
-GO_IPTABLES_FILE:=$(PKG_NAME)-go-iptables-$(GO_IPTABLES_VERSION).tar.gz
-
-define Download/go-iptables
-  URL:=https://codeload.github.com/coreos/go-iptables/tar.gz/v$(GO_IPTABLES_VERSION)?
-  URL_FILE:=$(GO_IPTABLES_FILE)
-  FILE:=$(GO_IPTABLES_FILE)
-  HASH:=skip
-endef
-
-define Build/Prepare
-	$(PKG_UNPACK)
-	[ ! -d ./src/ ] || $(CP) ./src/. $(PKG_BUILD_DIR)
-	$(eval $(call Download,go-iptables))
-	( \
-		mkdir -p $(PKG_BUILD_DIR)/patched/ ; \
-		gzip -dc $(DL_DIR)/$(GO_IPTABLES_FILE) | $(HOST_TAR) -C $(PKG_BUILD_DIR)/patched $(TAR_OPTIONS) ; \
-		mv $(PKG_BUILD_DIR)/patched/go-iptables-$(GO_IPTABLES_VERSION) $(PKG_BUILD_DIR)/patched/go-iptables ; \
-	)
-	$(Build/Patch)
+/etc/tailscale/
 endef
 
 define Package/tailscale/install
