@@ -1,8 +1,8 @@
-# Copyright (C) 2020-2021 Hyy2001X <https://github.com/Hyy2001X>
+# Copyright (C) 2020-2023 Hyy2001X <https://github.com/Hyy2001X>
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=LuCI support for iPerf3
+LUCI_TITLE:=LuCI support for iPerf3 server
 LUCI_DEPENDS:=+iperf3
 LUCI_PKGARCH:=all
 
