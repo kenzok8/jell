@@ -523,7 +523,7 @@ function to_check()
     elseif board_name:match("qihoo,360t7$") then
 		model = "mediatek_filogic/qihoo_360t7"
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek_filogic-qihoo_360t7-squashfs-sysupgrade.bin"
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mediatek-filogic-qihoo_360t7-squashfs-sysupgrade.bin"
     elseif board_name:match("linksys,ea4500$") then
 		model = "kirkwood_generic/linksys_ea4500"
 		check_update()
