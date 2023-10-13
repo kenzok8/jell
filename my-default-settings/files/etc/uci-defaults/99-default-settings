@@ -53,6 +53,9 @@ if [[ ! "$version" || "$version" -lt 1 ]]; then
 	if uci -q get system.@system[0] >/dev/null; then
 		uci -q set system.@system[0].zonename='Asia/Shanghai'
 		uci -q set system.@system[0].timezone='CST-8'
+		uci -q set system.@system[0].conloglevel='4'
+		uci -q set system.@system[0].cronloglevel='8'
+		uci -q set system.@system[0].ttylogin='1'
 		uci -q del system.ntp.server
 		uci -q add_list system.ntp.server='ntp.aliyun.com'
 		uci -q add_list system.ntp.server='0.openwrt.pool.ntp.org'
@@ -168,9 +171,7 @@ if [[ ! "$version" || "$version" -lt 1 ]]; then
 	uci -q set nft-qos.default.limit_enable='0'
 	uci commit nft-qos
 
-	uci -q set system.@system[0].conloglevel='4'
-	uci -q set system.@system[0].cronloglevel='8'
-	uci commit system
+	
 fi
 
 # kB
