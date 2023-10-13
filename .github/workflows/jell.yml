@@ -187,6 +187,8 @@ jobs:
         git_clone https://github.com/htynkn/openwrt-switch-lan-play && mv -n openwrt-switch-lan-play/package/* ./ && rm -rf openwrt-switch-lan-play
         git_clone https://github.com/jerrykuku/lua-maxminddb
         git_clone https://github.com/Ausaci/luci-app-nat6-helper
+        ) &
+        (
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust        
         git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
         git_clone https://github.com/derisamedia/luci-theme-alpha
@@ -194,6 +196,8 @@ jobs:
         git_clone https://github.com/gngpp/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
         git_clone https://github.com/rosywrt/luci-theme-rosy
+        git_clone https://github.com/izilzty/luci-app-chinadns-ng
+        git_clone https://github.com/Diciya/luci-app-broadbandacc	
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
