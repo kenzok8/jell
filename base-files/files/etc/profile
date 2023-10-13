@@ -22,7 +22,7 @@ esac
 
 [ -n "$FAILSAFE" ] || {
 	for FILE in /etc/profile.d/*.sh; do
-		if [ "$FILE" == "/etc/profile.d/sysinfo.sh" ]; then
+		if [ "$FILE" == "/etc/profile.d/30-sysinfo.sh" ]; then
 		 [ "$(which bash)" ] && env -i bash "$FILE"
 		else
 		 [ -e "$FILE" ] && . "$FILE"
