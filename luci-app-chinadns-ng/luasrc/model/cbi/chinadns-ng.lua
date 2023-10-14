@@ -32,13 +32,11 @@ o.rmempty     = false
 o = s:option(Value, "chnlist_file", translate("CHNRoute File"))
 o.placeholder = "/etc/chinadns-ng/chinalist.txt"
 o.default     = "/etc/chinadns-ng/chinalist.txt"
-o.datatype    = "file"
 o.rmempty     = false
 
 o = s:option(Value, "gfwlist_file", translate("GFWRoute File"))
 o.placeholder = "/etc/chinadns-ng/gfwlist.txt"
 o.default     = "/etc/chinadns-ng/gfwlist.txt"
-o.datatype    = "file"
 o.rmempty     = false
 
 o = s:option(Value, "timeout_sec", translate("timeout_sec"))
