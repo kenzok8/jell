@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=shadowsocksr-libev
 PKG_VERSION:=2.5.6
-PKG_RELEASE:=7
+PKG_RELEASE:=8
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/shadowsocksrr/shadowsocksr-libev
@@ -21,6 +21,7 @@ PKG_LICENSE_FILES:=LICENSE
 
 PKG_FIXUP:=autoreconf
 PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
 

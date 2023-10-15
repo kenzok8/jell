@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=v2rayA
 PKG_VERSION:=1.5.9.1698.1
-PKG_RELEASE:=48
+PKG_RELEASE:=49
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/v2rayA/v2rayA/tar.gz/v$(PKG_VERSION)?
@@ -20,6 +20,7 @@ PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=github.com/v2rayA/v2rayA
 GO_PKG_LDFLAGS_X:=$(GO_PKG)/conf.Version=$(PKG_VERSION)
