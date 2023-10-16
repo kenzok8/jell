@@ -226,6 +226,7 @@ if [[ ! "$version" || "$version" -lt 1 ]]; then
 	mkdir -p /etc/sysctl.d
 	echo -n >$SYSCTL_LOCAL
 	echo net.nf_conntrack_max=$nf_conntrack_max >>$SYSCTL_LOCAL
+	echo net.core.rmem_max=$nf_conntrack_max >>$SYSCTL_LOCAL
 	version=1
 fi
 
