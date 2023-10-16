@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwrt-cloudflared
 PKG_VERSION:=2023.8.2
-PKG_RELEASE:=37
+PKG_RELEASE:=38
 
 PKG_LICENSE:=MPLv2
 PKG_LICENSE_FILES:=LICENSE
@@ -34,6 +34,15 @@ define Package/$(PKG_NAME)/config
 menu "openwrt-cloudflared Configuration"
         depends on PACKAGE_$(PKG_NAME)
 
+config PACKAGE_OPENWRT_CLOUDFLARED_USE_EXTERNAL_GO_TOOLCHAIN
+	bool "Use external go toolchain"
+	default n
+
+config PACKAGE_OPENWRT_CLOUDFLARED_EXTERNAL_GO_TOOLCHAIN
+	depends on PACKAGE_OPENWRT_CLOUDFLARED_USE_EXTERNAL_GO_TOOLCHAIN
+	string "External go toolchain executable"
+	default ""
+
 config PACKAGE_OPENWRT_CLOUDFLARED_RUN_AS_NETWORK
         bool "Run as user network"
         default n
@@ -51,8 +60,14 @@ endef
 DATE:=$(shell date -u '+%Y-%m-%d-%H%M UTC')
 VERSION_FLAGS:=-X "main.Version=$(PKG_VERSION)" -X "main.BuildTime=$(DATE)"
 
+ifdef CONFIG_PACKAGE_OPENWRT_CLOUDFLARED_USE_EXTERNAL_GO_TOOLCHAIN
+	GO_TOOLCHAIN_EXECUTABLE:=$(CONFIG_PACKAGE_OPENWRT_CLOUDFLARED_EXTERNAL_GO_TOOLCHAIN)
+else
+	GO_TOOLCHAIN_EXECUTABLE:=go
+endif
+
 define Build/Compile
-	cd $(PKG_BUILD_DIR); $(GO_PKG_VARS) CGO_ENABLED=0 go build -trimpath -ldflags '-s -w $(VERSION_FLAGS)' -o $(PKG_INSTALL_DIR)/bin/cloudflared ./cmd/cloudflared; 
+	cd $(PKG_BUILD_DIR); $(GO_PKG_VARS) CGO_ENABLED=0 $(GO_TOOLCHAIN_EXECUTABLE) build -trimpath -ldflags '-s -w $(VERSION_FLAGS)' -o $(PKG_INSTALL_DIR)/bin/cloudflared ./cmd/cloudflared;
 endef
 
 define Package/$(PKG_NAME)/install
