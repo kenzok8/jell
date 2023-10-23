@@ -132,11 +132,13 @@ function generate_outbound(node) {
 		/* Direct */
 		override_address: node.override_address,
 		override_port: strToInt(node.override_port),
-		proxy_protocol: strToInt(node.proxy_protocol),
-		/* Hysteria */
+		/* Hysteria (2) */
 		up_mbps: strToInt(node.hysteria_down_mbps),
 		down_mbps: strToInt(node.hysteria_down_mbps),
-		obfs: node.hysteria_bofs_password,
+		obfs: node.hysteria_obfs_type ? {
+			type: node.hysteria_obfs_type,
+			password: node.hysteria_obfs_password
+		} : node.hysteria_obfs_password,
 		auth: (node.hysteria_auth_type === 'base64') ? node.hysteria_auth_payload : null,
 		auth_str: (node.hysteria_auth_type === 'string') ? node.hysteria_auth_payload : null,
 		recv_window_conn: strToInt(node.hysteria_recv_window_conn),
@@ -169,7 +171,7 @@ function generate_outbound(node) {
 		packet_encoding: node.packet_encoding,
 		/* WireGuard */
 		system_interface: (node.type === 'wireguard') || null,
-		interface_name: (node.type === 'wireguard') ? 'singwg-cfg-' + node['.name'] + '-out' : null,
+		interface_name: (node.type === 'wireguard') ? 'wg-' + node['.name'] + '-out' : null,
 		local_address: node.wireguard_local_address,
 		private_key: node.wireguard_private_key,
 		peer_public_key: node.wireguard_peer_public_key,
