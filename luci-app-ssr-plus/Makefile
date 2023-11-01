@@ -118,7 +118,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_MosDNS
 	bool "Include MosDNS"
-	default n
+	default y if i386||x86_64||arm
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria
 	bool "Include Hysteria"
