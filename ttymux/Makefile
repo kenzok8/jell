@@ -9,11 +9,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ttymux
 PKG_VERSION:=1
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL=https://github.com/wd5gnr/SerialMux.git
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=553d6e5b0d96773e8a7aaeb30d5bd1a1d1e3c8b9
 
 PKG_MAINTAINER:=Konstatnine Shevlakov <shevlakov@132lan.ru>
 PKG_LICENSE:=GPL-2.0
