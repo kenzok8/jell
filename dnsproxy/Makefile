@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dnsproxy
-PKG_VERSION:=0.56.3
-PKG_RELEASE:=58
+PKG_VERSION:=0.57.1
+PKG_RELEASE:=59
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/AdguardTeam/dnsproxy/tar.gz/v$(PKG_VERSION)?
