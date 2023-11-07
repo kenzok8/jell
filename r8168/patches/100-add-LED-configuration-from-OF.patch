@@ -1,6 +1,6 @@
---- a/src/r8125_n.c
-+++ b/src/r8125_n.c
-@@ -43,6 +43,7 @@
+--- a/src/r8168_n.c
++++ b/src/r8168_n.c
+@@ -47,6 +47,7 @@
  #include <linux/etherdevice.h>
  #include <linux/delay.h>
  #include <linux/mii.h>
@@ -8,12 +8,11 @@
  #include <linux/if_vlan.h>
  #include <linux/crc32.h>
  #include <linux/interrupt.h>
-@@ -14818,6 +14819,23 @@ rtl8125_setup_mqs_reg(struct rtl8125_pri
-         }
+@@ -25852,6 +25853,22 @@ rtl8168_setup_mqs_reg(struct rtl8168_pri
+         tp->imr_reg[3] = IntrMask3;
  }
  
-+static int
-+rtl8125_led_configuration(struct rtl8125_private *tp)
++static int rtl8168_led_configuration(struct rtl8168_private *tp)
 +{
 +        u32 led_data;
 +        int ret;
@@ -30,14 +29,14 @@
 +}
 +
  static void
- rtl8125_init_software_variable(struct net_device *dev)
+ rtl8168_init_software_variable(struct net_device *dev)
  {
-@@ -15384,6 +15402,8 @@ rtl8125_init_software_variable(struct ne
-         if (tp->InitRxDescType == RX_DESC_RING_TYPE_3)
-                 tp->rtl8125_rx_config |= EnableRxDescV3;
+@@ -26547,6 +26564,8 @@ err1:
+         if (tp->InitRxDescType == RX_DESC_RING_TYPE_2)
+                 tp->RxDescLength = RX_DESC_LEN_TYPE_2;
  
-+        rtl8125_led_configuration(tp);
++        rtl8168_led_configuration(tp);
 +
          tp->NicCustLedValue = RTL_R16(tp, CustomLED);
  
-         tp->wol_opts = rtl8125_get_hw_wol(tp);
+         rtl8168_get_hw_wol(dev);
