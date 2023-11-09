@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=trojan
 PKG_VERSION:=1.16.0
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/trojan-gfw/trojan/tar.gz/v$(PKG_VERSION)?
@@ -50,14 +50,13 @@ CMAKE_OPTIONS += \
 	-DBoost_NO_BOOST_CMAKE=ON
 
 define Package/trojan
-  SECTION:=net
-  CATEGORY:=Network
-  SUBMENU:=Web Servers/Proxies
-  TITLE:=An unidentifiable mechanism that helps you bypass GFW
-  URL:=https://github.com/trojan-gfw/trojan
-  DEPENDS:= \
-    +libpthread +libstdcpp +libopenssl \
-    +boost +boost-system +boost-program_options +boost-date_time
+	SECTION:=net
+	CATEGORY:=Network
+	TITLE:=An unidentifiable mechanism that helps you bypass GFW
+	URL:=https://github.com/trojan-gfw/trojan
+	DEPENDS:= \
+		+libpthread +libstdcpp +libopenssl \
+		+boost +boost-system +boost-program_options +boost-date_time
 endef
 
 define Package/trojan/install
