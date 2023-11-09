@@ -4,7 +4,7 @@ module("luci.controller.shadowsocksr", package.seeall)
 
 function index()
 	if not nixio.fs.access("/etc/config/shadowsocksr") then
-		return
+		call("act_reset")
 	end
 	local page
 	page = entry({"admin", "services", "shadowsocksr"}, alias("admin", "services", "shadowsocksr", "client"), _("ShadowSocksR Plus+"), 10)
