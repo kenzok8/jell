@@ -74,7 +74,7 @@ jobs:
         ) &
         (
         #git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
-        git clone https://github.com/XiaoliChan/helloworld -b mosdns-improv && rm -rf helloworld/v2raya && mvdir helloworld
+        git clone https://github.com/XiaoliChan/helloworld -b main && rm -rf helloworld/v2raya && mvdir helloworld
         git_clone https://github.com/Lienol/openwrt-package liep
         git clone https://github.com/AutoCONFIG/minieap-openwrt -b default
         git_clone https://github.com/rufengsuixing/luci-app-autoipsetadder
