@@ -1,8 +1,5 @@
 #!/bin/sh
 
-ARGS=$1
-DEVPORT=$(uci -q get atinout.general.atcport)
+ESCAPE=$(echo $1 | awk '{gsub(/[][\\.\\"^$(){}]/, "\\\\&"); print $0}')
 
-if [ "$DEVPORT" ]; then 
-	echo "${ARGS}" | /usr/bin/atinout - ${DEVPORT} -
-fi
+echo $ESCAPE | atinout - $2 -
