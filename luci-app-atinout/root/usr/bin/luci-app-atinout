@@ -1,5 +1,3 @@
 #!/bin/sh
 
-ESCAPE=$(echo $1 | awk '{gsub(/[][\\.\\"^$(){}]/, "\\\\&"); print $0}')
-
-echo $ESCAPE | atinout - $2 -
+echo $1 | atinout - $2 -
