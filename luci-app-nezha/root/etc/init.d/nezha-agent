@@ -29,10 +29,6 @@ service_triggers() {
         procd_add_reload_trigger "nezha-agent"
 }
 
-service_triggers() {
-	procd_add_reload_trigger "nezha-agent"
-}
-
 reload_service() {
   stop
   start
