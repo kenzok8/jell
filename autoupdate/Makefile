@@ -1,10 +1,10 @@
-# Copyright (C) 2020-2022 Hyy2001X <https://github.com/Hyy2001X>
+# Copyright (C) 2020-2023 Hyy2001X <https://github.com/Hyy2001X>
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autoupdate
 PKG_VERSION:=1
-PKG_RELEASE:=9
+PKG_RELEASE:=10
 
 include $(INCLUDE_DIR)/package.mk
 
