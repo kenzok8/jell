@@ -49,7 +49,7 @@ start() {
 	
 	hardisk=$shda$shdb$shdc$shdd$sother
 	cmd="qemu-system-x86_64 -name synology -enable-kvm -cpu $cpu -m ${m}G -smp $smp -vnc :$vnc \
-	$hardisk -device e1000,netdev=br0 -netdev bridge,br=br-lan,id=br0 -qmp tcp:127.0.0.1:$qmp,server,nowait -daemonize"
+	$hardisk -device e1000,netdev=br0 -netdev bridge,br=br-lan,id=br0 -qmp tcp:127.0.0.1:$qmp,server,nowait -nographic"
 	exec $cmd
 	sleep 1
 	qemu_pid=$(/usr/bin/pgrep -f 'qemu-system-x86_64 -name synology')
