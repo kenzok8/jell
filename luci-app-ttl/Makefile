@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Antitethering module for luci-app-firewall
-LUCI_DEPENDS:= +luci-app-firewall +iptables-mod-ipopt +kmod-ipt-ipopt +kmod-ipt-nat6
+LUCI_DEPENDS:= +luci-app-firewall +iptables-mod-ipopt +kmod-ipt-ipopt
 
 PKG_LICENSE:=Apache-2.0
 
