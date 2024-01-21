@@ -11,11 +11,6 @@ LUCI_DEPENDS:= +luci-app-firewall +iptables-mod-ipopt +kmod-ipt-ipopt
 
 PKG_LICENSE:=Apache-2.0
 
-define Package/luci-app-ttl/postrm
-	uci delete "firewall.@include[-1]" && \
-		rm -rf /etc/config/ttl
-endef
-
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
