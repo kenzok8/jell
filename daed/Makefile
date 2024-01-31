@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=daed
-PKG_RELEASE:=19
+PKG_RELEASE:=20
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/daeuniverse/daed.git
@@ -25,7 +25,7 @@ PKG_BUILD_FLAGS:=no-mips16
 GO_PKG:=github.com/daeuniverse/dae-wing
 GO_PKG_LDFLAGS:= \
 	-X '$(GO_PKG)/db.AppDescription=$(PKG_NAME) is a integration solution of dae, API and UI.'
-GO_PKG_LDFLAGS_X:= \
+GO_PKG_LDFLAGS_X= \
 	$(GO_PKG)/db.AppName=$(PKG_NAME) \
 	$(GO_PKG)/db.AppVersion=$(PKG_VERSION)
 GO_PKG_TAGS:=embedallowed
