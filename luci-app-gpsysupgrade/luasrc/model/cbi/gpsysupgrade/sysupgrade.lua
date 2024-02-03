@@ -436,10 +436,10 @@ function to_check()
 		model = "mvebu_cortexa9/linksys_wrt32x"
 		check_update()
 		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-mvebu-cortexa9-linksys_wrt32x-squashfs-sysupgrade.bin"
-    elseif board_name:match("qihoo,v6$") then
-		model = "qualcommax_ipq60xx/qihoo_v6"
+    elseif board_name:match("qihoo,360v6$") then
+		model = "qualcommax_ipq60xx/qihoo_360v6"
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-qualcommax-ipq60xx-qihoo_v6-squashfs-nand-sysupgrade.bin"
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-qualcommax-ipq60xx-qihoo_360v6-squashfs-nand-sysupgrade.bin"
     elseif board_name:match("glinet,gl%-axt1800$") then
 		model = "qualcommax_ipq60xx/glinet_gl-axt1800"
 		check_update()
