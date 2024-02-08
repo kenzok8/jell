@@ -1162,7 +1162,7 @@ return view.extend({
 
 								return [
 									host || '-',
-									lease.ip6addrs ? lease.ip6addrs.join(' ') : lease.ip6addr,
+									lease.ip6addrs ? lease.ip6addrs.join('<br />') : lease.ip6addr,
 									lease.duid,
 									exp
 								];
