@@ -1,0 +1,30 @@
+--- luci-app-opkg/htdocs/luci-static/resources/view/opkg.js
++++ luci-app-opkg/htdocs/luci-static/resources/view/opkg.js
+@@ -1105,8 +1120,8 @@ function updateLists(data)
+ 		    mount = L.toArray(data[0].filter(function(m) { return m.mount == '/' || m.mount == '/overlay' }))
+ 		    	.sort(function(a, b) { return a.mount > b.mount })[0] || { size: 0, free: 0 };
+ 
+-		pg.firstElementChild.style.width = Math.floor(mount.size ? ((100 / mount.size) * mount.free) : 100) + '%';
+-		pg.setAttribute('title', '%s (%1024mB)'.format(pg.firstElementChild.style.width, mount.free));
++		pg.firstElementChild.style.width = Math.floor(mount.size ? ((100 / mount.size) * (mount.size-mount.free)) : 100) + '%';
++		pg.setAttribute('title', '%.1024mB / %.1024mB (%s)'.format((mount.size-mount.free), mount.size, pg.firstElementChild.style.width));
+ 
+ 		parseList(data[1], packages.available);
+ 		parseList(data[2], packages.installed);
+@@ -1145,14 +1160,14 @@ return view.extend({
+ 
+ 			E('div', { 'class': 'controls' }, [
+ 				E('div', {}, [
+-					E('label', {}, _('Free space') + ':'),
++					E('label', {}, _('Used space') + ':'),
+ 					E('div', { 'class': 'cbi-progressbar', 'title': _('unknown') }, E('div', {}, [ '\u00a0' ]))
+ 				]),
+ 
+ 				E('div', {}, [
+ 					E('label', {}, _('Filter') + ':'),
+ 					E('span', { 'class': 'control-group' }, [
+-						E('input', { 'type': 'text', 'name': 'filter', 'placeholder': _('Type to filter…'), 'value': query, 'input': handleInput }),
++						E('input', { 'type': 'text', 'name': 'filter', 'placeholder': _('Type to filter…'), 'value': 'luci-app-', 'input': handleInput }),
+ 						E('button', { 'class': 'btn cbi-button', 'click': handleReset }, [ _('Clear') ])
+ 					])
+ 				]),
