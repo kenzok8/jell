@@ -1103,7 +1103,7 @@ function updateLists(data)
 
 	return (data ? Promise.resolve(data) : downloadLists()).then(function(data) {
 		var pg = document.querySelector('.cbi-progressbar'),
-			mount = L.toArray(data[0].filter(function(m) { return m.mount == '/' || m.mount == '/overlay' }))
+		    mount = L.toArray(data[0].filter(function(m) { return m.mount == '/' || m.mount == '/overlay' }))
 				.sort(function(a, b) { return a.mount > b.mount })[0] || { size: 0, free: 0 };
 
 		pg.firstElementChild.style.width = Math.floor(mount.size ? (100 / mount.size) * (mount.size - mount.free) : 100) + '%';
@@ -1153,7 +1153,7 @@ return view.extend({
 				E('div', {}, [
 					E('label', {}, _('Filter') + ':'),
 					E('span', { 'class': 'control-group' }, [
-						E('input', { 'type': 'text', 'name': 'filter', 'placeholder': _('Type to filter…'), 'value': query, 'input': handleInput }),
+						E('input', { 'type': 'text', 'name': 'filter', 'placeholder': _('Type to filter…'), 'value': 'luci-app-', 'input': handleInput }),
 						E('button', { 'class': 'btn cbi-button', 'click': handleReset }, [ _('Clear') ])
 					])
 				]),

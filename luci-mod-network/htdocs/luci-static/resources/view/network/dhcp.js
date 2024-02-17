@@ -337,6 +337,25 @@ return view.extend({
 		s.tab('mxhosts', _('MX'));
 		s.tab('cnamehosts', _('CNAME'));
 		s.tab('pxe_tftp', _('PXE/TFTP'));
+		s.tab('custom_domain', _('Custom Redirect Domain'));
+
+		o = s.taboption('custom_domain', form.SectionValue, 'domain', form.GridSection, 'domain', null,
+			_('Define a custom domain name and the corresponding PTR record'));
+
+		ss = o.subsection;
+		ss.addremove = true;
+		ss.anonymous = true;
+
+		so = ss.option(form.Value, 'name', _('Domain Name'));
+		so.datatype = 'hostname';
+		so.rmempty  = true;
+
+		so = ss.option(form.Value, 'ip', _('<abbr title=\"Internet Protocol Version 4\">IPv4</abbr>-Address'));
+		so.datatype = 'or(ip4addr,"ignore")';
+		so.rmempty  = true;
+
+		so = ss.option(form.Value, 'comments', _('Comments'));
+		so.rmempty  = true;
 
 		s.taboption('filteropts', form.Flag, 'domainneeded',
 			_('Domain required'),
@@ -729,13 +748,6 @@ return view.extend({
 			_('Set a maximum seconds TTL value for entries in the cache.'));
 		o.optional = true;
 		o.placeholder = 3600;
-
-		o = s.taboption('advanced', form.Value, 'mini_ttl',
-			_('Minimum TTL to send to clients'),
-			_('Modify DNS entries minimum TTL (max is 86400, 0 is no modify)'));
-		o.optional = true;
-		o.datatype = 'range(0,86400)';
-		o.placeholder = 0;
 
 		o = s.taboption('pxe_tftp', form.Flag, 'enable_tftp',
 			_('Enable TFTP server'),

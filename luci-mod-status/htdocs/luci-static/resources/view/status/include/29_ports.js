@@ -309,8 +309,6 @@ return baseclass.extend({
 	},
 
 	render: function(data) {
-		if (L.hasSystemFeature('swconfig'))
-			return null;
 
 		var board = JSON.parse(data[1]),
 		    known_ports = [],
