@@ -17,7 +17,6 @@ require("luci.sys")
 module("luci.controller.vsftpd", package.seeall)
 
 function index()
-	entry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false
 	if not nixio.fs.access("/etc/config/vsftpd") then
 		return
 	end
