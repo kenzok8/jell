@@ -73,8 +73,8 @@ jobs:
         git_clone https://github.com/kiddin9/openwrt-cloudreve && mvdir openwrt-cloudreve
         ) &
         (
-        #git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
-        git clone https://github.com/fw876/helloworld -b main && rm -rf helloworld/{v2raya,naiveproxy} && mvdir helloworld
+        git_clone https://github.com/xiaorouji/openwrt-passwall-packages && rm -rf openwrt-passwall-packages/{gn,naiveproxy} && mvdir openwrt-passwall-packages
+        git clone https://github.com/fw876/helloworld -b main && rm -rf helloworld/{gn,v2raya,naiveproxy} && mvdir helloworld
         git_clone https://github.com/Lienol/openwrt-package liep
         git clone https://github.com/AutoCONFIG/minieap-openwrt -b default
         git_clone https://github.com/rufengsuixing/luci-app-autoipsetadder
