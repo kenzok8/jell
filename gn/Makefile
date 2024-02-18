@@ -5,23 +5,31 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gn
-PKG_RELEASE:=11
+PKG_RELEASE:=12
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://gn.googlesource.com/gn.git
-PKG_SOURCE_DATE:=2023-04-05
-PKG_SOURCE_VERSION:=28b7b6c507eb808567e3aea446cd259f7691fddc
+PKG_SOURCE_DATE:=2024-01-24
+PKG_SOURCE_VERSION:=a2e2717ea670249a34b0de4b3e54f268d320bdfa
 PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=BSD 3-Clause
 PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
 
-ifneq ($(wildcard $(TOPDIR)/feeds/packages/devel/ninja/ninja.mk),)
-PKG_BUILD_DEPENDS+= ninja/host
-endif
 PKG_HOST_ONLY:=1
 HOST_BUILD_PARALLEL:=1
+
+ifeq ($(strip $(NINJA)),)
+ifneq ($(wildcard $(TOPDIR)/feeds/packages/devel/ninja/ninja.mk),)
+HOST_BUILD_DEPENDS:=ninja/host
+NINJA = \
+	MAKEFLAGS="$(MAKE_JOBSERVER)" \
+	$(STAGING_DIR_HOSTPKG)/bin/ninja \
+		$(if $(findstring c,$(OPENWRT_VERBOSE)),-v) \
+		$(if $(MAKE_JOBSERVER),,-j1)
+endif
+endif
 
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
@@ -45,7 +53,7 @@ define Host/Configure
 endef
 
 define Host/Compile
-	ninja -C $(HOST_BUILD_DIR)/out
+	+$(NINJA) -C $(HOST_BUILD_DIR)/out
 endef
 
 define Host/Install
