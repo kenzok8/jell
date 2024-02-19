@@ -222,7 +222,7 @@ jobs:
         ) &
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" "leanpkg" net/miniupnpd net/mwan3 multimedia/UnblockNeteaseMusic-Go \
-        multimedia/UnblockNeteaseMusic net/amule net/softethervpn5 net/antileech net/baidupcs-web net/frp multimedia/gmediarender net/go-aliyundrive-webdav \
+        net/amule net/softethervpn5 net/antileech net/baidupcs-web net/frp multimedia/gmediarender net/go-aliyundrive-webdav \
         net/qBittorrent-static net/phtunnel \
         net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/nps net/tcpping net/netatalk net/pgyvpn
         mv -f miniupnpd miniupnpd-iptables
@@ -247,7 +247,7 @@ jobs:
         net/go-nats net/go-wol net/simple-torrent net/bitsrunlogin-go net/transfer net/cloudreve net/daed \
         net/subconverter net/ngrokc net/oscam net/njitclient net/scutclient net/gost net/ua2f net/gowebdav net/qBittorrent-Enhanced-Edition \
         net/tinyportmapper net/tinyfecvpn net/nexttrace net/pcap-dnsproxy net/rustdesk-server net/tuic-server net/speedtest-go \
-        net/dns-forwarder net/ipset-lists net/ShadowVPN net/adguardhome net/cloudflared \
+        net/dns-forwarder net/ipset-lists net/ShadowVPN net/cloudflared \
         admin/btop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar \
         libs/libdouble-conversion libs/qt6base libs/cxxopts libs/jpcre2 libs/alac \
         utils/qt6tools utils/cpulimit utils/filebrowser utils/cups utils/cups-bjnp utils/joker net/udp2raw net/msd_lite \
