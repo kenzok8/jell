@@ -1460,7 +1460,7 @@ msgid "Fragment Packets"
 msgstr "分片方式"
 
 msgid " \"1-3\" is for segmentation at TCP layer, applying to the beginning 1 to 3 data writes by the client. \"tlshello\" is for TLS client hello packet fragmentation."
-msgstr " \"1-3\" 是 TCP 的流切片，应用于客户端第 1 至第 3 次写数据。"tlshello" 是 TLS 握手包切片。"
+msgstr " \"1-3\" 是 TCP 的流切片，应用于客户端第 1 至第 3 次写数据。\"tlshello\" 是 TLS 握手包切片。"
 
 msgid "Fragment Length"
 msgstr "分片包长"
