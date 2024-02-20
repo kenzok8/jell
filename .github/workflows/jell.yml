@@ -407,6 +407,7 @@ jobs:
         sed -i 's/PKG_SOURCE_DATE:=2021/PKG_SOURCE_DATE:=2023/' netifd/Makefile
         sed -i 's/PKG_SOURCE_DATE:=2/PKG_SOURCE_DATE:=3/' transmission-web-control/Makefile
         mkdir -p luci-app-passwall/root/www/luci-static/passwall
+        rm -rf adguardhome/patches
         cp -rf luci-app-bypass/root/www/luci-static/bypass/* luci-app-passwall/root/www/luci-static/passwall/
         cp -rf luci-app-bypass/root/usr/share/bypass/GeoLite2-Country.mmdb luci-app-passwall/root/usr/share/passwall/
         
