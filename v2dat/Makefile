@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=v2dat
 PKG_SOURCE_DATE:=2022-12-15
 PKG_SOURCE_VERSION:=47b8ee51fb528e11e1a83453b7e767a18d20d1f7
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_DATE).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/urlesistiana/v2dat/tar.gz/$(PKG_SOURCE_VERSION)?
@@ -36,7 +36,7 @@ define Package/v2dat
   DEPENDS:=$(GO_ARCH_DEPENDS)
 endef
 
-GO_PKG_TARGET_VARS:=$(filter-out CGO_ENABLED=%,$(GO_PKG_TARGET_VARS)) CGO_ENABLED=0
+GO_PKG_TARGET_VARS:=$(filter-out CGO_ENABLED=%,$(GO_PKG_TARGET_VARS)) CGO_ENABLED=1
 
 define Package/v2dat/install
 	$(call GoPackage/Package/Install/Bin,$(1))
