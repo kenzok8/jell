@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dockerd
-PKG_VERSION:=24.0.5
-PKG_RELEASE:=84
+PKG_VERSION:=25.0.3
+PKG_RELEASE:=85
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE
 
@@ -11,7 +11,7 @@ PKG_GIT_URL:=github.com/moby/moby
 PKG_GIT_REF:=v$(PKG_VERSION)
 PKG_SOURCE_URL:=https://codeload.$(PKG_GIT_URL)/tar.gz/$(PKG_GIT_REF)?
 PKG_HASH:=skip
-PKG_GIT_SHORT_COMMIT:=a61e2b4 # SHA1 used within the docker executables
+PKG_GIT_SHORT_COMMIT:=f417435 # SHA1 used within the docker executables
 
 PKG_MAINTAINER:=Gerard Ryan <G.M0N3Y.2503@gmail.com>
 
