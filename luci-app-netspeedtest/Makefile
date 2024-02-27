@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=luci-app-netspeedtest
 
 LUCI_TITLE:=LuCI Support for netspeedtest
-LUCI_DEPENDS:=+python3 +iperf3 +homebox +netperf
+LUCI_DEPENDS:=+python3 +iperf3-ssl +homebox
 LUCI_PKGARCH:=all
 PKG_MAINTAINER:=<https://github.com/sirpdboy/netspeedtest>
 
