@@ -9,7 +9,7 @@ function index()
   require "luci.sys"
   local appname = "luci-fan"
   local defaultpage = nil
-  if luci.sys.call("/usr/libexec/fan-control get >/dev/null") == 0 then
+  if luci.sys.call("/usr/libexec/fan-control get >/dev/null 2>&1") == 0 then
     entry({"admin", "system", appname}, cbi("luci-fan"), _("Fan Control"), 60)
   else
     entry({"admin", "system", appname}).dependent = true
