@@ -432,8 +432,9 @@ jobs:
 
     - name: update jell
       run: |
+       if git status --porcelain | grep .; then
         git add .
-        git commit -m "update $(date +%y-%m-%d" "%h:%m:%s)"
+        git commit -am "update $(date '+%Y-%m-%d %H:%M:%S')"
         for pkg in $(git diff-tree --no-commit-id --name-only HEAD); do
           if [ "$(grep "PKG_RELEASE" $pkg/Makefile)" ]; then
             sed -i "s/PKG_RELEASE:=.*/PKG_RELEASE:=$(git rev-list --count main $pkg)/" $pkg/Makefile || true
@@ -443,6 +444,10 @@ jobs:
         git add .
         git commit -m "update $(date +%Y-%m-%d" "%H:%M:%S)"
         git push -f
+       else
+        echo "nothing to commit"
+        exit 0
+       fi || exit 0
 
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@main
