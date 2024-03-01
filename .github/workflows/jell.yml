@@ -1,7 +1,7 @@
 #
 # This is free software, lisence use MIT.
 
-name: Merge-jell
+name: marry-jell
 on:
   push:
     paths:
