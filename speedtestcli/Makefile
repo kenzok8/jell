@@ -10,7 +10,7 @@ PKG_ARCH_SPEEDTEST:=$(ARCH)
 
 PKG_NAME:=speedtestcli
 PKG_VERSION:=1.2.0
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://fw.koolcenter.com/binary/SpeedTestCli/
 PKG_HASH:=skip
@@ -33,12 +33,6 @@ endef
 
 define Package/$(PKG_NAME)/description
   SpeedTestCli is a network speed test command
-endef
-
-define Package/$(PKG_NAME)/conffiles
-endef
-
-define Package/$(PKG_NAME)/postinst
 endef
 
 define Build/Configure
