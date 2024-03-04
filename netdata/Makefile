@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netdata
 PKG_VERSION:=1.33.1
-PKG_RELEASE:=18
+PKG_RELEASE:=19
 
 PKG_MAINTAINER:=Josef Schlehofer <pepe.schlehofer@gmail.com>, Daniel Engberg <daniel.engberg.lists@pyret.net>
 PKG_LICENSE:=GPL-3.0-or-later
@@ -31,7 +31,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/netdata
   SECTION:=admin
   CATEGORY:=Administration
-  DEPENDS:=+zlib +libuuid +libuv +libmnl +libjson-c +libopenssl
+  DEPENDS:=+zlib +libuuid +libuv +libmnl +libjson-c
   TITLE:=Real-time performance monitoring tool
   URL:=https://www.netdata.cloud/
 endef
@@ -53,6 +53,7 @@ CONFIGURE_ARGS += \
 	--enable-lto \
 	--disable-ebpf \
 	--without-libcap \
+	--disable-https \
 	--disable-dbengine \
 	--disable-compression \
 	--disable-plugin-nfacct \
