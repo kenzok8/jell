@@ -72,26 +72,6 @@
  	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
  	+PACKAGE_$(PKG_NAME)_INCLUDE_IPv6_Nat:ip6tables-mod-nat \
 
---- a/netdata/Makefile
-+++ b/netdata/Makefile
-@@ -31,7 +31,7 @@ include $(INCLUDE_DIR)/package.mk
- define Package/netdata
-   SECTION:=admin
-   CATEGORY:=Administration
--  DEPENDS:=+zlib +libuuid +libuv +libmnl +libjson-c
-+  DEPENDS:=+zlib +libuuid +libuv +libmnl +libjson-c +libopenssl
-   TITLE:=Real-time performance monitoring tool
-   URL:=https://www.netdata.cloud/
- endef
-@@ -55,7 +55,6 @@ CONFIGURE_ARGS += \
- 	--enable-lto \
- 	--disable-ebpf \
- 	--without-libcap \
--	--disable-https \
- 	--disable-dbengine \
- 	--disable-compression \
- 	--disable-plugin-nfacct \
-
 --- a/msmtp/Makefile
 +++ b/msmtp/Makefile
 @@ -46,7 +46,7 @@ endef
