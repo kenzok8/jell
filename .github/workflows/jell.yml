@@ -100,6 +100,7 @@ jobs:
         git_clone https://github.com/sirpdboy/netspeedtest && mv -n netspeedtest/luci-app-netspeedtest ./ ; rm -rf netspeedtest
         ) &
         (
+        git_clone https://github.com/JiaY-shi/fancontrol fanc && mvdir fanc
         git_clone https://github.com/destan19/OpenAppFilter && mvdir OpenAppFilter
         git_clone https://github.com/esirplayground/luci-app-poweroff
         git_clone https://github.com/lvqier/luci-app-dnsmasq-ipset
