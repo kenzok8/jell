@@ -6,8 +6,8 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=Support for MBIM
-LUCI_DEPENDS:=+umbim
+LUCI_TITLE:=Support for Fibocom FM350
+LUCI_DEPENDS:=+fm350-modem
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
