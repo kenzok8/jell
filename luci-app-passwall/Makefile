@@ -31,29 +31,9 @@ PKG_CONFIG_DEPENDS:= \
 LUCI_TITLE:=LuCI support for PassWall
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
-	+chinadns-ng +dns2socks +dns2tcp +ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc \
-	+microsocks +resolveip +tcping +unzip \
-	+lua-maxminddb +ipset +ipt2socks +iptables-mod-conntrack-extra +iptables-mod-iprange +iptables-mod-socket +iptables-mod-tproxy +kmod-ipt-nat \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy:naiveproxy \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Client:shadowsocks-libev-ss-local \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Client:shadowsocks-libev-ss-redir \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server:shadowsocks-libev-ss-server \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client:shadowsocks-rust-sslocal \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server:shadowsocks-rust-ssserver \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-local \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-redir \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server:shadowsocksr-libev-ssr-server \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_SingBox:sing-box \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus:trojan-plus \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client:tuic-client \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata:v2ray-geoip \
-	+v2ray-geosite \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin:v2ray-plugin \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Xray:xray-core \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Xray_Plugin:xray-plugin
+	+chinadns-ng +dns2socks +dns2tcp +dnsmasq-full +ip-full \
+	+libuci-lua +lua +luci-compat +luci-lib-jsonc \
+	+microsocks +resolveip +tcping
 
 define Package/$(PKG_NAME)/config
 menu "Configuration"
@@ -61,7 +41,6 @@ menu "Configuration"
 
 config PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy
 	bool "Iptables Transparent Proxy"
-	select PACKAGE_dnsmasq-full
 	select PACKAGE_ipset
 	select PACKAGE_ipt2socks
 	select PACKAGE_iptables
@@ -75,7 +54,6 @@ config PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy
 
 config PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy
 	bool "Nftables Transparent Proxy"
-	select PACKAGE_dnsmasq-full
 	select PACKAGE_ipt2socks
 	select PACKAGE_nftables
 	select PACKAGE_kmod-nft-socket
@@ -153,11 +131,14 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin
 	bool "Include V2ray-Plugin (Shadowsocks Plugin)"
+	select PACKAGE_v2ray-plugin
 	default y if aarch64||arm||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Xray
 	bool "Include Xray"
-	default y
+	select PACKAGE_xray-core
+	select PACKAGE_unzip
+	default y if aarch64||arm||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Xray_Plugin
 	bool "Include Xray-Plugin (Shadowsocks Plugin)"
