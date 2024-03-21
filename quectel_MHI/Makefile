@@ -8,8 +8,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pcie_mhi
-PKG_VERSION:=3.2
-PKG_RELEASE:=1
+PKG_VERSION:=3.6
+PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
