@@ -1,13 +1,6 @@
 Release Notes
 
 [V1.6.5]
-Date:   1/22/2024
-enhancement:
-  1. To support more modems such as EC200G
-  2. To support more modems such as X35 RG255C
-  3. To support big endian MCU work with Unisoc and ASR modems
-
-[V1.6.5]
 Date:   7/3/2023
 enhancement:
   1. Fix the issue of qmi client id leakage caused by kill 9 killing the client of quectel-qmi-proxy

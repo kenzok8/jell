@@ -45,18 +45,6 @@ static int s_pdp;
 #define safe_free(__x) do { if (__x) { free((void *)__x); __x = NULL;}} while(0)
 #define safe_at_response_free(__x) { if (__x) { at_response_free(__x); __x = NULL;}}
 
-int check_mcu_endian()
-{
-    union
-    {
-        int a;
-        char b;
-    }u;
-
-    u.a = 1;
-    return u.b;
-}
-
 #define at_response_error(err, p_response) \
     (err \
     || p_response == NULL \
@@ -712,11 +700,7 @@ static int at_netdevstatus(int pdp, unsigned int *pV4Addr) {
             else {
                 sscanf(ipv4_address, "%02X%02X%02X%02X", &addr[3], &addr[2], &addr[1], &addr[0]);
             }
-	 if(check_mcu_endian()){
             *pV4Addr = (addr[0]) | (addr[1]<<8) | (addr[2]<<16) | (addr[3]<<24);
-		}else{
-		*pV4Addr = (addr[0])<<24 | (addr[1]<<16) | (addr[2]<<8) | (addr[3]<<0);
-		}
        }
     }
 
@@ -842,11 +826,7 @@ static int requestGetIPAddress(PROFILE_T *profile, int curIpFamily) {
             int addr[4] = {0, 0, 0, 0};
 
             sscanf(ipv4, "%d.%d.%d.%d", &addr[0], &addr[1], &addr[2], &addr[3]);
-	if(check_mcu_endian()){
             v4Addr = (addr[0]) | (addr[1]<<8) | (addr[2]<<16) | (addr[3]<<24);
-	}else{
-		v4Addr = (addr[0])<< 24 | (addr[1]<<16) | (addr[2]<<8) | (addr[3]);
-	}
             break;
         }
     }

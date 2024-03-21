@@ -766,8 +766,6 @@ static int requestSetEthMode(PROFILE_T *profile) {
             qmap_settings.rx_urb_size = profile->qmap_size; //SDX24&SDX55 support 32KB
             qmap_settings.ep_type = DATA_EP_TYPE_HSUSB;
             qmap_settings.iface_id = 0x04;
-            if(profile->usb_dev.idProduct == 0x0316) //X35 Rmnet interface is 3
-                qmap_settings.iface_id = 0x03;
         }
 
         qmap_settings.ul_data_aggregation_max_datagrams = 11; //by test result, 11 can get best TPUT
