@@ -22,8 +22,7 @@ endef
 define Package/$(PKG_NAME)/postinst
 endef
 
-define Package/$(PKG_NAME)/prerm
-endef
+
 include $(TOPDIR)/feeds/luci/luci.mk
 
 

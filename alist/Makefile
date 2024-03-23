@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=alist
 PKG_VERSION:=3.32.0
 PKG_WEB_VERSION:=3.32.0
-PKG_RELEASE:=81
+PKG_RELEASE:=82
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/alist-org/alist/tar.gz/v$(PKG_VERSION)?
@@ -45,7 +45,7 @@ define Package/$(PKG_NAME)
   CATEGORY:=Network
   SUBMENU:=Web Servers/Proxies
   TITLE:=A file list program that supports multiple storage
-  URL:=https://alist-doc.nn.ci/
+  URL:=https://alist.nn.ci/
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
 endef
 
