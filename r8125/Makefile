@@ -8,7 +8,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=r8125
 PKG_VERSION:=9.012.04-1
-PKG_RELEASE:=18
+PKG_RELEASE:=19
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/awesometic/realtek-r8125-dkms/tar.gz/$(PKG_VERSION)?
@@ -23,7 +23,6 @@ include $(INCLUDE_DIR)/package.mk
 define KernelPackage/r8125
   TITLE:=Driver for Realtek r8125 chipsets
   SUBMENU:=Network Devices
-  VERSION:=$(LINUX_VERSION)+$(PKG_VERSION)-$(BOARD)-$(PKG_RELEASE)
   DEPENDS:=@PCI_SUPPORT
   FILES:= $(PKG_BUILD_DIR)/src/r8125.ko
   AUTOLOAD:=$(call AutoProbe,r8125)
