@@ -9,12 +9,13 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=vsftpd-alt
 PKG_VERSION:=3.0.5
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=vsftpd-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://security.appspot.com/downloads/
 PKG_HASH:=skip
 PKG_LICENSE:=GPLv2
+PKG_CPE_ID:=cpe:/a:vsftpd_project:vsftpd
 
 BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_BUILD_DIR:=$(BUILD_DIR)/vsftpd-$(PKG_VERSION)
@@ -48,6 +49,7 @@ endef
 
 ifneq ($(CONFIG_USE_MUSL),)
   NLSSTRING:=-lcrypt
+  TARGET_CFLAGS += -D_LARGEFILE64_SOURCE
 else ifneq ($(CONFIG_USE_GLIBC),)
   NLSSTRING:=-lcrypt
 else
@@ -64,7 +66,7 @@ define Build/Compile
 	$(SED) 's/-lcrypt -lnsl/$(NLSSTRING)/' $(PKG_BUILD_DIR)/Makefile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		CC="$(TARGET_CC)" \
-		CFLAGS="$(TARGET_CFLAGS)" \
+		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 		LDFLAGS="$(TARGET_LDFLAGS)" \
 		vsftpd
 endef
