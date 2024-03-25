@@ -1,20 +1,12 @@
-#
-# Copyright (C) 2018-2019 wongsyrone
-#
-# This is free software, licensed under the GNU General Public License v3.
-# See /LICENSE for more information.
-#
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=trojan-plus
 PKG_VERSION:=10.0.3
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/peter-tank/trojan-plus.git
-PKG_SOURCE_DATE:=2020-09-06
-PKG_SOURCE_VERSION:=a6394cdd718669b0c7491493a78e61f6f0f899b3
-PKG_MIRROR_HASH:=skip
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/peter-tank/trojan-plus/tar.gz/v$(PKG_VERSION)?
+PKG_HASH:=skip
 
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_DEPENDS:=openssl
