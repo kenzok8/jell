@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mosdns
 PKG_VERSION:=5.3.1
-PKG_RELEASE:=171
+PKG_RELEASE:=172
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/IrineSistiana/mosdns/tar.gz/v$(PKG_VERSION)?
@@ -35,8 +35,6 @@ define Package/mosdns
   URL:=https://github.com/IrineSistiana/mosdns
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
 endef
-
-GO_PKG_TARGET_VARS:=$(filter-out CGO_ENABLED=%,$(GO_PKG_TARGET_VARS)) CGO_ENABLED=0
 
 define Package/mosdns/install
 	$(call GoPackage/Package/Install/Bin,$(1))

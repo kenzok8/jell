@@ -6,18 +6,43 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chinadns-ng
 PKG_VERSION:=2024.03.25
-PKG_RELEASE:=39
+PKG_RELEASE:=40
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/zfl9/chinadns-ng/tar.gz/$(PKG_VERSION)?
-PKG_HASH:=skip
+PKG_SOURCE_URL:=https://github.com/zfl9/chinadns-ng/releases/download/$(PKG_VERSION)
+UNPACK_CMD=$(CP) $(DL_DIR)/$(PKG_SOURCE) $(PKG_BUILD_DIR)/chinadns-ng
+
+ifeq ($(ARCH),aarch64)
+  PKG_SOURCE:=chinadns-ng@aarch64-linux-musl@generic+v8a@fast+lto
+  PKG_HASH:=skip
+else ifeq ($(ARCH),arm)
+  ARM_CPU_FEATURES:=$(word 2,$(subst +,$(space),$(call qstrip,$(CONFIG_CPU_TYPE))))
+  ifeq ($(ARM_CPU_FEATURES),)
+    PKG_SOURCE:=chinadns-ng@arm-linux-musleabi@generic+v7a@fast+lto
+    PKG_HASH:=skip
+  else
+    PKG_SOURCE:=chinadns-ng@arm-linux-musleabihf@generic+v7a@fast+lto
+    PKG_HASH:=skip
+  endif
+else ifeq ($(ARCH),mips)
+  PKG_SOURCE:=chinadns-ng@mips-linux-musl@mips32+soft_float@fast+lto
+  PKG_HASH:=skip
+else ifeq ($(ARCH),mipsel)
+  PKG_SOURCE:=chinadns-ng@mipsel-linux-musl@mips32+soft_float@fast+lto
+  PKG_HASH:=skip
+else ifeq ($(ARCH),i386)
+  PKG_SOURCE:=chinadns-ng@i386-linux-musl@i686@fast+lto
+  PKG_HASH:=skip
+else ifeq ($(ARCH),x86_64)
+  PKG_SOURCE:=chinadns-ng@x86_64-linux-musl@x86_64@fast+lto
+  PKG_HASH:=skip
+else
+  PKG_SOURCE:=dummy
+  PKG_HASH:=skip
+endif
 
 PKG_LICENSE:=AGPL-3.0-only
 PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINER:=pexcn <i@pexcn.me>
-
-PKG_BUILD_PARALLEL:=1
-PKG_INSTALL:=1
+PKG_MAINTAINER:=sbwml <admin@cooluc.com>
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -27,12 +52,15 @@ define Package/chinadns-ng
   SUBMENU:=IP Addresses and Names
   TITLE:=ChinaDNS next generation, refactoring with epoll and ipset.
   URL:=https://github.com/zfl9/chinadns-ng
-  DEPENDS:=+ipset
+  DEPENDS:=@(aarch64||arm||i386||mips||mipsel||x86_64) @!(TARGET_x86_geode||TARGET_x86_legacy) +ipset
+endef
+
+define Build/Compile
 endef
 
 define Package/chinadns-ng/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/chinadns-ng $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/chinadns-ng $(1)/usr/bin
 endef
 
 $(eval $(call BuildPackage,chinadns-ng))
