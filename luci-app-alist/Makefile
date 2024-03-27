@@ -10,14 +10,10 @@ PKG_NAME:=luci-app-alist
 LUCI_TITLE:=LuCI support for alist
 LUCI_DEPENDS:=+alist +luci-compat
 
-define Package/$(PKG_NAME)/conffiles
-/etc/alist
-endef
-
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 [ -n "${IPKG_INSTROOT}" ] || {
-	( . /etc/uci-defaults/luci-alist ) && rm -f /etc/uci-defaults/luci-alist
+	( . /etc/uci-defaults/50-luci-alist ) && rm -f /etc/uci-defaults/50-luci-alist
 	exit 0
 }
 endef
