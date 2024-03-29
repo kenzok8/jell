@@ -1,44 +1,42 @@
-# SPDX-License-Identifier: GPL-3.0-only
-#
-# Copyright (C) 2023 ImmortalWrt.org
+# SPDX-License-Identifier: GPL-2.0-only
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chinadns-ng
 PKG_VERSION:=2024.03.27
-PKG_RELEASE:=41
-
-PKG_SOURCE_URL:=https://github.com/zfl9/chinadns-ng/releases/download/$(PKG_VERSION)
-UNPACK_CMD=$(CP) $(DL_DIR)/$(PKG_SOURCE) $(PKG_BUILD_DIR)/chinadns-ng
+PKG_RELEASE:=42
 
 ifeq ($(ARCH),aarch64)
-  PKG_SOURCE:=chinadns-ng@aarch64-linux-musl@generic+v8a@fast+lto
+  PKG_ARCH:=chinadns-ng@aarch64-linux-musl@generic+v8a@fast+lto
   PKG_HASH:=skip
 else ifeq ($(ARCH),arm)
   ARM_CPU_FEATURES:=$(word 2,$(subst +,$(space),$(call qstrip,$(CONFIG_CPU_TYPE))))
   ifeq ($(ARM_CPU_FEATURES),)
-    PKG_SOURCE:=chinadns-ng@arm-linux-musleabi@generic+v7a@fast+lto
+    PKG_ARCH:=chinadns-ng@arm-linux-musleabi@generic+v7a@fast+lto
     PKG_HASH:=skip
   else
-    PKG_SOURCE:=chinadns-ng@arm-linux-musleabihf@generic+v7a@fast+lto
+    PKG_ARCH:=chinadns-ng@arm-linux-musleabihf@generic+v7a@fast+lto
     PKG_HASH:=skip
   endif
 else ifeq ($(ARCH),mips)
-  PKG_SOURCE:=chinadns-ng@mips-linux-musl@mips32+soft_float@fast+lto
+  PKG_ARCH:=chinadns-ng@mips-linux-musl@mips32+soft_float@fast+lto
   PKG_HASH:=skip
 else ifeq ($(ARCH),mipsel)
-  PKG_SOURCE:=chinadns-ng@mipsel-linux-musl@mips32+soft_float@fast+lto
+  PKG_ARCH:=chinadns-ng@mipsel-linux-musl@mips32+soft_float@fast+lto
   PKG_HASH:=skip
 else ifeq ($(ARCH),i386)
-  PKG_SOURCE:=chinadns-ng@i386-linux-musl@i686@fast+lto
+  PKG_ARCH:=chinadns-ng@i386-linux-musl@i686@fast+lto
   PKG_HASH:=skip
 else ifeq ($(ARCH),x86_64)
-  PKG_SOURCE:=chinadns-ng@x86_64-linux-musl@x86_64@fast+lto
+  PKG_ARCH:=chinadns-ng@x86_64-linux-musl@x86_64@fast+lto
   PKG_HASH:=skip
 else
-  PKG_SOURCE:=dummy
   PKG_HASH:=skip
 endif
+
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(ARCH_PACKAGES)
+PKG_SOURCE_URL:=https://github.com/zfl9/chinadns-ng/releases/download/$(PKG_VERSION)/$(PKG_ARCH)?
+UNPACK_CMD=$(CP) $(DL_DIR)/$(PKG_SOURCE) $(PKG_BUILD_DIR)/$(PKG_NAME)
 
 PKG_LICENSE:=AGPL-3.0-only
 PKG_LICENSE_FILES:=LICENSE
