@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=xray-core
-PKG_VERSION:=1.8.9
-PKG_RELEASE:=38
+PKG_VERSION:=1.8.10
+PKG_RELEASE:=39
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/XTLS/Xray-core/tar.gz/v$(PKG_VERSION)?
