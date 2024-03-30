@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chinadns-ng
 PKG_VERSION:=2024.03.27
-PKG_RELEASE:=42
+PKG_RELEASE:=43
 
 ifeq ($(ARCH),aarch64)
   PKG_ARCH:=chinadns-ng@aarch64-linux-musl@generic+v8a@fast+lto
@@ -34,7 +34,7 @@ else
   PKG_HASH:=skip
 endif
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(ARCH_PACKAGES)
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_ARCH)
 PKG_SOURCE_URL:=https://github.com/zfl9/chinadns-ng/releases/download/$(PKG_VERSION)/$(PKG_ARCH)?
 UNPACK_CMD=$(CP) $(DL_DIR)/$(PKG_SOURCE) $(PKG_BUILD_DIR)/$(PKG_NAME)
 
