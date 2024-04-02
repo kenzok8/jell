@@ -203,6 +203,7 @@ jobs:
         git_clone https://github.com/zerolabnet/luci-app-torbp
         git_clone https://github.com/muink/luci-app-tinyfilemanager
         git_clone https://github.com/sbwml/luci-app-airconnect airconnect1 && mv airconnect1/* ./ && rm -rf airconnect1
+        git_clone https://github.com/sbwml/luci-app-qbittorrent openwrt-qb && mv -n openwrt-qb/* ./ &&  rm -rf openwrt-qb
         ) &
         (
         git clone https://github.com/sirpdboy/luci-theme-kucat -b js --depth 1
@@ -228,7 +229,7 @@ jobs:
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" "leanpkg" net/miniupnpd net/mwan3 multimedia/UnblockNeteaseMusic-Go \
         net/amule net/softethervpn5 net/antileech net/baidupcs-web net/frp multimedia/gmediarender net/go-aliyundrive-webdav \
-        net/qBittorrent-static net/phtunnel \
+        net/phtunnel \
         net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/nps net/tcpping net/netatalk net/pgyvpn
         mv -f miniupnpd miniupnpd-iptables
         git_sparse_clone openwrt-23.05 "https://github.com/openwrt/packages" "oppackages" \
@@ -254,7 +255,7 @@ jobs:
         net/tinyportmapper net/tinyfecvpn net/nexttrace net/pcap-dnsproxy net/rustdesk-server net/tuic-server net/speedtest-go \
         net/dns-forwarder net/ipset-lists net/ShadowVPN net/cloudflared \
         admin/btop libs/jpcre2 libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar \
-        libs/libdouble-conversion libs/qt6base libs/cxxopts libs/jpcre2 libs/alac \
+        libs/libdouble-conversion libs/cxxopts libs/jpcre2 libs/alac \
         utils/qt6tools utils/cpulimit utils/filebrowser utils/cups utils/cups-bjnp utils/joker net/udp2raw net/msd_lite \
         multimedia/you-get multimedia/lux multimedia/ykdl multimedia/gallery-dl devel/go-rice admin/gotop admin/netdata
         ) &
