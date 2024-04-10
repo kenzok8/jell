@@ -85,6 +85,7 @@ jobs:
         ) &
         (
         git_clone https://github.com/zzsj0928/luci-app-pushbot
+        git_clone https://github.com/muink/luci-app-dnsproxy
         git_clone https://github.com/jerrykuku/luci-theme-argon
         git_clone https://github.com/jerrykuku/luci-app-argon-config
         git_clone https://github.com/jerrykuku/luci-app-go-aliyundrive-webdav        
