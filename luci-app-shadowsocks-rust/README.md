@@ -72,10 +72,8 @@ tar xjf OpenWrt-SDK-ar71xx-for-linux-x86_64-gcc-4.8-linaro_uClibc-0.9.33.2.tar.b
 cd OpenWrt-SDK-ar71xx-*
 # Clone 项目
 git clone https://github.com/honwen/luci-app-shadowsocks-rust.git package/luci-app-shadowsocks-rust
-# 编译 po2lmo (如果有po2lmo可跳过)
-pushd package/luci-app-shadowsocks-rust/tools/po2lmo
-make && sudo make install
-popd
+# Clone Luci 项目
+git clone https://github.com/openwrt/luci.git feeds/luci
 # 选择要编译的包 LuCI -> 3. Applications
 make menuconfig
 # 开始编译
