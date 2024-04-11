@@ -5,8 +5,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=naiveproxy
-PKG_VERSION:=122.0.6261.43-2
-PKG_RELEASE:=50
+PKG_VERSION:=123.0.6312.40-1
+PKG_RELEASE:=51
+
+# intel 80386 & riscv64
+ifeq ($(ARCH_PACKAGES),i386_pentium-mmx)
+  ARCH_PACKAGES:=x86
+else ifeq ($(ARCH_PACKAGES),i386_pentium4)
+  ARCH_PACKAGES:=x86
+else ifeq ($(ARCH_PACKAGES),riscv64_riscv64)
+  ARCH_PACKAGES:=riscv64
+endif
 
 ifeq ($(ARCH_PACKAGES),aarch64_cortex-a53)
   PKG_HASH:=skip
@@ -70,7 +79,7 @@ define Package/naiveproxy
   SUBMENU:=Web Servers/Proxies
   TITLE:=Make a fortune quietly
   URL:=https://github.com/klzgrad/naiveproxy
-  DEPENDS:=@!(arc||armeb||mips||mips64||powerpc||TARGET_gemini) +libatomic
+  DEPENDS:=@(aarch64||arm||i386||mipsel||riscv64||x86_64) +libatomic
 endef
 
 define Package/naiveproxy/description
