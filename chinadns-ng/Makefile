@@ -3,8 +3,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chinadns-ng
-PKG_VERSION:=2024.03.27
-PKG_RELEASE:=46
+PKG_VERSION:=2024.04.13
+PKG_RELEASE:=47
 
 ifeq ($(ARCH),aarch64)
   PKG_ARCH:=chinadns-ng@aarch64-linux-musl@generic+v8a@fast+lto
