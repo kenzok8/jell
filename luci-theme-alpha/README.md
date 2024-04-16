@@ -6,7 +6,8 @@
 [group-badge]: https://img.shields.io/badge/visit_Facebook-Comunity-cyan
 [discord]: https://discord.gg/gdZwmDQGUm
 [discord-badge]: https://img.shields.io/badge/visit_Discord-Comunity-blue
-
+[paypal]: https://www.paypal.com/paypalme/derisamedia
+[paypal-badge]: https://img.shields.io/badge/Donate-Paypal_me-blue
 
 
 
@@ -21,6 +22,7 @@
 [![release][release-badge]][release]
 [![group][group-badge]][group]
 [![discord][discord-badge]][discord]
+[![paypal][paypal-badge]][paypal]
 
 
 Luci theme for Official Openwrt and Alpha OS build ,based on bootstrap and material luCi theme refferences,
