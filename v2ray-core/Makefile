@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=v2ray-core
-PKG_VERSION:=5.15.1
-PKG_RELEASE:=55
+PKG_VERSION:=5.15.3
+PKG_RELEASE:=56
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/v2fly/v2ray-core/tar.gz/v$(PKG_VERSION)?
