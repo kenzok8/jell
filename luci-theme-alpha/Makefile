@@ -11,7 +11,7 @@ THEME_TITLE:=Alpha
 
 PKG_NAME:=luci-theme-$(THEME_NAME)
 PKG_VERSION:=3.9.4-beta
-PKG_RELEASE:=13
+PKG_RELEASE:=14
 
 include $(INCLUDE_DIR)/package.mk
 
