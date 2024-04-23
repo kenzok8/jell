@@ -6,15 +6,17 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=naiveproxy
 PKG_VERSION:=123.0.6312.40-1
-PKG_RELEASE:=51
+PKG_RELEASE:=52
 
-# intel 80386 & riscv64
-ifeq ($(ARCH_PACKAGES),i386_pentium-mmx)
-  ARCH_PACKAGES:=x86
-else ifeq ($(ARCH_PACKAGES),i386_pentium4)
-  ARCH_PACKAGES:=x86
-else ifeq ($(ARCH_PACKAGES),riscv64_riscv64)
-  ARCH_PACKAGES:=riscv64
+# intel 80386 & riscv64 & cortex-a76
+ifeq ($(ARCH_PREBUILT),aarch64_cortex-a76)
+  ARCH_PREBUILT:=aarch64_generic
+else ifeq ($(ARCH_PREBUILT),i386_pentium-mmx)
+  ARCH_PREBUILT:=x86
+else ifeq ($(ARCH_PREBUILT),i386_pentium4)
+  ARCH_PREBUILT:=x86
+else ifeq ($(ARCH_PREBUILT),riscv64_riscv64)
+  ARCH_PREBUILT:=riscv64
 endif
 
 ifeq ($(ARCH_PACKAGES),aarch64_cortex-a53)
