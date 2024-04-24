@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-macvlan
 PKG_VERSION:=1.0.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_LICENSE:=GPLv3
 PKG_LICENSE_FILES:=LICENSE
@@ -75,6 +75,8 @@ define Package/luci-app-macvlan/install
 	$(INSTALL_DATA) ./files/root/etc/uci-defaults/40_luci-app-macvlan $(1)/etc/uci-defaults/40_luci-app-macvlan
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d
 	$(INSTALL_DATA) ./root/usr/share/rpcd/acl.d/*.json $(1)/usr/share/rpcd/acl.d/
+	$(INSTALL_DIR) $(1)/usr/share/ucitrack
+	$(INSTALL_DATA) ./root/usr/share/ucitrack/*.json $(1)/usr/share/ucitrack/
 endef
 
 $(eval $(call BuildPackage,luci-app-macvlan))
