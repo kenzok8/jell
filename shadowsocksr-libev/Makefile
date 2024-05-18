@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=shadowsocksr-libev
 PKG_VERSION:=2.5.3
-PKG_RELEASE:=16
+PKG_RELEASE:=17
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/shadowsocksrr/shadowsocksr-libev/tar.gz/$(PKG_VERSION)?
@@ -51,14 +51,6 @@ CONFIGURE_ARGS += \
 
 TARGET_CFLAGS += -flto
 TARGET_LDFLAGS += -Wl,--gc-sections,--as-needed
-
-ifeq ($(CONFIG_GCC_VERSION_12),y)
-	TARGET_CFLAGS += -Wno-error=use-after-free
-endif
-
-ifeq ($(CONFIG_GCC_VERSION_13),y)
-	TARGET_CFLAGS += -Wno-error=use-after-free
-endif
 
 $(foreach component,$(SHADOWSOCKSR_COMPONENTS), \
   $(eval $(call BuildPackage,shadowsocksr-libev-ssr-$(component))) \
