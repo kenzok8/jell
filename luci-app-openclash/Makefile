@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-openclash
-PKG_VERSION:=0.46.011
-PKG_RELEASE:=71
+PKG_VERSION:=0.46.014
+PKG_RELEASE:=72
 PKG_MAINTAINER:=vernesong <https://github.com/vernesong/OpenClash>
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
@@ -100,7 +100,6 @@ endef
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 	sed -i "s/v0.00.00-beta/v$(PKG_VERSION)-beta/g" /www/luci-static/resources/openclash/img/version.svg >/dev/null 2>&1
-	/etc/init.d/network restart >/dev/null 2>&1 &
 	exit 0
 endef
 
