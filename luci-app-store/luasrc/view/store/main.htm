@@ -38,7 +38,7 @@
 <script>
     (function() {
         let beforeunloadRegistered = false;
-        window.istore_log = function(flush_menu_onclose) {
+        window.istore_log = function(flush_menu_onclose, onExit) {
             if (flush_menu_onclose && !beforeunloadRegistered) {
                 beforeunloadRegistered = true;
                 window.addEventListener("beforeunload", function(event) {
@@ -46,7 +46,7 @@
                     return true;
                 });
             }
-            taskd.show_log("istore", true);
+            taskd.show_log("istore", true, onExit);
         };
     })();
 <%
