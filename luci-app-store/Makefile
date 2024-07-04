@@ -11,9 +11,9 @@ LUCI_DEPENDS:=+curl +opkg +luci-lib-ipkg +tar +coreutils +coreutils-stat +libuci
 LUCI_EXTRA_DEPENDS:=luci-lib-taskd (>=1.0.19)
 LUCI_PKGARCH:=all
 
-PKG_VERSION:=0.1.23-0
+PKG_VERSION:=0.1.24-0
 # PKG_RELEASE MUST be empty for luci.mk
-PKG_RELEASE:=37
+PKG_RELEASE:=38
 
 ISTORE_UI_VERSION:=0.1.16
 ISTORE_UI_RELEASE:=1
