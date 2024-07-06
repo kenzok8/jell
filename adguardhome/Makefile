@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=adguardhome
 PKG_VERSION:=0.107.52
-PKG_RELEASE:=296
+PKG_RELEASE:=297
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/AdguardTeam/AdGuardHome/tar.gz/v$(PKG_VERSION)?
@@ -62,12 +62,8 @@ endef
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
-	if [ -d "$(BUILD_DIR)/AdGuardHome-$(PKG_VERSION)" ]; then \
-		mv "$(BUILD_DIR)/AdGuardHome-$(PKG_VERSION)/"* "$(BUILD_DIR)/adguardhome-$(PKG_VERSION)/"; \
-	fi
 
 	gzip -dc $(DL_DIR)/$(FRONTEND_FILE) | $(HOST_TAR) -C $(PKG_BUILD_DIR)/ $(TAR_OPTIONS)
-	( cd "$(BUILD_DIR)/adguardhome-$(PKG_VERSION)"; go mod tidy )
 endef
 
 define Package/adguardhome/install
