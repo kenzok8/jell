@@ -3,8 +3,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=softethervpn5
-PKG_VERSION:=5.02.5180
-PKG_RELEASE:=5
+PKG_VERSION:=5.02.5185
+PKG_RELEASE:=6
 
 PKG_MAINTAINER:=Andy Walsh <andy.walsh44+github@gmail.com>
 PKG_LICENSE:=GPL-2.0
