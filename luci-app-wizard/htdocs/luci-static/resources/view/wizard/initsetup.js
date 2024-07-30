@@ -69,6 +69,7 @@ return view.extend({
 
 		o = s.taboption('netsetup', form.Flag, 'siderouter', _('Siderouter'),
 			_('Use as downstream router i.e. it will work like a switch'));
+		o.rmempty = false;
 
 		o = s.taboption('netsetup', form.Value, 'lan_gateway', _('IPv4 gateway'));
 		o.depends('siderouter', '1');

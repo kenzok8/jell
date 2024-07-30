@@ -192,23 +192,25 @@ start() {
 	config_foreach add_wizard wizard
 		if [ -n "$(command -v nginx)" ]; then
 		for server in $(uci show nginx | grep '_sc_' | grep '=server' | cut -d. -f2 | cut -d= -f1); do
-		uci delete nginx.$server
-	done
-	for server in $(uci show dhcp | grep '_sc_' | grep '=domain' | cut -d. -f2 | cut -d= -f1); do
-		uci delete dhcp.$server
-	done
+			uci delete nginx.$server
+		done
+		for server in $(uci show dhcp | grep '_sc_' | grep '=domain' | cut -d. -f2 | cut -d= -f1); do
+			uci delete dhcp.$server
+		done
 		config_foreach process_shortcut shortcuts
 		uci commit nginx
 		uci commit dhcp
-		(
+		/etc/init.d/nginx reload
+		fi
+	(
 		/etc/init.d/network restart
 		/etc/init.d/firewall reload
 	 /etc/init.d/dnsmasq reload
-	 /etc/init.d/nginx reload
+	 
 	 )&
-	fi
 }
 
 restart() {
-	XRELOAD=1 start
+	start
 }
+
