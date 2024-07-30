@@ -235,7 +235,7 @@ if [ -n "$(command -v nginx)" ]; then
 	uci -q set nginx._sc_fw.return="302 http://10.0.0.1/cgi-bin/luci/admin/services/passwall"
 
 	uci -q set dhcp._sc_fw=domain
-	uci -q set dhcp._sc_fw.name="cw"
+	uci -q set dhcp._sc_fw.name="fw"
 	uci -q set dhcp._sc_fw.ip="10.0.0.1"
 	uci -q set dhcp._sc_fw.comments="PassWall"
 	uci commit dhcp
