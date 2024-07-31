@@ -223,21 +223,21 @@ if [[ ! "$version" || "$version" -lt 1 ]]; then
 
 if [ -n "$(command -v nginx)" ]; then
 	uci add wizard shortcuts
-	uci set wizard.@shortcuts[-1].shortcut='fw'
+	uci set wizard.@shortcuts[-1].shortcut='pw'
 	uci set wizard.@shortcuts[-1].to_url='http://10.0.0.1/cgi-bin/luci/admin/services/passwall'
 	uci set wizard.@shortcuts[-1].comments='passwall'
 	uci commit wizard
 
-	uci -q set nginx._sc_fw=server
-	uci -q set nginx._sc_fw.server_name="fw"
-	uci -q add_list nginx._sc_fw.listen="80"
-	uci -q add_list nginx._sc_fw.listen="443"
-	uci -q set nginx._sc_fw.return="302 http://10.0.0.1/cgi-bin/luci/admin/services/passwall"
+	uci -q set nginx._sc_pw=server
+	uci -q set nginx._sc_pw.server_name="pw"
+	uci -q add_list nginx._sc_pw.listen="80"
+	uci -q add_list nginx._sc_pw.listen="443"
+	uci -q set nginx._sc_pw.return="302 http://10.0.0.1/cgi-bin/luci/admin/services/passwall"
 
-	uci -q set dhcp._sc_fw=domain
-	uci -q set dhcp._sc_fw.name="fw"
-	uci -q set dhcp._sc_fw.ip="10.0.0.1"
-	uci -q set dhcp._sc_fw.comments="PassWall"
+	uci -q set dhcp._sc_pw=domain
+	uci -q set dhcp._sc_pw.name="pw"
+	uci -q set dhcp._sc_pw.ip="10.0.0.1"
+	uci -q set dhcp._sc_pw.comments="PassWall"
 	uci commit dhcp
 fi
 	version=1
@@ -249,6 +249,14 @@ if [ -z "`uci -q get nginx.default_server`" ]; then
 	uci -q set nginx.default_server.server_name='op'
 	uci -q add_list nginx.default_server.include='conf.d/*.locations'
 	uci -q set nginx.default_server.access_log='off; # logd openwrt'
+	uci commit nginx
+fi
+if [ -z "`uci -q get dhcp.default_server`" ]; then
+	uci -q set dhcp.default_server=domain
+	uci -q set dhcp.default_server.name='op'
+	uci -q set dhcp.default_server.ip='10.0.0.1'
+	uci -q set dhcp.default_server.comments='后台地址'
+	uci commit dhcp
 fi
 fi
 
@@ -267,6 +275,8 @@ uci -q set base_config.@status[0].version=$version
 uci commit base_config
 
 modprobe xt_FULLCONENAT || {
+[ "$(iptables -L -t nat | grep "FULLCONENAT")" ] || {
 uci -q set firewall.@defaults[0].fullcone='0'
 uci commit firewall
+}
 }
