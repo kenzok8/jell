@@ -9,11 +9,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libcryptopp
-PKG_VERSION:=8.5.0
-PKG_RELEASE:=3
+PKG_VERSION:=CRYPTOPP_8_9_0
+PKG_RELEASE:=4
 
 PKG_SOURCE:=cryptopp$(subst .,,$(PKG_VERSION)).zip
-PKG_SOURCE_URL:=https://www.cryptopp.com/
+PKG_SOURCE_URL:=https://github.com/weidai11/cryptopp/releases/download/CRYPTOPP_$(subst .,_,$(PKG_VERSION))/
 PKG_HASH:=skip
 
 PKG_FIXUP:=autoreconf
@@ -38,9 +38,19 @@ define Package/libcryptopp/description
   use of templates and abstract base classes.
 endef
 
+PKG_BUILD_FILE:=cryptopp-autotools$(subst .,,$(PKG_VERSION)).zip
+define Download/autotools
+  URL:=https://github.com/noloader/cryptopp-autotools/releases/download/CRYPTOPP_$(subst .,_,$(PKG_VERSION))/
+  FILE:=$(PKG_BUILD_FILE)
+  HASH:=skip
+endef
+$(eval $(call Download,autotools))
+
 define Build/Prepare
-	$(Build/Prepare/Default)
+	$(PKG_UNPACK)
+	unzip -q -d $(PKG_BUILD_DIR) $(DL_DIR)/$(PKG_BUILD_FILE)
 	cd $(PKG_BUILD_DIR); rm -f GNUmakefile GNUmakefile-cross
+	$(Build/Patch)
 endef
 
 define Build/InstallDev
