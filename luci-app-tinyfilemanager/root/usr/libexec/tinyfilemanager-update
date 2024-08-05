@@ -105,7 +105,7 @@ done
 # Hotfix
 
 # Migrating to Local Reference
-sed -Ei "s,^(.+=\")https?://.+/([^/]+\.(css|js))(\".+),\1$REF_DIR/\3/\2\4," /tmp/$PKG_DIR/$INDEXPHP
+sed -Ei "s,^(.+=\")https?://(.+\.(css|js))(\".+),\1$REF_DIR/\2\4," /tmp/$PKG_DIR/$INDEXPHP
 
 }
 
