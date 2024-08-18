@@ -2,14 +2,14 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=r8168
 PKG_VERSION:=8.053.00
-PKG_RELEASE:=15
+PKG_RELEASE:=16
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=https://github.com/Noltari/rtl8168/releases/download/$(PKG_VERSION)
+PKG_SOURCE_URL:=https://github.com/openwrt/rtl8168/releases/download/$(PKG_VERSION)
 PKG_HASH:=skip
 
 PKG_BUILD_PARALLEL:=1
-PKG_LICENSE:=GPL-2.0-only
+PKG_LICENSE:=GPLv2
 PKG_MAINTAINER:=Alvaro Fernandez Rojas <noltari@gmail.com>
 
 include $(INCLUDE_DIR)/kernel.mk
@@ -24,13 +24,9 @@ define KernelPackage/r8168
   PROVIDES:=kmod-r8169
 endef
 
-define KernelPackage/r8168/description
-  This package contains a driver for Realtek r8168 chipsets.
-endef
-
 define Build/Compile
 	+$(KERNEL_MAKE) $(PKG_JOBS) \
-		M=$(PKG_BUILD_DIR)/src \
+		M="$(PKG_BUILD_DIR)/src" \
 		ENABLE_RSS_SUPPORT=y \
 		modules
 endef
