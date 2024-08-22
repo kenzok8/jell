@@ -38,32 +38,32 @@ function to_check()
     	model = "x86_64"
     	check_update()
     	if fs.access("/sys/firmware/efi") then
-    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-x86-64-generic-squashfs-combined-efi.img.gz"
+    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-x86-64-generic-squashfs-combined-efi.img.gz"
     	else
-    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-x86-64-generic-squashfs-combined.img.gz"
+    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-x86-64-generic-squashfs-combined.img.gz"
     		md5 = ""
     	end
     elseif board_name == "x86_generic" then
     	model = "x86_32"
     	check_update()
     	if fs.access("/sys/firmware/efi") then
-    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-x86-generic-squashfs-combined-efi.img.gz"
+    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-x86-generic-squashfs-combined-efi.img.gz"
     	else
-    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-x86-generic-squashfs-combined.img.gz"
+    		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-x86-generic-squashfs-combined.img.gz"
     		md5 = ""
     	end
     elseif board_name:match("phicomm,k3$") or board_name:match("rt%-ac88u$") then
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-" ..target.. "-" ..board_name.. "-squashfs.trx"
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-" ..target.. "-" ..board_name.. "-squashfs.trx"
     elseif target:match("sunxi") then
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-" ..target.. "-" ..board_name.. "-squashfs-sdcard.img.gz"    
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-" ..target.. "-" ..board_name.. "-squashfs-sdcard.img.gz"    
     elseif arch:match("aarch64_generic") or board_name:match("rpi%-") then
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-" ..target.. "-" ..board_name.. "-squashfs-sysupgrade.img.gz"
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-" ..target.. "-" ..board_name.. "-squashfs-sysupgrade.img.gz"
     else
 		check_update()
-		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-openwrt-" ..target.. "-" ..board_name.. "-squashfs-sysupgrade.bin"
+		download_url = "https://dl.openwrt.ai/firmware/" ..model.. "/" ..remote_version.. "-kwrt-" ..target.. "-" ..board_name.. "-squashfs-sysupgrade.bin"
     end
 	
 
