@@ -193,8 +193,8 @@ jobs:
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust        
         git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
         git_clone https://github.com/derisamedia/luci-theme-alpha
-        git clone --depth 1 -b js https://github.com/gngpp/luci-theme-design
-        git_clone https://github.com/gngpp/luci-theme-design luci-theme-design_new
+        git clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
+        git_clone https://github.com/kenzok78/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
         git_clone https://github.com/rosywrt/luci-theme-rosy
         git_clone https://github.com/izilzty/luci-app-chinadns-ng
