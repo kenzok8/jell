@@ -1,12 +1,15 @@
-# SPDX-License-Identifier: Apache-2.0
+# Copyright (C) 2019 Openwrt.org
 #
-# Copyright (C) 2023 ImmortalWrt.org
+# This is free software, licensed under the Apache License, Version 2.0 .
+#
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=LuCI app for qBittorrent
-LUCI_DEPENDS:=+qbittorrent-enhanced-edition
+PKG_NAME:=luci-app-qbittorrent
+
+LUCI_TITLE:=LuCI support for qBittorrent
 LUCI_PKGARCH:=all
+LUCI_DEPENDS:=+qbittorrent
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
