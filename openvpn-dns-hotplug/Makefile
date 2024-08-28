@@ -1,22 +1,21 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=xmm-modem
-PKG_VERSION:=0.1.3
-PKG_RELEASE:=41
+PKG_NAME:=openvpn-dns-hotplug
+PKG_VERSION:=0.0.1
+PKG_RELEASE:=16
 PKG_MAINTAINER:=Konstantine Shevlakov <shevlakov@132lan.ru>
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
   PKGARCH:=all
-  DEPENDS:=+comgt +kmod-usb-acm +kmod-usb-net-cdc-ncm
-  TITLE:=Fibocom L850/L860 protocol
+  TITLE:=Openvpn DNS hotplug
+  DEPENDS:=+openvpn
 endef
 
 define Package/$(PKG_NAME)/description
-	Simple connect to cellular for Fibocom L850/L860 module (Intel XMM LTE-A 7360/7560)
+	Hotplug script to get NS attribytes: DNS and domain search.
 endef
-
 
 define Build/Prepare
 endef
@@ -33,3 +32,4 @@ define Package/$(PKG_NAME)/install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
+
