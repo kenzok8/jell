@@ -47,6 +47,12 @@ board_name() {
 		fi
 	}
 
+for i in $(seq 1 10); do
+		[[ "$(uci -q get base_config.@status[0].inited)" == 1 && "$(cat /etc/config/wireless)" ]] && break
+		[ "$(cat /etc/config/wireless)" ] || /sbin/wifi config
+		sleep 1s
+done
+
 	if [[ "$(cat /etc/config/wireless)" ]]; then
 		. /etc/openwrt_release
 		SSID="$(uci -q get wizard.default.wifi_ssid || uci -q get system.@system[0].hostname || echo Kwrt)"

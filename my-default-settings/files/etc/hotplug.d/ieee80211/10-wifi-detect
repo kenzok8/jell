@@ -1,11 +1,6 @@
 #!/bin/sh
 
 [ "${ACTION}" = "add" ] && {
-	for i in $(seq 1 5); do
-		/sbin/wifi config
-		grep -q '"wlan"' /etc/board.json && break
-		echo "$i" >/tmp/wifi
-		sleep 1s
-	done
-	[ -z "$(uci -q get base_config.@status[0].wifi)" ] && . /sbin/mywifi
+	/sbin/wifi config
+	[[ -z "$(uci -q get base_config.@status[0].wifi)" ]] && . /sbin/mywifi &
 }
