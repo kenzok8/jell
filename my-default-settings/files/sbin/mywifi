@@ -53,8 +53,6 @@ sed -i '/option disabled/d' /etc/config/wireless
 	}
 
 	if [[ -f /etc/config/wireless ]]; then
-		SSID=${hostname}
-		SSID_PASSWD=""
 		[ "$(uci -q get wireless.radio1.band)" == "5g" ] && uci -q set wireless.radio0.band="2g"
 		widx=0
 		while uci rename wireless.@wifi-iface[$widx]=default_radio$widx >/dev/null 2>&1; do widx=$((widx+1)); done
@@ -62,4 +60,7 @@ sed -i '/option disabled/d' /etc/config/wireless
 			wifi_setup_radio ${radio}
 		done
 		uci commit wireless
+		/sbin/wifi reload
+		uci -q set base_config.@status[0].wifi=1
+		uci commit base_config
 	fi
