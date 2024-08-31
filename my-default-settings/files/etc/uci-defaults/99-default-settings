@@ -222,3 +222,6 @@ uci -q set firewall.@defaults[0].fullcone='0'
 uci commit firewall
 }
 }
+
+[ -z "$(uci -q get base_config.@status[0].wifi)" ] && . /sbin/mywifi
+
