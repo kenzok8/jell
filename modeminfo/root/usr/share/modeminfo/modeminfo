@@ -81,8 +81,6 @@ for s in $SECTIONS; do
 	if [ "$s" ]; then
 		get_vars
 		qmi_device
-	else
-		exit 0
 	fi
 	get_device_info
 	get_data_in >/dev/null 2>&1
