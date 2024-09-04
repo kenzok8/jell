@@ -81,11 +81,11 @@ for s in $SECTIONS; do
 	if [ "$s" ]; then
 		get_vars
 		qmi_device
+		get_device_info
+		get_data_in >/dev/null 2>&1
+		if_null
+		json_status
 	fi
-	get_device_info
-	get_data_in >/dev/null 2>&1
-	if_null
-	json_status
 	if [ "$ARGSLEN" = "${m}" ]; then
 		echo "	}"
 	else
