@@ -16,6 +16,7 @@
 # 设置日志参数
 log_size_limit=1024000
 log_file="/var/log/natmap/natmap.log"
+
 # natmap logs setting
 # 日志大小限制超过1M则删除最早的日志，若日志不存在则创建日志文件
 if [ -f "/var/log/natmap/natmap.log" ]; then
