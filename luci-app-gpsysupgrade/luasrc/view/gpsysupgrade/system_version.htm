@@ -199,7 +199,7 @@ font-size:130%
 local boardinfo = luci.util.ubus("system", "board") or { }
 overlay = boardinfo.release.distribution
 %>
-<%- if overlay ~="KWrt" and overlay ~= "1004" then -%>
+<%- if overlay ~="Kwrt" and overlay ~= "1004" then -%>
 	<b style="color:orangered">注意: 修改过根目录大小的定制固件请使用<a target="_blank" href="https://supes.top"> 网站 </a>或安装luci-app-attendedsysupgrade重新生成定制固件, 直接用此在线更新会重置分区,丢失配置.</b>
 <%- end -%>
 
