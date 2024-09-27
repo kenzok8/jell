@@ -7,8 +7,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=qt6base
-PKG_VERSION:=6.7.2
-PKG_RELEASE:=18
+PKG_VERSION:=6.7.3
+PKG_RELEASE:=19
 
 PKG_SOURCE:=qtbase-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/qt/qtbase/tar.gz/v$(PKG_VERSION)?
