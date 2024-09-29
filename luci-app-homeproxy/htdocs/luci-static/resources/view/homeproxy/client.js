@@ -236,7 +236,6 @@ return view.extend({
 			_('Specify target ports to be proxied. Multiple ports must be separated by commas.'));
 		o.value('', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
-		o.default = 'common';
 		o.validate = function(section_id, value) {
 			if (section_id && value && value !== 'common') {
 
@@ -1007,9 +1006,9 @@ return view.extend({
 		so.rmempty = false;
 
 		so = ss.option(form.ListValue, 'format', _('Format'));
-		so.value('source', _('Source file'));
 		so.value('binary', _('Binary file'));
-		so.default = 'source';
+		so.value('source', _('Source file'));
+		so.default = 'binary';
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'path', _('Path'));
