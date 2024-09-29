@@ -6,14 +6,20 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=Nginxer
-LUCI_DESCRIPTION:=Standard OpenWrt set including full admin with ppp support and the default Bootstrap theme
-LUCI_DEPENDS:=+luci-nginx
+LUCI_TITLE:=RouterDog
+LUCI_DEPENDS:=+routergo +luci-app-store +luci-lib-taskd
+LUCI_MINIFY_CSS:=0
+LUCI_MINIFY_JS:=0
+
+define Package/luci-app-routerdog/conffiles
+/etc/config/routerdog
+/www/luci-static/routerdog/image/bg.gif
+/www/luci-static/routerdog/image/login.gif
+endef
 
 define Package/luci-nginxer/postrm
 #!/bin/sh
-/etc/init.d/uhttpd enabled
-/etc/init.d/uhttpd start
+rm -f /tmp/luci-indexcache
 exit 0
 endef
 
