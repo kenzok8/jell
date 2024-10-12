@@ -217,10 +217,10 @@ jobs:
         git_clone https://github.com/Carseason/openwrt-packages Carseason && mv -n Carseason/*/* ./;mv services/routergo ./;rm -rf Carseason
         git_clone https://github.com/Carseason/openwrt-themedog && mv -n openwrt-themedog/luci/* ./;rm -rf openwrt-themedog
         git_clone https://github.com/Carseason/openwrt-app-actions Carseason && mv -n Carseason/applications/* ./;rm -rf Carseason
+        git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass kwrt-packages/luci-app-fileassistant ./ ; rm -rf kwrt-packages
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
-        svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-bypass
         svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
         svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/luci-app-irqbalance
         svn export https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-control-speedlimit
