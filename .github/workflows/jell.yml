@@ -218,6 +218,11 @@ jobs:
         git_clone https://github.com/Carseason/openwrt-themedog && mv -n openwrt-themedog/luci/* ./;rm -rf openwrt-themedog
         git_clone https://github.com/Carseason/openwrt-app-actions Carseason && mv -n Carseason/applications/* ./;rm -rf Carseason
         git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass kwrt-packages/luci-app-fileassistant ./ ; rm -rf kwrt-packages
+        git clone https://github.com/Thaolga/openwrt-nekobox -b nekobox --depth 1 && mv openwrt-nekobox/luci-app-nekobox ./;rm -rf openwrt-nekobox
+        git_clone https://github.com/muink/openwrt-fchomo && mvdir openwrt-fchomo
+        git_clone https://github.com/morytyann/OpenWrt-mihomo && mvdir OpenWrt-mihomo
+        git_clone https://github.com/lucikap/luci-app-brukamen && mv -n luci-app-brukamen/{luci*,mentohust,iii/*} ./;rm -rf luci-app-brukamen luci-app-autoshell_*.ipk
+        git_clone https://github.com/kiddin9/openwrt-clouddrive2 && mvdir openwrt-clouddrive2
         ) &
         (
         svn export https://github.com/immortalwrt/packages/trunk/net/smartdns
