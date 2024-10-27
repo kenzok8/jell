@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autoupdate
 PKG_VERSION:=1
-PKG_RELEASE:=17
+PKG_RELEASE:=18
 
 include $(INCLUDE_DIR)/package.mk
 
