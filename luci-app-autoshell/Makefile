@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-autoshell
 PKG_VERSION:=1.2.3
-PKG_RELEASE:=11
+PKG_RELEASE:=12
 
 PKG_MAINTAINER:=Brukamen <169296793@qq.com>
 PKG_LICENSE:=GPL-3.0-or-later
