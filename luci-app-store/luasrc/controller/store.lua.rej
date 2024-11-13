@@ -1,0 +1,11 @@
+--- luci-app-store/luasrc/controller/store.lua
++++ luci-app-store/luasrc/controller/store.lua
+@@ -249,7 +249,7 @@ function store_action(param)
+         local metapkg = pkg and (metapkgpre .. pkg) or ""
+         if action == "update" or pkg then
+             if action == "update" or action == "install" then
+-                code, out, err = _action(myopkg, action, metapkg)
++                code, out, err = _action(myopkg, action .. " --force-overwrite --force-checksum --force-depends", metapkg)
+             else
+                 local meta = json_parse(fs.readfile(metadir .. "/" .. pkg .. ".json"))
+                 local pkgs = {}
