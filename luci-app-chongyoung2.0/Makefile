@@ -10,7 +10,7 @@ LUCI_TITLE:=chongyoung
 LUCI_DEPENDS:=
 LUCI_PKGARCH:=all
 PKG_VERSION:=4.2.0
-PKG_RELEASE:=104
+PKG_RELEASE:=105
 
 define Package/luci-app-chongyoung-lua/postinst
 #!/bin/sh
