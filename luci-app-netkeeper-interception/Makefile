@@ -11,7 +11,7 @@ LUCI_TITLE:=LuCI for Netkeeper-Interception
 LUCI_DEPENDS:=+netkeeper-interception +luci-proto-netkeeper
 LUCI_PKGARCH:=all
 PKG_VERSION:=0.1
-PKG_RELEASE:=116
+PKG_RELEASE:=117
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
