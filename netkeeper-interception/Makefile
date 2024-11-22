@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netkeeper-interception
-PKG_RELEASE:=132
+PKG_RELEASE:=133
 PKG_VERSION:=0.2
 
 include $(INCLUDE_DIR)/package.mk
