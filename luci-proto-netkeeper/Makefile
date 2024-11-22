@@ -6,16 +6,11 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=Nginxer
-LUCI_DESCRIPTION:=Standard OpenWrt set including full admin with ppp support and the default Bootstrap theme
-LUCI_DEPENDS:=+luci-nginx
-
-define Package/luci-nginxer/postrm
-#!/bin/sh
-/etc/init.d/uhttpd enable
-/etc/init.d/uhttpd start
-exit 0
-endef
+LUCI_TITLE:=Support for Netkeeper
+LUCI_DEPENDS:=+netkeeper
+LUCI_PKGARCH:=all
+PKG_VERSION:=1.2
+PKG_RELEASE:=160
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

@@ -6,17 +6,17 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=Nginxer
-LUCI_DESCRIPTION:=Standard OpenWrt set including full admin with ppp support and the default Bootstrap theme
-LUCI_DEPENDS:=+luci-nginx
+LUCI_TITLE:=chongyoung
+LUCI_DEPENDS:=
+LUCI_PKGARCH:=all
+PKG_VERSION:=4.2.0
+PKG_RELEASE:=160
 
-define Package/luci-nginxer/postrm
+define Package/luci-app-chongyoung-lua/postinst
 #!/bin/sh
-/etc/init.d/uhttpd enable
-/etc/init.d/uhttpd start
+chmod +x $(1)/etc/init.d/*
 exit 0
 endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
-
 # call BuildPackage - OpenWrt buildroot signature
