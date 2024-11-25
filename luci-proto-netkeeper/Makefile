@@ -10,7 +10,7 @@ LUCI_TITLE:=Support for Netkeeper
 LUCI_DEPENDS:=+netkeeper
 LUCI_PKGARCH:=all
 PKG_VERSION:=1.2
-PKG_RELEASE:=190
+PKG_RELEASE:=191
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
