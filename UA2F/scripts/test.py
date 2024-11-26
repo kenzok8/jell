@@ -1,5 +1,6 @@
 import atexit
 import http.server
+import json
 import logging
 import os
 import socketserver
@@ -87,7 +88,6 @@ if __name__ == "__main__":
         })
         assert response.ok
         assert response.text == str(len(nxt))
-
 
     # clean
     cleanup_iptables()
