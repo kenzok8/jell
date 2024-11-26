@@ -10,7 +10,7 @@ LUCI_TITLE:=shanligong web for luci
 LUCI_DEPENDS:=
 LUCI_PKGARCH:=all
 PKG_VERSION:=2.5.0
-PKG_RELEASE:=195
+PKG_RELEASE:=196
 
 include $(TOPDIR)/feeds/luci/luci.mk
 # call BuildPackage - OpenWrt buildroot signature
