@@ -10,6 +10,7 @@ import time
 
 import requests
 from fake_useragent import UserAgent
+from tqdm import tqdm
 
 ua = UserAgent()
 
@@ -17,6 +18,9 @@ PORT = 37491
 
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
     def do_GET(self):
         user_agent = self.headers.get('User-Agent')
 
@@ -76,7 +80,7 @@ if __name__ == "__main__":
 
     time.sleep(3)
 
-    for i in range(10000):
+    for i in tqdm(range(10000)):
         nxt = ua.random
         response = requests.get(f"http://localhost:{PORT}", headers={
             "User-Agent": nxt
