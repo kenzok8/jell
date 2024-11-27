@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cache: [true, false]
+        cache: [ "-DUA2F_NO_CACHE=ON", "-DUA2F_NO_CACHE=OFF" ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,25 +99,31 @@ jobs:
         run: |
           sudo pip install -r scripts/requirements.txt
 
-      - name: Configure ipv6
-        run: |
-          sudo sysctl -w net.ipv6.conf.all.use_tempaddr=0
-          sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
-          sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0
-          
-          for interface in $(ip -br link show | awk '{print $1}'); do
-            sudo sysctl -w net.ipv6.conf.${interface}.disable_ipv6=0
-          done
-
       - name: Enable ipv6
         uses: fscarmen/warp-on-actions@v1.3
         with:
           stack: dual
           mode: client
 
+      - name: Configure ipv6
+        run: |
+          echo "net.ipv6.conf.all.disable_ipv6=0" | sudo tee -a /etc/sysctl.conf
+          echo "net.ipv6.conf.default.disable_ipv6=0" | sudo tee -a /etc/sysctl.conf
+          echo "net.ipv6.conf.lo.disable_ipv6=0" | sudo tee -a /etc/sysctl.conf
+          sudo sysctl -p
+
+      - name: Debug IPv6
+        run: |
+          ip -6 addr
+          sysctl net.ipv6.conf.all.disable_ipv6
+          sysctl net.ipv6.conf.default.disable_ipv6
+          sysctl net.ipv6.conf.lo.disable_ipv6
+          
+          ping6 -c 4 ::1 || echo "::1 is not reachable"
+
       - name: Run unit tests
         run: |
-          cmake -S . -B build -DUA2F_BUILD_TESTS=OFF -DUA2F_ENABLE_UCI=OFF -DUA2F_ENABLE_ASAN=ON ${{ matrix.cache == 'false' && '-DUA2F_NO_CACHE=ON' || '-DUA2F_NO_CACHE=OFF' }}
+          cmake -S . -B build -DUA2F_BUILD_TESTS=OFF -DUA2F_ENABLE_UCI=OFF -DUA2F_ENABLE_ASAN=ON ${{ matrix.cache }}
           cmake --build build
           ./build/ua2f --version
           sudo python scripts/test.py ./build/ua2f
@@ -138,45 +144,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: aarch64_cortex-a53
-            target: mvebu-cortexa53
-
-          - arch: aarch64_cortex-a72
-            target: mvebu-cortexa72
-
-          - arch: aarch64_generic
-            target: rockchip-armv8
-
-          - arch: arm_cortex-a7_neon-vfpv4
-            target: ipq40xx-generic
-
-          - arch: arm_cortex-a9_vfpv3-d16
-            target: mvebu-cortexa9
-
-          - arch: arm_cortex-a15_neon-vfpv4
-            target: armvirt-32
-
-          - arch: i386_pentium4
-            target: x86-generic
-
-          - arch: i386_pentium-mmx
-            target: x86-geode
-
-          - arch: mips_24kc
-            target: ath79-generic
-
-          - arch: mipsel_24kc
-            target: mt7621
-
-          - arch: powerpc_464fp
-            target: apm821xx-nand
-
-          - arch: powerpc_8548
-            target: mpc85xx-p1010
-
-          - arch: x86_64
-            target: x86-64
+        arch:
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_generic
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a9_vfpv3-d16
+          - arm_cortex-a15_neon-vfpv4
+          - i386_pentium4
+          - i386_pentium-mmx
+          - mips_24kc
+          - mipsel_24kc
+          - powerpc_464fp
+          - powerpc_8548
+          - x86_64
 
     steps:
       - uses: actions/checkout@v4
@@ -186,7 +167,7 @@ jobs:
       - name: Build
         uses: openwrt/gh-action-sdk@v7
         env:
-          ARCH: ${{ matrix.arch }}
+          ARCH: ${{ matrix.arch }}-23.05.5
           FEEDNAME: packages_ci
           PACKAGES: openwrt
 
@@ -197,7 +178,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: "!startsWith(github.ref, 'refs/tags/v')"
         with:
-          name: ${{ matrix.arch}}-${{ github.sha}}-packages
+          name: ${{ matrix.arch }}-${{ github.sha }}-packages
           path: "*.ipk"
 
       - name: Upload packages
@@ -212,7 +193,7 @@ jobs:
       - name: Store logs
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.arch}}-${{ github.sha }}-logs
+          name: ${{ matrix.arch }}-${{ github.sha }}-logs
           path: logs/
 
       - name: Remove logs
