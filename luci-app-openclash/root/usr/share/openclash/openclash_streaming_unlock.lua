@@ -781,7 +781,7 @@ function get_auth_info()
 	end
 
 	if not ip or ip == "" then
-		ip = SYS.exec("ip address show $(uci -q -p /tmp/state get network.lan.ifname || uci -q -p /tmp/state get network.lan.device) | grep -w 'inet' 2>/dev/null |grep -Eo 'inet [0-9\.]+' | awk '{print $2}' | tr -d '\n'")
+		ip = SYS.exec("ip address show $(uci -q -p /tmp/state get network.lan.device || uci -q -p /tmp/state get network.lan.device) | grep -w 'inet' 2>/dev/null |grep -Eo 'inet [0-9\.]+' | awk '{print $2}' | tr -d '\n'")
 	end
 	
 	if not ip or ip == "" then
