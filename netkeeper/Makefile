@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netkeeper
-PKG_RELEASE:=250
+PKG_RELEASE:=251
 PKG_VERSION:=3
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
