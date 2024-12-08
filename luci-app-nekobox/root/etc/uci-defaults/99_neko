@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Copyright (C) 2024 Thaolga
+
+arch=`uname -m`
+neko_dir="/etc/neko"
+tmp_dir="/tmp"
+
+echo "[ `date +%T` ] - Checking Files..."
+
+files_check() {
+    uci set uhttpd.main.index_page='index.php'
+    uci set uhttpd.main.interpreter='.php=/usr/bin/php-cgi'
+    uci commit uhttpd
+
+    /etc/init.d/uhttpd restart
+}
+if [ -f "/tmp/neko/neko.bak" ]; then
+    echo "[ `date +%T` ] - Old Configs"
+    echo "[ `date +%T` ] - Restoring..."
+    
+    if [ -f "/tmp/neko/cache.db" ]; then
+        cp -rf "/tmp/neko/cache.db" "/etc/neko/cache.db"
+    fi
+    cp -rf /tmp/neko/config/* "/etc/neko/config/"
+    cp -rf /tmp/neko/proxy_provider/* "/etc/neko/proxy_provider/"
+    cp -rf /tmp/neko/rule_provider/* "/etc/neko/rule_provider/"
+else
+    echo "[ `date +%T` ] - Old Files Not Detected, Checking Files"
+    files_check
+fi
+
+uci set neko.cfg.enabled='0'
+uci commit neko
