@@ -1,31 +1,27 @@
-<%
-local util  = require "luci.util"
-local container_status = util.trim(util.exec("/usr/libexec/istorec/clouddrive2.sh status"))
-local container_install = (string.len(container_status) > 0)
-local container_running = container_status == "running"
--%>
-<div class="cbi-value">
-    <label class="cbi-value-title"><%:Status%></label>
-    <div class="cbi-value-field">
-        <% if container_running then %>
-        <button class="cbi-button cbi-button-success" disabled="true"><%:CloudDrive2 is running%></button>
-        <% else %>
-        <button class="cbi-button cbi-button-negative" disabled="true"><%:CloudDrive2 is not running%></button>
-        <% end %>
-    </div>
-</div>
-<%
-if container_running then
-    local port=util.trim(util.exec("/usr/libexec/istorec/clouddrive2.sh port"))
-    if port == "" then
-        port="19798"
-    end
--%>
-<div class="cbi-value cbi-value-last">
-    <label class="cbi-value-title">&nbsp;</label>
-    <div class="cbi-value-field">
+<script type="text/javascript">//<![CDATA[
+XHR.poll(3, '<%=url([[admin]], [[nas]], [[clouddrive2]], [[status]])%>', null,
+	function(x, data) {
+		var tb = document.getElementById('clouddrive_status');
+		if (data && tb) {
+			if (data.running) {
+				var links = '<em><b><font color=green>CloudDrive2 <%:RUNNING%></font></b></em><input class="cbi-button mar-10" type="button" value="<%:Open Web Interface%>" onclick="openwebui();" />';
+				tb.innerHTML = links;
+			} else {
+				tb.innerHTML = '<em><b><font color=red>CloudDrive2 <%:NOT RUNNING%></font></b></em>';
+			}
+		}
+	}
+);
 
-    <input type="button" class="btn cbi-button cbi-button-apply" name="start" value="<%:Open CloudDrive2%>" onclick="window.open('http://'+location.hostname+':<%=port%>/', '_blank')">
-    </div>
-</div>
-<% end %>
+function openwebui(){
+	var url = window.location.host+":<%=luci.sys.exec("uci -q get clouddrive2.main.port"):gsub("^%s*(.-)%s*$", "%1")%>";
+	window.open('http://'+url,'target','');
+};
+//]]>
+</script>
+<style>.mar-10 {margin-left: 50px; margin-right: 10px;}</style>
+<fieldset class="cbi-section">
+	<p id="clouddrive_status">
+		<em><%:Collecting data...%></em>
+	</p>
+</fieldset>
