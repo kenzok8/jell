@@ -10,7 +10,7 @@ LUCI_TITLE:=mac for luci
 LUCI_DEPENDS:=
 LUCI_PKGARCH:=all
 PKG_VERSION:=4.2.1
-PKG_RELEASE:=335
+PKG_RELEASE:=336
 
 include $(TOPDIR)/feeds/luci/luci.mk
 # call BuildPackage - OpenWrt buildroot signature
