@@ -1,9 +1,9 @@
 local util  = require "luci.util"
 local jsonc = require "luci.jsonc"
 
-local clouddrive2 = {}
+local ubuntu2 = {}
 
-clouddrive2.blocks = function()
+ubuntu2.blocks = function()
   local f = io.popen("lsblk -s -f -b -o NAME,FSSIZE,MOUNTPOINT --json", "r")
   local vals = {}
   if f then
@@ -21,7 +21,7 @@ clouddrive2.blocks = function()
   return vals
 end
 
-clouddrive2.home = function()
+ubuntu2.home = function()
   local uci = require "luci.model.uci".cursor()
   local home_dirs = {}
   home_dirs["main_dir"] = uci:get_first("quickstart", "main", "main_dir", "/root")
@@ -32,18 +32,18 @@ clouddrive2.home = function()
   return home_dirs
 end
 
-clouddrive2.find_paths = function(blocks, home_dirs, path_name)
+ubuntu2.find_paths = function(blocks, home_dirs, path_name)
   local default_path = ''
   local configs = {}
 
-  default_path = home_dirs[path_name] .. "/CloudDrive2"
+  default_path = home_dirs[path_name] .. "/Ubuntu2"
   if #blocks == 0 then
     table.insert(configs, default_path)
   else
     for _, val in pairs(blocks) do 
-      table.insert(configs, val .. "/" .. path_name .. "/CloudDrive2")
+      table.insert(configs, val .. "/" .. path_name .. "/Ubuntu2")
     end
-    local without_conf_dir = "/root/" .. path_name .. "/CloudDrive2"
+    local without_conf_dir = "/root/" .. path_name .. "/Ubuntu2"
     if default_path == without_conf_dir then
       default_path = configs[1]
     end
@@ -52,4 +52,4 @@ clouddrive2.find_paths = function(blocks, home_dirs, path_name)
   return configs, default_path
 end
 
-return clouddrive2
+return ubuntu2
