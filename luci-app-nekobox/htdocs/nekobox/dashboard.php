@@ -32,6 +32,8 @@ $dash_link = $neko_cfg['ctrl_host'] . ':' . $neko_cfg['ctrl_port'] . '/ui/dashbo
     <link href="./assets/theme/<?php echo $neko_theme ?>" rel="stylesheet">
     <script type="text/javascript" src="./assets/js/feather.min.js"></script>
     <script type="text/javascript" src="./assets/js/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="./assets/js/bootstrap.min.js"></script>
+    <?php include './ping.php'; ?>
   </head>
   <body>
 <head>
@@ -46,10 +48,10 @@ $dash_link = $neko_cfg['ctrl_host'] . ':' . $neko_cfg['ctrl_port'] . '/ui/dashbo
 <div class="container text-left p-3">
         <div class="container h-100 mb-5">
             <h2 class="text-center p-2">Meta 面板</h2>
-            <button id="fullscreenToggle" class="btn btn-primary mb-2">全屏</button>
             <iframe id="iframeMeta" class="border border-3 rounded-4 w-100" style="height: 75vh;" src="http://<?php echo $zash_link; ?>" title="zash" allowfullscreen></iframe>
             <table class="table table-borderless callout mb-2">
                 <tbody>
+            <button id="fullscreenToggle" class="btn btn-primary mb-2">全屏</button>
                     <tr class="text-center d-flex flex-wrap justify-content-center">
                         <td><a class="btn btn-info btn-sm text-white" target="_blank" href="http://<?php echo $yacd_link; ?>">YACD-META 面板</a></td>
                         <td><a class="btn btn-info btn-sm text-white" target="_blank" href="http://<?php echo $dash_link; ?>">DASHBOARD 面板</a></td>
