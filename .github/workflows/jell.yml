@@ -38,53 +38,30 @@ jobs:
         sudo timedatectl set-timezone "Asia/Shanghai"
         ( sudo -E apt-get -qq install rename ) &
 
-    - name: Syn jell
-      run: |
-        set -e
-        shopt -s extglob
-        git rm -r --cache * >/dev/null 2>&1 || true
-        rm -rf $(find ./* -maxdepth 0 -type d ! -name ".github/diy") || echo "Cleanup failed."
-        function git_clone() {
-            echo "Cloning repository: $1"
-            git clone --depth 1 "$1" "$2"
-            if [ "$?" != 0 ]; then
-                echo "Error cloning repository: $1"
-                exit 1
-            fi
-        }
-        function git_sparse_clone() {
-            local branch="$1"
-            local rurl="$2"
-            local localdir="$3"
-            shift 3
-      
-            echo "Sparse cloning repository: $rurl (branch: $branch)"
-            tmpdir=$(mktemp -d) || exit 1
-            trap 'rm -rf "$tmpdir"' EXIT
-      
-            git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$rurl" "$tmpdir"
-            if [ "$?" != 0 ]; then
-                echo "Error cloning repository: $rurl"
-                exit 1
-            fi
-      
-            cd "$tmpdir" || exit 1
+        - name: Syn jell
+        run: |
+          shopt -s extglob
+          git rm -r --cache * >/dev/null 2>&1 &
+          rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
+          function git_clone() (
+            git clone --depth 1 $1 $2 || true
+          )
+          function git_sparse_clone() (
+            branch="$1" rurl="$2" localdir="$3" && shift 3
+            git clone -b $branch --depth 1 --filter=blob:none --sparse $rurl $localdir
+            cd $localdir
             git sparse-checkout init --cone
-            git sparse-checkout set "$@"
-            mv -n "$@" "$localdir" || echo "Move failed for $@"
+            git sparse-checkout set $@
+            mv -n $@ ../
             cd ..
-            rm -rf "$tmpdir"
-        }
-        function mvdir() {
-            if [ -d "$1" ]; then
-                echo "Moving directory: $1"
-                mv -n $(find "$1"/* -maxdepth 0 -type d) ./ || echo "Move failed for $1"
-                rm -rf "$1"
-            else
-                echo "Directory $1 does not exist."
-            fi
-        }
-        git_clone https://github.com/kiddin9/my-packages my-packages
+            rm -rf $localdir
+            )
+          function mvdir() {
+          mv -n `find $1/* -maxdepth 0 -type d` ./
+          rm -rf $1
+          }
+          (
+        git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
         #git_clone https://github.com/kiddin9/openwrt-bypass && mvdir openwrt-bypass
         git_clone https://github.com/kiddin9/luci-app-dnsfilter
         git_clone https://github.com/kiddin9/aria2
