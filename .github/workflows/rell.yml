@@ -1,15 +1,12 @@
-name: My Workflow
+name: Check Sender ID
 
 on:
   push:
     branches: [ main ]
 
-env:
-  SENDER_ID: ${{ github.event.sender.id }}
-
 jobs:
-  build:
+  print_id:
     runs-on: ubuntu-latest
     steps:
     - name: Print sender ID
-      run: echo "The sender ID is: $SENDER_ID"
+      run: echo "The sender ID is: ${{ github.event.sender.id }}"
