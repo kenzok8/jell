@@ -44,15 +44,15 @@ jobs:
         set +e
         git rm -r --cache * >/dev/null 2>&1 &
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
-        function git_clone() {
+        function git_clone() (
          git_clone --depth 1 $1 $2
           if [ "$?" != 0 ]; then
             echo "error on $1"
             pid="$( ps -q $$ )"
             kill $pid
           fi
-        }
-        function git_sparse_clone() {
+        )
+        function git_sparse_clone() (
         trap 'rm -rf "$tmpdir"' EXIT
         branch="$1" curl="$2" && shift 2
         rootdir="$PWD"
@@ -73,7 +73,7 @@ jobs:
         git sparse-checkout set "$@"
         mv -n $@ $rootdir/ || true
         cd $rootdir
-        }
+        )
         function mvdir() {
         mv -n `find $1/* -maxdepth 0 -type d` ./
         rm -rf $1
@@ -357,7 +357,7 @@ jobs:
         ) &
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" multimedia/UnblockNeteaseMusic-Go \
-        multimedia/UnblockNeteaseMusic net/amule net/softethervpn5 net/antileech multimedia/gmediarender net/go-aliyundrive-webdav \
+        net/amule net/softethervpn5 net/antileech multimedia/gmediarender net/go-aliyundrive-webdav \
         net/qBittorrent-static net/phtunnel net/frp net/headscale \
         net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/tcpping net/netatalk net/pgyvpn
         git_sparse_clone openwrt-24.10 "https://github.com/openwrt/packages" \
