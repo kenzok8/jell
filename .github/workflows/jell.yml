@@ -339,7 +339,7 @@ jobs:
         git_clone https://github.com/kenzok78/luci-theme-argone
         git_clone https://github.com/kenzok78/luci-app-argone-config
         git_clone https://github.com/kenzok8/wall && mv -n wall/* ./ ; rm -rf wall
-        git_clone https://github.com/kenzok78/luci-theme-design -b js --depth 1
+        git_clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
         git_clone https://github.com/kenzok78/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
         git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass kwrt-packages/luci-app-fileassistant ./ ; rm -rf kwrt-packages
