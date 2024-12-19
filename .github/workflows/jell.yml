@@ -38,30 +38,30 @@ jobs:
         sudo timedatectl set-timezone "Asia/Shanghai"
         ( sudo -E apt-get -qq install rename ) &
 
-    - name: Syn jell
+    - name: Syn upstream
       run: |
         shopt -s extglob
         set +e
         git rm -r --cache * >/dev/null 2>&1 &
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
-        function git_clone() (
-         git_clone --depth 1 $1 $2
+        function git_clone() {
+          git clone --depth 1 $1 $2
           if [ "$?" != 0 ]; then
             echo "error on $1"
             pid="$( ps -q $$ )"
             kill $pid
           fi
-        )
-        function git_sparse_clone() (
+        }
+        function git_sparse_clone() {
         trap 'rm -rf "$tmpdir"' EXIT
         branch="$1" curl="$2" && shift 2
         rootdir="$PWD"
         tmpdir="$(mktemp -d)" || exit 1
         if [ ${#branch} -lt 10 ]; then
-       git_clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
+        git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
         cd "$tmpdir"
         else
-       git_clone --filter=blob:none --sparse "$curl" "$tmpdir"
+        git clone --filter=blob:none --sparse "$curl" "$tmpdir"
         cd "$tmpdir"
         git checkout $branch
         fi
@@ -73,7 +73,7 @@ jobs:
         git sparse-checkout set "$@"
         mv -n $@ $rootdir/ || true
         cd $rootdir
-        )
+        }
         function mvdir() {
         mv -n `find $1/* -maxdepth 0 -type d` ./
         rm -rf $1
@@ -219,7 +219,7 @@ jobs:
         git_clone https://github.com/hzyitc/mnh-openwrt && mvdir mnh-openwrt
         ) &
         (
-       git_clone https://github.com/sirpdboy/luci-theme-kucat -b js --depth 1
+        git_clone https://github.com/sirpdboy/luci-theme-kucat -b js --depth 1
         git_clone https://github.com/QiuSimons/luci-app-daed-next daed1 && mvdir daed1
         git_clone https://github.com/sirpdboy/luci-app-chatgpt-web
         git_clone https://github.com/sirpdboy/luci-app-eqosplus
@@ -344,11 +344,11 @@ jobs:
         git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass kwrt-packages/luci-app-fileassistant ./ ; rm -rf kwrt-packages
         git_clone https://github.com/Thaolga/openwrt-nekobox -b nekobox --depth 1 && mv openwrt-nekobox/luci-app-nekobox ./;rm -rf openwrt-nekobox
         git_clone https://github.com/morytyann/OpenWrt-mihomo && mvdir OpenWrt-mihomo
-		    git_clone https://github.com/pymumu/luci-app-smartdns
+        git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/xiaorouji/openwrt-passwall2 passwall2 && mv -n passwall2/luci-app-passwall2 ./;rm -rf passwall2
         git_clone --depth 1 -b main https://github.com/xiaorouji/openwrt-passwall passwall && mv -n passwall/luci-app-passwall ./;rm -rf passwall
-		    git_clone https://github.com/fw876/helloworld && mv -n helloworld/luci-app-ssr-plus ./ ; rm -rf helloworld
-		    git_clone https://github.com/sbwml/luci-app-qbittorrent openwrt-qb && mv -n openwrt-qb/* ./ &&  rm -rf openwrt-qb
+        git_clone https://github.com/fw876/helloworld && mv -n helloworld/luci-app-ssr-plus ./ ; rm -rf helloworld
+        git_clone https://github.com/sbwml/luci-app-qbittorrent openwrt-qb && mv -n openwrt-qb/* ./ &&  rm -rf openwrt-qb
         ) &
         (
         git_sparse_clone master "https://github.com/QiuSimons/OpenWrt-Add" luci-app-irqbalance
