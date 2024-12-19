@@ -22,7 +22,6 @@ on:
 
 jobs:
   merge:
-    timeout-minutes: 60  # 设置超时时间为60分钟
     if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
     runs-on: ubuntu-latest
 
@@ -39,47 +38,52 @@ jobs:
         sudo timedatectl set-timezone "Asia/Shanghai"
         ( sudo -E apt-get -qq install rename ) &
 
-    - name: Syn upstream
+    - name: Syn jell
       run: |
+        set -e
         shopt -s extglob
-        set +e
-        git rm -r --cache * >/dev/null 2>&1 &
-        rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
+        git rm -r --cache * >/dev/null 2>&1 || true
+        rm -rf $(find ./* -maxdepth 0 -type d ! -name ".github/diy") || echo "Cleanup failed."
         function git_clone() {
-          git clone --depth 1 $1 $2
-          if [ "$?" != 0 ]; then
-            echo "error on $1"
-            pid="$( ps -q $$ )"
-            kill $pid
-          fi
+            echo "Cloning repository: $1"
+            git clone --depth 1 "$1" "$2"
+            if [ "$?" != 0 ]; then
+                echo "Error cloning repository: $1"
+                exit 1
+            fi
         }
         function git_sparse_clone() {
-        trap 'rm -rf "$tmpdir"' EXIT
-        branch="$1" curl="$2" && shift 2
-        rootdir="$PWD"
-        tmpdir="$(mktemp -d)" || exit 1
-        if [ ${#branch} -lt 10 ]; then
-        git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
-        cd "$tmpdir"
-        else
-        git clone --filter=blob:none --sparse "$curl" "$tmpdir"
-        cd "$tmpdir"
-        git checkout $branch
-        fi
-        if [ "$?" != 0 ]; then
-            echo "error on $curl"
-            exit 1
-        fi
-        git sparse-checkout init --cone
-        git sparse-checkout set "$@"
-        mv -n $@ $rootdir/ || true
-        cd $rootdir
+            local branch="$1"
+            local rurl="$2"
+            local localdir="$3"
+            shift 3
+      
+            echo "Sparse cloning repository: $rurl (branch: $branch)"
+            tmpdir=$(mktemp -d) || exit 1
+            trap 'rm -rf "$tmpdir"' EXIT
+      
+            git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$rurl" "$tmpdir"
+            if [ "$?" != 0 ]; then
+                echo "Error cloning repository: $rurl"
+                exit 1
+            fi
+      
+            cd "$tmpdir" || exit 1
+            git sparse-checkout init --cone
+            git sparse-checkout set "$@"
+            mv -n "$@" "$localdir" || echo "Move failed for $@"
+            cd ..
+            rm -rf "$tmpdir"
         }
         function mvdir() {
-        mv -n `find $1/* -maxdepth 0 -type d` ./
-        rm -rf $1
+            if [ -d "$1" ]; then
+                echo "Moving directory: $1"
+                mv -n $(find "$1"/* -maxdepth 0 -type d) ./ || echo "Move failed for $1"
+                rm -rf "$1"
+            else
+                echo "Directory $1 does not exist."
+            fi
         }
-        (
         git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
         #git_clone https://github.com/kiddin9/openwrt-bypass && mvdir openwrt-bypass
         git_clone https://github.com/kiddin9/luci-app-dnsfilter
