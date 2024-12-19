@@ -1,23 +1,24 @@
---- a/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-+++ b/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-@@ -41,6 +41,7 @@ chmod +x /usr/share/passwall/*.sh
- [ "$(uci -q get passwall.@global_xray[0].sniffing)" == "1" ] && [ "$(uci -q get passwall.@global_xray[0].route_only)" != "1" ] && uci -q set passwall.@global_xray[0].sniffing_override_dest=1
- uci -q delete passwall.@global_xray[0].sniffing
- uci -q delete passwall.@global_xray[0].route_only
-+[ "`which nft`" ] && uci -q set passwall.@global_forwarding[0].use_nft=1
- uci -q commit passwall
+--- a/luci-app-passwall2/root/etc/uci-defaults/luci-passwall2
++++ b/luci-app-passwall2/root/etc/uci-defaults/luci-passwall2
+@@ -36,6 +36,11 @@ touch /etc/config/passwall2_show >/dev/null 2>&1
  
+ chmod +x /usr/share/passwall2/*.sh
+ 
++[ "`which nft`" ] && {
++uci -q set passwall2.@global_forwarding[0].use_nft=1
++uci -q commit passwall2
++}
++
  rm -f /tmp/luci-indexcache
+ rm -rf /tmp/luci-modulecache/
+ killall -HUP rpcd 2>/dev/null
 
---- a/luci-app-passwall/Makefile
-+++ b/luci-app-passwall/Makefile
-@@ -35,7 +35,29 @@ LUCI_PKGARCH:=all
- LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
- 	+chinadns-ng +dns2socks +dns2tcp +dnsmasq-full +ip-full \
- 	+libuci-lua +lua +luci-compat +luci-lib-jsonc \
--	+microsocks +resolveip +tcping
-+	+microsocks +resolveip +tcping \
-+	+ipt2socks \
+--- a/luci-app-passwall2/Makefile
++++ b/luci-app-passwall2/Makefile
+@@ -32,6 +32,21 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
+ 	+ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc +resolveip +tcping \
+ 	+xray-core +v2ray-geoip +v2ray-geosite \
+ 	+unzip \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy:naiveproxy \
@@ -31,18 +32,12 @@
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server:shadowsocksr-libev-ssr-server \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_SingBox:sing-box \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus:trojan-plus \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client:tuic-client \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata:v2ray-geoip \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata:v2ray-geosite \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin:v2ray-plugin \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_Xray:xray-core \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_Xray:unzip \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_Xray_Plugin:xray-plugin
+ 	+PACKAGE_$(PKG_NAME)_INCLUDE_IPv6_Nat:ip6tables-mod-nat
  
  define Package/$(PKG_NAME)/config
- menu "Configuration"
-@@ -65,7 +87,6 @@ config PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy
+@@ -71,7 +86,6 @@ config PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy
  	bool "Include Haproxy"
@@ -50,7 +45,7 @@
  	default y if aarch64||arm||i386||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria
-@@ -81,19 +102,15 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy
+@@ -87,8 +101,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Client
  	bool "Include Shadowsocks Libev Client"
@@ -59,10 +54,7 @@
  	default y
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server
- 	bool "Include Shadowsocks Libev Server"
--	select PACKAGE_shadowsocks-libev-ss-server
- 	default y if aarch64||arm||i386||x86_64
- 
+@@ -99,7 +111,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client
  	bool "Include Shadowsocks Rust Client"
  	depends on aarch64||arm||i386||mips||mipsel||x86_64
@@ -70,7 +62,7 @@
  	default y if aarch64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
-@@ -104,8 +121,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
+@@ -110,8 +121,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client
  	bool "Include ShadowsocksR Libev Client"
@@ -79,7 +71,7 @@
  	default y
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
-@@ -115,17 +130,15 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
+@@ -121,12 +130,10 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
  	bool "Include Simple-Obfs (Shadowsocks Plugin)"
@@ -88,45 +80,31 @@
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
  	bool "Include Sing-Box"
- 	select PACKAGE_sing-box
--	default y if aarch64||arm||i386||x86_64
-+	default n
- 
- config PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus
- 	bool "Include Trojan-Plus"
--	select PACKAGE_trojan-plus
- 	default y
+-	select PACKAGE_sing-box
+ 	default y if aarch64||arm||i386||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client
-@@ -142,14 +155,11 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata
+@@ -137,7 +144,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin
  	bool "Include V2ray-Plugin (Shadowsocks Plugin)"
 -	select PACKAGE_v2ray-plugin
  	default y if aarch64||arm||i386||x86_64
  
- config PACKAGE_$(PKG_NAME)_INCLUDE_Xray
- 	bool "Include Xray"
--	select PACKAGE_xray-core
--	select PACKAGE_unzip
--	default y if aarch64||arm||i386||x86_64
-+	default y
- 
- config PACKAGE_$(PKG_NAME)_INCLUDE_Xray_Plugin
- 	bool "Include Xray-Plugin (Shadowsocks Plugin)"
+ endif
 
---- a/luci-app-passwall/luasrc/controller/passwall.lua
-+++ b/luci-app-passwall/luasrc/controller/passwall.lua
-@@ -21,6 +21,7 @@ function index()
- 	entry({"admin", "services", appname, "reset_config"}, call("reset_config")).leaf = true
- 	entry({"admin", "services", appname, "show"}, call("show_menu")).leaf = true
- 	entry({"admin", "services", appname, "hide"}, call("hide_menu")).leaf = true
+--- a/luci-app-passwall2/luasrc/controller/passwall2.lua
++++ b/luci-app-passwall2/luasrc/controller/passwall2.lua
+@@ -74,6 +74,7 @@ function index()
+ 	entry({"admin", "services", appname, "clear_all_nodes"}, call("clear_all_nodes")).leaf = true
+ 	entry({"admin", "services", appname, "delete_select_nodes"}, call("delete_select_nodes")).leaf = true
+ 	entry({"admin", "services", appname, "update_rules"}, call("update_rules")).leaf = true
 +	entry({"admin", "services", appname, "ip"}, call('check_ip')).leaf = true
- 	local e
- 	if uci:get(appname, "@global[0]", "hide_from_luci") ~= "1" then
- 		e = entry({"admin", "services", appname}, alias("admin", "services", appname, "settings"), _("Pass Wall"), -1)
-@@ -211,6 +212,61 @@ function clear_log()
- 	luci.sys.call("echo '' > /tmp/log/passwall.log")
+ 
+ 	--[[Components update]]
+ 	local coms = require "luci.passwall2.com"
+@@ -89,6 +90,61 @@ local function http_write_json(content)
+ 	http.write_json(content or {code = 1})
  end
  
 +function check_site(host, port)
@@ -184,26 +162,25 @@
 +    luci.http.write_json(e)
 +end
 +
- function index_status()
- 	local e = {}
- 	e.dns_mode_status = luci.sys.call("netstat -apn | grep ':15353 ' >/dev/null") == 0
-diff --git a/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua b/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
-index 0c33ccd90f..258da6a551 100644
---- a/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
-+++ b/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
-@@ -431,6 +431,7 @@ for k, v in pairs(nodes_table) do
-     end
+ function reset_config()
+ 	luci.sys.call('/etc/init.d/passwall2 stop')
+ 	luci.sys.call('[ -f "/usr/share/passwall2/0_default_config" ] && cp -f /usr/share/passwall2/0_default_config /etc/config/passwall2')
+
+--- a/luci-app-passwall2/luasrc/model/cbi/passwall2/client/global.lua
++++ b/luci-app-passwall2/luasrc/model/cbi/passwall2/client/global.lua
+@@ -411,5 +411,6 @@ for k, v in pairs(nodes_table) do
  end
  
-+m:append(Template(appname .. "/global/status_bottom"))
  m:append(Template(appname .. "/global/footer"))
++m:append(Template(appname .. "/global/status_bottom"))
  
  return m
-diff --git a/luci-app-passwall/luasrc/view/passwall/global/status_bottom.htm b/luci-app-passwall/luasrc/view/passwall/global/status_bottom.htm
+
+diff --git a/luci-app-passwall2/luasrc/view/passwall2/global/status_bottom.htm b/luci-app-passwall2/luasrc/view/passwall2/global/status_bottom.htm
 new file mode 100644
 index 000000000000..a00fff9c79b3
 --- /dev/null
-+++ b/luci-app-passwall/luasrc/view/passwall/global/status_bottom.htm
++++ b/luci-app-passwall2/luasrc/view/passwall2/global/status_bottom.htm
 @@ -0,0 +1,128 @@
 +<style>
 +.pure-img {
@@ -322,7 +299,7 @@ index 000000000000..a00fff9c79b3
 +    );
 +
 +document.addEventListener('DOMContentLoaded', function() {
-+    setTimeout("resize()",200)
++    setTimeout("resize()",100)
 +    fetch(CHECK_IP_URL)
 +        .then(response => response.json())
 +        .then(data => {
@@ -333,35 +310,3 @@ index 000000000000..a00fff9c79b3
 +
 +window.addEventListener('resize', resize);
 +</script>
-diff --git a/luci-app-passwall/root/etc/uci-defaults/luci-passwall b/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-index cc39c00a21..079c9723b3 100755
---- a/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-+++ b/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-@@ -1,5 +1,8 @@
- #!/bin/sh
- 
-+grep -q ip-api.com /usr/share/passwall/rules/proxy_host ||
-+	sed -i '$a ip-api.com' /usr/share/passwall/rules/proxy_host
-+
- uci -q batch <<-EOF >/dev/null
- 	set dhcp.@dnsmasq[0].localuse=1
- 	commit dhcp
-
---- a/luci-app-passwall/root/usr/share/passwall/0_default_config
-+++ b/luci-app-passwall/root/usr/share/passwall/0_default_config
- 	option use_default_dns 'direct'
-@@ -45,12 +46,12 @@ config global_other
- 	option nodes_ping 'auto_ping tcping'
- 
- config global_rules
--	option auto_update '0'
-+	option auto_update '1'
- 	option chnlist_update '1'
- 	option chnroute_update '1'
- 	option chnroute6_update '1'
- 	option gfwlist_update '1'
--	option geosite_update '0'
-+	option geosite_update '1'
- 	option geoip_update '0'
- 	list gfwlist_url 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/gfw.txt'
- 	list chnroute_url 'https://ispip.clang.cn/all_cn.txt'
