@@ -84,7 +84,7 @@ jobs:
                 echo "Directory $1 does not exist."
             fi
         }
-        git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
+        git_clone https://github.com/kiddin9/my-packages my-packages
         #git_clone https://github.com/kiddin9/openwrt-bypass && mvdir openwrt-bypass
         git_clone https://github.com/kiddin9/luci-app-dnsfilter
         git_clone https://github.com/kiddin9/aria2
