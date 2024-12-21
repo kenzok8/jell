@@ -20,7 +20,7 @@ end
 
 function gen_outbound(flag, node, tag, proxy_table)
 	local result = nil
-	if node and node ~= "nil" then
+	if node then
 		local node_id = node[".name"]
 		if tag == nil then
 			tag = node_id
@@ -46,7 +46,7 @@ function gen_outbound(flag, node, tag, proxy_table)
 					"127.0.0.1", --bind
 					new_port, --socks port
 					config_file, --config file
-					(proxy_tag and proxy_tag ~= "nil" and relay_port) and tostring(relay_port) or "" --relay port
+					(proxy_tag and relay_port) and tostring(relay_port) or "" --relay port
 					)
 				)
 			)
@@ -56,7 +56,7 @@ function gen_outbound(flag, node, tag, proxy_table)
 				port = new_port
 			}
 		else
-			if proxy_tag and proxy_tag ~= "nil" then
+			if proxy_tag then
 				node.detour = proxy_tag
 			end
 		end
@@ -679,7 +679,7 @@ function gen_config_server(node)
 		}
 	}
 
-	if node.outbound_node and node.outbound_node ~= "nil" then
+	if node.outbound_node then
 		local outbound = nil
 		if node.outbound_node == "_iface" and node.outbound_node_iface then
 			outbound = {
@@ -905,7 +905,7 @@ function gen_config(var)
 			end
 
 			if node.chain_proxy == "1" and node.preproxy_node then
-				if outbound["_flag_proxy_tag"] and outbound["_flag_proxy_tag"] ~= "nil" then
+				if outbound["_flag_proxy_tag"] then
 					--Ignore
 				else
 					local preproxy_node = uci:get_all(appname, node.preproxy_node)
@@ -951,7 +951,7 @@ function gen_config(var)
 
 			local function gen_shunt_node(rule_name, _node_id)
 				if not rule_name then return nil, nil end
-				if not _node_id then _node_id = node[rule_name] or "nil" end
+				if not _node_id then _node_id = node[rule_name] end
 				local rule_outboundTag
 				if _node_id == "_direct" then
 					rule_outboundTag = "direct"
@@ -959,7 +959,7 @@ function gen_config(var)
 					rule_outboundTag = "block"
 				elseif _node_id == "_default" and rule_name ~= "default" then
 					rule_outboundTag = "default"
-				elseif _node_id:find("Socks_") then
+				elseif _node_id and _node_id:find("Socks_") then
 					local socks_id = _node_id:sub(1 + #"Socks_")
 					local socks_node = uci:get_all(appname, socks_id) or nil
 					if socks_node then
@@ -976,7 +976,7 @@ function gen_config(var)
 							rule_outboundTag = _outbound.tag
 						end
 					end
-				elseif _node_id ~= "nil" then
+				elseif _node_id then
 					local _node = uci:get_all(appname, _node_id)
 					if not _node then return nil, nil end
 
@@ -1020,7 +1020,7 @@ function gen_config(var)
 									})
 								end
 							end
-
+							
 							local _outbound = gen_outbound(flag, _node, rule_name, { tag = use_proxy and preproxy_tag or nil })
 							if _outbound then
 								_outbound.tag = _outbound.tag .. ":" .. _node.remarks
@@ -1093,7 +1093,7 @@ function gen_config(var)
 							end
 						end
 					end
-
+					
 					local rule = {
 						inbound = inboundTag,
 						outbound = outboundTag,
@@ -1180,7 +1180,7 @@ function gen_config(var)
 						rule.domain_regex = #domain_table.domain_regex > 0 and domain_table.domain_regex or nil
 						rule.geosite = #domain_table.geosite > 0 and domain_table.geosite or nil
 
-						if outboundTag and outboundTag ~= "nil" then
+						if outboundTag then
 							table.insert(dns_domain_rules, api.clone(domain_table))
 						end
 					end
@@ -1261,7 +1261,7 @@ function gen_config(var)
 				server = dns_socks_address,
 				server_port = tonumber(dns_socks_port)
 			})
-		else
+		else 
 			default_outTag = COMMON.default_outbound_tag
 		end
 
@@ -1304,7 +1304,7 @@ function gen_config(var)
 				inet4_range = "198.18.0.0/15",
 				inet6_range = "fc00::/18",
 			}
-
+			
 			table.insert(dns.servers, {
 				tag = fakedns_tag,
 				address = "fakeip",
@@ -1320,7 +1320,7 @@ function gen_config(var)
 				path = "/tmp/singbox_passwall_" .. flag .. ".db"
 			}
 		end
-
+	
 		if direct_dns_udp_server or direct_dns_tcp_server or direct_dns_dot_server then
 			local domain = {}
 			local nodes_domain_text = sys.exec('uci show passwall | grep ".address=" | cut -d "\'" -f 2 | grep "[a-zA-Z]$" | sort -u')
@@ -1333,7 +1333,7 @@ function gen_config(var)
 					domain = domain
 				})
 			end
-
+	
 			local direct_strategy = "prefer_ipv6"
 			if direct_dns_query_strategy == "UseIPv4" then
 				direct_strategy = "ipv4_only"
@@ -1356,7 +1356,7 @@ function gen_config(var)
 					direct_dns_server = "tls://[" .. direct_dns_dot_server .. "]:" .. port
 				end
 			end
-
+	
 			table.insert(dns.servers, {
 				tag = "direct",
 				address = direct_dns_server,
@@ -1425,7 +1425,7 @@ function gen_config(var)
 				end
 			end
 		end
-
+	
 		table.insert(inbounds, {
 			type = "direct",
 			tag = "dns-in",
@@ -1445,7 +1445,7 @@ function gen_config(var)
 			outbound = "dns-out"
 		})
 	end
-
+	
 	if inbounds or outbounds then
 		local config = {
 			log = {
@@ -1476,7 +1476,7 @@ function gen_config(var)
 			tag = "block"
 		})
 		for index, value in ipairs(config.outbounds) do
-			if (not value["_flag_proxy_tag"] or value["_flag_proxy_tag"] == "nil") and not value.detour and value["_id"] and value.server and value.server_port then
+			if not value["_flag_proxy_tag"] and not value.detour and value["_id"] and value.server and value.server_port then
 				sys.call(string.format("echo '%s' >> %s", value["_id"], api.TMP_PATH .. "/direct_node_list"))
 			end
 			for k, v in pairs(config.outbounds[index]) do
@@ -1553,7 +1553,7 @@ function gen_proto_config(var)
 		}
 		if outbound then table.insert(outbounds, outbound) end
 	end
-
+	
 	local config = {
 		log = {
 			disabled = true,

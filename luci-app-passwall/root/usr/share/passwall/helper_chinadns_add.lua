@@ -307,8 +307,8 @@ if uci:get(appname, TCP_NODE, "protocol") == "_shunt" then
 	local t = uci:get_all(appname, TCP_NODE)
 	local default_node_id = t["default_node"] or "_direct"
 	uci:foreach(appname, "shunt_rules", function(s)
-		local _node_id = t[s[".name"]] or "nil"
-		if _node_id ~= "nil" and _node_id ~= "_blackhole" then
+		local _node_id = t[s[".name"]]
+		if _node_id and _node_id ~= "_blackhole" then
 			if _node_id == "_default" then
 				_node_id = default_node_id
 			end
@@ -394,7 +394,7 @@ if uci:get(appname, TCP_NODE, "protocol") == "_shunt" then
 			}
 			insert_array_after(config_lines, tmp_lines, "#--4")
 		end
-
+		
 	end
 
 	if is_file_nonzero(file_shunt_host) then
@@ -419,7 +419,7 @@ if CHNLIST == "proxy" then DEFAULT_TAG = "chn" end
 --全局模式，默认使用远程DNS
 if DEFAULT_MODE == "proxy" and CHNLIST == "0" and GFWLIST == "0" then
 	DEFAULT_TAG = "gfw"
-	if NO_IPV6_TRUST == "1" and uci:get(appname, TCP_NODE, "protocol") ~= "_shunt" then
+	if NO_IPV6_TRUST == "1" and uci:get(appname, TCP_NODE, "protocol") ~= "_shunt" then 
 		table.insert(config_lines, "no-ipv6")
 	end
 end
