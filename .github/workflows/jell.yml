@@ -36,67 +36,45 @@ jobs:
         sudo timedatectl set-timezone "Asia/Shanghai"
         ( sudo -E apt-get -qq install rename ) &
 
-    - name: Syn jell
+    - name: Syn upstream
       run: |
-        # Set up trap to clean up background processes
-        trap 'kill $(jobs -p) 2>/dev/null' EXIT
-        
         shopt -s extglob
         set +e
-        
-        git rm -r --cache * >/dev/null 2>&1
+        git rm -r --cache * >/dev/null 2>&1 &
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
-        
         function git_clone() {
-          local retries=3
-          local repo_url="$1"
-          local target_dir="$2"
-          
-          while [ $retries -gt 0 ]; do
-            echo "Cloning $repo_url to ${target_dir:-./} (attempts left: $retries)"
-            if git clone --depth 1 "$repo_url" "$target_dir"; then
-              return 0
-            fi
-            ((retries--))
-            sleep 5
-          done
-          
-          echo "Failed to clone $repo_url after 3 attempts"
-          return 1
+          git clone --depth 1 $1 $2
+          if [ "$?" != 0 ]; then
+            echo "error on $1"
+            pid="$( ps -q $$ )"
+            kill $pid
+          fi
         }
-        
         function git_sparse_clone() {
-          trap 'rm -rf "$tmpdir"' EXIT
-          branch="$1" curl="$2" && shift 2
-          rootdir="$PWD"
-          tmpdir="$(mktemp -d)" || exit 1
-          
-          if [ ${#branch} -lt 10 ]; then
-            git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
-            cd "$tmpdir"
-          else
-            git clone --filter=blob:none --sparse "$curl" "$tmpdir"
-            cd "$tmpdir"
-            git checkout "$branch"
-          fi
-          
-          if [ $? -ne 0 ]; then
+        trap 'rm -rf "$tmpdir"' EXIT
+        branch="$1" curl="$2" && shift 2
+        rootdir="$PWD"
+        tmpdir="$(mktemp -d)" || exit 1
+        if [ ${#branch} -lt 10 ]; then
+        git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
+        cd "$tmpdir"
+        else
+        git clone --filter=blob:none --sparse "$curl" "$tmpdir"
+        cd "$tmpdir"
+        git checkout $branch
+        fi
+        if [ "$?" != 0 ]; then
             echo "error on $curl"
-            cd "$rootdir"
-            return 1
-          fi
-          
-          git sparse-checkout init --cone
-          git sparse-checkout set "$@"
-          mv -n $@ "$rootdir"/ || true
-          cd "$rootdir"
+            exit 1
+        fi
+        git sparse-checkout init --cone
+        git sparse-checkout set "$@"
+        mv -n $@ $rootdir/ || true
+        cd $rootdir
         }
-        
         function mvdir() {
-          if [ -d "$1" ]; then
-            mv -n `find "$1"/* -maxdepth 0 -type d` ./
-            rm -rf "$1"
-          fi
+        mv -n `find $1/* -maxdepth 0 -type d` ./
+        rm -rf $1
         }
         (
         git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
