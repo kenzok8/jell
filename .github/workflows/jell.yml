@@ -39,64 +39,41 @@ jobs:
       run : |
         shopt -s extglob
         set +e
-        git rm -r --cache * >/dev/null 2>&1 || true
-        rm -rf $(find ./* -maxdepth 0 -type d ! -name ".github/diy") >/dev/null 2>&1
-    
+        git rm -r --cache * >/dev/null 2>&1 &
+        rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
         function git_clone() {
-          if [ -z "$1" ] || [ -z "$2" ]; then
-            echo "Error: Missing parameters for git_clone"
-            return 1
-          fi
-          echo "Cloning $1 into $2..."
-          git clone --depth 1 "$1" "$2"
+          git clone --depth 1 $1 $2
           if [ "$?" != 0 ]; then
-            echo "Error on $1"
+            echo "error on $1"
             exit 1
           fi
-        }
-    
+         }
         function git_sparse_clone() {
-          local branch="$1" 
-          local curl="$2"
-          shift 2
-          local rootdir="$PWD"
-          local tmpdir
-          
-          tmpdir="$(mktemp -d)" || exit 1
-          trap 'rm -rf "$tmpdir"' EXIT
-          
-          echo "Sparse cloning $curl branch $branch..."
-          
-          if [ ${#branch} -lt 10 ]; then
-            git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
-            cd "$tmpdir" || exit 1
-          else
-            git clone --filter=blob:none --sparse "$curl" "$tmpdir"
-            cd "$tmpdir" || exit 1
-            git checkout "$branch"
-          fi
-          
-          if [ "$?" != 0 ]; then
-            echo "Error on $curl"
+        trap 'rm -rf "$tmpdir"' EXIT
+        branch="$1" curl="$2" && shift 2
+        rootdir="$PWD"
+        tmpdir="$(mktemp -d)" || exit 1
+        if [ ${#branch} -lt 10 ]; then
+        git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
+        cd "$tmpdir"
+        else
+        git clone --filter=blob:none --sparse "$curl" "$tmpdir"
+        cd "$tmpdir"
+        git checkout $branch
+        fi
+        if [ "$?" != 0 ]; then
+            echo "error on $curl"
             exit 1
-          fi
-          
-          git sparse-checkout init --cone
-          git sparse-checkout set "$@"
-          echo "Moving files to $rootdir"
-          mv -n "$@" "$rootdir/" || true
-          cd "$rootdir" || exit 1
-        }
-    
+        fi
+        git sparse-checkout init --cone
+        git sparse-checkout set "$@"
+        mv -n $@ $rootdir/ || true
+        cd $rootdir
+         }
         function mvdir() {
-          if [ ! -d "$1" ]; then
-            echo "Directory $1 does not exist"
-            return 1
-          fi
-          echo "Moving contents of $1"
-          mv -n $(find "$1"/* -maxdepth 0 -type d) ./ 2>/dev/null || true
-          rm -rf "$1"
-        }      
+        mv -n `find $1/* -maxdepth 0 -type d` ./
+        rm -rf $1
+        }
         (
         git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
         #git_clone https://github.com/kiddin9/openwrt-bypass && mvdir openwrt-bypass
