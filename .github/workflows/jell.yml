@@ -81,7 +81,7 @@ jobs:
           mv -n `find $1/* -maxdepth 0 -type d` ./
           rm -rf $1
         }
-    
+        (
         # Clone repositories
         git_clone https://github.com/kiddin9/my-packages my-packages && mvdir my-packages
         #git_clone https://github.com/kiddin9/openwrt-bypass openwrt-bypass && mvdir openwrt-bypass
