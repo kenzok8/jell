@@ -432,7 +432,7 @@ function store_upload()
         if string.lower(string.sub(path, -4, -1)) == ".run" then
             code, out, err = _action("sh", "-c", "ls -l \"%s\"; md5sum \"%s\" 2>/dev/null; chmod 755 \"%s\" && \"%s\"; RET=$?; rm -f \"%s\"; exit $RET" %{ path, path, path, path, path })
         else
-            code, out, err = _action("sh", "-c", "opkg install --force-overwrite --force-checksum --force-depends \"%s\"; RET=$?; rm -f \"%s\"; exit $RET" %{ path, path })
+            code, out, err = _action("sh", "-c", "opkg install \"%s\"; RET=$?; rm -f \"%s\"; exit $RET" %{ path, path })
         end
     else
         code = 500

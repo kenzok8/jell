@@ -12,7 +12,7 @@ start_service() {
 }
 
 stop_service(){
-	killall -9 accel-pppd >/dev/null 2>&1
+	killall -3 accel-pppd >/dev/null 2>&1
 	rm -rf /var/run/accel-pppd.pid
 }
 

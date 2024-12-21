@@ -6,7 +6,10 @@ function index()
 		return
 	end
 
-	entry({"admin", "nas", "owntone"}, cbi("owntone"), _("Music Remote Center")).dependent = true
+	local page = entry({"admin", "nas", "owntone"}, cbi("owntone"), _("Music Remote Center"))
+	page.dependent = true
+	page.acl_depends = { "luci-app-music-remote-center" }
+
 	entry({"admin", "nas", "owntone", "status"}, call("act_status")).leaf = true
 end
 

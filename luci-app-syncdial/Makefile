@@ -9,8 +9,7 @@ include $(TOPDIR)/rules.mk
 LUCI_TITLE:=Virtual WAN config generator
 LUCI_DEPENDS:=+kmod-macvlan +luci-app-mwan3
 
-PKG_NAME:=luci-app-syncdial
-
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
+#Makefile for syncdial

@@ -141,7 +141,7 @@ return view.extend({
 
 		o = s.option(form.Value, 'youtube_key', _('Youtube API Key'),
 			_('API Key 申请地址：https://developers.google.com/youtube/v3/getting-started#before-you-start'));
-
+		o.password = true;
 		o.depends({'music_source': 'youtube', '!contains': true});
 
 		o = s.option(form.Flag, 'follow_source_order', _('顺序查询'),
@@ -258,7 +258,7 @@ return view.extend({
 		o = s.option(form.ListValue, 'hijack_ways', _('劫持方法'),
 			 _('如果使用 Hosts 劫持，监听端口将固定为 80/443，请注意更改您的 webUI 端口。'));
 		o.value('dont_hijack', _('不开启劫持'));
-		o.value('use_ipset', _('使用 NFTSet 劫持'));
+		o.value('use_ipset', _('使用 IPSet 劫持'));
 		o.value('use_hosts', _('使用 Hosts 劫持'));
 		o.default = 'dont_hijack';
 		o.rmempty = false;

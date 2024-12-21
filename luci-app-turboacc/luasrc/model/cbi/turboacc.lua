@@ -49,37 +49,14 @@ bbr_cca.description = translate("Using BBR CCA can improve TCP network performan
 end
 
 if nixio.fs.access("/lib/modules/" .. kernel_version .. "/xt_FULLCONENAT.ko") or nixio.fs.access("/lib/modules/" .. kernel_version .. "/nft_fullcone.ko") then
-fullcone_nat = s:option(ListValue, "fullcone_nat", translate("FullCone NAT"))
+fullcone_nat = s:option(Flag, "fullcone_nat", translate("FullCone NAT"))
 fullcone_nat.default = 0
-fullcone_nat:value("0", translate("Disable"))
-fullcone_nat:value("1", translate("Compatible Mode"))
-fullcone_nat:value("2", translate("High Performing Mode"))
 fullcone_nat.description = translate("Using FullCone NAT can improve gaming performance effectively")
+if nixio.fs.access("/usr/sbin/nft") then
+fullcone_nat6 = s:option(Flag, "fullcone_nat6", translate("FullCone NAT6"))
+fullcone_nat6.default = 0
+fullcone_nat6.description = translate("Using FullCone NAT6 can improve gaming performance effectively")
 end
-
-if nixio.fs.access("/usr/sbin/pdnsd") or nixio.fs.access("/usr/bin/dnsforwarder") or nixio.fs.access("/usr/bin/dnsproxy") then
-dns_caching = s:option(Flag, "dns_caching", translate("DNS Caching"))
-dns_caching.default = 0
-dns_caching.rmempty = false
-dns_caching.description = translate("Enable DNS Caching and anti ISP DNS pollution")
 end
-
-dns_caching_mode = s:option(ListValue, "dns_caching_mode", translate("Resolve DNS Mode"), translate("DNS Program"))
-if nixio.fs.access("/usr/sbin/pdnsd") then
-dns_caching_mode:value("1", translate("Using PDNSD to query and cache"))
-end
-if nixio.fs.access("/usr/bin/dnsforwarder") then
-dns_caching_mode:value("2", translate("Using DNSForwarder to query and cache"))
-end
-if nixio.fs.access("/usr/bin/dnsproxy") then
-dns_caching_mode:value("3", translate("Using DNSProxy to query and cache"))
-end
-dns_caching_mode.default = 1
-dns_caching_mode:depends("dns_caching", 1)
-
-dns_caching_dns = s:option(Value, "dns_caching_dns", translate("Upsteam DNS Server"))
-dns_caching_dns.default = "114.114.114.114,114.114.115.115,223.5.5.5,223.6.6.6,180.76.76.76,119.29.29.29,119.28.28.28,1.2.4.8,210.2.4.8"
-dns_caching_dns.description = translate("Muitiple DNS server can saperate with ','")
-dns_caching_dns:depends("dns_caching", 1)
 
 return m

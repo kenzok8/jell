@@ -1,5 +1,0 @@
-requests
-fake-useragent
-tqdm
-fastapi
-uvicorn

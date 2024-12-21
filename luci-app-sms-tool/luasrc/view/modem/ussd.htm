@@ -16,14 +16,14 @@
 -- Licensed to the GNU General Public License v3.0.
 -->
 
-	<h2><%:USSD Codes%></h2>
-	<div class="cbi-map-descr"><%:Web UI for handling USSD codes via sms_tool. More information about the sms-tool on the%> <a href="https://eko.one.pl/?p=openwrt-sms_tool" target="_blank"><%:eko.one.pl forum%></a>.</div>
+	<h2><%:USSD 代码%></h2>
+	<div class="cbi-map-descr"><%:通过sms_tool处理USSD代码的Web用户界面。关于短信工具的更多信息，请见%> <a href="https://eko.one.pl/?p=openwrt-sms_tool" target="_blank"><%:eko.one.pl forum%></a>.</div>
 	<p></p>
-	<h4><%:Sending USSD codes%></h4>
+	<h4><%:发送 USSD 代码%></h4>
 	<div class="table" width="100%">
 
 		<div class="tr">
-			<div class="td left" width="25%"><%:User USSD Codes%>:</div>
+			<div class="td left" width="25%"><%:用户 USSD 代码%>:</div>
 
 			<div class="td left" >
 				<select name="ussd" id="pl" onclick="copyFunction()">
@@ -34,19 +34,19 @@
 			</div>
 
 		<div class="tr">
-			<div class="td left" ><%:Code to send%>:</div>
+			<div class="td left" ><%:要发送的代码%>:</div>
 			<div class="td left" ><input type="text" id="code" required size="20"></div>
 
 		</div>
 		<div class="tr">
-			<div class="td left" ><%:Reply%>:</div><div class="td left" ><pre id="odp" style="visibility: hidden;"></pre></div>
+			<div class="td left" ><%:回复%>:</div><div class="td left" ><pre id="odp" style="visibility: hidden;"></pre></div>
 
 		</div>
 	</div>
 
 	<div class="table" width="100%">
 		<div class="tr cbi-rowstyle-2">
-		<div class="td right"><input type="button" style="margin-right: 5%"; id="sendussd" class="btn cbi-button cbi-button-neutral" value="<%:Send Code%>" /></div>
+		<div class="td right"><input type="button" style="margin-right: 5%"; id="sendussd" class="btn cbi-button cbi-button-neutral" value="<%:发送代码%>" /></div>
 		</div>
 
 	</div>

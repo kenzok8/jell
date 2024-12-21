@@ -190,7 +190,7 @@ if true then
 					if s2 and #s2 > 1 then
 						http_host = s2[1]
 						port = s2[2]
-					end 
+					end
 					url = url:gsub(http_host, dns_ip)
 				end
 			end
@@ -205,7 +205,7 @@ if true then
 end
 
 --设置默认 DNS 分组(托底组)
-local DEFAULT_DNS_GROUP = (USE_DEFAULT_DNS == "direct" and LOCAL_GROUP) or 
+local DEFAULT_DNS_GROUP = (USE_DEFAULT_DNS == "direct" and LOCAL_GROUP) or
                           (USE_DEFAULT_DNS == "remote" and REMOTE_GROUP)
 local only_global = (DEFAULT_PROXY_MODE == "proxy" and CHN_LIST == "0" and USE_GFW_LIST == "0") and 1 --没有启用中国列表和GFW列表时(全局)
 if only_global == 1 then

@@ -1,7 +1,3 @@
--- Copyright 2020-2022 Rafa� Wabik (IceG) - From eko.one.pl forum
--- Licensed to the GNU General Public License v3.0.
-
-
 	local util = require "luci.util"
 	local fs = require "nixio.fs"
 	local sys = require "luci.sys"
@@ -15,12 +11,12 @@ module("luci.controller.modem.sms", package.seeall)
 
 function index()
 	entry({"admin", "modem"}, firstchild(), "Modem", 30).dependent=false
-	entry({"admin", "modem", "sms"}, alias("admin", "modem", "sms", "readsms"), translate("SMS Messages"), 20).acl_depends={ "luci-app-sms-tool" }
-	entry({"admin", "modem", "sms", "readsms"},template("modem/readsms"),translate("Received Messages"), 10)
- 	entry({"admin", "modem", "sms", "sendsms"},template("modem/sendsms"),translate("Send Messages"), 20)
- 	entry({"admin", "modem", "sms", "ussd"},template("modem/ussd"),translate("USSD Codes"), 30)
-	entry({"admin", "modem", "sms", "atcommands"},template("modem/atcommands"),translate("AT Commands"), 40)
-	entry({"admin", "modem", "sms", "smsconfig"},cbi("modem/smsconfig"),translate("Configuration"), 50)
+	entry({"admin", "modem", "sms"}, alias("admin", "modem", "sms", "readsms"), translate("短信"), 20)
+	entry({"admin", "modem", "sms", "readsms"},template("modem/readsms"),translate("收到的信息"), 10)
+ 	entry({"admin", "modem", "sms", "sendsms"},template("modem/sendsms"),translate("发送消息"), 20)
+ 	entry({"admin", "modem", "sms", "ussd"},template("modem/ussd"),translate("USSD 代码"), 30)
+	entry({"admin", "modem", "sms", "atcommands"},template("modem/atcommands"),translate("AT 命令"), 40)
+	entry({"admin", "modem", "sms", "smsconfig"},cbi("modem/smsconfig"),translate("配置"), 50)
 	entry({"admin", "modem", "sms", "delete_one"}, call("delete_sms", smsindex), nil).leaf = true
 	entry({"admin", "modem", "sms", "delete_all"}, call("delete_all_sms"), nil).leaf = true
 	entry({"admin", "modem", "sms", "run_ussd"}, call("ussd"), nil).leaf = true

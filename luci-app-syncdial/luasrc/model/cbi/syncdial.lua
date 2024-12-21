@@ -1,14 +1,13 @@
-local e = require "nixio.fs"
+local e = require"nixio.fs"
 require("luci.tools.webadmin")
-local e = "mwan3 status | grep -c \"is online and tracking is active\""
-local e = io.popen(e,"r")
-local t = e:read("*a")
-e:close()
+
 m = Map("syncdial")
 m.title = translate("多线多拨")
-m.description = translate("使用macvlan驱动创建多个虚拟WAN口，支持并发多拨 <br />当前在线接口数量：")..t
+m.description = translate("使用macvlan驱动创建多个虚拟WAN口，支持并发多拨。")
 
-s = m:section(TypedSection, "syncdial")
+m:section(SimpleSection).template = "syncdial/syncdial_status"
+
+s = m:section(NamedSection, "config", "syncdial", translate("配置"))
 s.anonymous = true
 
 o = s:option(Flag, "enabled", translate("启用"))
@@ -29,7 +28,7 @@ o.optional = false
 o.rmempty = false
 
 o = s:option(Value, "wannum", translate("虚拟WAN接口数量"))
-o.datatype = "range(0,249)"
+o.datatype = "and(uinteger,range(0,249))"
 o.optional = false
 o.default = 1
 
@@ -39,27 +38,27 @@ o.rmempty = false
 o = s:option(Value, "wanselect2", translate("选择第二个外网接口"))
 o.description = translate("<font color=\"red\">指定要多拨的第二个外网接口，如wan2</font>")
 luci.tools.webadmin.cbi_add_networks(o)
-o.optional = false
-o:depends("dial_type", "2")
+o.optional=false
+o:depends("dial_type","2")
 
 o = s:option(Value, "wannum2", translate("第二条线虚拟WAN接口数量"))
 o.description = translate("设置第二条线的拨号数")
-o.datatype = "range(0,249)"
+o.datatype = "and(uinteger,range(0,249))"
 o.optional = false
 o.default = 1
-o:depends("dial_type", "2")
+o:depends("dial_type","2")
 
 o = s:option(Flag, "bindwan2", translate("绑定物理接口"))
 o.description = translate("第二条线生成的虚拟接口绑定当前物理接口")
 o.rmempty = false
-o:depends("dial_type", "2")
+o:depends("dial_type","2")
 
 o = s:option(Flag, "dialchk", translate("启用掉线检测"))
 o.rmempty = false
 
 o = s:option(Value, "dialnum", translate("最低在线接口数量"))
 o.description = translate("如果在线接口数量小于这个值则重拨。")
-o.datatype = "range(0,248)"
+o.datatype = "and(uinteger,range(0,248))"
 o.optional = false
 o.default = 2
 
@@ -68,7 +67,7 @@ o.description = translate("如果第二条线在线接口数量小于这个值�
 o.datatype = "range(0,248)"
 o.optional = false
 o.default = 2
-o:depends("dial_type", "2")
+o:depends("dial_type","2")
 
 o = s:option(Value, "dialwait", translate("重拨等待时间"))
 o.description = translate("重拨时，接口全部下线后下一次拨号前的等待时间。单位：秒 最小值：5秒")

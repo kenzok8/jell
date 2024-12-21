@@ -42,6 +42,11 @@ uci -q delete passwall2.@global_xray[0].sniffing
 uci -q delete passwall2.@global_xray[0].route_only
 uci -q commit passwall2
 
+[ "`which nft`" ] && {
+uci -q set passwall2.@global_forwarding[0].use_nft=1
+uci -q commit passwall2
+}
+
 rm -f /tmp/luci-indexcache
 rm -rf /tmp/luci-modulecache/
 killall -HUP rpcd 2>/dev/null

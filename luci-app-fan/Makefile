@@ -6,7 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI fan control
-LUCI_DEPENDS:=+coreutils-stat
+LUCI_DEPENDS:=+coreutils-stat +kmod-hwmon-pwmfan +kmod-thermal
 LUCI_PKGARCH:=all
 PKG_MAINTAINER:=jjm2473 <jjm2473@gmail.com>
 

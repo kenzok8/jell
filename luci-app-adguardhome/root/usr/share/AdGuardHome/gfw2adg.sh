@@ -1,7 +1,5 @@
 #!/bin/sh
-
 PATH="/usr/sbin:/usr/bin:/sbin:/bin"
-
 checkmd5(){
 local nowmd5=$(md5sum /tmp/adguard.list 2>/dev/null)
 nowmd5=${nowmd5%% *}
@@ -12,7 +10,6 @@ if [ "$nowmd5" != "$lastmd5" ]; then
 	[ "$1" == "noreload" ] || /etc/init.d/AdGuardHome reload
 fi
 }
-
 configpath=$(uci get AdGuardHome.AdGuardHome.configpath 2>/dev/null)
 [ "$1" == "del" ] && sed -i '/programaddstart/,/programaddend/d' $configpath && checkmd5 "$2" && exit 0
 gfwupstream=$(uci get AdGuardHome.AdGuardHome.gfwupstream 2>/dev/null)
@@ -73,16 +70,16 @@ if (RSTART==1 && RLENGTH==length(fin)) {print "ipset add gfwlist "fin>"/tmp/doip
 if (fin=="" || finl==fin) next;
 finl=fin;
 if (white==0)
-    {print("  - '\''[/"fin"/]"upst"'\''");}
+    {print("    - '\''[/"fin"/]"upst"'\''");}
 else{
-    print("  - '\''[/"fin"/]#'\''");}
-}END{print("  - '\''[/programaddend/]#'\''")}' > /tmp/adguard.list
+    print("    - '\''[/"fin"/]#'\''");}
+}END{print("    - '\''[/programaddend/]#'\''")}' > /tmp/adguard.list
 grep programaddstart $configpath
 if [ "$?" == "0" ]; then
-	sed -i '/programaddstart/,/programaddend/c\  - '\''\[\/programaddstart\/\]#'\''' $configpath
+	sed -i '/programaddstart/,/programaddend/c\    - '\''\[\/programaddstart\/\]#'\''' $configpath
 	sed -i '/programaddstart/'r/tmp/adguard.list $configpath
 else
-	sed -i '1i\  - '\''[/programaddstart/]#'\''' /tmp/adguard.list
+	sed -i '1i\    - '\''[/programaddstart/]#'\''' /tmp/adguard.list
 	sed -i '/upstream_dns:/'r/tmp/adguard.list $configpath
 fi
 checkmd5 "$2"

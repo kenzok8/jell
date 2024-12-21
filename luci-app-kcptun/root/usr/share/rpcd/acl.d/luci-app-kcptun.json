@@ -1,11 +1,14 @@
 {
 	"luci-app-kcptun": {
-		"description": "Grant UCI access for luci-app-kcptun",
+		"description": "Grant access to LuCI app kcptun",
 		"read": {
-			"uci": [ "kcptun" ]
+			"ubus": {
+				"service": [ "list" ]
+			},
+			"uci": ["kcptun"]
 		},
 		"write": {
-			"uci": [ "kcptun" ]
+			"uci": ["kcptun"]
 		}
 	}
 }

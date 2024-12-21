@@ -47,7 +47,7 @@ window.onload = function prefiksSMS() {
 		}
 
 		if ( msg == "1" ) {
-		alert("<%:The phone number should be preceded by the country prefix (for Poland it is 48, without +). If the number is 5, 4 or 3 characters, it is treated as.. short and should not be preceded by a country prefix.%>");
+		alert("<%:电话号码的前面应该有国家的前缀（波兰是48，没有+）。如果号码是5个、4个或3个字符，它将被视为短号码，而不应在前面加上国家前缀。(The phone number should be preceded by the country prefix (for Poland it is 48, without +). If the number is 5, 4 or 3 characters, it is treated as.. short and should not be preceded by a country prefix.)%>");
 		}
 
 
@@ -188,16 +188,16 @@ document.addEventListener('DOMContentLoaded', function (ev) {var button = docume
 //]]></script>
 
 
-	<h2><%:SMS Messages%></h2>
-	<div class="cbi-map-descr"><%:Web UI for sending messages via sms_tool. More information about the sms-tool on the%> <a href="https://eko.one.pl/?p=openwrt-sms_tool" target="_blank"><%:eko.one.pl forum%></a>.</div>
+	<h2><%:短信%></h2>
+	<div class="cbi-map-descr"><%:通过sms_tool发送信息的Web用户界面。关于短信工具的更多信息，请见%> <a href="https://eko.one.pl/?p=openwrt-sms_tool" target="_blank"><%:eko.one.pl 论坛%></a>.</div>
 	<p></p>
 	
-	<h4><%:Send Messages%></h4>
+	<h4><%:发送短信%></h4>
 
 	<div class="table">
 
 		<div class="tr">
-			<div class="td left" ><%:User Phonebook%>:</div>
+			<div class="td left" ><%:用户电话簿%>:</div>
 			<div class="td left" >
 
 				<select name="ussd" id="pb" onchange="copyFunction2()">
@@ -208,18 +208,18 @@ document.addEventListener('DOMContentLoaded', function (ev) {var button = docume
 		</div>
 
 		<div class="tr">
-			<div class="td left" ><%:Send to%>:</div>
+			<div class="td left" ><%:发送至%>:</div>
 			<div class="td left" ><input type="text" id="numer" onKeyUp="codsp()" placeholder="<%:PHONE_NUMBER%>" required minlength="3" maxlength="24" size="11"></div>
 			<div class="td left" ></div>
 		</div>
 		<div class="tr">
-			<div class="td left" ><%:Message text%>:</div>
+			<div class="td left" ><%:消息正文%>:</div>
 			<div class="td left" ><textarea id="smstxt" onKeyUp="count_replace(this)" required></textarea><div id="counter">160</div></div>
 			<div class="td left" ></div>
 		</div>
 			
 		<div class="tr">
-			<div class="td left" ><%:Status%>:</div><div class="td left" id="odp"></div>
+			<div class="td left" ><%:状态%>:</div><div class="td left" id="odp"></div>
 
 		</div>
 
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function (ev) {var button = docume
 	<div class="table">
 
 		<div class="tr cbi-rowstyle-2">
-		<div class="td right"><input type="button" style="margin-right: 5%"; id="sendsms" class="btn cbi-button cbi-button-neutral" value="<%:Send Message%>" /></div>
+		<div class="td right"><input type="button" style="margin-right: 5%"; id="sendsms" class="btn cbi-button cbi-button-neutral" value="<%:发送短信%>" /></div>
 		</div>
 
 	</div>
