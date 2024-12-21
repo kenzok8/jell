@@ -40,28 +40,58 @@ jobs:
         shopt -s extglob
         set +e
         git rm -r --cache * >/dev/null 2>&1 || true
-        rm -rf $(find ./* -maxdepth 0 -type d ! -name ".github/diy") >/dev/null 2>&1	
+        rm -rf $(find ./* -maxdepth 0 -type d ! -name ".github/diy") >/dev/null 2>&1
         function git_clone() {
-          git clone --depth 1 "$1" "$2" || true
+          if [ -z "$1" ] || [ -z "$2" ]; then
+            echo "Error: Missing parameters for git_clone"
+            return 1
+          fi
+          echo "Cloning $1 into $2..."
+          git clone --depth 1 "$1" "$2"
+          if [ "$?" != 0 ]; then
+            echo "Error on $1"
+            kill $$
+          fi
         }
-        
         function git_sparse_clone() {
           local branch="$1" 
-          local rurl="$2" 
-          local localdir="$3"
-          shift 3
+          local curl="$2"
+          shift 2
+          local rootdir="$PWD"
+          local tmpdir
           
-          git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$rurl" "$localdir"
-          cd "$localdir" || return
+          tmpdir="$(mktemp -d)" || exit 1
+          trap 'rm -rf "$tmpdir"' EXIT
+          
+          echo "Sparse cloning $curl branch $branch..."
+          
+          if [ ${#branch} -lt 10 ]; then
+            git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
+            cd "$tmpdir" || exit 1
+          else
+            git clone --filter=blob:none --sparse "$curl" "$tmpdir"
+            cd "$tmpdir" || exit 1
+            git checkout "$branch"
+          fi
+          
+          if [ "$?" != 0 ]; then
+            echo "Error on $curl"
+            exit 1
+          fi
+          
           git sparse-checkout init --cone
           git sparse-checkout set "$@"
-          mv -n "$@" ../
-          cd ..
-          rm -rf "$localdir"
+          echo "Moving files to $rootdir"
+          mv -n "$@" "$rootdir/" || true
+          cd "$rootdir" || exit 1
         }
-        
         function mvdir() {
-          mv -n $(find "$1"/* -maxdepth 0 -type d) ./
+          if [ ! -d "$1" ]; then
+            echo "Directory $1 does not exist"
+            return 1
+          fi
+          echo "Moving contents of $1"
+          mv -n $(find "$1"/* -maxdepth 0 -type d) ./ 2>/dev/null || true
           rm -rf "$1"
         }
         (
