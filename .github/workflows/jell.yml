@@ -20,7 +20,7 @@ on:
 
 jobs:
   merge:
-    if: github.event_name == 'workflow_dispatch' || github.event.repository.owner.id == github.event.sender.id
+    if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
     runs-on: Ubuntu-22.04
 
     steps:
@@ -35,7 +35,7 @@ jobs:
         git config --global user.name "action"
         sudo timedatectl set-timezone "Asia/Shanghai"
 
-    - name: Syn upstream
+    - name: Syn jell
       run : |
         shopt -s extglob
         set +e
@@ -46,7 +46,7 @@ jobs:
           if [ "$?" != 0 ]; then
             echo "error on $1"
             pid="$( ps -q $$ )"
-            kill $pid
+            exit 1
           fi
         }
         function git_sparse_clone() {
@@ -110,7 +110,7 @@ jobs:
         git_clone https://github.com/sirpdboy/netspeedtest && mv -n netspeedtest/luci-app-netspeedtest ./ ; rm -rf netspeedtest
         git_clone https://github.com/sirpdboy/luci-app-parentcontrol
         git_clone https://github.com/sirpdboy/luci-app-poweroffdevice
-        # git_clone https://github.com/muink/luci-app-homeproxy
+        #git_clone https://github.com/muink/luci-app-homeproxy
         ) &
         (
         git_clone https://github.com/destan19/OpenAppFilter && mvdir OpenAppFilter
@@ -140,7 +140,7 @@ jobs:
         git_clone https://github.com/ophub/luci-app-amlogic amlogic && mv -n amlogic/luci-app-amlogic ./;rm -rf amlogic
         git_clone https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest cloudflarespeedtest && mv -n cloudflarespeedtest/applications/* ./;rm -rf cloudflarespeedtest
         git_clone https://github.com/xiaorouji/openwrt-passwall2 passwall2 && mv -n passwall2/luci-app-passwall2 ./;rm -rf passwall2
-        # git_clone https://github.com/messense/aliyundrive-fuse aliyundrive && mv -n aliyundrive/openwrt/* ./;rm -rf aliyundrive
+        #git_clone https://github.com/messense/aliyundrive-fuse aliyundrive && mv -n aliyundrive/openwrt/* ./;rm -rf aliyundrive
         git_clone https://github.com/linkease/nas-packages && mv -n nas-packages/{network/services/*,multimedia/*} ./; rm -rf nas-packages
         git_clone https://github.com/linkease/nas-packages-luci && mv -n nas-packages-luci/luci/* ./; rm -rf nas-packages-luci
         git_clone https://github.com/linkease/istore && mv -n istore/luci/* ./; rm -rf istore
@@ -166,7 +166,7 @@ jobs:
         git_clone https://github.com/mchome/openwrt-dogcom
         git_clone https://github.com/yichya/luci-app-xray yichya && mv -f yichya/status ./luci-app-xray-status;mv -f yichya/core ./luci-app-xray;rm -rf yichya
         git_clone https://github.com/rafmilecki/luci-app-xjay
-        # git_clone https://github.com/kiddin9/openwrt-thunder && mvdir openwrt-thunder
+        #git_clone https://github.com/kiddin9/openwrt-thunder && mvdir openwrt-thunder
         ) &
         (
         git_clone https://github.com/honwen/luci-app-aliddns
@@ -216,7 +216,6 @@ jobs:
         git_clone https://github.com/hzyitc/mnh-openwrt && mvdir mnh-openwrt
         ) &
         (
-        git_clone https://github.com/sirpdboy/luci-theme-kucat -b js --depth 1
         git_clone https://github.com/QiuSimons/luci-app-daed-next daed1 && mvdir daed1
         git_clone https://github.com/sirpdboy/luci-app-chatgpt-web
         git_clone https://github.com/sirpdboy/luci-app-eqosplus
@@ -258,7 +257,7 @@ jobs:
         git_clone https://github.com/Carseason/openwrt-packages Carseason && mv -n Carseason/*/* ./;mv services/routergo ./;rm -rf Carseason
         git_clone https://github.com/Carseason/openwrt-themedog && mv -n openwrt-themedog/luci/* ./;rm -rf openwrt-themedog
         git_clone https://github.com/Carseason/openwrt-app-actions Carseason && mv -n Carseason/applications/* ./;rm -rf Carseason
-        # git_clone https://github.com/VergilGao/openwrt-sblite && mvdir openwrt-sblite
+        #git_clone https://github.com/VergilGao/openwrt-sblite && mvdir openwrt-sblite
         git_clone --depth 1 -b nekobox https://github.com/Thaolga/openwrt-nekobox  && mv openwrt-nekobox/luci-app-nekobox ./;rm -rf openwrt-nekobox
         git_clone https://github.com/nosignals/openwrt-neko && mv openwrt-neko/luci-app-neko ./;rm -rf openwrt-neko
         ) &
@@ -324,8 +323,8 @@ jobs:
         git_clone https://github.com/hudra0/qosmate
         git_clone https://github.com/kiddin9/luci-app-qosmate
         git_clone https://github.com/yz-java/openwrt-subconverter && mv -f openwrt-subconverter/luci-app-subconverter ./; rm -rf openwrt-subconverter
-        # git_clone https://github.com/karen07/antiblock-openwrt-package
-        # git_clone https://github.com/karen07/luci-app-antiblock-openwrt-package
+        #git_clone https://github.com/karen07/antiblock-openwrt-package
+        #git_clone https://github.com/karen07/luci-app-antiblock-openwrt-package
         git_clone https://github.com/muink/luci-app-netdata
         git_clone https://github.com/xptsp/luci-app-ympd
         git_clone https://github.com/xptsp/openwrt-ympd
@@ -340,6 +339,8 @@ jobs:
         git_clone https://github.com/kenzok78/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
         git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass kwrt-packages/luci-app-fileassistant ./ ; rm -rf kwrt-packages
+	) &
+        (
         git_clone https://github.com/Thaolga/openwrt-nekobox -b nekobox --depth 1 && mv openwrt-nekobox/luci-app-nekobox ./;rm -rf openwrt-nekobox
         git_clone https://github.com/morytyann/OpenWrt-mihomo && mvdir OpenWrt-mihomo
         git_clone https://github.com/pymumu/luci-app-smartdns
@@ -349,7 +350,7 @@ jobs:
         git_clone https://github.com/sbwml/luci-app-qbittorrent openwrt-qb && mv -n openwrt-qb/* ./ &&  rm -rf openwrt-qb
         ) &
         (
-                git_sparse_clone master "https://github.com/QiuSimons/OpenWrt-Add" luci-app-irqbalance
+        git_sparse_clone master "https://github.com/QiuSimons/OpenWrt-Add" luci-app-irqbalance
         git_sparse_clone main "https://github.com/lucikap/Brukamen" luci-app-ua2f
         git_sparse_clone master "https://github.com/lunatickochiya/Matrix-Action-Openwrt" package/kochiya/brlaser package/kochiya/luci-app-banmac-ipt package/kochiya/luci-app-banmac-nft package/kochiya/luci-app-nvr package/kochiya/luci-app-openvpn-server
         ) &
