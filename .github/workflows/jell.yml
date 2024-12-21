@@ -21,7 +21,7 @@ on:
 jobs:
   merge:
     if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
-    runs-on: Ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -91,7 +91,7 @@ jobs:
         git_clone https://github.com/kiddin9/autoshare && mvdir autoshare
         git_clone https://github.com/kiddin9/luci-app-xlnetacc
         git_clone https://github.com/kiddin9/luci-app-wizard
-        git_clone https://github.com/kiddin9/openwrt-adguardhome && mvdir openwrt-adguardhome
+        #git_clone https://github.com/kiddin9/openwrt-adguardhome && mvdir openwrt-adguardhome
         git_clone https://github.com/kiddin9/luci-app-cloudreve
         git_clone https://github.com/kiddin9/openwrt-clouddrive2 && mvdir openwrt-clouddrive2
         ) &
@@ -350,8 +350,7 @@ jobs:
         (
         git_clone https://github.com/morytyann/OpenWrt-mihomo && mvdir OpenWrt-mihomo
         git_clone https://github.com/pymumu/luci-app-smartdns
-        git_clone https://github.com/xiaorouji/openwrt-passwall2 passwall2 && mv -n passwall2/luci-app-passwall2 ./;rm -rf passwall2
-        git_clone --depth 1 -b main https://github.com/xiaorouji/openwrt-passwall passwall && mv -n passwall/luci-app-passwall ./;rm -rf passwall
+        git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
         git_clone https://github.com/fw876/helloworld && mv -n helloworld/luci-app-ssr-plus ./ ; rm -rf helloworld
         git_clone https://github.com/sbwml/luci-app-qbittorrent openwrt-qb && mv -n openwrt-qb/* ./ &&  rm -rf openwrt-qb
         ) &
@@ -362,7 +361,7 @@ jobs:
         ) &
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" multimedia/UnblockNeteaseMusic-Go \
-        multimedia/UnblockNeteaseMusic net/amule net/softethervpn5 net/antileech multimedia/gmediarender net/go-aliyundrive-webdav \
+        net/amule net/softethervpn5 net/antileech multimedia/gmediarender net/go-aliyundrive-webdav \
         net/qBittorrent-static net/phtunnel net/headscale \
         net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/tcpping net/netatalk net/pgyvpn
         git_sparse_clone openwrt-24.10 "https://github.com/openwrt/packages" \
@@ -385,7 +384,7 @@ jobs:
         net/dns-forwarder net/ipset-lists net/ShadowVPN net/cloudflared net/nps \
         libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 libs/libtorrent-rasterbar \
         libs/libdouble-conversion libs/qt6base libs/cxxopts libs/jpcre2 libs/alac libs/libcryptopp sound/spotifyd \
-        utils/qt6tools utils/cpulimit utils/sendat utils/exfatprogs utils/filebrowser utils/cups utils/cups-bjnp utils/joker net/udp2raw net/msd_lite \
+        utils/qt6tools utils/cpulimit utils/sendat utils/exfatprogs utils/cups utils/cups-bjnp utils/joker net/udp2raw net/msd_lite \
         multimedia/you-get multimedia/lux multimedia/ykdl multimedia/gallery-dl devel/go-rice admin/gotop
         ) &
         (
@@ -460,7 +459,7 @@ jobs:
              -H "Authorization: Bearer ${{ secrets.REPO_TOKEN }}" \
              -X POST -d '{ "query": "query {repository(owner: \"'"$1"'\", name: \"'"$2"'\"){latestRelease{tagName tagCommit{oid}}refs(refPrefix:\"refs/tags/\",last:1,orderBy:{field:TAG_COMMIT_DATE,direction:ASC}){edges{node{name target{oid}}}}defaultBranchRef{target{...on Commit {oid}}}}}"}' https://api.github.com/graphql)
         }
-        for pkg in $(ls !(luci-*|cloudflared|dnsproxy|ppp|joker|openwrt-ympd|gost|aic8800|headscale|aria2|webd|mihomo|netmaker-openwrt|hickory-dns|frp|libcryptopp|toml11|chinadns-ng|ddns-go|libtorrent-rasterbar|ua2f|homebox|xtables-wgobfs|nexttrace|tuic-server|subconverter|softethervpn5|shadowsocksr-libev|mt76|sub-web|mmdvm-host|alist|curl|qBittorrent-Enhanced-Edition|libwxwidgets|ysf-clients|natter|fullconenat|v2raya|r8152|amule|brook|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|tailscale|mosdns|coremark|mbedtls|quickjspp|accel-ppp)/Makefile); do
+        for pkg in $(ls !(luci-*|cloudflared|dnsproxy|ppp|joker|openwrt-ympd|aic8800|headscale|aria2|webd|mihomo|netmaker-openwrt|hickory-dns|frp|libcryptopp|toml11|chinadns-ng|libtorrent-rasterbar|ua2f|homebox|xtables-wgobfs|nexttrace|tuic-server|subconverter|softethervpn5|shadowsocksr-libev|mt76|sub-web|mmdvm-host|curl|qBittorrent-Enhanced-Edition|libwxwidgets|ysf-clients|natter|fullconenat|v2raya|r8152|amule|brook|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|tailscale|mosdns|coremark|mbedtls|quickjspp|accel-ppp)/Makefile); do
           repo="$(grep ^PKG_SOURCE_URL $pkg | grep github | cut -f 4-5 -d '/' | sed -e 's/.git//' | grep -E '[0-9a-zA-Z_-]+$')" || true
           if [ "$repo" ]; then
             owner="$(echo $repo | cut -f 1 -d '/')"
