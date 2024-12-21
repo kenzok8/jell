@@ -35,8 +35,8 @@ jobs:
         git config --global user.name "action"
         sudo timedatectl set-timezone "Asia/Shanghai"
 
-        - name: Syn jell
-        run: |
+    - name: Syn jell
+      run: |
         shopt -s extglob
         set +e
         git rm -r --cache * >/dev/null 2>&1 &
