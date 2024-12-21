@@ -20,7 +20,7 @@ on:
 
 jobs:
   merge:
-    if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.owner.id == github.event.sender.id
     runs-on: Ubuntu-22.04
 
     steps:
