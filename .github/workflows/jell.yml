@@ -423,23 +423,23 @@ jobs:
         git_sparse_clone openwrt-24.10 "https://github.com/immortalwrt/luci" applications protocols/luci-proto-minieap protocols/luci-proto-quectel themes/luci-theme-argon
         mv -n luciapp/* applications/; rm -rf luciapp
         git_sparse_clone master "https://github.com/immortalwrt/luci" applications/luci-app-filebrowser-go
-	
-	
-	# Wait for all background processes to finish
-        for job in $(jobs -p); do
-          wait $job || ((FAILURES++))
-        done
-        
-        if [ $FAILURES -gt 0 ]; then
-          echo "Some cloning operations failed"
-          exit 1
-        fi
 
         for ipk in $(ls -d applications/!(luci-app-rclone|luci-app-filebrowser)/); do
         	if [[ $(ls $ipk/po | wc -l) -gt 4 ]]; then
             rm -rf $ipk
         	fi
         done
+
+        # Wait for all background processes to finish
+        for job in $(jobs -p); do
+          wait $job || ((FAILURES++))
+        done
+        
+         if [ $FAILURES -gt 0 ]; then
+           echo "Some cloning operations failed"
+           exit 1
+         fi
+         done 
 
         git_sparse_clone master "https://github.com/coolsnowwolf/lede" package/lean package/network/services/shellsync package/qca/shortcut-fe
 
