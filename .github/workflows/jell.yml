@@ -39,24 +39,30 @@ jobs:
       run: |
         shopt -s extglob
         set +e
-        git rm -r --cache * >/dev/null 2>&1 &
-        rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
-        function git_clone() (
-          git clone --depth 1 $1 $2 || true
-        )
-        function git_sparse_clone() (
-          branch="$1" rurl="$2" localdir="$3" && shift 3
-          git clone -b $branch --depth 1 --filter=blob:none --sparse $rurl $localdir
-          cd $localdir
+        git rm -r --cache * >/dev/null 2>&1 || true
+        rm -rf $(find ./* -maxdepth 0 -type d ! -name ".github/diy") >/dev/null 2>&1	
+        function git_clone() {
+          git clone --depth 1 "$1" "$2" || true
+        }
+        
+        function git_sparse_clone() {
+          local branch="$1" 
+          local rurl="$2" 
+          local localdir="$3"
+          shift 3
+          
+          git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$rurl" "$localdir"
+          cd "$localdir" || return
           git sparse-checkout init --cone
-          git sparse-checkout set $@
-          mv -n $@ ../
+          git sparse-checkout set "$@"
+          mv -n "$@" ../
           cd ..
-          rm -rf $localdir
-          )
+          rm -rf "$localdir"
+        }
+        
         function mvdir() {
-        mv -n `find $1/* -maxdepth 0 -type d` ./
-        rm -rf $1
+          mv -n $(find "$1"/* -maxdepth 0 -type d) ./
+          rm -rf "$1"
         }
         (
         git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
