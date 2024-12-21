@@ -10,15 +10,13 @@ on:
       - '.github/diy/**'
   schedule:
     - cron: 0 */4 * * *
+  repository_dispatch:  
   workflow_dispatch:
     inputs:
       ssh:
         description: 'ssh'
         required: false
         default: 'true'
-  watch:
-    types: started
-  repository_dispatch:
 
 jobs:
   merge:
@@ -40,49 +38,67 @@ jobs:
 
     - name: Syn jell
       run: |
+        # Set up trap to clean up background processes
+        trap 'kill $(jobs -p) 2>/dev/null' EXIT
+        
         shopt -s extglob
         set +e
-        git rm -r --cache * >/dev/null 2>&1 &
+        
+        git rm -r --cache * >/dev/null 2>&1
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
-    
+        
         function git_clone() {
-          git clone --depth 1 $1 $2
-          if [ "$?" != 0 ]; then
-            echo "error on $1"
-            pid="$( ps -q $$ )"
-            kill $pid
-          fi
+          local retries=3
+          local repo_url="$1"
+          local target_dir="$2"
+          
+          while [ $retries -gt 0 ]; do
+            echo "Cloning $repo_url to ${target_dir:-./} (attempts left: $retries)"
+            if git clone --depth 1 "$repo_url" "$target_dir"; then
+              return 0
+            fi
+            ((retries--))
+            sleep 5
+          done
+          
+          echo "Failed to clone $repo_url after 3 attempts"
+          return 1
         }
-    
+        
         function git_sparse_clone() {
           trap 'rm -rf "$tmpdir"' EXIT
           branch="$1" curl="$2" && shift 2
           rootdir="$PWD"
           tmpdir="$(mktemp -d)" || exit 1
+          
           if [ ${#branch} -lt 10 ]; then
             git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
             cd "$tmpdir"
           else
             git clone --filter=blob:none --sparse "$curl" "$tmpdir"
             cd "$tmpdir"
-            git checkout $branch
+            git checkout "$branch"
           fi
-          if [ "$?" != 0 ]; then
+          
+          if [ $? -ne 0 ]; then
             echo "error on $curl"
-            exit 1
+            cd "$rootdir"
+            return 1
           fi
+          
           git sparse-checkout init --cone
           git sparse-checkout set "$@"
-          mv -n $@ $rootdir/ || true
-          cd $rootdir
-         }
-    
-        function mvdir() {
-          mv -n `find $1/* -maxdepth 0 -type d` ./
-          rm -rf $1
+          mv -n $@ "$rootdir"/ || true
+          cd "$rootdir"
         }
-    
-        (
+        
+        function mvdir() {
+          if [ -d "$1" ]; then
+            mv -n `find "$1"/* -maxdepth 0 -type d` ./
+            rm -rf "$1"
+          fi
+        }
+	(
         git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
         #git_clone https://github.com/kiddin9/openwrt-bypass && mvdir openwrt-bypass
         git_clone https://github.com/kiddin9/luci-app-dnsfilter
@@ -407,6 +423,17 @@ jobs:
         git_sparse_clone openwrt-24.10 "https://github.com/immortalwrt/luci" applications protocols/luci-proto-minieap protocols/luci-proto-quectel themes/luci-theme-argon
         mv -n luciapp/* applications/; rm -rf luciapp
         git_sparse_clone master "https://github.com/immortalwrt/luci" applications/luci-app-filebrowser-go
+	
+	
+	# Wait for all background processes to finish
+        for job in $(jobs -p); do
+          wait $job || ((FAILURES++))
+        done
+        
+        if [ $FAILURES -gt 0 ]; then
+          echo "Some cloning operations failed"
+          exit 1
+        fi
 
         for ipk in $(ls -d applications/!(luci-app-rclone|luci-app-filebrowser)/); do
         	if [[ $(ls $ipk/po | wc -l) -gt 4 ]]; then
