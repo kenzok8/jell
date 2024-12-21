@@ -35,7 +35,7 @@ jobs:
         git config --global user.name "action"
         sudo timedatectl set-timezone "Asia/Shanghai"
 
-    - name: Syn jell
+    - name: Syn upstream
       run : |
         shopt -s extglob
         set +e
@@ -45,15 +45,16 @@ jobs:
           git clone --depth 1 $1 $2
           if [ "$?" != 0 ]; then
             echo "error on $1"
-            exit 1
+            pid="$( ps -q $$ )"
+            kill $pid
           fi
-         }
+        }
         function git_sparse_clone() {
         trap 'rm -rf "$tmpdir"' EXIT
         branch="$1" curl="$2" && shift 2
         rootdir="$PWD"
         tmpdir="$(mktemp -d)" || exit 1
-        if [ -n "$branch" ] && [ ${#branch} -lt 10 ]; then
+        if [ ${#branch} -lt 10 ]; then
         git clone -b "$branch" --depth 1 --filter=blob:none --sparse "$curl" "$tmpdir"
         cd "$tmpdir"
         else
@@ -66,10 +67,10 @@ jobs:
             exit 1
         fi
         git sparse-checkout init --cone
-        git sparse-checkout set "$@" 2>/dev/null
+        git sparse-checkout set "$@"
         mv -n $@ $rootdir/ || true
         cd $rootdir
-         }
+        }
         function mvdir() {
         mv -n `find $1/* -maxdepth 0 -type d` ./
         rm -rf $1
@@ -348,18 +349,18 @@ jobs:
         git_clone https://github.com/sbwml/luci-app-qbittorrent openwrt-qb && mv -n openwrt-qb/* ./ &&  rm -rf openwrt-qb
         ) &
         (
-        git_sparse_clone master "https://github.com/QiuSimons/OpenWrt-Add" luci-app-irqbalance
+                git_sparse_clone master "https://github.com/QiuSimons/OpenWrt-Add" luci-app-irqbalance
         git_sparse_clone main "https://github.com/lucikap/Brukamen" luci-app-ua2f
         git_sparse_clone master "https://github.com/lunatickochiya/Matrix-Action-Openwrt" package/kochiya/brlaser package/kochiya/luci-app-banmac-ipt package/kochiya/luci-app-banmac-nft package/kochiya/luci-app-nvr package/kochiya/luci-app-openvpn-server
         ) &
         (
         git_sparse_clone master "https://github.com/coolsnowwolf/packages" multimedia/UnblockNeteaseMusic-Go \
-        net/amule net/softethervpn5 net/antileech multimedia/gmediarender net/go-aliyundrive-webdav \
-        net/qBittorrent-static net/phtunnel net/frp net/headscale \
+        multimedia/UnblockNeteaseMusic net/amule net/softethervpn5 net/antileech multimedia/gmediarender net/go-aliyundrive-webdav \
+        net/qBittorrent-static net/phtunnel net/headscale \
         net/uugamebooster net/verysync net/vlmcsd net/dnsforwarder net/tcpping net/netatalk net/pgyvpn
         git_sparse_clone openwrt-24.10 "https://github.com/openwrt/packages" \
         utils/coremark utils/watchcat utils/dockerd utils/cgroupfs-mount net/uwsgi net/smartdns net/miniupnpd net/p910nd net/ddns-scripts \
-        net/ariang net/tailscale
+        net/ariang net/tailscale net/frp
         ) &
         (
         git_sparse_clone openwrt-24.10 "https://github.com/openwrt/luci" applications/luci-app-aria2 \
@@ -397,25 +398,14 @@ jobs:
         mv -f applications luciapp
         rm -rf luciapp/{luci-app-qbittorrent,luci-app-zerotier,luci-app-cpufreq,luci-app-e2guardian,luci-app-aliyundrive-fuse,luci-app-syncdial,luci-app-firewall}
         git_sparse_clone openwrt-24.10 "https://github.com/immortalwrt/luci" applications protocols/luci-proto-minieap protocols/luci-proto-quectel themes/luci-theme-argon
-        mv -n luciapp/* applications/; rm -rf luciapp
-        git_sparse_clone master "https://github.com/immortalwrt/luci" applications/luci-app-filebrowser-go
+        rm -rf applications/{luci-app-frp*,luci-app-shadowsocks-libev}
+        mv -n luciapp/!(luci-app-filetransfer|luci-app-ksmbd) applications/; rm -rf luciapp
 
-        for ipk in $(ls -d applications/!(luci-app-rclone|luci-app-filebrowser)/); do
+        for ipk in $(ls -d applications/!(luci-app-rclone)/); do
         	if [[ $(ls $ipk/po | wc -l) -gt 4 ]]; then
             rm -rf $ipk
         	fi
         done
-
-        # Wait for all background processes to finish
-        for job in $(jobs -p); do
-          wait $job || ((FAILURES++))
-        done
-        
-         if [ $FAILURES -gt 0 ]; then
-           echo "Some cloning operations failed"
-           exit 1
-         fi
-         done 
 
         git_sparse_clone master "https://github.com/coolsnowwolf/lede" package/lean package/network/services/shellsync package/qca/shortcut-fe
 
