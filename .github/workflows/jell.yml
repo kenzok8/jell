@@ -36,11 +36,12 @@ jobs:
         sudo timedatectl set-timezone "Asia/Shanghai"
 
     - name: Syn jell
-      run: |
+      run : |
         shopt -s extglob
         set +e
         git rm -r --cache * >/dev/null 2>&1 || true
         rm -rf $(find ./* -maxdepth 0 -type d ! -name ".github/diy") >/dev/null 2>&1
+    
         function git_clone() {
           if [ -z "$1" ] || [ -z "$2" ]; then
             echo "Error: Missing parameters for git_clone"
@@ -50,9 +51,10 @@ jobs:
           git clone --depth 1 "$1" "$2"
           if [ "$?" != 0 ]; then
             echo "Error on $1"
-            kill $$
+            exit 1
           fi
         }
+    
         function git_sparse_clone() {
           local branch="$1" 
           local curl="$2"
@@ -85,6 +87,7 @@ jobs:
           mv -n "$@" "$rootdir/" || true
           cd "$rootdir" || exit 1
         }
+    
         function mvdir() {
           if [ ! -d "$1" ]; then
             echo "Directory $1 does not exist"
@@ -93,7 +96,7 @@ jobs:
           echo "Moving contents of $1"
           mv -n $(find "$1"/* -maxdepth 0 -type d) ./ 2>/dev/null || true
           rm -rf "$1"
-        }
+        }      
         (
         git_clone https://github.com/kiddin9/my-packages && mvdir my-packages
         #git_clone https://github.com/kiddin9/openwrt-bypass && mvdir openwrt-bypass
