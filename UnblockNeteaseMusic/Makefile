@@ -1,24 +1,16 @@
-# SPDX-Identifier-License: GPL-3.0-only
-#
-# Copyright (C) 2021 ImmortalWrt.org
-
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=UnblockNeteaseMusic
-PKG_BASE_VERSION:=0.27.0
-PKG_RELEASE:=146
+PKG_VERSION:=0.27.8-patch.1
+PKG_RELEASE:=147
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/UnblockNeteaseMusic/server.git
-PKG_SOURCE_DATE:=2022-10-09
-PKG_SOURCE_VERSION:=b6ed5790037716282dd0b1b956c11614e4426ebe
-PKG_MIRROR_HASH:=skip
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/UnblockNeteaseMusic/server/tar.gz/v${PKG_VERSION}?
+PKG_HASH:=skip
 
-PKG_VERSION:=$(PKG_BASE_VERSION)-$(PKG_SOURCE_DATE)-$(call version_abbrev,$(PKG_SOURCE_VERSION))
-
-PKG_LICENSE:=LGPL-3.0-only
-PKG_LICENSE_FILE:=LICENSE
-PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -31,22 +23,25 @@ define Package/UnblockNeteaseMusic
   PKGARCH:=all
 endef
 
+define Package/$(PKG_NAME)/description
+Revive Netease Cloud Music (NodeJS)
+endef
+
 define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	xzcat $(DL_DIR)/$(PKG_SOURCE) | $(TAR) -C $(PKG_BUILD_DIR) $(TAR_OPTIONS)
+	tar -xzvf $(DL_DIR)/$(PKG_SOURCE) -C $(PKG_BUILD_DIR)
+	mkdir -p $(PKG_BUILD_DIR)/$(PKG_NAME)
+	echo -e $(PKG_VERSION) > $(PKG_BUILD_DIR)/$(PKG_NAME)/core_ver
 endef
 
 define Build/Configure
-	echo -e $(PKG_BASE_VERSION) > $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)/core_ver
-	echo -e $(PKG_SOURCE_VERSION) > $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)/local_ver
 endef
 
 define Build/Compile
 endef
 
-define Package/UnblockNeteaseMusic/install
-	$(INSTALL_DIR) $(1)/usr/share/UnblockNeteaseMusic
-	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)/* $(1)/usr/share/UnblockNeteaseMusic
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/share/$(PKG_NAME)
+	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME)/* $(1)/usr/share/$(PKG_NAME)
 endef
 
-$(eval $(call BuildPackage,UnblockNeteaseMusic))
+$(eval $(call BuildPackage,$(PKG_NAME)))
