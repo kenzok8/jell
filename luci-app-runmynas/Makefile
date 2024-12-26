@@ -2,8 +2,6 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_VERSION:=1.1.1-20231208
-PKG_RELEASE:=3
 
 LUCI_TITLE:=LuCI support for runmynas
 LUCI_PKGARCH:=all
