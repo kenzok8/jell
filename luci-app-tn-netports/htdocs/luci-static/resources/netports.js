@@ -44,7 +44,7 @@ const svgCollapse =
 	'329.7c-9.4-9.4-9.4-24.6 0-33.9l136-136c9.4-9.5 24.6-9.5 34-.1z"/></svg>';
 
 var NetPorts = L.Class.extend({
-	NetPorts: function(inputConfig) {
+	NetPorts(inputConfig) {
 		var config = {
 			targetElement: null,
 			tblCellClasses: 'top left',

@@ -10,14 +10,14 @@ return view.extend({
 //	handleSave: null,
 //	handleReset: null,
 
-	load: function() {
+	load() {
 	return Promise.all([
 		L.resolveDefault(fs.stat('/usr/sbin/nginx'), {}),
 		uci.load('netdata')
 	]);
 	},
 
-	render: function(res) {
+	render(res) {
 		var has_nginx = res[0].path;
 
 		let m, s, o;

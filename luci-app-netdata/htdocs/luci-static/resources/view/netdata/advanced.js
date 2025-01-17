@@ -9,11 +9,11 @@ return view.extend({
 handleSaveApply: null,
 handleReset: null,
 
-	load: function() {
+	load() {
 		return L.resolveDefault(fs.read('/etc/netdata/netdata.conf'), '');
 	},
 
-	handleSave: function(ev) {
+	handleSave(ev) {
 		var value = (document.querySelector('textarea').value || '').trim().replace(/\r\n/g, '\n') + '\n';
 
 		return fs.write('/etc/netdata/netdata.conf', value).then(function(rc) {
@@ -26,7 +26,7 @@ handleReset: null,
 		});
 	},
 
-	render: function(conf) {
+	render(conf) {
 		return E([
 			E('h4', _('Edit Netdata main config: <code>/etc/netdata/netdata.conf</code>')),
 			E('p', {}, E('textarea', { 'style': 'width:100%', 'rows': 25, 'disabled': isReadonlyView }, [ conf != null ? conf : '' ]))

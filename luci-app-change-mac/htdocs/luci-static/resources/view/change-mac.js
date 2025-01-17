@@ -19,7 +19,7 @@ return view.extend({
 //		expect: { result: false }
 //	}),
 
-	load: function() {
+	load() {
 	return Promise.all([
 		L.resolveDefault(fs.stat('/usr/bin/rgmac'), {}),
 		uci.load('network'),
@@ -27,7 +27,7 @@ return view.extend({
 	]);
 	},
 
-	handleCommand: function(exec, args) {
+	handleCommand(exec, args) {
 		var buttons = document.querySelectorAll('.diag-action > .cbi-button');
 
 		for (var i = 0; i < buttons.length; i++)
@@ -46,18 +46,18 @@ return view.extend({
 		});
 	},
 
-	handleQueryOUI: function(ev, cmd) {
+	handleQueryOUI(ev, cmd) {
 		var addr = ev.currentTarget.parentNode.previousSibling.value;
 
 		return this.handleCommand('rgmac', [ '-e', addr ]);
 	},
 
-	handleQueryVendor: function(ev, cmd) {
+	handleQueryVendor(ev, cmd) {
 
 		return this.handleCommand('rgmac', [ '-lrouter' ]);
 	},
 
-//	handleAction: function(name, action, ev) {
+//	handleAction(name, action, ev) {
 //		return this.callInitAction(name, action).then(function(success) {
 //			if (success != true)
 //				throw _('Command failed');
@@ -68,7 +68,7 @@ return view.extend({
 //		});
 //	},
 
-	handleAction: function(m, action, ev) {
+	handleAction(m, action, ev) {
 		m.save();
 		uci.save();
 		uci.apply();
@@ -81,7 +81,7 @@ return view.extend({
 			.catch(function(e) { ui.addNotification(null, E('p', e.message)) });
 	},
 
-	render: function(res) {
+	render(res) {
 		var has_rgmac = res[0].path,
 			oui_be_queried = uci.get('change-mac', '@change-mac[0]', 'mac_type_specific') || '74:D0:2B';
 

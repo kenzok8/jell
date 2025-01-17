@@ -37,7 +37,7 @@ return view.extend({
 //	handleSave: null,
 //	handleReset: null,
 
-	load: function() {
+	load() {
 	return Promise.all([
 		L.resolveDefault(fs.read('/var/packagesync/releaseslist'), null),
 		L.resolveDefault(fs.read('/var/packagesync/targetslist'), null),
@@ -50,7 +50,7 @@ return view.extend({
 	]);
 	},
 
-	poll_status: function(nodes, stat) {
+	poll_status(nodes, stat) {
 		var isRunning = stat[0],
 			view = nodes.querySelector('#sync_status');
 
@@ -62,7 +62,7 @@ return view.extend({
 		return;
 	},
 
-	render: function(res) {
+	render(res) {
 		var releaseslist = res[0] ? res[0].trim().split("\n") : [],
 			targetslist = res[1] ? res[1].trim().split("\n") : [],
 			pkgarchslist = res[2] ? res[2].trim().split("\n") : [],
@@ -122,7 +122,7 @@ return view.extend({
 				for (var i = 0; i < usedname.length; i++)
 					if (usedname[i] == value)
 						return _('The Name %h is already used').format(value);
-        
+
 			return true;
 		};
 		o.write = function(section, value) {

@@ -25,7 +25,7 @@ var netports_el = E('div', {});
 var netports_object = null;
 
 return L.Class.extend({
-	__init__: function() {
+	__init__() {
 		var head = document.getElementsByTagName('head')[0];
 		var css = E('link', { 'href': L.resource('netports/netports.css'), 'rel': 'stylesheet' });
 		head.appendChild(css);
@@ -54,14 +54,14 @@ return L.Class.extend({
 
 	title: _('Network Interfaces Ports Status'),
 
-	load: function() {
+	load() {
 		return Promise.all([
 			L.resolveDefault(callNetPortsGetInfo(), {}),
 			callSessionAccess('access-group', 'luci-app-tn-netports', 'read'),
 		]);
 	},
 
-	render: function(data) {
+	render(data) {
 		var hasReadPermission = data[1];
 
 		if (!hasReadPermission)
