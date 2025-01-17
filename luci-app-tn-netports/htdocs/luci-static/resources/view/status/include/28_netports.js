@@ -30,7 +30,7 @@ return L.Class.extend({
 		var css = E('link', { 'href': L.resource('netports/netports.css'), 'rel': 'stylesheet' });
 		head.appendChild(css);
 
-		uci.load('luci_netports').then(function() {
+		uci.load('luci_netports').then(() => {
 			var np_default_additional_info =
 				parseInt(uci.get('luci_netports', 'global', 'default_additional_info') || 0) == 1;
 

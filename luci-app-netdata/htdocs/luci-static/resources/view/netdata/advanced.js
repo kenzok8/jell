@@ -3,7 +3,7 @@
 'require fs';
 'require ui';
 
-var isReadonlyView = !L.hasViewPermission() || null;
+const isReadonlyView = !L.hasViewPermission() || null;
 
 return view.extend({
 handleSaveApply: null,
@@ -14,14 +14,14 @@ handleReset: null,
 	},
 
 	handleSave(ev) {
-		var value = (document.querySelector('textarea').value || '').trim().replace(/\r\n/g, '\n') + '\n';
+		let value = (document.querySelector('textarea').value || '').trim().replace(/\r\n/g, '\n') + '\n';
 
-		return fs.write('/etc/netdata/netdata.conf', value).then(function(rc) {
+		return fs.write('/etc/netdata/netdata.conf', value).then((rc) => {
 			document.querySelector('textarea').value = value;
 			ui.addNotification(null, E('p', _('Contents have been saved.')), 'info');
 
 			return fs.exec('/etc/init.d/netdata', [ 'reload' ]);
-		}).catch(function(e) {
+		}).catch((e) => {
 			ui.addNotification(null, E('p', _('Unable to save contents: %s').format(e.message)));
 		});
 	},
