@@ -263,21 +263,18 @@ EOF
 		    uci set firewall.vntcli.enabled="1"
 	        fi
 		#vnt_ip="$($clibin --info | awk -F 'Virtual ip:' {'print $2'} | tr -d ' \n')"
-		vnt_device="$(uci -q get vnt.@vnt-cli[0].vnt_device)"
-		if [ "$vnt_device" = "1" ];  then
-			echo "$(date '+%Y-%m-%d %H:%M:%S') vnt-cli : 添加网络接口 VNT" >>/tmp/vnt-cli.log
-                	if [ -z "$(uci -q get network.VNT)" ];  then				
-				uci set network.VNT='interface'
-				if [ -z "$ipaddr" ]; then
-					uci set network.VNT.proto='none'
-				else
-					uci set network.VNT.proto='static'
-					uci set network.VNT.ipaddr=$ipaddr
-					uci set network.VNT.netmask='255.255.255.0'
-				fi
-                        	uci set network.VNT.device=$vnt_tun
-                        	uci set network.VNT.device=$vnt_tun
+		if [ -z "$(uci -q get network.VNT)" ];  then				
+			uci set network.VNT='interface'
+			if [ -z "$ipaddr" ]; then
+				uci set network.VNT.proto='none'
+			else
+				uci set network.VNT.proto='static'
+				uci set network.VNT.ipaddr=$ipaddr
+				uci set network.VNT.netmask='255.255.255.0'
 			fi
+                        uci set network.VNT.device=$vnt_tun
+                        uci set network.VNT.device=$vnt_tun
+			echo "$(date '+%Y-%m-%d %H:%M:%S') vnt-cli : 添加网络接口 VNT ，绑定虚拟网卡$vnt_tun " >>/tmp/vnt-cli.log
 		fi
                 if [ -z "$(uci -q get firewall.vntzone)" ];  then
 				echo "$(date '+%Y-%m-%d %H:%M:%S') vnt-cli : 添加防火墙规则，开启IP动态伪装 MSS钳制" >>/tmp/vnt-cli.log
@@ -288,11 +285,7 @@ EOF
 				uci set firewall.vntzone.masq='1'
                                 uci set firewall.vntzone.mtu_fix='1'
 				uci set firewall.vntzone.name='VNT'
-				if [ "$vnt_device" = "1" ];  then
-					uci set firewall.vntzone.network='VNT'
-				else
-					uci set firewall.vntzone.device=$vnt_tun
-				fi
+				uci set firewall.vntzone.network='VNT'
 		fi
 		vnt_forward="$(uci -q get vnt.@vnt-cli[0].vnt_forward)"
 		if [ "${vnt_forward//vntfwlan/}" != "$vnt_forward" ]; then
@@ -330,7 +323,7 @@ EOF
                 
                 [ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
 		[ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1
-		[ "$forward" = "0" ] || sysctl -w net.ipv4.ip_forward=1 >/dev/null 2>&1
+		#[ "$forward" = "0" ] || sysctl -w net.ipv4.ip_forward=1 >/dev/null 2>&1
                 [ ! -z "$checkip" ] && check
                 echo `date +%s` > /tmp/vnt_time
                 
