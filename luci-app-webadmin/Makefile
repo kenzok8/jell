@@ -11,8 +11,6 @@ LUCI_DEPENDS:=+uhttpd
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-webadmin
-PKG_VERSION:=2
-PKG_RELEASE:=12
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
