@@ -2,8 +2,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=appfilter
-PKG_VERSION:=6.0.1
-PKG_RELEASE:=12
+PKG_VERSION:=6.1.1
+PKG_RELEASE:=13
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 include $(INCLUDE_DIR)/package.mk
