@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mihomo
-PKG_VERSION:=1.19.1
-PKG_RELEASE:=250
+PKG_VERSION:=1.19.2
+PKG_RELEASE:=251
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/metacubex/mihomo/tar.gz/v$(PKG_VERSION)?
