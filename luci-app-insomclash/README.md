@@ -1,8 +1,8 @@
 ## Luci app insomclash untuk openwrt
 
 [![EN](https://img.shields.io/badge/lang-EN-red.svg?style=for-the-badge)](README-EN.md)
-[![GitHub Downloads](https://img.shields.io/github/downloads/bobbyunknown/luci-app-insomclash/total?style=for-the-badge&logo=github)](https://github.com/bobbyunknown/luci-app-insomclash/releases)
-[![GitHub Views](https://img.shields.io/badge/VIEWS-0-brightgreen?style=for-the-badge&logo=github)](https://github.com/bobbyunknown/luci-app-insomclash)
+[![GitHub Downloads](https://img.shields.io/github/downloads/bobbyunknown/luci-app-insomclash/total?style=for-the-badge)](https://github.com/bobbyunknown)
+[![GitHub Release](https://img.shields.io/github/v/release/bobbyunknown/luci-app-insomclash?style=for-the-badge)](https://github.com/bobbyunknown/luci-app-insomclash/releases)
 
 #### Support me:
 [![Sociabuzz](https://img.shields.io/badge/Sociabuzz-1DA1F2?style=for-the-badge&logo=sociabuzz&logoColor=white)](https://sociabuzz.com/bobbyunknown/tribe)
