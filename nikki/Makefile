@@ -1,11 +1,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/MetaCubeX/mihomo.git
-PKG_SOURCE_DATE:=2025-02-17
+PKG_SOURCE_DATE:=2025-02-19
 PKG_SOURCE_VERSION:=29388cad3420c54fc7c35e83d3d7193b12cc60ef
 PKG_MIRROR_HASH:=skip
 
@@ -16,7 +16,7 @@ PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
 
-PKG_BUILD_VERSION:=alpha-dc1145a
+PKG_BUILD_VERSION:=alpha-e2b75b3
 PKG_BUILD_TIME:=$(shell date -u -Iseconds)
 
 GO_PKG:=github.com/metacubex/mihomo
@@ -56,6 +56,9 @@ define Package/nikki/install
 	$(INSTALL_DIR) $(1)/etc/nikki/profiles
 	$(INSTALL_DIR) $(1)/etc/nikki/subscriptions
 	$(INSTALL_DIR) $(1)/etc/nikki/run
+	$(INSTALL_DIR) $(1)/etc/nikki/run/providers
+	$(INSTALL_DIR) $(1)/etc/nikki/run/providers/rule
+	$(INSTALL_DIR) $(1)/etc/nikki/run/providers/proxy
 	$(INSTALL_DIR) $(1)/etc/nikki/run/ui
 
 	$(INSTALL_DATA) $(CURDIR)/files/mixin.yaml $(1)/etc/nikki/mixin.yaml
