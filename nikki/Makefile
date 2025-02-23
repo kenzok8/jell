@@ -1,11 +1,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/MetaCubeX/mihomo.git
-PKG_SOURCE_DATE:=2025-02-19
+PKG_SOURCE_DATE:=2025-02-21
 PKG_SOURCE_VERSION:=008b91bfe8c0e2daca0ab69061efd9ea1ad71bd2
 PKG_MIRROR_HASH:=skip
 
@@ -16,7 +16,7 @@ PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
 
-PKG_BUILD_VERSION:=alpha-e2b75b3
+PKG_BUILD_VERSION:=alpha-5830afc
 PKG_BUILD_TIME:=$(shell date -u -Iseconds)
 
 GO_PKG:=github.com/metacubex/mihomo
@@ -51,6 +51,7 @@ define Package/nikki/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 
 	$(INSTALL_DIR) $(1)/etc/nikki
+	$(INSTALL_DIR) $(1)/etc/nikki/ucode
 	$(INSTALL_DIR) $(1)/etc/nikki/scripts
 	$(INSTALL_DIR) $(1)/etc/nikki/nftables
 	$(INSTALL_DIR) $(1)/etc/nikki/profiles
@@ -59,14 +60,17 @@ define Package/nikki/install
 	$(INSTALL_DIR) $(1)/etc/nikki/run/providers
 	$(INSTALL_DIR) $(1)/etc/nikki/run/providers/rule
 	$(INSTALL_DIR) $(1)/etc/nikki/run/providers/proxy
-	$(INSTALL_DIR) $(1)/etc/nikki/run/ui
 
 	$(INSTALL_DATA) $(CURDIR)/files/mixin.yaml $(1)/etc/nikki/mixin.yaml
 
+	$(INSTALL_BIN) $(CURDIR)/files/ucode/include.uc $(1)/etc/nikki/ucode/include.uc
+	$(INSTALL_BIN) $(CURDIR)/files/ucode/mixin.uc $(1)/etc/nikki/ucode/mixin.uc
+	$(INSTALL_BIN) $(CURDIR)/files/ucode/hijack.ut $(1)/etc/nikki/ucode/hijack.ut
+
 	$(INSTALL_BIN) $(CURDIR)/files/scripts/include.sh $(1)/etc/nikki/scripts/include.sh
 	$(INSTALL_BIN) $(CURDIR)/files/scripts/firewall_include.sh $(1)/etc/nikki/scripts/firewall_include.sh
+	$(INSTALL_BIN) $(CURDIR)/files/scripts/debug.sh $(1)/etc/nikki/scripts/debug.sh
 
-	$(INSTALL_BIN) $(CURDIR)/files/nftables/hijack.nft $(1)/etc/nikki/nftables/hijack.nft
 	$(INSTALL_BIN) $(CURDIR)/files/nftables/reserved_ip.nft $(1)/etc/nikki/nftables/reserved_ip.nft
 	$(INSTALL_BIN) $(CURDIR)/files/nftables/reserved_ip6.nft $(1)/etc/nikki/nftables/reserved_ip6.nft
 	$(INSTALL_BIN) $(CURDIR)/files/nftables/geoip_cn.nft $(1)/etc/nikki/nftables/geoip_cn.nft
