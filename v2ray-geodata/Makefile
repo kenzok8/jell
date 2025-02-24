@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=v2ray-geodata
-PKG_RELEASE:=225
+PKG_RELEASE:=226
 
 PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
@@ -21,7 +21,7 @@ define Download/geoip
   HASH:=skip
 endef
 
-GEOSITE_VER:=20250223170925
+GEOSITE_VER:=20250223232811
 GEOSITE_FILE:=dlc.dat.$(GEOSITE_VER)
 define Download/geosite
   URL:=https://github.com/v2fly/domain-list-community/releases/download/$(GEOSITE_VER)/
@@ -30,7 +30,7 @@ define Download/geosite
   HASH:=skip
 endef
 
-GEOSITE_IRAN_VER:=202502170036
+GEOSITE_IRAN_VER:=202502240036
 GEOSITE_IRAN_FILE:=iran.dat.$(GEOSITE_IRAN_VER)
 define Download/geosite-ir
   URL:=https://github.com/bootmortis/iran-hosted-domains/releases/download/$(GEOSITE_IRAN_VER)/
