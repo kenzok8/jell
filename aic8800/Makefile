@@ -6,7 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=aic8800
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_DATE:=2024-06-20
@@ -47,10 +47,9 @@ define KernelPackage/aic8800u
 	+@DRIVER_11N_SUPPORT +@DRIVER_11AC_SUPPORT
   FILES:= \
 	$(PKG_BUILD_DIR)/$(MAKE_PATH)/aic_load_fw/aic_load_fw.ko \
-	$(PKG_BUILD_DIR)/$(MAKE_PATH)/aic8800_fdrv/aic8800_fdrv.ko
-  AUTOLOAD:=$(call AutoProbe,aic_load_fw aic8800_fdrv)
-  MODPARAMS.aic8800_fdrv:=he_on=n
-  CONFLICTS:=kmod-aic8800s
+	$(PKG_BUILD_DIR)/$(MAKE_PATH)/aic8800_fdrv/aic8800_fdrv_usb.ko
+  AUTOLOAD:=$(call AutoProbe,aic_load_fw aic8800_fdrv_usb)
+  MODPARAMS.aic8800_fdrv_usb:=he_on=n
   VARIANT:=usb
 endef
 
