@@ -51,7 +51,7 @@ msgid "Balancer Strategy"
 msgstr "负载均衡器配置"
 
 msgid "Strategy <code>leastPing</code> requires observatory (see "Extra Options" tab) to be enabled."
-msgstr "策略<code>leastPing</code>需要启用后台连接观测（请参阅“扩展选项”选项卡）。"
+msgstr "配置<code>leastPing</code>需要启用后台连接观测（参阅“扩展选项”选项卡）。"
 
 msgid "Enable Transparent Proxy"
 msgstr "启用透明代理"
@@ -297,7 +297,7 @@ msgid "See <a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</
 msgstr "参阅<a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a>获取帮助。"
 
 msgid "Extra Inbounds"
-msgstr "扩展入站。"
+msgstr "扩展入站"
 
 msgid "Add more socks5 / http inbounds and redirect to other outbounds."
 msgstr "添加更多socks5/http入站并重定向到其他出站。"
@@ -660,7 +660,7 @@ msgid "Custom Configuration Hook"
 msgstr "自定义配置钩子"
 
 msgid "Read <a href="https://ucode.mein.io/">ucode Documentation</a> for the language used. Code filled here may need to change after upgrading luci-app-xray."
-msgstr "参阅<a href=\"https://ucode.mein.io/">ucode Documentation</a>获取帮助。"
+msgstr "参阅<a href="https://ucode.mein.io/">ucode Documentation</a>获取帮助。升级luci-app-xray后，此处填写的代码可能需要更改"
 
 msgid "Stream Security"
 msgstr "传输层安全"
