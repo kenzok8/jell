@@ -27,14 +27,42 @@ export function shellQuote(s) {
 	return `'${replace(s, "'", "'\\''")}'`;
 };
 
-export function yqRead(flags, command, filepath) {
-	let out = '';
+export function isBinary(str) {
+	for (let off = 0, byte = ord(str); off < length(str); byte = ord(str, ++off))
+		if (byte <= 8 || (byte >= 14 && byte <= 31))
+			return true;
 
-	const fd = popen(`yq ${flags} ${shellQuote(command)} ${filepath}`);
-	if (fd) {
-		out = fd.read('all');
-		fd.close();
-	}
+	return false;
+};
+
+export function executeCommand(...args) {
+	let outfd = mkstemp();
+	let errfd = mkstemp();
+
+	const exitcode = system(`${join(' ', args)} >&${outfd.fileno()} 2>&${errfd.fileno()}`);
+
+	outfd.seek(0);
+	errfd.seek(0);
+
+	const stdout = outfd.read(1024 * 1024) ?? '';
+	const stderr = errfd.read(1024 * 1024) ?? '';
+
+	outfd.close();
+	errfd.close();
+
+	const binary = isBinary(stdout);
+
+	return {
+		command: join(' ', args),
+		stdout: binary ? null : stdout,
+		stderr,
+		exitcode,
+		binary
+	};
+};
+
+export function yqRead(flags, command, filepath) {
+	const out = popen(`yq ${flags} ${shellQuote(command)} ${filepath}`).read('all');
 
 	return out;
 };
