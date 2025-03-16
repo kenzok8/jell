@@ -9,7 +9,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lucky
 PKG_VERSION:=2.15.7
-PKG_RELEASE:=393
+PKG_RELEASE:=394
+PKGARCH:=all 
 
 ifeq ($(ARCH),mipsel)
 	LUCKY_ARCH:=mipsle_softfloat
@@ -17,29 +18,26 @@ endif
 ifeq ($(ARCH),mips)
 	LUCKY_ARCH:=mips_softfloat
 endif
-ifeq ($(ARCH),arm)
-	LUCKY_ARCH:=armv5
-endif
-ifeq ($(BOARD),kirkwood)
-	LUCKY_ARCH:=armv5
-endif
-ifeq ($(ARCH),armv7)
-	LUCKY_ARCH:=armv7
-endif
-ifeq ($(ARCH),aarch64)
-	LUCKY_ARCH:=arm64
-endif
-ifeq ($(ARCH),arm64)
-	LUCKY_ARCH:=arm64
-endif
-ifeq ($(ARCH),armv8)
-	LUCKY_ARCH:=arm64
-endif
 ifeq ($(ARCH),i386)
 	LUCKY_ARCH:=i386
 endif
 ifeq ($(ARCH),x86_64)
 	LUCKY_ARCH:=x86_64
+endif
+ifeq ($(ARCH),arm)
+	LUCKY_ARCH:=armv7
+endif
+ifeq ($(BOARD),bcm53xx)
+	LUCKY_ARCH:=armv6
+ifeq ($(word 2,$(subst +,$(space),$(call qstrip,$(CONFIG_CPU_TYPE)))),)
+	LUCKY_ARCH:=armv5
+endif
+endif
+ifeq ($(BOARD),kirkwood)
+	LUCKY_ARCH:=armv5
+endif
+ifeq ($(ARCH),aarch64)
+	LUCKY_ARCH:=arm64
 endif
 
 PKG_LICENSE:=GPL-3.0-only
@@ -47,7 +45,7 @@ PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=GDY666 <gdy666@foxmail.com>
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=3626928d4a45ae606856b834614e45997b5da235
+PKG_HASH:=skip
 
 include $(INCLUDE_DIR)/package.mk
 
