@@ -13,6 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         arch:
+
           - aarch64_generic
           - i386_pentium-mmx
           - loongarch64_generic
@@ -30,7 +31,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}-openwrt-24.10
           FEEDNAME: packages_ci
-          PACKAGES: luci-app-advancedplus
+          PACKAGES: luci-app-chatgpt-web
           NO_REFRESH_CHECK: true
 
       - name: Upload artifacts
