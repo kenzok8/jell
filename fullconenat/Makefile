@@ -9,13 +9,13 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=fullconenat
-PKG_RELEASE:=13
+PKG_RELEASE:=14
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/llccd/netfilter-full-cone-nat.git
 PKG_SOURCE_DATE:=2023-01-01
 PKG_SOURCE_VERSION:=74c5e6f3c7faaf33ece451697537c81781781c20
-PKG_MIRROR_HASH:=8bad0cf5d90c52b4cad384e4f1b15ac28312f767fcffe692c606d87d8c3facfc
+PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=LICENSE
@@ -36,7 +36,7 @@ define Package/ip6tables-mod-fullconenat
   SECTION:=net
   CATEGORY:=Network
   TITLE:=FULLCONENAT ip6tables extension
-  DEPENDS:=ip6tables +kmod-nf-nat6 +kmod-ipt-fullconenat +ip6tables-mod-nat
+  DEPENDS:=+ip6tables +kmod-nf-nat6 +kmod-ipt-fullconenat +ip6tables-mod-nat
 endef
 
 define KernelPackage/ipt-fullconenat
