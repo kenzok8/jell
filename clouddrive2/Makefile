@@ -10,14 +10,8 @@ PKG_NAME:=CloudDrive2
 PKG_VERSION:=0.8.16
 PKG_RELEASE=1
 
-STRIP:=true
-
 ifeq ($(ARCH),x86_64)
 	PKG_ARCH:=x86_64
-endif
-
-ifeq ($(ARCH),arm64)
-	PKG_ARCH:=aarch64
 endif
 
 ifeq ($(ARCH),aarch64)
@@ -37,7 +31,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/clouddrive2
   SECTION:=net
   CATEGORY:=Network
-  DEPENDS:=@(arm||aarch64||x86_64) fuse3-utils
+  DEPENDS:=@(arm||aarch64||x86_64) +fuse3-utils
   TITLE:=CloudDrive2
 endef
 
