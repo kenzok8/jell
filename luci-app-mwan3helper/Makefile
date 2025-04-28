@@ -10,8 +10,6 @@ LUCI_DEPENDS:=+luci-app-mwan3 +pdnsd-alt +dnsmasq-full +ipset
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-mwan3helper
-PKG_VERSION:=1
-PKG_RELEASE:=13
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
