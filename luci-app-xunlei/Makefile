@@ -5,7 +5,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for Xunlei
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+lsblk +docker +dockerd +luci-lib-taskd
+LUCI_DEPENDS:=+lsblk +docker +luci-lib-taskd
 
 define Package/luci-app-xunlei/conffiles
 /etc/config/xunlei
