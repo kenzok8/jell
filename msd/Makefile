@@ -2,12 +2,12 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=msd
 PKG_VERSION:=3.2.0
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/rozhuk-im/msd.git
 PKG_SOURCE_DATE:=2024-04-29
-PKG_SOURCE_VERSION:=1294ca1b356ad1facfadc130d0a598aca5a1a8f0
+PKG_SOURCE_VERSION:=11b8b36cc9496234a42061b903097d92414d7f82
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
