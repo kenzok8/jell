@@ -9,6 +9,6 @@ LUCI_URL:=https://github.com/karen07/luci-app-antiblock-openwrt-package
 LUCI_DESCRIPTION:=Provides Web UI for AntiBlock
 LUCI_DEPENDS:=+luci-base +antiblock
 
-include $(TOPDIR)/feeds/luci/luci.mk
+include ../../luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
