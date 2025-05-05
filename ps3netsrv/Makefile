@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=ps3netsrv
 PKG_VERSION:=20240210a
 PKG_GIT_COMMIT:=cea6cbefa94db12e3918cd9602f085239bfcbcee
-PKG_RELEASE:=5
+PKG_RELEASE:=6
 
 PKG_SOURCE:=$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/jhonathanc/ps3netsrv/archive/refs/tags
