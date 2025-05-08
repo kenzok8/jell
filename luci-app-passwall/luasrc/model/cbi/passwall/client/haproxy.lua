@@ -135,7 +135,7 @@ end
 ---- Haproxy Port
 o = s:option(Value, "haproxy_port", translate("Haproxy Port"))
 o.datatype = "port"
-o.default = 1181
+o.default = 65535
 o.rmempty = false
 
 ---- Node Weight
@@ -157,5 +157,7 @@ o = s:option(ListValue, "backup", translate("Mode"))
 o:value(0, translate("Primary"))
 o:value(1, translate("Standby"))
 o.rmempty = false
+
+s:append(Template(appname .. "/haproxy/js"))
 
 return m
