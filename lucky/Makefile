@@ -9,7 +9,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lucky
 PKG_VERSION:=2.15.10
-PKG_RELEASE:=481
+PKG_RELEASE:=482
+PKGARCH:=all 
 
 ifeq ($(ARCH),mipsel)
 	LUCKY_ARCH:=mipsle_softfloat
@@ -24,11 +25,7 @@ ifeq ($(ARCH),x86_64)
 	LUCKY_ARCH:=x86_64
 endif
 ifeq ($(ARCH),arm)
-	ifeq ($(BOARD),bcm53xx)
-		LUCKY_ARCH:=armv6
-	else
 	LUCKY_ARCH:=armv7
-endif
 endif
 ifeq ($(BOARD),bcm53xx)
 	LUCKY_ARCH:=armv6
@@ -55,13 +52,13 @@ include $(INCLUDE_DIR)/package.mk
 define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=Network
-	TITLE:=Lucky gdy
+	TITLE:=Lucky dynamic domain name ddns-go service, socat,frp 
 	DEPENDS:=@(i386||x86_64||arm||aarch64||mipsel||mips)
 	URL:=https://github.com/gdy666/lucky
 endef
 
 define Package/$(PKG_NAME)/description
-  Main functions of Lucky: ipv4/ipv6 portforward,ddns,IOT wake on lan ,reverse proxy and more...
+  Main functions of Lucky: dynamic domain name ddns-go service, socat,reverse proxy ,wake on lan
 endef
 
 define Build/Prepare
