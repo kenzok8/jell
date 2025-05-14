@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-passwall2
-PKG_VERSION:=25.5.7
-PKG_RELEASE:=203
+PKG_VERSION:=25.5.15
+PKG_RELEASE:=204
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy \
