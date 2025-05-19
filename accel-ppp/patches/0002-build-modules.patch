@@ -1,0 +1,24 @@
+--- a/drivers/ipoe/Makefile
++++ b/drivers/ipoe/Makefile
+@@ -1,4 +1,4 @@
+ obj-m += ipoe.o
+ 
+ default:
+-	make -C $(KDIR) M=$(PWD) modules
++	$(MAKE) -C $(KDIR) M=$(PWD) modules
+--- a/drivers/pptp/Makefile
++++ b/drivers/pptp/Makefile
+@@ -1,4 +1,4 @@
+ obj-m += pptp.o
+ 
+ default:
+-	make -C $(KDIR) M=$(PWD) modules
++	$(MAKE) -C $(KDIR) M=$(PWD) modules
+--- a/drivers/vlan_mon/Makefile
++++ b/drivers/vlan_mon/Makefile
+@@ -1,4 +1,4 @@
+ obj-m += vlan_mon.o
+ 
+ default:
+-	make -C $(KDIR) M=$(PWD) modules
++	$(MAKE) -C $(KDIR) M=$(PWD) modules

@@ -1,11 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=homebox
-PKG_VERSION:=0.0.0-dev.2020062901
-PKG_RELEASE:=16
+PKG_VERSION:=0.0.0_pre2020062901
+PKG_RELEASE:=17
 
-PKG_SOURCE_URL_FILE:=v$(PKG_VERSION).tar.gz
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+SRC_VERSION:=0.0.0-dev.2020062901
+PKG_SOURCE_URL_FILE:=v$(SRC_VERSION).tar.gz
+PKG_SOURCE:=$(PKG_NAME)-$(SRC_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/XGHeaven/homebox/archive/refs/tags/
 PKG_HASH:=skip
 
