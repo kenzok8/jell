@@ -1,25 +1,34 @@
 #
-# Copyright (C) 2020 Openwrt.org
+# Copyright (C) 2022 Krypton Lee <jun.k.lee199410@outlook.com>
 #
-# This is free software, licensed under the Apache License, Version 2.0 .
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
 #
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=qt6base
-PKG_VERSION:=6.8.3
-PKG_RELEASE:=36
+PKG_BASE:=6.9
+PKG_BUGFIX:=0
+PKG_VERSION:=$(PKG_BASE).$(PKG_BUGFIX)
+PKG_RELEASE:=37
 
-PKG_SOURCE:=qtbase-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/qt/qtbase/tar.gz/v$(PKG_VERSION)?
+PKG_SOURCE:=qtbase-everywhere-src-$(PKG_VERSION).tar.xz
+PKG_SOURCE_URL:=https://mirrors.tencent.com/qt/archive/qt/$(PKG_BASE)/$(PKG_VERSION)/submodules/ \
+		  https://mirrors.aliyun.com/qt/archive/qt/$(PKG_BASE)/$(PKG_VERSION)/submodules/ \
+		  http://download.qt-project.org/archive/qt/$(PKG_BASE)/$(PKG_VERSION)/submodules/
 PKG_HASH:=skip
 
-HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/qtbase-$(PKG_VERSION)
-PKG_BUILD_DIR:=$(BUILD_DIR)/qtbase-$(PKG_VERSION)
+HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/qtbase-everywhere-src-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/qtbase-everywhere-src-$(PKG_VERSION)
+
+PKG_MAINTAINER:=Krypton Lee <jun.k.lee199410@outlook.com>
+PKG_LICENSE:=LGPL-2.1
+PKG_LICENSE_FILES:=COPYING
+PKG_CPE_ID:=cpe:/a:qt:qt
 
 PKG_BUILD_DEPENDS:=qt6base/host
 PKG_BUILD_PARALLEL:=1
-PKG_USE_MIPS16:=0
 PKG_BUILD_FLAGS:=no-mips16
 CMAKE_INSTALL:=1
 
@@ -35,7 +44,7 @@ define Package/libQt6/Default
   SUBMENU:=Qt6
   TITLE:=Qt6
   URL:=http://qt-project.org
-  DEPENDS:=@!arc +libatomic +libstdcpp +zlib
+  DEPENDS:=@!(arc||TARGET_gemini) +libatomic +libdouble-conversion +libstdcpp +zlib
 endef
 
 define Package/libQt6
@@ -49,14 +58,13 @@ endef
 TARGET_CFLAGS+= -I$(STAGING_DIR)/usr/include/libdrm
 ifdef CONFIG_USE_GLIBC
   ifeq ($(ARCH),x86_64)
-    TARGET_LDFLAGS+= -Wl,--sysroot=$(TOOLCHAIN_DIR)
+    TARGET_LDFLAGS+= -Wl,--sysroot=$(TOOLCHAIN_ROOT_DIR)
   endif
 endif
 
 CMAKE_SHARED_LDFLAGS := $(filter-out -Wl$(comma)-Bsymbolic-functions,$(CMAKE_SHARED_LDFLAGS))
 
 CMAKE_HOST_OPTIONS+= \
-	-DQT_FORCE_MIN_CMAKE_VERSION_FOR_BUILDING_QT=3.19 \
 	-DBUILD_SHARED_LIBS=OFF \
 	-DFEATURE_optimize_full=ON \
 	-DFEATURE_glib=OFF \
@@ -71,8 +79,6 @@ CMAKE_HOST_OPTIONS+= \
 	-DFEATURE_xml=ON
 
 CMAKE_OPTIONS+= \
-	-DQT_FORCE_MIN_CMAKE_VERSION_FOR_BUILDING_QT=3.19 \
-	-DQT_FORCE_MIN_CMAKE_VERSION_FOR_USING_QT=3.19 \
 	-DBUILD_SHARED_LIBS=ON \
 	-DCMAKE_SYSROOT=$(STAGING_DIR) \
 	-DQT_HOST_PATH=$(STAGING_DIR_HOSTPKG) \
@@ -87,7 +93,7 @@ CMAKE_OPTIONS+= \
 	-DFEATURE_system_zlib=ON \
 	-DFEATURE_zstd=OFF \
 	-DFEATURE_backtrace=OFF \
-	-DFEATURE_system_doubleconversion=OFF \
+	-DFEATURE_system_doubleconversion=ON \
 	-DFEATURE_glib=OFF \
 	-DFEATURE_icu=OFF \
 	-DFEATURE_mimetype_database=ON \
@@ -97,6 +103,7 @@ CMAKE_OPTIONS+= \
 	-DFEATURE_gui=$(if $(CONFIG_PACKAGE_libQt6Gui),ON,OFF) \
 	-DFEATURE_fontconfig=OFF \
 	-DFEATURE_system_freetype=ON \
+	-DFEATURE_xkbcommon=OFF \
 	-DFEATURE_accessibility=OFF \
 	-DFEATURE_harfbuzz=OFF \
 	-DFEATURE_gif=OFF \
@@ -120,7 +127,7 @@ CMAKE_OPTIONS+= \
 	-DFEATURE_sql=$(if $(CONFIG_PACKAGE_libQt6Sql),ON,OFF) \
 	-DFEATURE_sqlmodel=OFF \
 	-DFEATURE_sql_sqlite=ON \
-	-DFEATURE_system_sqlite=OFF \
+	-DFEATURE_system_sqlite=ON \
 	-DFEATURE_sql_db2=OFF \
 	-DFEATURE_sql_ibase=OFF \
 	-DFEATURE_sql_mysql=OFF \
@@ -166,7 +173,7 @@ $(eval $(call DefineQt6Package,DBus,Core,))
 $(eval $(call DefineQt6Package,Gui,DBus,+libdrm +libfreetype))
 $(eval $(call DefineQt6Package,Network,Core,+libopenssl +krb5-libs))
 $(eval $(call DefineQt6Package,PrintSupport,Widgets,))
-$(eval $(call DefineQt6Package,Sql,Core,))
+$(eval $(call DefineQt6Package,Sql,Core,+libsqlite3))
 $(eval $(call DefineQt6Package,Test,Core,))
 $(eval $(call DefineQt6Package,Widgets,Gui,))
 $(eval $(call DefineQt6Package,Xml,Core,))
