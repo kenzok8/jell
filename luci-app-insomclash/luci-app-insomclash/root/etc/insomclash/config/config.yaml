@@ -1,0 +1,64 @@
+port: 7890
+socks-port: 1080
+redir-port: 7893
+tproxy-port: 7894
+mode: rule
+allow-lan: true
+routing-mark: 0xff
+bind-address: '*'
+ipv6: false
+external-controller: 0.0.0.0:9090
+external-ui: ui
+secret: aqila22
+tun:
+  enable: true
+  stack: system
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  listen: :1053
+  default-nameserver:
+    - 8.8.8.8
+    - 8.8.4.4
+  fallback:
+    - 1.1.1.1
+    - 1.0.0.1
+  nameserver:
+    - https://cloudflare-dns.com/dns-query
+    - https://dns.google/dns-query
+  proxy-server-nameserver:
+    - 112.215.198.248
+    - 112.215.198.254
+  fake-ip-filter:
+    - +.*
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+  skip-domain:
+    - '+.microsoft.com'
+    - '+.windows.com'
+profile:
+  store-selected: true
+proxy-providers:
+  akun:
+    type: file
+    path: ./proxy_providers/akun.yaml
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+proxy-groups:
+  - name: umum
+    type: select
+    use:
+      - akun
+rules:
+  - MATCH,umum
+rule-providers: null

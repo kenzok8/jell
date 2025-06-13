@@ -1,0 +1,288 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%+header%>
+
+<div class="cbi-map">
+    <h2><%:Insomclash Converter%></h2>
+    <div class="cbi-section">
+        
+        <div class="cbi-section-node">
+            <h3><%:Clash Multi-Protocol Converter%></h3>
+            <p><%:Supports: Trojan, VMess, VLESS, Shadowsocks, and SSH protocols%></p>
+            <p><%:Enter a subscription URL or multiple proxy links (one per line)%></p>
+            
+            <!-- Message area for notifications -->
+            <div id="converter_message" style="display: none; margin: 10px 0;"></div>
+            
+            <form id="converter-form">
+                <div class="cbi-value">
+                    <label class="cbi-value-field"><%:Proxy URLs%></label>
+                        <textarea name="proxy_input" id="proxy_input" class="cbi-input-textarea" rows="10" placeholder="Subscription URL:&#10;https://example.com/subscription&#10;&#10;Or individual proxy URLs:&#10;ssh://user:pass@example.com:22&#10;user@ssh-server.com:2222&#10;trojan://password@example.com:443&#10;vmess://base64encodedcontent&#10;vless://uuid@example.com:443" style="width: 100%;"></textarea>
+                        </div>
+                <div class="cbi-value">
+                    <div class="cbi-value-field">
+                        <input type="button" class="cbi-button cbi-button-apply" value="<%:Convert%>" onclick="convertProxies()" />
+                        <input type="button" class="cbi-button cbi-button-reset" value="<%:Clear%>" onclick="clearForm()" />
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Result area -->
+            <div id="result-area" style="display: none; margin-top: 20px;">
+                <div class="cbi-value">
+                    <label class="cbi-value-title"><%:Converted YAML%></label>
+                    <div class="cbi-value-field">
+                        <div id="conversion-stats" style="color:aqua;">
+                            <strong><%:Conversion Result:%></strong> <span id="proxy-count">0</span> <%:proxies converted successfully%>
+                        </div>
+                        <textarea id="yaml-result" class="cbi-input-textarea" rows="20" readonly style="width: 100%; font-family: monospace;"></textarea>
+                        <div style="margin-top: 10px;">
+                            <input type="button" class="cbi-button cbi-button-save" value="<%:Copy YAML%>" onclick="copyYAML()" id="copy-btn" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+           <!-- Copyright Section -->
+            <div class="edit-section" style="margin-top: 30px; font-size: 12px; color: #666; text-align: center;">
+                <p>© 2023 <a href="https://github.com/bobbyunknown" target="_blank">BobbyUnknown</a> - Insomclash</p>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+#proxy_input.cbi-input-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+#yaml-result.cbi-input-textarea {
+    min-height: 300px;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .cbi-value-field input[type="button"] {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    #proxy_input.cbi-input-textarea {
+        min-height: 120px;
+    }
+
+    #yaml-result.cbi-input-textarea {
+        min-height: 250px;
+    }
+}
+</style>
+
+<script type="text/javascript">
+function showMessage(message, type) {
+    const messageDiv = document.getElementById('converter_message');
+    messageDiv.innerHTML = '<div class="alert-message ' + (type === 'success' ? 'success' : 'warning') + '"><p>' + message + '</p></div>';
+    messageDiv.style.display = 'block';
+
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+
+function convertProxies() {
+    const input = document.getElementById('proxy_input').value.trim();
+    
+    if (!input) {
+        showMessage('Please enter proxy URLs', 'error');
+        return;
+    }
+
+    showMessage('Converting proxies...', 'info');
+    
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "convert_proxy")%>', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        displayResult(response.proxies);
+                        const count = response.proxies.length;
+                        showMessage(`Conversion completed! ${count} proxy${count !== 1 ? 'ies' : ''} converted successfully.`, 'success');
+                    } else {
+                        showMessage(response.message || 'Conversion failed', 'error');
+                    }
+                } catch (e) {
+                    showMessage('Error parsing response', 'error');
+                }
+            } else {
+                showMessage('Network error occurred', 'error');
+            }
+        }
+    };
+    
+    xhr.send('proxy_input=' + encodeURIComponent(input));
+}
+
+function displayResult(proxies) {
+    const proxyCount = proxies.length;
+    document.getElementById('proxy-count').textContent = proxyCount;
+
+    let yaml = 'proxies:';
+
+    proxies.forEach(proxy => {
+        yaml += '\n  - name: ' + proxy.name;
+        yaml += '\n    server: ' + proxy.server;
+        yaml += '\n    port: ' + proxy.port;
+        yaml += '\n    type: ' + proxy.type;
+        
+        if (proxy.password) {
+            yaml += '\n    password: ' + proxy.password;
+        }
+        if (proxy.uuid) {
+            yaml += '\n    uuid: ' + proxy.uuid;
+        }
+        if (proxy.cipher) {
+            yaml += '\n    cipher: ' + proxy.cipher;
+        }
+        
+        if (proxy.tls !== undefined) {
+            yaml += '\n    tls: ' + (proxy.tls ? 'true' : 'false');
+        }
+        if (proxy['skip-cert-verify']) {
+            yaml += '\n    skip-cert-verify: true';
+        }
+        if (proxy.sni) {
+            yaml += '\n    sni: ' + proxy.sni;
+        }
+        
+        if (proxy.network) {
+            yaml += '\n    network: ' + proxy.network;
+            
+            if (proxy.network === 'ws' && proxy['ws-opts']) {
+                yaml += '\n    ws-opts:';
+                if (proxy['ws-opts'].path) {
+                    yaml += '\n      path: ' + proxy['ws-opts'].path;
+                }
+                if (proxy['ws-opts'].headers) {
+                    yaml += '\n      headers:';
+                    for (const [key, value] of Object.entries(proxy['ws-opts'].headers)) {
+                        yaml += '\n        ' + key + ': ' + value;
+                    }
+                }
+            } else if (proxy.network === 'grpc' && proxy['grpc-opts']) {
+                yaml += '\n    grpc-opts:';
+                if (proxy['grpc-opts']['grpc-service-name']) {
+                    yaml += '\n      grpc-service-name: ' + proxy['grpc-opts']['grpc-service-name'];
+                }
+            }
+        }
+        
+        yaml += '\n    udp: true';
+    });
+    
+    document.getElementById('yaml-result').value = yaml;
+    document.getElementById('result-area').style.display = 'block';
+}
+
+function copyYAML() {
+    const yaml = document.getElementById('yaml-result').value;
+    const copyBtn = document.getElementById('copy-btn');
+    const originalText = copyBtn.value;
+
+    if (!yaml) {
+        showMessage('No YAML to copy', 'error');
+        return;
+    }
+
+    const textArea = document.createElement('textarea');
+    textArea.value = yaml;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(yaml).then(function() {
+                copyBtn.value = "COPIED!";
+                copyBtn.style.backgroundColor = "#28a745";
+                copyBtn.style.color = "#fff";
+
+                setTimeout(function() {
+                    copyBtn.value = originalText;
+                    copyBtn.style.backgroundColor = "";
+                    copyBtn.style.color = "";
+                }, 2000);
+            }).catch(function() {
+                fallbackCopy();
+            });
+        } else {
+            fallbackCopy();
+        }
+    } catch (err) {
+        fallbackCopy();
+    }
+
+    function fallbackCopy() {
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                copyBtn.value = "COPIED!";
+                copyBtn.style.backgroundColor = "#28a745";
+                copyBtn.style.color = "#fff";
+
+                setTimeout(function() {
+                    copyBtn.value = originalText;
+                    copyBtn.style.backgroundColor = "";
+                    copyBtn.style.color = "";
+                }, 2000);
+            } else {
+                showMessage('Copy failed - please select and copy manually', 'error');
+            }
+        } catch (err) {
+            showMessage('Copy not supported - please select and copy manually', 'error');
+        }
+    }
+
+    document.body.removeChild(textArea);
+}
+
+
+
+function clearForm() {
+    document.getElementById('proxy_input').value = '';
+    document.getElementById('result-area').style.display = 'none';
+    document.getElementById('converter_message').style.display = 'none';
+    document.getElementById('proxy-count').textContent = '0';
+}
+</script>
+
+<%+footer%>

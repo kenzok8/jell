@@ -1,0 +1,67 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
+<%+header%>
+
+<div class="cbi-map">
+    <h2><%:Upload Files%></h2>
+    <div class="cbi-section">
+        <div class="cbi-section-node">
+
+            <% if upload_message and upload_message ~= "" then %>
+            <div class="alert-message">
+                <p><%=upload_message%></p>
+            </div>
+            <% end %>
+
+            <form method="post" enctype="multipart/form-data" action="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "upload_file")%>">
+                <div class="cbi-value">
+                    <label class="cbi-value-title"><%:Upload File Type%></label>
+                    <div class="cbi-value-field">
+                        <select name="upload_type">
+                            <option value="config"><%:Config File%>(.yaml)</option>
+                            <option value="proxy"><%:Proxy Provider File%>(.yaml)</option>
+                            <option value="rule"><%:Rule Provider File%>(.yaml)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="cbi-value">
+                    <label class="cbi-value-title"><%:Select File%></label>
+                    <div class="cbi-value-field">
+                        <input type="file" name="file" accept=".yaml,.yml" />
+                    </div>
+                </div>
+
+                <div class="cbi-value">
+                    <div class="cbi-value-field">
+                        <input type="submit" class="cbi-button cbi-button-apply" value="<%:Upload%>" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%+footer%>

@@ -1,0 +1,34 @@
+define TPROXY_MARK=0xff
+define ROUTER_MARK=0x01
+define TPROXY_PORT=7894
+define TPROXY_L4PROTO={ tcp, udp }
+
+include "/usr/share/insomclash/rules_nft/local_ip.nft"
+
+table inet oproxy_tproxy {
+  chain divert {
+    type filter hook prerouting priority mangle; policy accept;
+    meta l4proto $TPROXY_L4PROTO socket transparent 1 meta mark set $ROUTER_MARK accept
+  }
+
+  chain prerouting {
+    type filter hook prerouting priority mangle; policy accept;
+    meta mark $TPROXY_MARK return
+    udp dport 53 return
+    tcp dport 53 return
+    ip daddr @local_ipv4 return
+    ip6 daddr @local_ipv6 return
+    meta l4proto $TPROXY_L4PROTO meta mark set $ROUTER_MARK tproxy to :$TPROXY_PORT accept
+  }
+
+  chain output {
+    type route hook output priority mangle; policy accept;
+    meta mark $TPROXY_MARK return
+    udp dport 53 return
+    tcp dport 53 return
+    ip daddr @local_ipv4 return
+    ip6 daddr @local_ipv6 return
+    meta l4proto $TPROXY_L4PROTO meta mark set $ROUTER_MARK accept
+  }
+}
+

@@ -1,0 +1,88 @@
+#!/bin/bash
+
+# - Copyright 2024
+# - bobbyunknown <https://github.com/bobbyunknown>
+#
+# https://opensource.org/license/mit
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+ulimit -SHn 1000000
+
+id="200"
+tun_device="Meta"
+nft=`command -v nft`
+
+start_tun() {
+    echo "[ `date +%T` ] - Starting nftables"
+
+    ip rule add fwmark ${id} table ${id} 2>/dev/null
+    ip route add default dev ${tun_device} table ${id} 2>/dev/null
+
+    handles=`$nft -a list chain inet fw4 forward 2>/dev/null |grep -E "Insomclash.*TUN" |awk -F '# handle ' '{print$2}'`
+    for handle in $handles; do
+        $nft delete rule inet fw4 forward handle ${handle} 2>/dev/null
+    done
+
+    handles=`$nft -a list chain inet fw4 input 2>/dev/null |grep -E "Insomclash.*TUN" |awk -F '# handle ' '{print$2}'`
+    for handle in $handles; do
+        $nft delete rule inet fw4 input handle ${handle} 2>/dev/null
+    done
+
+    handles=`$nft -a list chain inet fw4 srcnat 2>/dev/null |grep -E "Insomclash.*TUN" |awk -F '# handle ' '{print$2}'`
+    for handle in $handles; do
+        $nft delete rule inet fw4 srcnat handle ${handle} 2>/dev/null
+    done
+
+    $nft insert rule inet fw4 forward position 0 meta l4proto { tcp, udp } oifname ${tun_device} counter accept comment \"Insomclash TUN Forward\"
+    $nft insert rule inet fw4 forward position 0 meta l4proto { tcp, udp } iifname ${tun_device} counter accept comment \"Insomclash TUN Forward\"
+    $nft insert rule inet fw4 input position 0 meta l4proto { tcp, udp } iifname ${tun_device} counter accept comment \"Insomclash TUN Input\"
+    $nft insert rule inet fw4 srcnat position 0 meta nfproto { ipv4 } oifname ${tun_device} counter return comment \"Insomclash TUN Postrouting\"
+}
+
+stop_tun() {
+    echo "[ `date +%T` ] - Cleaning nftables"
+
+    ip rule del fwmark ${id} table ${id} 2>/dev/null
+    ip route del default dev ${tun_device} table ${id} 2>/dev/null
+
+    # Clean nftables rules
+    nft_list=(forward input srcnat)
+    for nft_now in ${nft_list[@]}; do
+        handles=`$nft -a list chain inet fw4 $nft_now 2>/dev/null |grep -E "Insomclash.*TUN" |awk -F '# handle ' '{print$2}'`
+        for handle in $handles; do
+            $nft delete rule inet fw4 ${nft_now} handle ${handle} 2>/dev/null
+        done
+    done
+}
+
+
+case "$1" in
+    start)
+        start_tun
+        ;;
+    stop)
+        stop_tun
+        ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        echo "  start - Setup proxy rules"
+        echo "  stop  - Clean proxy rules"
+        exit 1
+        ;;
+esac

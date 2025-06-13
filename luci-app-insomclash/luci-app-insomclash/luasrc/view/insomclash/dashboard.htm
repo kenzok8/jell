@@ -1,0 +1,266 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%+header%>
+
+<style>
+table th, .table .th {
+	text-align: center;
+}
+
+table td, .table .td {
+	text-align: center;
+	word-break: keep-all;
+}
+
+#dashboard_iframe {
+    width: 100%;
+    height: 800px;
+    min-height: 800px;
+    border: 1px solid #575757;
+    border-radius: 4px;
+}
+
+.dashboard-buttons {
+    margin-bottom: 15px;
+}
+
+.iframe-selector {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    #dashboard_iframe {
+        height: 70vh;
+        min-height: 500px;
+    }
+}
+
+@media (min-width: 769px) {
+    #dashboard_iframe {
+        height: 80vh;
+        min-height: 800px;
+    }
+}
+</style>
+
+<div class="cbi-map">
+    <h2 name="content"><%:Insomclash Dashboard%></h2>
+    <div class="cbi-map-descr"><%:Access Insomclash web dashboard%></div>
+
+    <!-- Message area -->
+    <div id="dashboard_message" style="display: none; margin: 10px 0;"></div>
+
+    <div class="cbi-section">
+        <div class="cbi-section-node">
+            <div class="cbi-value dashboard-buttons">
+                <label class="cbi-value-title"><%:Open in New Tab%></label>
+                <div class="cbi-value-field">
+                    <button id="yacd_button" class="cbi-button cbi-button-neutral" onclick="openDashboard('yacd')">YACD</button>
+                    <button id="metacubexd_button" class="cbi-button cbi-button-neutral" onclick="openDashboard('metacubexd')">MetaCubeXD</button>
+                    <button id="zashboard_button" class="cbi-button cbi-button-neutral" onclick="openDashboard('zashboard')">Zashboard</button>
+                </div>
+            </div>
+
+            <!-- Iframe selector -->
+            <div class="cbi-value iframe-selector">
+                <label class="cbi-value-title"><%:View in Frame%></label>
+                <div class="cbi-value-field">
+                    <select id="iframe_selector" class="cbi-input-select" onchange="loadIframe()">
+                        <option value="yacd" selected>YACD</option>
+                        <option value="metacubexd">MetaCubeXD</option>
+                        <option value="zashboard">Zashboard</option>
+                    </select>
+                    <button id="refresh_iframe" class="cbi-button cbi-button-reload" onclick="refreshIframe()"><%:Refresh%></button>
+                    <button id="fullscreen_iframe" class="cbi-button cbi-button-action" onclick="toggleFullscreen()"><%:Fullscreen%></button>
+                </div>
+            </div>
+
+            <!-- Iframe container -->
+            <div class="cbi-value">
+                    <iframe id="dashboard_iframe" src="about:blank" style="display: none;"></iframe>
+                    <div id="iframe_placeholder" style="text-align: center; padding: 50px; color: #666;">
+                        <%:Select a dashboard from the dropdown above to view it here%>
+                </div>
+            </div>
+            <!-- Copyright Section -->
+            <div class="edit-section" style="margin-top: 30px; font-size: 12px; color: #666; text-align: center;">
+                <p>© 2023 <a href="https://github.com/bobbyunknown" target="_blank">BobbyUnknown</a> - Insomclash</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    let dashboardUrls = {};
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        getDashboardInfo().then(() => {
+            setTimeout(() => {
+                checkServiceStatus();
+            }, 500);
+        });
+    });
+    
+    // Function to get dashboard info
+    function getDashboardInfo() {
+        return fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "get_dashboard_info")%>')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Dashboard info received:', data);
+                if (data.success && data.dashboard_urls) {
+                    dashboardUrls = data.dashboard_urls;
+                }
+                return data;
+            })
+            .catch(error => {
+                console.error('Error fetching dashboard info:', error);
+                showMessage('Error loading dashboard info: ' + error.message, 'error');
+                return { success: false };
+            });
+    }
+    
+    function checkServiceStatus() {
+        fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "service_action")%>?action=status')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Service status:', data);
+                updateButtonStates(data.running);
+            })
+            .catch(error => {
+                console.error('Error checking service status:', error);
+                updateButtonStates(false);
+            });
+    }
+    
+    function updateButtonStates(serviceRunning = false) {
+        console.log('Updating button states - Service running:', serviceRunning, 'Dashboard URLs:', dashboardUrls);
+
+        const buttons = ['yacd_button', 'metacubexd_button', 'zashboard_button'];
+        const selector = document.getElementById('iframe_selector');
+        const refreshButton = document.getElementById('refresh_iframe');
+        const fullscreenButton = document.getElementById('fullscreen_iframe');
+
+        const hasUrls = Object.keys(dashboardUrls).length > 0;
+
+        if (!serviceRunning) {
+            buttons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = true;
+            });
+            if (selector) selector.disabled = true;
+            if (refreshButton) refreshButton.disabled = true;
+            if (fullscreenButton) fullscreenButton.disabled = true;
+            showMessage('Service is not running. Please start the service first.', 'warning');
+        } else if (!hasUrls) {
+            buttons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = true;
+            });
+            if (selector) selector.disabled = true;
+            if (refreshButton) refreshButton.disabled = true;
+            if (fullscreenButton) fullscreenButton.disabled = true;
+            showMessage('Dashboard URLs not available. Check if secret is configured in your config file.', 'warning');
+        } else {
+            buttons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = false;
+            });
+            if (selector) selector.disabled = false;
+            if (refreshButton) refreshButton.disabled = false;
+            if (fullscreenButton) fullscreenButton.disabled = false;
+            document.getElementById('dashboard_message').style.display = 'none';
+            autoLoadDefaultDashboard();
+        }
+    }
+    
+    function openDashboard(type) {
+        if (dashboardUrls[type]) {
+            window.open(dashboardUrls[type], '_blank');
+        } else {
+            showMessage('Dashboard URL not available. Make sure service is running and config has secret.', 'error');
+        }
+    }
+    
+    function loadIframe() {
+        const selector = document.getElementById('iframe_selector');
+        const iframe = document.getElementById('dashboard_iframe');
+        const placeholder = document.getElementById('iframe_placeholder');
+        
+        const selectedType = selector.value;
+        
+        if (selectedType && dashboardUrls[selectedType]) {
+            iframe.src = dashboardUrls[selectedType];
+            iframe.style.display = 'block';
+            placeholder.style.display = 'none';
+        } else {
+            iframe.src = 'about:blank';
+            iframe.style.display = 'none';
+            placeholder.style.display = 'block';
+        }
+    }
+    
+    function refreshIframe() {
+        const iframe = document.getElementById('dashboard_iframe');
+        if (iframe.src && iframe.src !== 'about:blank') {
+            iframe.src = iframe.src;
+        }
+    }
+
+    function toggleFullscreen() {
+        const iframe = document.getElementById('dashboard_iframe');
+        if (iframe.src && iframe.src !== 'about:blank') {
+            if (!document.fullscreenElement) {
+                iframe.requestFullscreen().catch(err => {
+                    console.log('Error attempting to enable fullscreen:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    function autoLoadDefaultDashboard() {
+        const iframe = document.getElementById('dashboard_iframe');
+        const selector = document.getElementById('iframe_selector');
+
+        if (iframe.src === 'about:blank' || iframe.src === '' || iframe.src === window.location.href) {
+            if (dashboardUrls.yacd && selector.value === 'yacd') {
+                loadIframe();
+            }
+        }
+    }
+    
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('dashboard_message');
+        messageDiv.innerHTML = '<div class="alert-message ' + (type === 'success' ? 'success' : 'warning') + '"><p>' + message + '</p></div>';
+        messageDiv.style.display = 'block';
+
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+</script>
+
+<%+footer%>

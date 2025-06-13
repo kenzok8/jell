@@ -1,0 +1,10 @@
+
+config insomclash 'config'
+	option tunnel_mode 'tun'
+	option config_select 'config.yaml'
+	option enable_custom_dns '0'
+	option dns_port '53'
+	option ipv6 '0'
+	option trans_ipv6 '0'
+	option editor_theme '1'
+

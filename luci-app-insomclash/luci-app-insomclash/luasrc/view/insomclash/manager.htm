@@ -1,0 +1,400 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%+header%>
+
+<%
+local fs = require "nixio.fs"
+local sys = require "luci.sys"
+
+-- Get URL parameters for messages
+local http = require "luci.http"
+local message = http.formvalue("message")
+local success = http.formvalue("success")
+
+-- Directory paths
+local config_dir = "/etc/insomclash/config/"
+local proxy_dir = "/etc/insomclash/proxy_providers/"
+local rule_dir = "/etc/insomclash/rule_providers/"
+
+-- Ensure directories exist
+fs.mkdirr(config_dir)
+fs.mkdirr(proxy_dir)
+fs.mkdirr(rule_dir)
+
+-- Function to get files in directory
+local function get_files(dir)
+    local files = {}
+    if fs.access(dir) then
+        for file in fs.dir(dir) do
+            if file ~= "." and file ~= ".." then
+                local filepath = dir .. file
+                local stat = fs.stat(filepath)
+                if stat and stat.type == "reg" then
+                    table.insert(files, {
+                        name = file,
+                        path = filepath,
+                        size = stat.size,
+                        mtime = stat.mtime
+                    })
+                end
+            end
+        end
+    end
+    return files
+end
+
+local config_files = get_files(config_dir)
+local proxy_files = get_files(proxy_dir)
+local rule_files = get_files(rule_dir)
+%>
+
+<div class="cbi-map">
+    <h2><%:Insomclash Manager%></h2>
+    <div class="cbi-section">
+        
+        <div class="cbi-section-node">
+            <h3><%:File Management%></h3>
+            <div id="upload_message" style="display: none; margin: 10px 0;"></div>
+
+            <form method="post" enctype="multipart/form-data" action="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "upload_file")%>" id="upload-form">
+                <div class="cbi-value">
+                    <label class="cbi-value-title"><%:Upload File Type%></label>
+                    <div class="cbi-value-field">
+                        <select name="upload_type" id="file_type" onchange="updateFileAccept()">
+                            <option value="config"><%:Config File%>(.yaml)</option>
+                            <option value="proxy"><%:Proxy Provider File%>(.yaml)</option>
+                            <option value="rule"><%:Rule Provider File%>(.yaml)</option>
+                            <option value="full_backup"><%:Full Backup%> (tar.gz)</option>
+                            <option value="full_restore"><%:Full Restore%> (tar.gz)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="cbi-value" id="file-upload-section">
+                    <label class="cbi-value-title"><%:Select File%></label>
+                    <div class="cbi-value-field">
+                        <input type="file" name="file" id="file-input" accept=".yaml,.yml" />
+                    </div>
+                </div>
+                <div class="cbi-value">
+                    <div class="cbi-value-field" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="submit" class="cbi-button cbi-button-apply" value="<%:Upload%>" id="upload-btn" />
+                        <input type="button" class="cbi-button cbi-button-save" value="<%:Backup%>" id="backup-btn" onclick="downloadBackup()" />
+                    </div>
+                </div>
+            </form>
+
+            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                <%:Note: Upload individual YAML files or restore from tar.gz backup. Files will be saved to the corresponding folder based on selected type.%>
+            </div>
+        </div>
+        
+        <div class="cbi-section-node">
+            <div class="cbi-tab-container">
+                <ul class="cbi-tabmenu">
+                    <li class="cbi-tab"><a href="#" onclick="showTab('config')" id="tab-config"><%:Config%></a></li>
+                    <li class="cbi-tab"><a href="#" onclick="showTab('proxy')" id="tab-proxy"><%:Proxy%></a></li>
+                    <li class="cbi-tab"><a href="#" onclick="showTab('rule')" id="tab-rule"><%:Rule%></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="cbi-section-node" id="content-config">
+            <h3><%:Config Files%></h3>
+
+            <div style="margin-bottom: 15px;">
+                <form method="post" action="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "create_file")%>" style="display: inline-block;">
+                    <input type="hidden" name="file_type" value="config" />
+                    <input type="text" name="filename" placeholder="Enter filename (without .yaml)" style="padding: 5px; margin-right: 5px;" />
+                    <input type="submit" class="cbi-button cbi-button-add" value="<%:Add New Config%>" />
+                </form>
+            </div>
+
+            <table class="table">
+                <tr class="tr table-titles">
+                    <th class="th"><%:Filename%></th>
+                    <th class="th"><%:Size%></th>
+                    <th class="th"><%:Modified%></th>
+                    <th class="th"><%:Actions%></th>
+                </tr>
+                <% for _, file in ipairs(config_files) do %>
+                <tr class="tr">
+                    <td class="td"><%=file.name%></td>
+                    <td class="td"><%=string.format("%.1f KB", file.size/1024)%></td>
+                    <td class="td"><%=os.date("%Y-%m-%d %H:%M:%S", file.mtime)%></td>
+                    <td class="td">
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "editor")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-edit"><%:Edit%></a>
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "download_file")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-apply"><%:Download%></a>
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "delete_file")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-remove" onclick="return confirm('Delete this file?')"><%:Delete%></a>
+                    </td>
+                </tr>
+                <% end %>
+            </table>
+        </div>
+        
+        <div class="cbi-section-node" id="content-proxy" style="display: none;">
+            <h3><%:Proxy Files%></h3>
+
+            <div style="margin-bottom: 15px;">
+                <form method="post" action="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "create_file")%>" style="display: inline-block;">
+                    <input type="hidden" name="file_type" value="proxy" />
+                    <input type="text" name="filename" placeholder="Enter filename (without .yaml)" style="padding: 5px; margin-right: 5px;" />
+                    <input type="submit" class="cbi-button cbi-button-add" value="<%:Add New Proxy%>" />
+                </form>
+            </div>
+
+            <table class="table">
+                <tr class="tr table-titles">
+                    <th class="th"><%:Filename%></th>
+                    <th class="th"><%:Size%></th>
+                    <th class="th"><%:Modified%></th>
+                    <th class="th"><%:Actions%></th>
+                </tr>
+                <% for _, file in ipairs(proxy_files) do %>
+                <tr class="tr">
+                    <td class="td"><%=file.name%></td>
+                    <td class="td"><%=string.format("%.1f KB", file.size/1024)%></td>
+                    <td class="td"><%=os.date("%Y-%m-%d %H:%M:%S", file.mtime)%></td>
+                    <td class="td">
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "editor")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-edit"><%:Edit%></a>
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "download_file")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-apply"><%:Download%></a>
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "delete_file")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-remove" onclick="return confirm('Delete this file?')"><%:Delete%></a>
+                    </td>
+                </tr>
+                <% end %>
+            </table>
+        </div>
+        
+        <div class="cbi-section-node" id="content-rule" style="display: none;">
+            <h3><%:Rule Files%></h3>
+
+            <div style="margin-bottom: 15px;">
+                <form method="post" action="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "create_file")%>" style="display: inline-block;">
+                    <input type="hidden" name="file_type" value="rule" />
+                    <input type="text" name="filename" placeholder="Enter filename (without .yaml)" style="padding: 5px; margin-right: 5px;" />
+                    <input type="submit" class="cbi-button cbi-button-add" value="<%:Add New Rule%>" />
+                </form>
+            </div>
+
+            <table class="table">
+                <tr class="tr table-titles">
+                    <th class="th"><%:Filename%></th>
+                    <th class="th"><%:Size%></th>
+                    <th class="th"><%:Modified%></th>
+                    <th class="th"><%:Actions%></th>
+                </tr>
+                <% for _, file in ipairs(rule_files) do %>
+                <tr class="tr">
+                    <td class="td"><%=file.name%></td>
+                    <td class="td"><%=string.format("%.1f KB", file.size/1024)%></td>
+                    <td class="td"><%=os.date("%Y-%m-%d %H:%M:%S", file.mtime)%></td>
+                    <td class="td">
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "editor")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-edit"><%:Edit%></a>
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "download_file")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-apply"><%:Download%></a>
+                        <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "delete_file")%>?file=<%=luci.http.urlencode(file.path)%>" class="cbi-button cbi-button-remove" onclick="return confirm('Delete this file?')"><%:Delete%></a>
+                    </td>
+                </tr>
+                <% end %>
+            </table>
+        </div>
+            <!-- Copyright Section -->
+            <div class="edit-section" style="margin-top: 30px; font-size: 12px; color: #666; text-align: center;">
+                <p>© 2023 <a href="https://github.com/bobbyunknown" target="_blank">BobbyUnknown</a> - Insomclash</p>
+            </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .td .cbi-button {
+        display: block;
+        width: 100%;
+        margin: 2px 0;
+        padding: 8px 12px;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .table {
+        font-size: 12px;
+    }
+
+    .table .th, .table .td {
+        padding: 8px 4px;
+    }
+
+    input[name="filename"] {
+        width: 100% !important;
+        max-width: 200px;
+        margin-bottom: 10px;
+    }
+
+    .add-new-form {
+        display: block !important;
+    }
+
+    .add-new-form input[type="text"] {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        margin-right: 0 !important;
+    }
+
+    .add-new-form input[type="submit"] {
+        display: block;
+        width: 100%;
+    }
+
+    .cbi-value-field {
+        flex-direction: row !important;
+        gap: 10px !important;
+        justify-content: flex-start !important;
+    }
+
+    .cbi-value-field input[type="submit"],
+    .cbi-value-field input[type="button"] {
+        width: auto !important;
+        flex: none !important;
+    }
+
+    @media (max-width: 480px) {
+        .table .th:nth-child(2),
+        .table .td:nth-child(2),
+        .table .th:nth-child(3),
+        .table .td:nth-child(3) {
+            display: none;
+        }
+    }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+    .td .cbi-button {
+        padding: 6px 10px;
+        font-size: 13px;
+        margin: 1px;
+    }
+}
+</style>
+
+<script type="text/javascript">
+function showTab(tabName) {
+    document.getElementById('content-config').style.display = 'none';
+    document.getElementById('content-proxy').style.display = 'none';
+    document.getElementById('content-rule').style.display = 'none';
+
+    document.getElementById('tab-config').parentNode.classList.remove('cbi-tab-active');
+    document.getElementById('tab-proxy').parentNode.classList.remove('cbi-tab-active');
+    document.getElementById('tab-rule').parentNode.classList.remove('cbi-tab-active');
+
+    document.getElementById('content-' + tabName).style.display = 'block';
+    document.getElementById('tab-' + tabName).parentNode.classList.add('cbi-tab-active');
+}
+
+function showMessage(message, type) {
+    const messageDiv = document.getElementById('upload_message');
+    messageDiv.innerHTML = '<div class="alert-message ' + (type === 'success' ? 'success' : 'warning') + '"><p>' + message + '</p></div>';
+    messageDiv.style.display = 'block';
+
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
+
+function checkUrlMessage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    const success = urlParams.get('success');
+
+    if (message) {
+        showMessage(message, success === '1' ? 'success' : 'error');
+        const url = new URL(window.location);
+        url.searchParams.delete('message');
+        url.searchParams.delete('success');
+        window.history.replaceState({}, document.title, url.pathname);
+    }
+}
+
+function updateFileAccept() {
+    const fileType = document.getElementById('file_type').value;
+    const fileInput = document.getElementById('file-input');
+    const uploadSection = document.getElementById('file-upload-section');
+    const uploadBtn = document.getElementById('upload-btn');
+    const backupBtn = document.getElementById('backup-btn');
+
+    if (fileType === 'full_backup') {
+        uploadSection.style.display = 'none';
+        uploadBtn.style.display = 'none';
+        backupBtn.style.display = 'inline-block';
+    } else if (fileType === 'full_restore') {
+        uploadSection.style.display = 'block';
+        uploadBtn.style.display = 'inline-block';
+        uploadBtn.value = '<%:Restore%>';
+        fileInput.accept = '.tar.gz,.tgz';
+        backupBtn.style.display = 'none';
+    } else {
+        uploadSection.style.display = 'block';
+        uploadBtn.style.display = 'inline-block';
+        uploadBtn.value = '<%:Upload%>';
+        fileInput.accept = '.yaml,.yml,.tar.gz,.tgz';
+        backupBtn.style.display = 'inline-block';
+    }
+}
+
+function downloadBackup() {
+    const fileType = document.getElementById('file_type').value;
+
+    if (fileType === 'full_restore') {
+        alert('Please select a backup type to download, not restore.');
+        return;
+    }
+
+    const backupUrl = '<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "backup_files")%>';
+
+    let backupType = fileType;
+    if (fileType === 'full_backup') {
+        backupType = 'full';
+    }
+
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = backupUrl;
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'backup_type';
+    input.value = backupType;
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    showTab('config');
+    checkUrlMessage();
+    updateFileAccept();
+});
+</script>
+
+<%+footer%>

@@ -1,0 +1,160 @@
+#!/bin/bash
+
+# - Copyright 2024
+# - bobbyunknown <https://github.com/bobbyunknown>
+#
+# https://opensource.org/license/mit
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+firewall="/etc/init.d/firewall"
+insomclash_dir="/etc/insomclash"
+insomclash_tmp_dir="/tmp/insomclash"
+insomclash_bin="/usr/bin/mihomo"
+
+config_select=$(uci -q get insomclash.config.config_select)
+if [ -z "$config_select" ]; then
+    config_select="config.yaml"
+fi
+insomclash_config="$insomclash_dir/config/$config_select"
+
+tunnel_mode=$(uci -q get insomclash.config.tunnel_mode)
+if [ "$tunnel_mode" == "tproxy" ]; then
+    rules_bin="/usr/share/insomclash/routing-tproxy"
+else
+    rules_bin="/usr/share/insomclash/routing-tun"
+fi
+
+mkdir -p $insomclash_tmp_dir
+
+core_log="$insomclash_tmp_dir/core.log"
+insomclash_pid_path="$insomclash_tmp_dir/insomclash.pid"
+log="$insomclash_tmp_dir/insomclash.log"
+
+        
+logs() {
+    echo "[ $(date +%T) ] $1"
+    if [ -z $2 ]; then
+        echo "[ $(date +%T) ] $1" >> $log
+    elif [ $2 -eq 2 ]; then
+        echo "[ $(date +%T) ] $1" > $log
+    elif [ $2 -eq 3 ]; then
+        echo "[ $(date +%T) ] $1" >> $log
+        exit 1
+    fi
+}
+
+insomclash_start(){
+    if [ -f "$insomclash_config" ]; then
+        if [ "$tunnel_mode" == "tun" ]; then
+            logs "- Setting tun.enable = true for TUN mode"
+            yq eval '.tun.enable = true' -i "$insomclash_config"
+        else
+            logs "- Setting tun.enable = false for TPROXY mode"
+            yq eval '.tun.enable = false' -i "$insomclash_config"
+        fi
+    fi
+
+    if [ -f $insomclash_pid_path ] ; then
+        old_pid=$(cat $insomclash_pid_path 2>/dev/null)
+        if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
+            logs "- insomclash is Running. Killing insomclash PID : $old_pid"
+            $rules_bin stop >> $log
+            kill "$old_pid" 2>/dev/null
+        else
+            logs "- Found stale PID file, removing..."
+        fi
+        rm $insomclash_pid_path
+        logs "- Retry Starting insomclash..."
+    fi
+    if [ -f $insomclash_bin ] ; then
+        rpid=$(pgrep "mihomo|reload")
+        if [[ -n $rpid ]] ; then
+            kill $rpid 
+        fi
+        rm -f $core_log
+        logs "- Restarting Firewall"
+        $firewall restart
+        $insomclash_bin -d $insomclash_dir -f $insomclash_config >> $core_log &
+        sleep 1
+        insomclash_pid=$(pgrep mihomo)
+        if [[ -z $insomclash_pid ]]; then
+            logs "- Retry Starting insomclash"
+            $insomclash_bin -d $insomclash_dir -f $insomclash_config >> $core_log &
+            sleep 1
+            insomclash_pid=$(pgrep mihomo)
+        fi
+        logs "- insomclash Started. PID : $insomclash_pid"
+        logs "- Configs : $insomclash_config"
+        echo $insomclash_pid > $insomclash_pid_path
+        $rules_bin start >> $log
+    else
+        logs "- Core not Detected!!!"
+    fi
+    logs "Done"
+}
+
+insomclash_stop(){
+    logs "Disable insomclash" 2
+    $rules_bin stop >> $log
+    if [ -f $insomclash_pid_path ] ; then
+        old_pid=$(cat $insomclash_pid_path 2>/dev/null)
+        if [ -n "$old_pid" ]; then
+            logs "- Killing insomclash PID : $old_pid"
+            logs "- Restarting Firewall"
+            $firewall restart
+            kill "$old_pid" 2>/dev/null
+        fi
+        rm $insomclash_pid_path
+        rpid=$(pgrep "mihomo|reload")
+        if [[ -n $rpid ]] ; then
+            kill $rpid
+        fi
+        logs "insomclash has Disabled"
+        logs "insomclash Disabled." > $core_log
+    else
+        logs "insomclash is not Running"
+    fi
+    service insomclash disable
+}
+
+insomclash_restart(){
+    logs "Restarting insomclash" 2
+    insomclash_start
+    logs "Restarting insomclash - Done"
+}
+
+
+case "$1" in
+    start)
+        insomclash_start
+        ;;
+    stop)
+        insomclash_stop
+        ;;
+    restart)
+        insomclash_restart
+        ;;
+    *)
+        echo "insomclash"
+        echo "      start   : Start Mihomo Proxy"
+        echo "      stop    : Kill/Stop Mihomo Proxy"
+        echo "      restart : Restarting Mihomo Proxy"
+        ;;
+esac

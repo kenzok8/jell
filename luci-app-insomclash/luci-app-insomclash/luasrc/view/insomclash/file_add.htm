@@ -1,0 +1,51 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%
+    local file_type = self.file_type or "config"
+    local file_path = ""
+    local file_title = ""
+    
+    if file_type == "config" then
+        file_path = "/etc/insomclash/config/"
+        file_title = "Add New Config File"
+    elseif file_type == "proxy" then
+        file_path = "/etc/insomclash/proxy_providers/"
+        file_title = "Add New Proxy Provider File"
+    elseif file_type == "rule" then
+        file_path = "/etc/insomclash/rule_providers/"
+        file_title = "Add New Rule Provider File"
+    end
+-%>
+
+<div class="cbi-value">
+    <label class="cbi-value-title"><%:Add New File%></label>
+    <div class="cbi-value-field">
+        <form method="post" action="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "create_file")%>">
+            <input type="hidden" name="file_type" value="<%=file_type%>" />
+            <input type="text" name="filename" placeholder="<%:Enter filename%>" />
+            <input type="submit" class="cbi-button cbi-button-add" value="<%:Create & Edit%>" />
+        </form>
+        <small><%:File will be created as .yaml%></small>
+    </div>
+</div>

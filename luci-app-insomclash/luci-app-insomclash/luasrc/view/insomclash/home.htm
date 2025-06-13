@@ -1,0 +1,356 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%+header%>
+
+<style>
+table td, .table .td {
+	text-align: left;
+	word-break: keep-all;
+}
+
+.cbi-value {
+	margin-bottom: 15px;
+	padding: 12px 0;
+}
+
+.service-control-section {
+	border-bottom: 1px solid #333;
+	padding-bottom: 15px;
+	margin-bottom: 15px;
+}
+
+.cbi-value-field button, .td button {
+	margin-right: 8px;
+	margin-bottom: 5px;
+}
+
+.cbi-value-field button:last-child, .td button:last-child {
+	margin-right: 0;
+}
+
+.cbi-section-descr {
+	margin: 15px 0 8px 0;
+	padding: 0;
+	font-size: 14px;
+}
+
+.edit-section {
+	padding: 15px 0;
+	border-top: 1px solid #333;
+	margin-top: 15px;
+	text-align: center;
+}
+
+.table {
+    width: 100% !important;
+    table-layout: fixed;
+    margin: 0;
+    padding: 0;
+}
+
+.cbi-map {
+    width: 100%;
+    max-width: none;
+}
+
+.cbi-section {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.cbi-section-node {
+    width: 100%;
+    padding: 0;
+}
+
+.cbi-section.fade-in {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.cbi-section .table,
+.cbi-section.fade-in .table {
+    width: 100% !important;
+    margin: 0;
+    table-layout: fixed;
+}
+
+.cbi-section .table .tr,
+.cbi-section.fade-in .table .tr {
+    width: 100%;
+    display: table-row;
+}
+
+.cbi-section .table .td,
+.cbi-section.fade-in .table .td {
+    display: table-cell;
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+
+.cbi-section .table .td:first-child,
+.cbi-section.fade-in .table .td:first-child {
+    width: 25%;
+    min-width: 120px;
+    font-weight: bold;
+}
+
+.cbi-section .table .td:last-child,
+.cbi-section.fade-in .table .td:last-child {
+    width: 75%;
+}
+
+@media (max-width: 868px) {
+	.table {
+		width: 100%;
+		display: table;
+	}
+	
+	.table .tr {
+		display: table-row;
+	}
+	
+	.table .td {
+		display: table-cell;
+		padding: 8px 4px;
+	}
+	
+	.table .td:first-child {
+		width: 40%;
+	}
+	
+	.cbi-button {
+		margin-bottom: 8px;
+		padding: 8px 12px;
+		font-size: 14px;
+	}
+	
+	.service-control-section .cbi-button {
+		min-width: auto;
+		max-width: 100%;
+	}
+
+	.service-control-section .cbi-value-title {
+		padding-left: 12px;
+		margin-bottom: 10px;
+		font-weight: bold;
+	}
+
+	.service-control-section .cbi-value-field {
+		padding-left: 12px;
+	}
+}
+
+@media (max-width: 480px) {
+	.service-control-section .cbi-value-field {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+	}
+	
+	.service-control-section .cbi-button {
+		flex: 0 0 48%;
+		margin-right: 0;
+	}
+}
+</style>
+
+<div class="cbi-map">
+    <h2 name="content"><%:Insomclash%></h2>
+    <div class="cbi-map-descr"><%:Luci Simple Tunnel Client for Mihomo%></div>
+
+    <!-- Message area for service actions -->
+    <div id="service_message" style="display: none; margin: 10px 0;"></div>
+
+    <div class="cbi-section">
+        <div class="cbi-section-node">
+            <!-- Service Status Table -->
+            <table class="table">
+                <tr class="tr">
+                    <td class="td left"><%:Service Status%></td>
+                    <td class="td left" id="service_status"><%:Loading...%></td>
+                </tr>
+            </table>
+
+            <!-- Service Control Section (Original Style) -->
+            <div class="cbi-value service-control-section">
+                <label class="cbi-value-title"><%:Service Control%></label>
+                <div class="cbi-value-field">
+                    <button id="start_button" class="cbi-button cbi-button-save"><%:Start%></button>
+                    <button id="stop_button" class="cbi-button cbi-button-remove"><%:Stop%></button>
+                    <button id="restart_button" class="cbi-button cbi-button-reload"><%:Restart%></button>
+                </div>
+            </div>
+
+            <!-- Configuration Information Section -->
+            <div class="cbi-section fade-in">
+                <h3><%:Configuration Information%></h3>
+                <table class="table">
+                    <tr class="tr">
+                        <td class="td left"><%:Config%></td>
+                        <td class="td left" id="config_select_display"><%:Loading...%></td>
+                    </tr>
+                    <tr class="tr">
+                        <td class="td left"><%:Mode%></td>
+                        <td class="td left" id="tunnel_mode_display"><%:Loading...%></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Edit Configuration Section -->
+            <div class="edit-section">
+                <button id="edit_mode_button" class="cbi-button cbi-button-edit" onclick="window.location='<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "edit_config")%>'"><%:Edit Configuration%></button>
+            </div>
+            <!-- Copyright Section -->
+            <div class="edit-section" style="margin-top: 30px; font-size: 12px; color: #666; text-align: center;">
+                <p>© 2023 <a href="https://github.com/bobbyunknown" target="_blank">BobbyUnknown</a> - Insomclash</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    function checkUrlMessage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+        const success = urlParams.get('success');
+
+        if (message) {
+            showMessage(message, success === '1' ? 'success' : 'error');
+            const url = new URL(window.location);
+            url.searchParams.delete('message');
+            url.searchParams.delete('success');
+            window.history.replaceState({}, document.title, url.pathname);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        getServiceStatus();
+        getConfig();
+        checkUrlMessage();
+    });
+    
+    function getServiceStatus() {
+        fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "service_action")%>?action=status')
+            .then(response => response.json())
+            .then(data => {
+                const statusElement = document.getElementById('service_status');
+                const startButton = document.getElementById('start_button');
+                const stopButton = document.getElementById('stop_button');
+                const editModeButton = document.getElementById('edit_mode_button');
+
+                if (data.running) {
+                    statusElement.innerHTML = '<span style="color: green; font-weight: bold;"><%:Running%></span>';
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                    editModeButton.disabled = true;
+                } else {
+                    statusElement.innerHTML = '<span style="color: red; font-weight: bold;"><%:Stopped%></span>';
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    editModeButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching status:', error);
+                document.getElementById('service_status').textContent = 'Error: ' + error.message;
+            });
+    }
+
+    function controlService(action) {
+        const formData = new FormData();
+        formData.append('action', action);
+
+        fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "service_action")%>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(data.message || 'Operation completed successfully', 'success');
+                setTimeout(() => {
+                    getServiceStatus();
+                }, 1000);
+            } else {
+                showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error controlling service:', error);
+            showMessage('Error: ' + error.message, 'error');
+        });
+    }
+
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('service_message');
+        messageDiv.innerHTML = '<div class="alert-message ' + (type === 'success' ? 'success' : 'warning') + '"><p>' + message + '</p></div>';
+        messageDiv.style.display = 'block';
+
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    function getConfig() {
+        fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "get_config")%>')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.tunnel_mode) {
+                        const displayText = data.tunnel_mode === 'tproxy' ? 'TPROXY' : 'TUN';
+                        document.getElementById('tunnel_mode_display').textContent = displayText;
+                    }
+
+                    if (data.config_select) {
+                        document.getElementById('config_select_display').textContent = data.config_select;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching config:', error);
+                document.getElementById('tunnel_mode_display').textContent = 'Error loading mode';
+                document.getElementById('config_select_display').textContent = 'Error loading config';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('start_button').addEventListener('click', function() {
+            controlService('start');
+        });
+        
+        document.getElementById('stop_button').addEventListener('click', function() {
+            controlService('stop');
+        });
+        
+        document.getElementById('restart_button').addEventListener('click', function() {
+            controlService('restart');
+        });
+    });
+</script>
+
+<%+footer%>

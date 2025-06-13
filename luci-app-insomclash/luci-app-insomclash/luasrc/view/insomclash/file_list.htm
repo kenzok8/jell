@@ -1,0 +1,56 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%
+    local files = self.files or {}
+    local file_type = self.file_type or "config"
+-%>
+
+<table class="table cbi-section-table">
+    <thead>
+        <tr class="cbi-section-table-titles">
+            <th class="cbi-section-table-cell"><%:Filename%></th>
+            <th class="cbi-section-table-cell"><%:Size%></th>
+            <th class="cbi-section-table-cell"><%:Modified%></th>
+            <th class="cbi-section-table-cell"><%:Actions%></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% for i, file in ipairs(files) do %>
+        <tr class="cbi-section-table-row">
+            <td class="cbi-section-table-cell"><%=file.name%></td>
+            <td class="cbi-section-table-cell"><%=string.format("%.1f KB", file.size / 1024)%></td>
+            <td class="cbi-section-table-cell"><%=file.mtime%></td>
+            <td class="cbi-section-table-cell">
+                <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "editor")%>?file=<%=luci.http.urlencode(file.path)%>"
+                   class="cbi-button cbi-button-edit"><%:Edit%></a>
+                <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "download_file")%>?file=<%=luci.http.urlencode(file.path)%>"
+                   class="cbi-button cbi-button-neutral"><%:Download%></a>
+                <a href="<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "delete_file")%>?file=<%=luci.http.urlencode(file.path)%>"
+                   class="cbi-button cbi-button-remove"
+                   onclick="return confirm('<%:Delete file%> <%=file.name%>?')"><%:Delete%></a>
+            </td>
+        </tr>
+        <% end %>
+    </tbody>
+</table>

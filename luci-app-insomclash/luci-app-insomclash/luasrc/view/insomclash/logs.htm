@@ -1,0 +1,220 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%+header%>
+
+<style>
+.log-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.log-area {
+    flex: 1;
+    min-width: 0;
+    width: 50%;
+}
+
+@media (max-width: 768px) {
+    .log-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .log-area {
+        width: 100%;
+    }
+
+    .log-textarea.cbi-input-textarea {
+        height: 300px !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .log-container {
+        flex-direction: row;
+    }
+}
+</style>
+
+<div class="cbi-map">
+    <h2><%:Insomclash Logs%></h2>
+    <div class="cbi-map-descr"><%:Insomclash service logs%></div>
+
+    <div class="cbi-section">
+        <div class="cbi-section-node">
+            <div class="cbi-value" style="display: flex; flex-wrap: wrap;">
+                <label class="cbi-value-title" style="min-width: 120px;"><%:Log Actions%></label>
+                <div class="cbi-value-field" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <button id="refresh_button" class="cbi-button cbi-button-neutral"><%:Refresh Log%></button>
+                    <button id="clear_button" class="cbi-button cbi-button-remove"><%:Clear Logs%></button>
+                    <button id="back_button" class="cbi-button cbi-button-action" onclick="window.location='<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "config")%>'"><%:Back to Home%></button>
+                </div>
+            </div>
+            <div class="cbi-value" style="display: flex; flex-wrap: wrap;">
+                <label class="cbi-value-title" style="min-width: 120px;"><%:Auto Refresh%></label>
+                <div class="cbi-value-field" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                    <input type="checkbox" id="auto_refresh" class="cbi-input-checkbox" checked>
+                    <label for="auto_refresh"><%:Enable%></label>
+                    <select id="refresh_interval" class="cbi-input-select">
+                        <option value="5">5 <%:seconds%></option>
+                        <option value="10" selected>10 <%:seconds%></option>
+                        <option value="30">30 <%:seconds%></option>
+                        <option value="60">60 <%:seconds%></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cbi-section">
+        <h3><%:Log Output%></h3>
+        <div class="cbi-section-node">
+            <div class="log-container">
+                <div class="log-area">
+                    <h4 style="margin-bottom: 10px;"><%:Insomclash Log%></h4>
+                    <textarea id="insomclash_log_content" readonly class="cbi-input-textarea log-textarea" style="width: 100%; height: 500px; font-family: monospace; resize: both;"><%:Loading insomclash logs...%></textarea>
+                </div>
+                <div class="log-area">
+                    <h4 style="margin-bottom: 10px;"><%:Core Log%></h4>
+                    <textarea id="core_log_content" readonly class="cbi-input-textarea log-textarea" style="width: 100%; height: 500px; font-family: monospace; resize: both;"><%:Loading core logs...%></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+     <!-- Copyright Section -->
+    <div class="edit-section" style="margin-top: 30px; font-size: 12px; color: #666; text-align: center;">
+        <p>© 2023 <a href="https://github.com/bobbyunknown" target="_blank">BobbyUnknown</a> - Insomclash</p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    let isDisplayCleared = false;
+    let refreshTimer = null;
+
+    function getLogs() {
+        if (!isDisplayCleared) {
+            fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "get_logs")%>')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const insomclashLogContent = document.getElementById('insomclash_log_content');
+                        const coreLogContent = document.getElementById('core_log_content');
+
+                        insomclashLogContent.value = data.insomclash_logs || 'No insomclash logs available';
+                        insomclashLogContent.scrollTop = insomclashLogContent.scrollHeight;
+
+                        coreLogContent.value = data.core_logs || 'No core logs available';
+                        coreLogContent.scrollTop = coreLogContent.scrollHeight;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                    document.getElementById('insomclash_log_content').value = 'Error loading logs: ' + error.message;
+                    document.getElementById('core_log_content').value = 'Error loading logs: ' + error.message;
+                });
+        }
+    }
+    
+    function startAutoRefresh() {
+        if (refreshTimer) {
+            clearInterval(refreshTimer);
+        }
+        
+        const interval = document.getElementById('refresh_interval').value;
+        
+        refreshTimer = setInterval(getLogs, interval * 1000);
+    }
+    
+    function stopAutoRefresh() {
+        if (refreshTimer) {
+            clearInterval(refreshTimer);
+            refreshTimer = null;
+        }
+    }
+    
+    function showMessage(message, type) {
+        let messageDiv = document.getElementById('log_message');
+        if (!messageDiv) {
+            messageDiv = document.createElement('div');
+            messageDiv.id = 'log_message';
+            messageDiv.style.cssText = 'margin: 10px 0; display: none;';
+            document.querySelector('.cbi-map').insertBefore(messageDiv, document.querySelector('.cbi-section'));
+        }
+        
+        messageDiv.innerHTML = '<div class="alert-message ' + (type === 'success' ? 'success' : 'warning') + '"><p>' + message + '</p></div>';
+        messageDiv.style.display = 'block';
+
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000);
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        getLogs();
+        
+        document.getElementById('refresh_button').addEventListener('click', function() {
+            isDisplayCleared = false;
+            getLogs();
+            showMessage('Logs refreshed', 'success');
+        });
+        
+        document.getElementById('clear_button').addEventListener('click', function() {
+            if (confirm('<%:Are you sure you want to clear all logs?%>')) {
+                fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "get_logs")%>?clear=1')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('insomclash_log_content').value = 'Insomclash logs cleared successfully';
+                        document.getElementById('core_log_content').value = 'Core logs cleared successfully';
+                        isDisplayCleared = true;
+                        showMessage('Logs cleared successfully', 'success');
+                    })
+                    .catch(error => {
+                        console.error('Error clearing logs:', error);
+                        showMessage('Error clearing logs: ' + error.message, 'error');
+                    });
+            }
+        });
+        
+        document.getElementById('auto_refresh').addEventListener('change', function() {
+            if (this.checked) {
+                startAutoRefresh();
+            } else {
+                stopAutoRefresh();
+            }
+        });
+        
+        document.getElementById('refresh_interval').addEventListener('change', function() {
+            if (document.getElementById('auto_refresh').checked) {
+                startAutoRefresh();
+            }
+        });
+        
+        if (document.getElementById('auto_refresh').checked) {
+            startAutoRefresh();
+        }
+    });
+</script>
+
+<%+footer%>

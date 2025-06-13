@@ -1,0 +1,265 @@
+<!--
+- Copyright 2024
+- bobbyunknown <https://github.com/bobbyunknown>
+
+https://opensource.org/license/mit
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<%+header%>
+<style>
+    .editor-container {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 9;
+    }
+    .CodeMirror {
+        min-height: 560px !important;
+    }
+
+    .btn {
+        max-width: 350px;
+        width: 100%;
+    }
+    .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .btn:active {
+        transform: scale(0.98);
+    }
+</style>
+
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/codemirror.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/addon/fold/foldgutter.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/addon/lint/lint.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/addon/display/fullscreen.css">
+<script src="/luci-static/resources/insomclash/codemirror/codemirror.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/mode/yaml/yaml.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/fold/foldcode.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/fold/foldgutter.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/fold/indent-fold.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/display/fullscreen.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/scroll/annotatescrollbar.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/lint/lint.js"></script>
+<script src="/luci-static/resources/insomclash/codemirror/addon/lint/yaml-lint.js"></script>
+
+<script src="/luci-static/resources/insomclash/libs/js-yaml.min.js"></script>
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/theme/monokai.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/theme/dracula.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/theme/material.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/theme/rubyblue.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/theme/3024-day.min.css">
+<link rel="stylesheet" href="/luci-static/resources/insomclash/codemirror/theme/3024-night.min.css">
+<script type="module">
+    let initialContent = "";
+    const themes = ["monokai", "dracula", "3024-night", "3024-day", "material", "rubyblue"];
+    let currentThemeIndex = 1;
+    let isFolded = false;
+    const editor = CodeMirror.fromTextArea(document.getElementById("yaml-editor"), {
+        mode: "yaml",
+        lineNumbers: true,
+        lineWrapping: true,
+        theme: "dracula",
+        foldGutter: true,
+        matchBrackets: true,
+        lint: true,
+        collapseIdentical: false,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        autoCloseBrackets: true,
+        extraKeys: {
+            "F2": function (cm) { cm.setOption("fullScreen", !cm.getOption("fullScreen")); },
+            "Esc": function (cm) { if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false); },
+            "Ctrl-S": saveFileContent,
+        }
+    });
+    function toggleFold() {
+        const doc = editor.getDoc();
+        const lineCount = doc.lineCount();
+
+        if (isFolded) {
+            for (let i = 0; i < lineCount; i++) {
+                editor.foldCode({ line: i, ch: 0 }, null, "unfold");
+            }
+        } else {
+            for (let i = 0; i < lineCount; i++) {
+                editor.foldCode({ line: i, ch: 0 }, null, "fold");
+            }
+        }
+
+        isFolded = !isFolded;
+    }
+    var currentFile = null;
+
+    function loadFileContent(filePath) {
+        if (!filePath) {
+            filePath = getUrlParameter('file');
+        }
+
+        if (!filePath) {
+            alert('No file specified');
+            return;
+        }
+
+        currentFile = filePath;
+
+        const fileName = filePath.split('/').pop();
+        document.getElementById('current-file-display').textContent = 'Editing: ' + fileName;
+
+        fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "load_file")%>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'file_path=' + encodeURIComponent(filePath)
+        }).then(response => response.json())
+         .then(data => {
+                if (data.success) {
+                    document.getElementById("yaml-editor").value = data.content;
+                    editor.setValue(data.content);
+                    initialContent = data.content;
+                    isFolded = false;
+                } else {
+                    alert(data.message);
+                }
+         }).catch(error => {
+                console.log("Failed to load file content: " + error);
+         });
+    }
+    function saveFileContent() {
+        if (!currentFile) {
+            alert('No file loaded');
+            return;
+        }
+        var content = editor.getValue();
+        if (content !== initialContent) {
+            var confirmSave = confirm("Content has changed, save?");
+            if (confirmSave) {
+                fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "save_file")%>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'file_path=' + encodeURIComponent(currentFile) + '&content=' + encodeURIComponent(content) + '&theme=' + encodeURIComponent(currentThemeIndex)
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("File saved successfully!");
+                        initialContent = content;
+                    } else {
+                        alert("Save failed: " + data.message);
+                    }
+                    console.log(data);
+                })
+                    .catch(error => {
+                        alert("Save failed: " + error);
+                    });
+            } else {
+                alert("Save cancelled");
+            }
+        } else {
+            alert("No changes to save");
+        }
+    }
+    function deleteFile() {
+        if (!currentFile) {
+            alert('No file loaded');
+            return;
+        }
+        var confirmSave = confirm("Confirm delete file: " + currentFile + "?");
+        if (confirmSave) {
+            fetch('<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "delete_file")%>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'file=' + encodeURIComponent(currentFile)
+            }).then(response => response.json())
+               .then(data => {
+                    if (data.success) {
+                        alert("File deleted successfully!");
+                        window.location.href = '<%=luci.dispatcher.build_url("admin", "vpn", "insomclash", "manager")%>';
+                    } else {
+                        alert("Delete failed: " + data.message);
+                    }
+               })
+        } else {
+            alert("Delete cancelled");
+        }
+    }
+    function update_value(key, value) {
+        console.log("Theme updated to: " + value);
+    }
+    function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    window.onload = () => {
+        const fileParam = getUrlParameter('file');
+
+        if (fileParam) {
+            loadFileContent(fileParam);
+            editor.setOption("theme", themes[currentThemeIndex]);
+        } else {
+            document.getElementById('current-file-display').textContent = 'No file specified. Please access editor via Manager.';
+        }
+        document.getElementById("toggle-fold").addEventListener("click", toggleFold);
+
+        document.getElementById("save-code").addEventListener("click", saveFileContent);
+        document.getElementById("delete-btn").addEventListener("click", deleteFile);
+
+        document.getElementById("switch-theme").addEventListener("click", () => {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            editor.setOption("theme", themes[currentThemeIndex]);
+            update_value("config.editor_theme", currentThemeIndex);
+        });
+    };
+</script>
+
+<% 
+    local function is_yaml(file)
+        return string.match(file, "%.yaml$") or string.match(file, "%.yml$")
+    end
+%>
+
+<div class="cbi-map">
+    <h2 name="content"><%:Insomclash Editor%></h2>
+    <div class="cbi-map-descr"><%:Edit Insomclash configuration files%></div>
+</div>
+
+<div class="cbi-section">
+    <div class="toolbar">
+        <span id="current-file-display" style="font-weight: bold; margin-right: 20px;"></span>
+        <input type="button" class="btn cbi-button cbi-button-reload" id="toggle-fold" value="<%:Toggle Fold%>"></input>
+        <input type="button" class="btn cbi-button cbi-button-reload" id="switch-theme" value="<%:Toggle Theme%>"></input>
+        <input type="button" class="btn cbi-button cbi-button-reload" id="save-code" value="<%:Save%>"></input>
+        <input type="button" class="btn cbi-button cbi-button-reload" id="delete-btn" value="<%:Delete%>"></input>
+    </div>
+</div>
+<div class="editor-container">
+    <textarea id="yaml-editor"></textarea>
+</div>
+<div style="margin: 10px 0; text-align: left">
+    <b>
+        <%:F2: Fullscreen%> | <%:Esc: Exit Fullscreen%> | <%:Ctrl+S: Save%>
+    </b>
+</div>
+<%+footer%>

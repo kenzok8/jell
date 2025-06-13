@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# - Copyright 2024
+# - bobbyunknown <https://github.com/bobbyunknown>
+#
+# https://opensource.org/license/mit
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+ulimit -SHn 1000000
+
+ROUTER_MARK=0x01
+TPROXY_MARK=0xff
+DNS_PORT=1053
+TPROXY_PORT=7894
+nft=`command -v nft`
+
+NFT_RULES_DIR=/usr/share/insomclash/rules_nft
+NFT_TPROXY_IPV6=$NFT_RULES_DIR/ipv6.nft
+NFT_TPROXY=$NFT_RULES_DIR/ipv4.nft
+
+start_tproxy() {
+    echo "Adding IPv4 routing rules"
+    # IPv4
+    ip rule add fwmark $ROUTER_MARK lookup 100 2>/dev/null || echo "IPv4 rule already exists"
+    ip route add local default dev lo table 100 2>/dev/null || echo "IPv4 route already exists"
+
+    enable_ipv6=$(uci -q get insomclash.config.ipv6)
+    if [ "$enable_ipv6" == "1" ] ; then
+        echo "Adding IPv6 routing rules"
+        # IPv6
+        ip -6 rule add fwmark $ROUTER_MARK lookup 100 2>/dev/null || echo "IPv6 rule already exists"
+        ip -6 route add local default dev lo table 100 2>/dev/null || echo "IPv6 route already exists"
+    fi
+
+    enable_custom_dns=$(uci -q get insomclash.config.enable_custom_dns)
+    if [ "$enable_custom_dns" == "1" ] ; then
+        dns_port=$(uci -q get insomclash.config.dns_port)
+        [[ -z "$dns_port" ]] && dns_port="53"
+    else
+        dns_port="$DNS_PORT"
+    fi
+    if [ "$dns_port" != "53" ] ; then
+        if [ -z "$($nft list chain inet fw4 dstnat |grep 'Insomclash DNS Hijack')" ]; then
+            $nft insert rule inet fw4 dstnat position 0 udp dport 53 redirect to "$dns_port" comment \"Insomclash DNS Hijack\"
+        fi
+    fi
+    
+    echo "Adding nftable sets for IP addresses"
+    $nft -f $NFT_RULES_DIR/local_ip.nft 2>/dev/null || echo "Warning: Failed to load local_ip.nft"
+    
+    echo "Adding nftable TPROXY rules"
+    enable_trans_ipv6=$(uci -q get insomclash.config.trans_ipv6)
+    if [ "$enable_trans_ipv6" == "1" ] ; then
+        $nft -f $NFT_TPROXY_IPV6
+    else
+        $nft -f $NFT_TPROXY
+    fi
+}
+
+cleanup_tproxy() {
+    dns_port=$(uci -q get insomclash.config.dns_port)
+    [[ -z "$dns_port" ]] && dns_port="$DNS_PORT"
+    if [ "$dns_port" != "53" ] ; then
+        if [ ! -z "$($nft list chain inet fw4 dstnat |grep 'Insomclash DNS Hijack')" ]; then
+            $nft delete rule inet fw4 dstnat handle $($nft -a list chain inet fw4 dstnat | grep "Insomclash DNS Hijack" | awk -F '# handle ' '{print $2}')
+        fi
+    fi
+    
+    $nft delete table inet oproxy_tproxy 2>/dev/null || echo "Table oproxy_tproxy not found"
+    
+    echo "Cleaning up routing rules"
+    ip rule delete fwmark $ROUTER_MARK lookup 100 2>/dev/null || echo "IPv4 rule not found"
+    ip -6 rule delete fwmark $ROUTER_MARK lookup 100 2>/dev/null || echo "IPv6 rule not found"
+}
+
+case "$1" in
+    start)
+        start_tproxy
+        ;;
+    stop)
+        cleanup_tproxy
+        ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac
+
+exit 0
