@@ -7,158 +7,124 @@
 # https://rem.mit-license.org/
 
 PACKAGE_NAME="luci-app-insomclash"
+MIHOMO="mihomo"
+OWNER="bobbyunknown"
+REPO="Openwrt-Insomclash"
 
-get_latest_release_url() {
-    REPO="bobbyunknown/luci-app-insomclash"
-    API_URL="https://api.github.com/repos/$REPO/releases/latest"
-    DOWNLOAD_URL=$(curl -s "$API_URL" | grep "browser_download_url.*ipk" | cut -d '"' -f 4)
-    
-    if [ ! -z "$DOWNLOAD_URL" ]; then
-        FILENAME=$(basename "$DOWNLOAD_URL")
-        echo "$DOWNLOAD_URL|$FILENAME"
-    else
-        echo ""
-    fi
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+detect_architecture() {
+    ARCH=$(grep '^OPENWRT_ARCH=' /etc/os-release | sed 's/OPENWRT_ARCH=//' | tr -d '"')
 }
 
-check_system_resources() {
-    FREE_SPACE=$(df -h /tmp | awk 'NR==2 {print $4}')
-    echo "Ruang disk tersedia di /tmp: $FREE_SPACE"
+get_latest_release() {
+    curl -s https://api.github.com/repos/$OWNER/$REPO/releases/latest \
+    | jq -r '.assets[].browser_download_url'
+}
+
+update_owrt() {
+    echo -e "${BLUE}Updating package list...${NC}"
+    if ! opkg update; then
+        echo -e "${RED}Error: Failed to update package list!${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}Package list updated successfully${NC}"
+}
+
+download_package() {
+    MIHOMO_URL=$(get_latest_release | grep "$MIHOMO.*${ARCH}.ipk")
+    LUCI_URL=$(get_latest_release | grep "$PACKAGE_NAME.*all.ipk")
+    
+    if [ -z "$MIHOMO_URL" ]; then
+        echo -e "${RED}Error: Cannot find mihomo package for architecture $ARCH${NC}"
+        exit 1
+    fi
+
+    if [ -f "/tmp/$MIHOMO.ipk" ]; then
+        echo -e "${YELLOW}Removing existing $MIHOMO.ipk...${NC}"
+        rm -f "/tmp/$MIHOMO.ipk"
+    fi
+    
+    if [ -f "/tmp/$PACKAGE_NAME.ipk" ]; then
+        echo -e "${YELLOW}Removing existing $PACKAGE_NAME.ipk...${NC}"
+        rm -f "/tmp/$PACKAGE_NAME.ipk"
+    fi
+    
+    echo -e "${BLUE}Downloading $MIHOMO...${NC}"
+    curl -L -o /tmp/$MIHOMO.ipk "$MIHOMO_URL"
+    
+    echo -e "${BLUE}Downloading $PACKAGE_NAME...${NC}"
+    curl -L -o /tmp/$PACKAGE_NAME.ipk "$LUCI_URL"
 }
 
 install_package() {
-    check_system_resources
-    echo "Menginstal $PACKAGE_NAME..."
-    opkg update 
-    
-    RELEASE_INFO=$(get_latest_release_url)
-    if [ -z "$RELEASE_INFO" ]; then
-        echo "Gagal mendapatkan informasi rilis. Silakan coba lagi nanti."
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    DOWNLOAD_URL=$(echo "$RELEASE_INFO" | cut -d'|' -f1)
-    FILENAME=$(echo "$RELEASE_INFO" | cut -d'|' -f2)
-    
-    echo "Mengunduh $FILENAME..."
-    if ! curl -L -o "/tmp/$FILENAME" "$DOWNLOAD_URL"; then
-        echo "Gagal mengunduh file. Silakan periksa koneksi internet Anda."
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    if [ ! -f "/tmp/$FILENAME" ]; then
-        echo "File tidak ditemukan setelah unduhan. Silakan coba lagi."
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    echo "File yang diunduh: /tmp/$FILENAME"
-    ls -l "/tmp/$FILENAME"
-    
-    echo "Menginstal paket..."
-    if ! opkg install "/tmp/$FILENAME"; then
-        echo "Gagal menginstal paket. Silakan coba opsi force install."
-        rm -f "/tmp/$FILENAME"
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    rm -f "/tmp/$FILENAME"
-    echo "Instalasi $PACKAGE_NAME selesai."
-    read -p "Tekan Enter untuk melanjutkan..."
+    cd /tmp
+    opkg install $MIHOMO*.ipk
+    opkg install $PACKAGE_NAME*.ipk
 }
 
-force_install_package() {
-    check_system_resources
-    echo "Melakukan force install $PACKAGE_NAME..."
-    opkg update
-    
-    RELEASE_INFO=$(get_latest_release_url)
-    if [ -z "$RELEASE_INFO" ]; then
-        echo "Gagal mendapatkan informasi rilis. Silakan coba lagi nanti."
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    DOWNLOAD_URL=$(echo "$RELEASE_INFO" | cut -d'|' -f1)
-    FILENAME=$(echo "$RELEASE_INFO" | cut -d'|' -f2)
-    
-    echo "Mengunduh $FILENAME..."
-    if ! curl -L -o "/tmp/$FILENAME" "$DOWNLOAD_URL"; then
-        echo "Gagal mengunduh file. Silakan periksa koneksi internet Anda."
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    if [ ! -f "/tmp/$FILENAME" ]; then
-        echo "File tidak ditemukan setelah unduhan. Silakan coba lagi."
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    echo "File yang diunduh: /tmp/$FILENAME"
-    ls -l "/tmp/$FILENAME"
-    
-    echo "Melakukan force install paket..."
-    if ! opkg install --force-reinstall "/tmp/$FILENAME"; then
-        echo "Gagal melakukan force install paket."
-        rm -f "/tmp/$FILENAME"
-        read -p "Tekan Enter untuk melanjutkan..."
-        return 1
-    fi
-    
-    rm -f "/tmp/$FILENAME"
-    echo "Force install $PACKAGE_NAME selesai."
-    read -p "Tekan Enter untuk melanjutkan..."
+remove_package() {
+    opkg remove $MIHOMO
+    opkg remove $PACKAGE_NAME
 }
 
-uninstall_package() {
-    echo "Menghapus $PACKAGE_NAME..."
-    opkg remove "$PACKAGE_NAME"
-    find / -type d -name "*insomclash*" -exec rm -rf {} + 2>/dev/null
-    find / -type f -name "*insomclash*" -delete 2>/dev/null
-    echo "Paket $PACKAGE_NAME dan file-file terkait berhasil dihapus."
-    read -p "Tekan Enter untuk melanjutkan..."
-}
-
-while true; do
+show_menu() {
     clear
-    echo "┌─────────────────────────────────────┐"
-    echo "│    luci-app-insomclash Installer    │"
-    echo "│     github.com/bobbyunknown         │"
-    echo "├─────────────────────────────────────┤"
-    echo "│                                     │"
-    echo "│  1. Install insomclash              │"
-    echo "│  2. Force Install insomclash        │"
-    echo "│  3. Uninstall insomclash            │"
-    echo "│  4. Keluar                          │"
-    echo "│                                     │"
-    echo "└─────────────────────────────────────┘"
-    echo
-    read -p "Pilihan Anda [1-4]: " choice
-    echo
+    echo -e "${BLUE}┌─────────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│${NC}    ${YELLOW}luci-app-insomclash Installer${NC}    ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}     ${GREEN}github.com/bobbyunknown${NC}         ${BLUE}│${NC}"
+    echo -e "${BLUE}├─────────────────────────────────────┤${NC}"
+    echo -e "${BLUE}│${NC}                                     ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  ${YELLOW}Architecture:${NC} ${GREEN}$ARCH${NC}                    ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}                                     ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  ${YELLOW}1.${NC} Install luci-app-insomclash     ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  ${YELLOW}2.${NC} Uninstall                       ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}  ${YELLOW}3.${NC} Exit                            ${BLUE}│${NC}"
+    echo -e "${BLUE}│${NC}                                     ${BLUE}│${NC}"
+    echo -e "${BLUE}└─────────────────────────────────────┘${NC}"
+}
 
-    case $choice in
-        1)
-            install_package
-            ;;
-        2)
-            force_install_package
-            ;;
-        3)
-            uninstall_package
-            ;;
-         4)
-            echo "Keluar dari program."
-            exit 0
-            ;;
-        *)
-            echo "Pilihan tidak valid. Silakan coba lagi."
-            ;;
-    esac
+main() {
+    detect_architecture
+    
+    while true; do
+        show_menu
+        read -p "Select menu (1-3): " choice
+        
+        case $choice in
+            1)
+                echo -e "${BLUE}Starting Insomclash installation...${NC}"
+                if ! update_owrt; then
+                    echo -e "${RED}Installation cancelled due to package update failure${NC}"
+                    read -p "Press Enter to continue..."
+                    continue
+                fi
+                download_package
+                install_package
+                echo -e "${GREEN}Installation completed!${NC}"
+                ;;
+            2)
+                echo -e "${BLUE}Removing Insomclash...${NC}"
+                remove_package
+                echo -e "${GREEN}Removal completed!${NC}"
+                ;;
+            3)
+                echo -e "${BLUE}Exiting installer...${NC}"
+                exit 0
+                ;;
+            *)
+                echo -e "${RED}Invalid choice. Please select 1-3.${NC}"
+                ;;
+        esac
+        
+        echo ""
+        read -p "Press Enter to continue..."
+    done
+}
 
-    echo "Operasi selesai."
-    echo
-done
+main

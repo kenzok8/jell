@@ -11,7 +11,7 @@ start_service() {
     procd_set_param command "$BIN_PATH" start
     procd_set_param stdout 1
     procd_set_param stderr 1
-    procd_close_instanc
+    procd_close_instance
 }
 
 stop_service() {
