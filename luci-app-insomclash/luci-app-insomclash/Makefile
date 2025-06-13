@@ -30,7 +30,7 @@ PKG_RELEASE:=1
 PKG_MAINTAINER:=BobbyUnknown <bobbyun.known88@gmail.com>
 
 LUCI_TITLE:=Luci Simple Tunnel Client for Mihomo
-LUCI_DEPENDS:=+wget +curl +iptables-mod-tproxy +firewall4 +xtables-nft +kmod-tun +ca-bundle +mihomo
+LUCI_DEPENDS:=+wget +curl +coreutils-base64 +jq +yq +ip-full +iptables-mod-tproxy +firewall4 +xtables-nft +kmod-tun +ca-bundle +mihomo
 LUCI_PKGARCH:=all
 
 PKG_LICENSE:=MIT
