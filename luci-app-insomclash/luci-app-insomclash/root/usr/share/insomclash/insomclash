@@ -22,7 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
 firewall="/etc/init.d/firewall"
 insomclash_dir="/etc/insomclash"
 insomclash_tmp_dir="/tmp/insomclash"
@@ -47,7 +46,6 @@ core_log="$insomclash_tmp_dir/core.log"
 insomclash_pid_path="$insomclash_tmp_dir/insomclash.pid"
 log="$insomclash_tmp_dir/insomclash.log"
 
-        
 logs() {
     echo "[ $(date +%T) ] $1"
     if [ -z $2 ]; then
@@ -61,6 +59,8 @@ logs() {
 }
 
 insomclash_start(){
+    logs "Running insomclash_start..."
+
     if [ -f "$insomclash_config" ]; then
         if [ "$tunnel_mode" == "tun" ]; then
             logs "- Setting tun.enable = true for TUN mode"
@@ -71,67 +71,44 @@ insomclash_start(){
         fi
     fi
 
-    if [ -f $insomclash_pid_path ] ; then
-        old_pid=$(cat $insomclash_pid_path 2>/dev/null)
-        if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
-            logs "- insomclash is Running. Killing insomclash PID : $old_pid"
-            $rules_bin stop >> $log
-            kill "$old_pid" 2>/dev/null
-        else
-            logs "- Found stale PID file, removing..."
-        fi
-        rm $insomclash_pid_path
-        logs "- Retry Starting insomclash..."
-    fi
-    if [ -f $insomclash_bin ] ; then
-        rpid=$(pgrep "mihomo|reload")
-        if [[ -n $rpid ]] ; then
-            kill $rpid 
-        fi
-        rm -f $core_log
-        logs "- Restarting Firewall"
-        $firewall restart
-        $insomclash_bin -d $insomclash_dir -f $insomclash_config >> $core_log &
-        sleep 1
-        insomclash_pid=$(pgrep mihomo)
-        if [[ -z $insomclash_pid ]]; then
-            logs "- Retry Starting insomclash"
-            $insomclash_bin -d $insomclash_dir -f $insomclash_config >> $core_log &
-            sleep 1
-            insomclash_pid=$(pgrep mihomo)
-        fi
-        logs "- insomclash Started. PID : $insomclash_pid"
-        logs "- Configs : $insomclash_config"
-        echo $insomclash_pid > $insomclash_pid_path
-        $rules_bin start >> $log
+    logs "- Killing any existing mihomo processes for clean start."
+    killall mihomo 2>/dev/null || true
+
+    rm -f $insomclash_pid_path
+
+    rm -f "$core_log"
+
+    logs "- Restarting Firewall."
+    $firewall restart || logs "- Failed to restart firewall."
+
+    logs "- Starting Routing Rules: Okay"
+    $rules_bin start >> "$log" 2>&1 || logs "- Failed to start routing rules."
+
+    if [ -f "$insomclash_bin" ] ; then
+        logs "- Executing Mihomo in foreground. PID will be managed by Procd."
+        exec "$insomclash_bin" -d "$insomclash_dir" -f "$insomclash_config" >> "$core_log" 2>&1
     else
-        logs "- Core not Detected!!!"
+        logs "- Core Mihomo binary not detected at: $insomclash_bin"
+        exit 1
     fi
-    logs "Done"
 }
 
 insomclash_stop(){
-    logs "Disable insomclash" 2
-    $rules_bin stop >> $log
-    if [ -f $insomclash_pid_path ] ; then
-        old_pid=$(cat $insomclash_pid_path 2>/dev/null)
-        if [ -n "$old_pid" ]; then
-            logs "- Killing insomclash PID : $old_pid"
-            logs "- Restarting Firewall"
-            $firewall restart
-            kill "$old_pid" 2>/dev/null
-        fi
-        rm $insomclash_pid_path
-        rpid=$(pgrep "mihomo|reload")
-        if [[ -n $rpid ]] ; then
-            kill $rpid
-        fi
-        logs "insomclash has Disabled"
-        logs "insomclash Disabled." > $core_log
-    else
-        logs "insomclash is not Running"
-    fi
-    service insomclash disable
+    logs "Running insomclash_stop..."
+    
+    logs "- Stopping Routing Rules: Okay"
+    $rules_bin stop >> "$log" 2>&1 || logs "- Failed to stop routing rules."
+
+    logs "- Killing mihomo process."
+    killall mihomo 2>/dev/null || true
+
+    logs "- Restarting Firewall."
+    $firewall restart || logs "- Failed to restart firewall."
+
+    rm -f $insomclash_pid_path
+
+    logs "Insomclash has stopped."
+    echo "insomclash Disabled." > "$core_log"
 }
 
 insomclash_restart(){
@@ -139,7 +116,6 @@ insomclash_restart(){
     insomclash_start
     logs "Restarting insomclash - Done"
 }
-
 
 case "$1" in
     start)
@@ -152,9 +128,10 @@ case "$1" in
         insomclash_restart
         ;;
     *)
-        echo "insomclash"
-        echo "      start   : Start Mihomo Proxy"
-        echo "      stop    : Kill/Stop Mihomo Proxy"
-        echo "      restart : Restarting Mihomo Proxy"
+        echo "Usage: $0 {start|stop|restart}"
+        echo "  start   : Starts the Mihomo proxy and applies routing rules."
+        echo "  stop    : Stops the Mihomo proxy and removes routing rules."
+        echo "  restart : Restarts the Mihomo proxy and reapplies routing rules."
         ;;
 esac
+

@@ -25,12 +25,12 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-insomclash
 PKG_VERSION:=1.0.1
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_MAINTAINER:=BobbyUnknown <bobbyun.known88@gmail.com>
 
 LUCI_TITLE:=Luci Simple Tunnel Client for Mihomo
-LUCI_DEPENDS:=+wget +curl +coreutils-base64 +jq +yq +ip-full +iptables-mod-tproxy +firewall4 +xtables-nft +kmod-tun +ca-bundle +mihomo
+LUCI_DEPENDS:=+wget +curl +coreutils-base64 +jq +yq +ip-full +iptables-mod-tproxy +firewall4 kmod-nft-tproxy +xtables-nft +kmod-tun +ca-bundle +mihomo
 LUCI_PKGARCH:=all
 
 PKG_LICENSE:=MIT

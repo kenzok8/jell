@@ -295,7 +295,7 @@ table td, .table .td {
                 showMessage(data.message || 'Operation completed successfully', 'success');
                 setTimeout(() => {
                     getServiceStatus();
-                }, 1000);
+                }, 3000);
             } else {
                 showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
             }

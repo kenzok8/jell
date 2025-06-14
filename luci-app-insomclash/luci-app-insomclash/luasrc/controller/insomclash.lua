@@ -48,11 +48,8 @@ function action_service()
         local status_output = util.exec("/etc/init.d/insomclash status")
         local running = false
 
-        if status_output and status_output:match("running") then
-            running = true
-        else
-            local pgrep_result = util.exec("pgrep -f insomclash")
-            running = (pgrep_result and pgrep_result:len() > 0)
+        if status_output then
+            running = status_output:match("running") and not status_output:match("inactive")
         end
 
         result = { success = true, running = running }
