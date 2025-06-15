@@ -25,12 +25,12 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-insomclash
 PKG_VERSION:=1.0.1
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_MAINTAINER:=BobbyUnknown <bobbyun.known88@gmail.com>
 
 LUCI_TITLE:=Luci Simple Tunnel Client for Mihomo
-LUCI_DEPENDS:=+wget +curl +coreutils-base64 +jq +yq +ip-full +iptables-mod-tproxy +firewall4 kmod-nft-tproxy +xtables-nft +kmod-tun +ca-bundle +mihomo
+LUCI_DEPENDS:=+wget +curl +coreutils-base64 +coreutils-nohup +jq +yq +ip-full +iptables-mod-tproxy +firewall4 kmod-nft-tproxy +xtables-nft +kmod-tun +ca-bundle +mihomo
 LUCI_PKGARCH:=all
 
 PKG_LICENSE:=MIT
@@ -78,6 +78,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) ./root/usr/share/insomclash/insomclash $(1)/usr/share/insomclash/
 	$(INSTALL_BIN) ./root/usr/share/insomclash/routing-tun $(1)/usr/share/insomclash/
 	$(INSTALL_BIN) ./root/usr/share/insomclash/routing-tproxy $(1)/usr/share/insomclash/
+	$(INSTALL_BIN) ./root/usr/share/insomclash/log_job $(1)/usr/share/insomclash/
 
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./root/etc/init.d/insomclash $(1)/etc/init.d/insomclash

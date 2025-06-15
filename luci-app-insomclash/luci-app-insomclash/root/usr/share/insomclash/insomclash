@@ -58,8 +58,16 @@ logs() {
     fi
 }
 
+clear_all_logs() {
+    logs "- Clearing core.log and insomclash.log"
+    > "$core_log"
+    > "$log"
+}
+
 insomclash_start(){
     logs "Running insomclash_start..."
+
+    clear_all_logs
 
     if [ -f "$insomclash_config" ]; then
         if [ "$tunnel_mode" == "tun" ]; then
@@ -76,7 +84,11 @@ insomclash_start(){
 
     rm -f $insomclash_pid_path
 
-    rm -f "$core_log"
+    logs "- Stopping any existing insomclash log monitor processes."
+    killall log_job 2>/dev/null || true
+
+    logs "- Starting insomclash log monitor in background."
+    nohup /usr/share/insomclash/log_job &
 
     logs "- Restarting Firewall."
     $firewall restart || logs "- Failed to restart firewall."
@@ -101,6 +113,9 @@ insomclash_stop(){
 
     logs "- Killing mihomo process."
     killall mihomo 2>/dev/null || true
+
+    logs "- Stopping insomclash log monitor process."
+    killall log_job 2>/dev/null || true
 
     logs "- Restarting Firewall."
     $firewall restart || logs "- Failed to restart firewall."

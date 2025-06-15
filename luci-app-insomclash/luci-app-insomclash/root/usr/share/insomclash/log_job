@@ -1,0 +1,16 @@
+#!/bin/bash
+
+CORE_LOG="/tmp/insomclash/core.log"
+MAX_SIZE=524288
+LOG_CHECK_INTERVAL=3600
+
+while true; do
+    if [ -f "$CORE_LOG" ]; then
+        size=$(stat -c %s "$CORE_LOG")
+        if [ "$size" -gt "$MAX_SIZE" ]; then
+            echo "[$(date)] insomclash_log_monitor: core.log exceeds 1MB ($size bytes), clearing..."
+            > "$CORE_LOG"
+        fi
+    fi
+    sleep "$LOG_CHECK_INTERVAL"
+done
