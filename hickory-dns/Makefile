@@ -1,19 +1,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
+PKG_VERSION:=2025.06.18
+PKG_RELEASE:=13
 
-# Set a base version with a git snapshot suffix for APK compatibility.
-PKG_VERSION:=0.0.0_git20250618.1476c06
-PKG_RELEASE:=12
-
-# Set the full commit for the tarball and build directory.
 HICKORY_COMMIT:=1476c0616e4653a58351abcf22ee512fad43fa6b
 
-PKG_SOURCE:=hickory-dns-${PKG_VERSION}.tar.gz
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/hickory-dns/hickory-dns/tar.gz/1476c0616e4653a58351abcf22ee512fad43fa6b?
 PKG_HASH:=skip
 
-# Override PKG_BUILD_DIR to match the extracted folder name
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-1476c0616e4653a58351abcf22ee512fad43fa6b
 
 PKG_BUILD_DEPENDS:=rust/host
@@ -44,6 +40,7 @@ define Package/hickory-dns/install
 	$(INSTALL_DIR) $(1)/etc/hickory-dns/
 	$(INSTALL_BIN) ./files/etc/init.d/hickory-dns $(1)/etc/init.d/hickory-dns
 	$(INSTALL_BIN) ./files/etc/hickory-dns/forwarder.toml $(1)/etc/hickory-dns/forwarder.toml
+	echo "$(HICKORY_COMMIT)" > $(1)/etc/hickory-dns/commit
 endef
 
 $(eval $(call RustBinPackage,hickory-dns))
