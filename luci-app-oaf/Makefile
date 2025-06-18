@@ -5,7 +5,7 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=Open App Filter Module
+LUCI_TITLE:=LuCI support for OAF
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+appfilter +kmod-oaf +luci-compat
 PKG_NAME:=luci-app-oaf
