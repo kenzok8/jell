@@ -1,12 +1,21 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
-PKG_VERSION:=0.0.0
-PKG_RELEASE:=11
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/hickory-dns/hickory-dns.git
-PKG_SOURCE_VERSION:=705a301f40c2481961916f3d59f75f87c9fa3c61
+# Set a base version with a git snapshot suffix for APK compatibility.
+PKG_VERSION:=0.0.0_git20250618.1476c06
+PKG_RELEASE:=12
+
+# Set the full commit for the tarball and build directory.
+HICKORY_COMMIT:=1476c0616e4653a58351abcf22ee512fad43fa6b
+
+PKG_SOURCE:=hickory-dns-${PKG_VERSION}.tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/hickory-dns/hickory-dns/tar.gz/1476c0616e4653a58351abcf22ee512fad43fa6b?
+PKG_HASH:=skip
+
+# Override PKG_BUILD_DIR to match the extracted folder name
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-1476c0616e4653a58351abcf22ee512fad43fa6b
+
 PKG_BUILD_DEPENDS:=rust/host
 PKG_BUILD_PARALLEL:=1
 
