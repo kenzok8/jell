@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
 PKG_VERSION:=2025.06.19
-PKG_RELEASE:=14
+PKG_RELEASE:=15
 
 HICKORY_COMMIT:=ab8d0b31acee41b7bd7e249435b4fbfbc04492ac
 
@@ -34,7 +34,6 @@ define Build/Compile
 endef
 
 define Package/hickory-dns/install
-	echo "$(HICKORY_COMMIT)" > $(1)/etc/hickory/commit
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/* $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc/init.d/
