@@ -1,16 +1,16 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
-PKG_VERSION:=2025.06.18
-PKG_RELEASE:=13
+PKG_VERSION:=2025.06.19
+PKG_RELEASE:=14
 
-HICKORY_COMMIT:=1476c0616e4653a58351abcf22ee512fad43fa6b
+HICKORY_COMMIT:=ab8d0b31acee41b7bd7e249435b4fbfbc04492ac
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/hickory-dns/hickory-dns/tar.gz/1476c0616e4653a58351abcf22ee512fad43fa6b?
+PKG_SOURCE_URL:=https://codeload.github.com/hickory-dns/hickory-dns/tar.gz/ab8d0b31acee41b7bd7e249435b4fbfbc04492ac?
 PKG_HASH:=skip
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-1476c0616e4653a58351abcf22ee512fad43fa6b
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-ab8d0b31acee41b7bd7e249435b4fbfbc04492ac
 
 PKG_BUILD_DEPENDS:=rust/host
 PKG_BUILD_PARALLEL:=1
@@ -34,6 +34,7 @@ define Build/Compile
 endef
 
 define Package/hickory-dns/install
+	echo "$(HICKORY_COMMIT)" > $(1)/etc/hickory/commit
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/* $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc/init.d/
