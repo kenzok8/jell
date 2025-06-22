@@ -11,7 +11,7 @@ LUCI_TITLE:=Network interfaces statistics
 LUCI_PKGARCH:=all
 PKG_LICENSE:=MIT
 
-#include $(TOPDIR)/feeds/luci/luci.mk
+#include ../../luci.mk
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
