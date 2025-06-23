@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-passwall
 PKG_VERSION:=25.6.1
-PKG_RELEASE:=650
+PKG_RELEASE:=651
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy \
@@ -22,6 +22,7 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server \
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Shadow_TLS \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_SingBox \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus \
@@ -132,6 +133,12 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client
 config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
 	bool "Include ShadowsocksR Libev Server"
 	select PACKAGE_shadowsocksr-libev-ssr-server
+	default n
+
+config PACKAGE_$(PKG_NAME)_INCLUDE_Shadow_TLS
+	bool "Include Shadow-TLS"
+	select PACKAGE_shadow-tls
+	depends on aarch64||arm||x86_64
 	default n
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
