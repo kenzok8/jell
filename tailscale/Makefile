@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tailscale
 PKG_VERSION:=1.80.3
-PKG_RELEASE:=38
+PKG_RELEASE:=39
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/tailscale/tailscale/tar.gz/v$(PKG_VERSION)?
@@ -19,6 +19,7 @@ PKG_MAINTAINER:=Zephyr Lykos <self@mochaa.ws>, \
 		Sandro Jäckel <sandro.jaeckel@gmail.com>
 PKG_LICENSE:=BSD-3-Clause
 PKG_LICENSE_FILES:=LICENSE
+PKG_CPE_ID:=cpe:/a:tailscale:tailscale
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/tailscale-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=golang/host
