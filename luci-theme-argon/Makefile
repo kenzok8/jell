@@ -10,7 +10,7 @@ LUCI_TITLE:=Argon Theme
 LUCI_DEPENDS:=+wget +jsonfilter
 
 
-CONFIG_LUCI_CSSTIDY:=
+LUCI_MINIFY_CSS:=0
 
 define Package/luci-theme-argon/conffiles
 /www/luci-static/argon/background/
