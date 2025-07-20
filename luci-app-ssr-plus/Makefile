@@ -2,6 +2,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=luci-app-ssr-plus
 LUCI_PKGARCH:=all
+PKG_NAME:=luci-app-ssr-plus
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_NONE_V2RAY \
