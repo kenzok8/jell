@@ -1,15 +1,11 @@
-# Copyright (C) 2016 Openwrt.org
+# SPDX-License-Identifier: Apache-2.0
 #
-# This is free software, licensed under the Apache License, Version 2.0 .
-#
+# Copyright (C) 2025 ImmortalWrt.org
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=luci-app-ramfree
-LUCI_PKGARCH:=all
+LUCI_TITLE:=LuCI support for RAM free
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
-
-
