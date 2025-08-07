@@ -60,7 +60,7 @@ return view.extend({
 
 	render: function(data) {
 		var m, s, o;
-		m = new form.Map('mergerfs', _('MergerFS Pool'));
+		m = new form.Map('mergerfs', _('MergerFS Pool'), _('MergerFS is a union filesystem, which allows you to pool multiple directories into a single mount point.<br>This is useful for combining storage space and files from multiple devices or directories into one accessible location.<br>New files can be distributed across the pooled directories based on various policies, such as most free space or first found.<br>More information can be found at <a target="_blank" href="https://github.com/trapexit/mergerfs">GitHub</a>.'));
 
 		var mounts = data[0]||[];
 
@@ -68,10 +68,15 @@ return view.extend({
 		s = m.section(form.GridSection, '_mtab');
 
 		s.render = L.bind(function(view, section_id) {
-			var reload = E('button', {
-						'class': 'btn cbi-button-reload',
-						'click': ui.createHandlerFn(view, 'handleReload', m, mounts),
-					}, [ _('Mount Configured MergerFS') ])
+			var desc = E('div', { 'class': 'cbi-section-descr' },
+				_('If mounting fails, search "mergerfs" in the <a href="/cgi-bin/luci/admin/status/logs">system log</a> for more information.')
+			);
+			var reload = E('div', { 'class': 'cbi-section-node' }, [
+				E('button', {
+					'class': 'btn cbi-button-reload',
+					'click': ui.createHandlerFn(view, 'handleReload', m, mounts),
+				}, [ _('Mount Configured MergerFS') ])
+			]);
 			var table = E('table', { 'class': 'table cbi-section-table' }, [
 				E('tr', { 'class': 'tr table-titles' }, [
 					E('th', { 'class': 'th' }, _('Mount Point')),
@@ -104,7 +109,7 @@ return view.extend({
 
 			cbi_update_table(table, rows, E('em', _('No mounted MergerFS found')));
 
-			return E('div', { 'class': 'cbi-section cbi-tblsection' }, [ E('h3', _('Mounted MergerFS')), reload, table ]);
+			return E('div', { 'class': 'cbi-section cbi-tblsection' }, [ E('h3', _('Mounted MergerFS')), desc, reload, table ]);
 		}, s, this);
 
 		// 基本信息分区
@@ -151,7 +156,7 @@ return view.extend({
 		};
 
 		// type: textarea, name: paths
-		o = s.option(form.TextValue, 'paths', _('Paths'), _("List of paths to merge, one per line. Line starting with '#' will be treated as a comment."));
+		o = s.option(form.TextValue, 'paths', _('Paths'), _("List of paths to merge, one per line. Line starting with '#' will be treated as a comment.<br>All paths must existed before mounting or the mounting will fail."));
 		o.datatype = 'string';
 		o.modalonly = true;
 		o.rows = 5;

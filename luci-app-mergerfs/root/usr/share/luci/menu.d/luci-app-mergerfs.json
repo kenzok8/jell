@@ -1,5 +1,5 @@
 {
-	"admin/services/mergerfs": {
+	"admin/nas/mergerfs": {
 		"title": "MergerFS",
 		"action": {
 			"type": "view",
