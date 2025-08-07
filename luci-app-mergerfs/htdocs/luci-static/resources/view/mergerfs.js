@@ -35,6 +35,11 @@ return view.extend({
 
 	handleReload: function(m, mounts, ev) {
 		return fs.exec('/etc/init.d/mergerfs', ['reload'])
+		.then(()=>
+			new Promise(function(resolve) {
+				setTimeout(resolve, 200);
+			})
+		)
 		.then(callMountPoints)
 		.then(function(newMounts) {
 			if (newMounts && newMounts.length > 0) {

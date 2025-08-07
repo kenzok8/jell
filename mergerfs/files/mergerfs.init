@@ -29,8 +29,6 @@ start_pool() {
 		return 1
 	}
 
-	mountpoint -q "$mountpoint" && return 0
-
 	# (
 	printf "%s\n" "$paths" | while IFS= read -r p; do
 		case "$p" in
@@ -64,9 +62,15 @@ start_pool() {
 	[ -n "$options" ] && opts="${opts},${options}"
 
 	mkdir -p "$mountpoint"
+	# mountpoint -q "$mountpoint" && umount "$mountpoint"
 
 	logger -t "mergerfs" "mergerfs -o $opts \"$srcs\" \"$mountpoint\""
-	mergerfs -o "$opts" "$srcs" "$mountpoint"
+
+	procd_open_instance "$section"
+	procd_set_param command /usr/bin/mergerfs -f -o "$opts" "$srcs" "$mountpoint"
+	procd_close_instance
+	# close flock fd, or the script will hangs next time it runs
+	# ( exec 1000>&- ; mergerfs -o "$opts" "$srcs" "$mountpoint" )
 }
 
 stop_service() {
@@ -79,4 +83,8 @@ stop_pool() {
 	local mountpoint
 	config_get mountpoint "$section" mountpoint
 	[ -n "$mountpoint" ] && umount "$mountpoint"
+}
+
+service_triggers() {
+	procd_add_reload_trigger "mergerfs"
 }
