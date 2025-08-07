@@ -1,0 +1,13 @@
+{
+	"admin/services/mergerfs": {
+		"title": "MergerFS",
+		"action": {
+			"type": "view",
+			"path": "mergerfs"
+		},
+		"depends": {
+			"acl": [ "luci-app-mergerfs" ],
+			"uci": { "mergerfs": true }
+		}
+	}
+}
