@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2006-2017 OpenWrt.org
-# Copyright (C) 2022-2023 sirpdboy <herboy2008@gmail.com>
+# Copyright (C) 2022-2025 sirpdboy <herboy2008@gmail.com>
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
