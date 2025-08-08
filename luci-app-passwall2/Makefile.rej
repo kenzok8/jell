@@ -1,0 +1,15 @@
+--- luci-app-passwall2/Makefile
++++ luci-app-passwall2/Makefile
+@@ -130,12 +139,10 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
+ 	bool "Include Simple-Obfs (Shadowsocks Plugin)"
+-	select PACKAGE_simple-obfs
+ 	default y
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
+ 	bool "Include Sing-Box"
+-	select PACKAGE_sing-box
+ 	default y if aarch64||arm||i386||x86_64
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client
