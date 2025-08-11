@@ -13,6 +13,7 @@ LUCI_DEPENDS:=+wget +jsonfilter
 LUCI_MINIFY_CSS:=0
 
 define Package/luci-theme-argon/conffiles
+/etc/config/argon
 /www/luci-static/argon/background/
 endef
 
