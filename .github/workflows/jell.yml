@@ -348,6 +348,7 @@ jobs:
         ) &
         (
         #git_clone https://github.com/morytyann/OpenWrt-mihomo && mvdir OpenWrt-mihomo
+        git clone --depth 1 https://github.com/nikkinikki-org/OpenWrt-momo OpenWrt-momo && mv -n OpenWrt-momo/*momo ./ ; rm -rf OpenWrt-momo
         git_clone https://github.com/nikkinikki-org/OpenWrt-nikki OpenWrt-nikki && mv -n OpenWrt-nikki/*nikki ./ ; rm -rf OpenWrt-nikki
         git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/xiaorouji/openwrt-passwall2 passwall2 && mv -n passwall2/luci-app-passwall2 ./;rm -rf passwall2
