@@ -8,8 +8,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=alist
 PKG_VERSION:=3.50.0
-PKG_WEB_VERSION:=3.50.0
-PKG_RELEASE:=130
+PKG_WEB_VERSION:=3.50.1
+PKG_RELEASE:=131
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/alist-org/alist/tar.gz/v$(PKG_VERSION)?
