@@ -1,4 +1,5 @@
-#-- Copyright (C) 2018 dz <dingzhong110@gmail.com>
+-- Copyright (C) 2018 dz <dingzhong110@gmail.com>
+-- mod by 2021-2022  sirpdboy  <herboy2008@gmail.com> https://github.com/sirpdboy/luci-app-cupsd
 
 module("luci.controller.cupsd", package.seeall)
 
@@ -7,11 +8,21 @@ function index()
 		return
 	end
 
-	local page
+	local page = entry({"admin", "services", "cupsd"},alias("admin", "services", "cupsd", "basic"), _("CUPS打印服务器"), 60)
+	page.dependent = true
+	page.acl_depends = { "luci-app-cupsd" }
+	entry({"admin", "services", "cupsd", "basic"}, cbi("cupsd/basic"), _("设置"), 10).leaf = true
 
-
-	entry({"admin", "services", "cupsd"},alias("admin", "services", "cupsd","page1"),_("CUPS 打印服务器"),60).dependent = true
-	entry({"admin", "services", "cupsd","page1"}, cbi("cupsd/page1"),_("设置"),10).leaf = true
-	entry({"admin", "services", "cupsd","page2"}, cbi("cupsd/page2"),_("高级"),20).leaf = true
+	entry({"admin", "services", "cupsd_status"}, call("act_status"))
 end
 
+function act_status()
+	local sys  = require "luci.sys"
+	local uci  = require "luci.model.uci".cursor()
+	local port = tonumber(uci:get_first("cupsd", "cupsd", "port") )
+	local e = { }
+	e.running = sys.call("pidof cupsd > /dev/null") == 0
+	e.port = port or 631
+	luci.http.prepare_content("application/json")
+	luci.http.write_json(e)
+end

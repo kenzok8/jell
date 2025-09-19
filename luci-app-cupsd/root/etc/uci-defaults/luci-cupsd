@@ -8,7 +8,5 @@ uci -q batch <<-EOF >/dev/null
 EOF
 
 
-/etc/init.d/cupsd stop
-
-rm -f /tmp/luci-indexcache
+rm -f /tmp/luci*
 exit 0

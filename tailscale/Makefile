@@ -8,8 +8,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tailscale
-PKG_VERSION:=1.80.3
-PKG_RELEASE:=39
+PKG_VERSION:=1.84.2
+PKG_RELEASE:=40
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/tailscale/tailscale/tar.gz/v$(PKG_VERSION)?
@@ -55,9 +55,11 @@ define Package/tailscale/conffiles
 endef
 
 define Package/tailscale/install
-	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/init.d $(1)/etc/config
+	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/init.d $(1)/etc/config $(1)/etc/hotplug.d/iface
 	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/tailscaled $(1)/usr/sbin
 	$(LN) tailscaled $(1)/usr/sbin/tailscale
+	$(INSTALL_BIN) ./files//tailscale.helper $(1)/usr/sbin/tailscale_helper
+	$(INSTALL_BIN) ./files//tailscale.iface $(1)/etc/hotplug.d/iface/40-tailscale
 endef
 
 $(eval $(call BuildPackage,tailscale))
