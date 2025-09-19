@@ -358,7 +358,7 @@ jobs:
         (
         git_clone https://github.com/sirpdboy/luci-app-watchdog watchdog1 && mvdir watchdog1
         git_clone https://github.com/sirpdboy/luci-app-timecontrol timecontrol && mvdir timecontrol
-        git_clone https://github.com/sirpdboy/luci-theme-kucat kucat && mvdir kucat
+        git clone --depth 1 https://github.com/sirpdboy/luci-theme-kucat openwrt-kucat && mv -n openwrt-kucat/luci-theme-kucat ./ ; rm -rf openwrt-kucat
         git_clone https://github.com/muink/openwrt-fastfetch
         git_clone https://github.com/linkease/lcdsimple lcdsimple1 && mvdir lcdsimple1
         git_clone https://github.com/Wulnut/luci-app-suselogin
