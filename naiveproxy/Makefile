@@ -1,4 +1,3 @@
-
 # SPDX-License-Identifier: GPL-3.0-only
 #
 # Copyright (C) 2021 ImmortalWrt.org
@@ -6,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=naiveproxy
-PKG_VERSION:=140.0.7339.121-1
-PKG_RELEASE:=78
+PKG_VERSION:=140.0.7339.123-1
+PKG_RELEASE:=79
 
 # intel 80386 & riscv64 & cortex-a76
 ifeq ($(ARCH_PREBUILT),aarch64_cortex-a76)
