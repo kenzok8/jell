@@ -1,3 +1,4 @@
+
 #!/bin/sh
 #
 #	USAGE: git-short-commit.sh <GIT_URL> <GIT_REF> <GIT_DIR>
@@ -39,7 +40,7 @@ git init --quiet "${GIT_DIR}"
 
 		if git fetch --depth 1 origin "${GIT_REF}"; then
 			git checkout --detach FETCH_HEAD --
-			git rev-parse --short=7 HEAD
+			git rev-parse --short HEAD
 			break
 		fi
 

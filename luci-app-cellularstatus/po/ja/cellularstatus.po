@@ -1,0 +1,36 @@
+"Language: ja\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: tkmsst>\n"
+
+#: applications/luci-app-cellularstatus/root/usr/share/luci/menu.d/luci-app-cellularstatus.json:3
+msgid "Cellular Network"
+msgstr "モバイルネットワーク"
+
+#: applications/luci-app-cellularstatus/htdocs/luci-static/resources/view/status/cellularstatus.js:101
+msgid "N/A"
+msgstr "なし"
+
+#: applications/luci-app-cellularstatus/htdocs/luci-static/resources/view/status/cellularstatus.js:113
+msgid "No information"
+msgstr "情報なし"
+
+#: applications/luci-app-cellularstatus/htdocs/luci-static/resources/view/status/cellularstatus.js:119
+msgid "Cellular Network"
+msgstr "モバイルネットワーク"
+
+#: applications/luci-app-cellularstatus/htdocs/luci-static/resources/view/status/cellularstatus.js:119
+msgid "Cellular network information"
+msgstr "モバイルネットワーク情報"
+
+#: applications/luci-app-cellularstatus/htdocs/luci-static/resources/view/status/cellularstatus.js:161
+msgid "Signal strength"
+msgstr "電波強度"
+
+#: applications/luci-app-cellularstatus/htdocs/luci-static/resources/view/status/cellularstatus.js:179
+msgid "SIM Information"
+msgstr "SIM 情報"
+
+#: applications/luci-app-cellularstatus/htdocs/luci-static/resources/view/status/cellularstatus.js:179
+msgid "Current Connection Status"
+msgstr "現在の接続状況"
