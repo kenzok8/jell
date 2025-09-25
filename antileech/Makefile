@@ -1,58 +1,53 @@
+# SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2007-2009 OpenWrt.org
-#
-# This is free software, licensed under the GNU General Public License v2.
-# See /LICENSE for more information.
-#
+# Copyright (C) 2021-2022 ImmortalWrt.org
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=antileech
-PKG_VERSION:=2.3.2
-PKG_RELEASE:=16
+PKG_RELEASE:=17
 
-#PKG_SOURCE:=antileech-2.3.1.tar.gz
-#PKG_SOURCE_URL:=@SF/amule
-#PKG_MD5SUM:=a892a1cc00d03e943e03434d182fe73e
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_DATE:=2021-12-05
+PKG_SOURCE_URL:=https://github.com/persmule/amule-dlp.antiLeech.git
+PKG_SOURCE_VERSION:=1b14ed828ed227933333de31ffb8e24e6c10451c
+PKG_MIRROR_HASH:=skip
 
+PKG_FIXUP:=autoreconf
 PKG_BUILD_DEPENDS:=libgd
+PKG_BUILD_PARALLEL:=1
+PKG_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
 
 define Package/antileech
-  SUBMENU:=P2P
-  SECTION:=net
-  CATEGORY:=Network
-  TITLE:=AntiLeech for amule
-  URL:=http://www.amule.org/
-  DEPENDS:=+libc +amule +libwxbase
+  SECTION:=libs
+  CATEGORY:=Libraries
+  TITLE:=AntiLeech for aMule
+  URL:=https://github.com/persmule/amule-dlp.antiLeech
+  DEPENDS:=+libc +libwxbase
 endef
 
-TARGET_LDFLAGS += \
-
-define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src/* $(PKG_BUILD_DIR)/
+define Package/antileech/description
+  Dynamic Leech Protection(DLP) is a part of eMule Xtreme Mod at first.
+  This project aim to make DLP available for aMule. This repo contains
+  the plugin library "libantiLeech".
 endef
 
 define Build/Configure
-	sed -i "s:^AC_CHECK_PROG.WXCONFIG,.*::g" $(PKG_BUILD_DIR)/configure.ac
-	sed -i "s:wx-config --cppflags:$(STAGING_DIR)/usr/bin/wx-config --cppflags:g" $(PKG_BUILD_DIR)/configure.ac
-	cd $(PKG_BUILD_DIR) && sh ./autogen.sh
+	$(SED) "s:^AC_CHECK_PROG.WXCONFIG,.*::g" $(PKG_BUILD_DIR)/configure.ac
+	$(SED) "s:wx-config --cppflags:$(STAGING_DIR)/usr/bin/wx-config --cppflags:g" $(PKG_BUILD_DIR)/configure.ac
+
+	( cd $(PKG_BUILD_DIR); $(SHELL) ./autogen.sh; )
 	$(call Build/Configure/Default)
 endef
 
-define Build/Compile
-	$(MAKE) -k -C $(PKG_BUILD_DIR) \
-		HOSTCC="$(HOSTCC)" \
-		DESTDIR="$(PKG_INSTALL_DIR)" \
-		all install
-endef
+MAKE_FLAGS += HOSTCC="$(HOSTCC)"
 
 define Package/antileech/install
 	$(INSTALL_DIR) $(1)/usr/share/amule
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/share/amule/libantiLeech.so $(1)/usr/share/amule
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/amule/libantiLeech.so* $(1)/usr/share/amule/
 endef
 
 $(eval $(call BuildPackage,antileech))

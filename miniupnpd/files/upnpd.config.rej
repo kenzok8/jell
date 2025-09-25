@@ -1,0 +1,13 @@
+--- miniupnpd/files/upnpd.config
++++ miniupnpd/files/upnpd.config
+@@ -13,6 +14,10 @@ config upnpd config
+ 	option port		5000
+ 	option upnp_lease_file	/var/run/miniupnpd.leases
+ 	option igdv1		1
++	option use_stun '1'
++	option stun_host 'stun.miwifi.com'
++	option stun_port '3478'
++	option ipv6_disable '1'
+ 
+ config perm_rule
+ 	option action		allow
