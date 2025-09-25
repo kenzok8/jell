@@ -95,20 +95,14 @@ jobs:
         git_clone https://github.com/kiddin9/luci-app-cloudreve
         git_clone https://github.com/kiddin9/openwrt-clouddrive2 && mvdir openwrt-clouddrive2
         ) &
-        (  
-        #git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
-        #git clone https://github.com/fw876/helloworld && rm -rf helloworld/{v2raya,naiveproxy,chinadns-ng} && mvdir helloworld
-        #git_clone https://github.com/xiaorouji/openwrt-passwall-packages && mvdir openwrt-passwall-packages
+        ( 
         git_clone https://github.com/Lienol/openwrt-package liep
-        #git_clone https://github.com/AutoCONFIG/minieap-openwrt -b default
         git_clone https://github.com/rufengsuixing/luci-app-autoipsetadder
         git_clone https://github.com/NateLol/luci-app-beardropper
         git_clone https://github.com/riverscn/openwrt-iptvhelper && mvdir openwrt-iptvhelper
         git_clone https://github.com/kongfl888/luci-app-timedreboot
         ) &
         (
-        #git_clone https://github.com/jerrykuku/luci-app-vssr
-        #git_clone https://github.com/jerrykuku/luci-app-ttnode
         git_clone https://github.com/sirpdboy/luci-app-advancedplus
         git_clone https://github.com/sirpdboy/luci-app-autotimeset
         git_clone https://github.com/sirpdboy/luci-app-lucky oplucky && mvdir oplucky
@@ -117,7 +111,6 @@ jobs:
         git_clone https://github.com/sirpdboy/luci-app-netspeedtest speedtest && rm -rf speedtest/{iperf*,演示.gif};mvdir speedtest
         git_clone https://github.com/sirpdboy/luci-app-parentcontrol
         git_clone https://github.com/sirpdboy/luci-app-poweroffdevice poweroffdevice && mvdir poweroffdevice
-        #git_clone https://github.com/muink/luci-app-homeproxy
         ) &
         (
         git_clone https://github.com/destan19/OpenAppFilter && mvdir OpenAppFilter
@@ -143,10 +136,8 @@ jobs:
         git_clone https://github.com/lisaac/luci-app-dockerman dockerman && mv -n dockerman/applications/* ./; rm -rf dockerman
         ) &
         (
-        #git_clone https://github.com/messense/openwrt-wiretrustee && mv -n openwrt-wiretrustee/wiretrustee ./;rm -rf openwrt-wiretrustee
         git_clone https://github.com/ophub/luci-app-amlogic amlogic && mv -n amlogic/luci-app-amlogic ./;rm -rf amlogic
         git_clone https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest cloudflarespeedtest && mv -n cloudflarespeedtest/applications/* ./;rm -rf cloudflarespeedtest
-        #git_clone https://github.com/messense/aliyundrive-fuse aliyundrive && mv -n aliyundrive/openwrt/* ./;rm -rf aliyundrive
         git_clone https://github.com/linkease/nas-packages && mv -n nas-packages/network/services/* ./; rm -rf nas-packages
         git_clone https://github.com/linkease/nas-packages-luci && mv -n nas-packages-luci/luci/* ./; rm -rf nas-packages-luci
         git_clone https://github.com/linkease/istore && mv -n istore/luci/* ./; rm -rf istore
@@ -293,7 +284,7 @@ jobs:
         git_clone https://github.com/tanghammer/luci-app-switchtools
         ) &
         (
-        git_clone https://github.com/wangqn/luci-app-nut
+        #git_clone https://github.com/wangqn/luci-app-nut
         git_clone https://github.com/kingyond/luci-app-accesscontrol-plus accesscontrol-plus && mv accesscontrol-plus/luci-app-accesscontrol-plus ./;rm -rf accesscontrol-plus
         git_clone https://github.com/4IceG/luci-app-lite-watchdog lite-watchdog && mv lite-watchdog/luci-app-lite-watchdog ./;rm -rf lite-watchdog
         git_clone https://github.com/Mitsuhaxy/luci-app-miniproxy
@@ -380,7 +371,7 @@ jobs:
         git_clone https://github.com/nikkinikki-org/OpenWrt-nikki && mv -f OpenWrt-nikki/{luci-app-nikki,nikki} ./;rm -rf OpenWrt-nikki
         git_clone https://github.com/pymumu/luci-app-smartdns
         git_clone https://github.com/xiaorouji/openwrt-passwall2 passwall2 && mv -n passwall2/luci-app-passwall2 ./;rm -rf passwall2
-        git_clone https://github.com/xiaorouji/openwrt-passwall passwall && mv -n passwall/luci-app-passwall ./;rm -rf passwall
+        git_clone https://github.com/xiaorouji/openwrt-passwall passwall1 && mv -n passwall1/luci-app-passwall ./;rm -rf passwall1
         git_clone https://github.com/fw876/helloworld && mv -n helloworld/luci-app-ssr-plus ./ ; rm -rf helloworld
         git_clone https://github.com/sbwml/luci-app-qbittorrent openwrt-qb && mv -n openwrt-qb/* ./ &&  rm -rf openwrt-qb
         ) &
