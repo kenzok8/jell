@@ -417,20 +417,20 @@ jobs:
         git_sparse_clone chawrt/24.10 "https://github.com/liudf0716/packages" net/ss-redir
         ) &
         git_sparse_clone master "https://github.com/immortalwrt/packages" net/n2n net/dae \
-        net/amule net/cdnspeedtest net/minieap net/ddns-go net/sysuh3c net/3proxy net/cloudreve \
+        net/amule net/cdnspeedtest net/minieap net/sysuh3c net/3proxy net/cloudreve \
         net/go-nats net/go-wol net/bitsrunlogin-go net/transfer net/daed net/udp2raw net/msd_lite \
-        net/subconverter net/ngrokc net/scutclient net/gost net/ua2f net/dufs net/qBittorrent-Enhanced-Edition \
+        net/subconverter net/ngrokc net/scutclient net/ua2f net/dufs net/qBittorrent-Enhanced-Edition \
         net/tinyportmapper net/tinyfecvpn net/nexttrace net/rustdesk-server net/tuic-server \
         net/ipset-lists net/ShadowVPN net/nps net/vlmcsd net/dnsforwarder \
         net/ps3netsrv net/q net/speedtest-cli \
-        net/vsftpd net/smartdns net/miniupnpd net/p910nd \
+        net/vsftpd net/miniupnpd net/p910nd \
         net/ariang libs/wxbase libs/rapidjson libs/libcron libs/quickjspp libs/toml11 \
         libs/libdouble-conversion libs/qt6base libs/jpcre2 libs/alac libs/libcryptopp libs/antileech \
-        utils/qt6tools utils/dockerd utils/cpulimit utils/sendat utils/filebrowser utils/cups-bjnp utils/rhash utils/boltbrowser \
+        utils/qt6tools utils/cpulimit utils/sendat utils/cups-bjnp utils/rhash utils/boltbrowser \
         utils/phicomm-k3screenctrl utils/joker utils/7z utils/dhrystone utils/supervisor utils/tinymembench utils/pcat-mgr utils/fan2go \
         utils/coremark utils/watchcat multimedia/you-get multimedia/lux multimedia/gmediarender multimedia/ykdl multimedia/gallery-dl \
         sound/spotifyd devel/go-rice admin/gotop \
-        lang/lua-periphery lang/lua-neturl lang/lua-maxminddb lang/node-pnpm devel/gn
+        lang/lua-periphery lang/lua-neturl lang/lua-maxminddb lang/node-pnpm
         git_clone https://github.com/koshev-msk/modemfeed && mv -n modemfeed/*/!(telephony)/* ./; rm -rf modemfeed
         git_sparse_clone openwrt-24.10 "https://github.com/coolsnowwolf/luci" applications themes/luci-theme-design libs/luci-lib-fs
         mv -f applications luciapp;rm -rf luciapp/luci-app-turboacc
