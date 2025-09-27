@@ -43,29 +43,18 @@ jobs:
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
     
         function git_clone() {
-          local url="$1"
-          local dir="$2"
-          local branch="$3"
-          
-          if [ -n "$branch" ]; then
-            git clone --depth 1 -b "$branch" "$url" "$dir"
-          else
-            git clone --depth 1 "$url" "$dir"
-          fi
-          
+          git clone --depth 1 $1 $2
           if [ "$?" != 0 ]; then
-            echo "error on $url"
+            echo "error on $1"
             exit 1
           fi
         }
 
         function git_sparse_clone() {
           trap 'rm -rf "$tmpdir"' EXIT
-          local branch="$1" 
-          local curl="$2" 
-          shift 2
-          local rootdir="$PWD"
-          local tmpdir="$(mktemp -d)" || exit 1
+          branch="$1" curl="$2" && shift 2
+          rootdir="$PWD"
+          tmpdir="$(mktemp -d)" || exit 1
           
           # Clone repo based on branch length
           if [ ${#branch} -lt 10 ]; then
@@ -74,31 +63,23 @@ jobs:
           else
             git clone --filter=blob:none --sparse "$curl" "$tmpdir"
             cd "$tmpdir"
-            git checkout "$branch"
+            git checkout $branch
           fi
 
           if [ "$?" != 0 ]; then
-            echo "error on $curl"
-            exit 1
+              echo "error on $curl"
+              exit 1
           fi
 
           git sparse-checkout init --cone
           git sparse-checkout set "$@"
-          mv -n "$@" "$rootdir/" || true
-          cd "$rootdir"
+          mv -n $@ $rootdir/ || true
+          cd $rootdir
         }
 
         function mvdir() {
-          if [ ! -d "$1" ]; then
-            echo "Directory $1 does not exist"
-            return 1
-          fi
-          
-          # 检查是否有子目录
-          if [ "$(find "$1" -maxdepth 1 -type d | wc -l)" -gt 1 ]; then
-            mv -n $(find "$1"/* -maxdepth 0 -type d) ./
-          fi
-          rm -rf "$1"
+          mv -n `find $1/* -maxdepth 0 -type d` ./
+          rm -rf $1
         }
         (
         # Clone repositories
@@ -207,6 +188,7 @@ jobs:
         (
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust
         git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
+        #git_clone https://github.com/papagaye744/luci-theme-design -b js --depth 1
         git_clone https://github.com/lazywalker/mmdvm-openwrt && rm -rf mmdvm-openwrt/misc && mvdir mmdvm-openwrt
         git_clone https://github.com/4IceG/luci-app-3ginfo-lite 3ginfol && mvdir 3ginfol
         git_clone https://github.com/4IceG/luci-app-modemband modemb  && mvdir modemb
@@ -348,7 +330,7 @@ jobs:
         git_clone https://github.com/kenzok78/luci-theme-argone
         git_clone https://github.com/kenzok78/luci-app-argone-config
         git_clone https://github.com/kenzok8/wall && mv -n wall/* ./ ; rm -rf wall
-        #git clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
+        git_clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
         git_clone https://github.com/kenzok78/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
         git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass ./ ; rm -rf kwrt-packages
@@ -440,7 +422,7 @@ jobs:
         utils/coremark utils/watchcat multimedia/you-get multimedia/lux multimedia/gmediarender multimedia/ykdl multimedia/gallery-dl \
         sound/spotifyd devel/go-rice admin/gotop \
         lang/lua-periphery lang/lua-neturl lang/lua-maxminddb lang/node-pnpm
-        [ ! -d "modemfeed" ] && git_clone https://github.com/koshev-msk/modemfeed && mv -n modemfeed/*/!(telephony)/* ./ && rm -rf modemfeed
+        git_clone https://github.com/koshev-msk/modemfeed && mv -n modemfeed/*/!(telephony)/* ./; rm -rf modemfeed
         git_sparse_clone openwrt-24.10 "https://github.com/coolsnowwolf/luci" applications themes/luci-theme-design libs/luci-lib-fs
         mv -f applications luciapp;rm -rf luciapp/luci-app-turboacc
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" applications
