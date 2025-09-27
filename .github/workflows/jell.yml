@@ -43,7 +43,11 @@ jobs:
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
     
         function git_clone() {
-          git clone --depth 1 $1 $2
+          if [ "$3" ]; then
+            git clone --depth 1 -b "$3" "$1" "$2"
+          else
+            git clone --depth 1 "$1" "$2"
+          fi
           if [ "$?" != 0 ]; then
             echo "error on $1"
             exit 1
@@ -188,7 +192,6 @@ jobs:
         (
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust
         git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
-        #git_clone https://github.com/papagaye744/luci-theme-design -b js --depth 1
         git_clone https://github.com/lazywalker/mmdvm-openwrt && rm -rf mmdvm-openwrt/misc && mvdir mmdvm-openwrt
         git_clone https://github.com/4IceG/luci-app-3ginfo-lite 3ginfol && mvdir 3ginfol
         git_clone https://github.com/4IceG/luci-app-modemband modemb  && mvdir modemb
@@ -330,7 +333,7 @@ jobs:
         git_clone https://github.com/kenzok78/luci-theme-argone
         git_clone https://github.com/kenzok78/luci-app-argone-config
         git_clone https://github.com/kenzok8/wall && mv -n wall/* ./ ; rm -rf wall
-        git_clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
+        #git clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
         git_clone https://github.com/kenzok78/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
         git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass ./ ; rm -rf kwrt-packages
@@ -422,7 +425,7 @@ jobs:
         utils/coremark utils/watchcat multimedia/you-get multimedia/lux multimedia/gmediarender multimedia/ykdl multimedia/gallery-dl \
         sound/spotifyd devel/go-rice admin/gotop \
         lang/lua-periphery lang/lua-neturl lang/lua-maxminddb lang/node-pnpm
-        git_clone https://github.com/koshev-msk/modemfeed && mv -n modemfeed/*/!(telephony)/* ./; rm -rf modemfeed
+        [ ! -d "modemfeed" ] && git_clone https://github.com/koshev-msk/modemfeed && mv -n modemfeed/*/!(telephony)/* ./ && rm -rf modemfeed
         git_sparse_clone openwrt-24.10 "https://github.com/coolsnowwolf/luci" applications themes/luci-theme-design libs/luci-lib-fs
         mv -f applications luciapp;rm -rf luciapp/luci-app-turboacc
         git_sparse_clone master "https://github.com/coolsnowwolf/luci" applications
