@@ -43,14 +43,7 @@ jobs:
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
     
         function git_clone() {
-          if [ -z "$1" ] || [ -z "$2" ]; then
-            echo "Repository URL or destination path is missing"
-            exit 1
-          fi
-          if [ -d "$2" ]; then
-            rm -rf "$2"
-          fi
-          git clone --depth 1 "$1" "$2"
+          git clone --depth 1 $1 $2
           if [ "$?" != 0 ]; then
             echo "error on $1"
             exit 1
