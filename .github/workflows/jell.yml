@@ -360,7 +360,7 @@ jobs:
         git_clone https://github.com/kenzok78/luci-app-guest-wifi
         git_clone https://github.com/EkkoG/openwrt-natmap
         git_clone https://github.com/EkkoG/luci-app-natmap
-        git_clone https://github.com/EasyTier/luci-app-easytier luci-app-easytier1 && mvdir luci-app-easytier1
+        #git_clone https://github.com/EasyTier/luci-app-easytier luci-app-easytier1 && mvdir luci-app-easytier1
         git_clone https://github.com/sbwml/luci-app-openlist2 oplist && mvdir oplist
         git_clone https://github.com/AngelaCooljx/luci-theme-material3
         git_clone https://github.com/vison-v/luci-app-nginx-proxy
