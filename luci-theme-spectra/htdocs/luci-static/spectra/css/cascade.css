@@ -1578,7 +1578,7 @@ input,
 	line-height: 1.5rem;
 	padding: .5rem .75rem;
 	margin: .25rem .1rem;
-	color: var(--text-primary) !important;
+	color: var(--text-primary);
 	background-color: var(--card-bg);
 	border: 1px solid #dee2e6;
 	border-radius: .25rem;
@@ -4507,8 +4507,7 @@ body:not(.Interfaces) .cbi-rowstyle-2:first-child {
 	justify-content: center;
 	line-height: 1.5rem;
 	padding: .5rem .76rem;
-	margin: .25rem .1rem .25rem 0;
-	margin: .25rem 0.25rem .25rem 0.5rem;
+        margin: .25rem 0.1rem .25rem 0.1rem;
 	color: #fff;
 	border-radius: .25rem;
 	outline: 0;
@@ -5711,7 +5710,7 @@ input[type="checkbox"] {
 	padding: 0;
 	cursor: pointer;
 	transition: all .2s;
-	margin: 1rem 0 0 0
+	margin: 1rem 8px 0 0
 }
 
 input[type="checkbox"]:checked {
