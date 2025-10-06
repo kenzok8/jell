@@ -258,9 +258,6 @@ jobs:
         git_clone https://github.com/nosignals/openwrt-neko && mv openwrt-neko/luci-app-neko ./;rm -rf openwrt-neko
         ) &
         (
-        git_clone https://github.com/liudf0716/luci-app-yt-dlp
-        git_clone https://github.com/liudf0716/luci-app-kcptun
-        git_clone https://github.com/liudf0716/luci-app-apfree-wifidog
         git_clone https://github.com/lwb1978/openwrt-gecoosac && mvdir openwrt-gecoosac
         git_clone https://github.com/ilxp/luci-app-ikoolproxy
         git_clone https://github.com/animegasan/luci-app-droidnet
