@@ -8,6 +8,6 @@ LUCI_DEPENDS:=+luci-base +ksmbd-server +autoshare-ksmbd
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=Richard Yu <yurichard3839@gmail.com>
 
-include $(TOPDIR)/feeds/luci/luci.mk
+include ../../luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
