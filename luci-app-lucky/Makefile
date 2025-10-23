@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2021-2022  sirpdboy  <herboy2008@gmail.com> https://github.com/sirpdboy/luci-app-lucky
+# Copyright (C) 2021-2025  sirpdboy  <herboy2008@gmail.com> https://github.com/sirpdboy/luci-app-lucky
 # 
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
@@ -11,11 +11,6 @@ PKG_NAME:=luci-app-lucky
 LUCI_TITLE:=LuCI Support for Dynamic lucky Client
 LUCI_DEPENDS:=+lucky
 LUCI_PKGARCH:=all
-
-define Package/$(PKG_NAME)/conffiles
-/etc/config/lucky
-/etc/lucky/lucky.conf
-endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
