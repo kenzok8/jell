@@ -1,13 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sms-tool
-PKG_RELEASE:=11
+PKG_RELEASE:=12
 
+PKG_SOURCE_URL:=https://github.com/obsy/sms_tool
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/obsy/sms_tool.git
-PKG_SOURCE_DATE:=2024-07-25
+PKG_SOURCE_DATE:=2021-08-24
 PKG_SOURCE_VERSION:=491ffdb0bfbc170929c1c7e947f5b889865df348
-PKG_MIRROR_HASH:=skip
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -19,7 +18,7 @@ define Package/sms-tool
 endef
 
 define Package/sms-tool/description
-	SMS Tool for 3G/4G/5G modem
+	SMS Tool for 3G/4G modem
 endef
 
 define Package/sms-tool/install
