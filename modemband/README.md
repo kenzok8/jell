@@ -15,9 +15,13 @@ Supported devices:
 - Huawei (various models) in serial mode
 - Quectel EC20
 - Quectel EC25
+- Quectel EC200T-CN
 - Quectel EG06-E
+- Quectel EG12-EA
 - Quectel EG18-EA
+- Quectel EG120K-EA
 - Quectel EM12-G
+- Quectel EM12G-MSFT
 - Quectel EM160R-GL
 - Quectel EP06-E
 - Quectel RG500Q-EA
@@ -28,6 +32,7 @@ Supported devices:
 - Quectel RM502Q-GL
 - Quectel RM505Q-AE
 - Quectel RM520N-GL
+- Quectel RM551E-GL
 - Sierra Wireless EM7455/MC7455/DW5811e
 - SIMCOM SIM8200EA-M2
 - Telit LM940
@@ -35,6 +40,7 @@ Supported devices:
 - Telit LN940 (Foxconn T77W676) in mbim mode
 - Telit LN960 (Foxconn T77W968)
 - Telit LN960
+- Thales/Cinterion MV31-W (T99W175) in mbim mode
 - Yuge CLM920 NC_5
 - ZTE MF286 (router)
 - ZTE MF286A (router)
@@ -133,3 +139,15 @@ root@MiFi:~# modemband.sh getbands
 ```
 
 See also [description in Polish](https://eko.one.pl/?p=openwrt-modemband).
+
+# Precompiled packages for stable release
+
+https://dl.eko.one.pl/packages/opkg/all/
+
+# Precompiled packages for development snapshots
+
+https://dl.eko.one.pl/packages/apk/all/
+
+# The project is used in
+- [easyconfig](https://eko.one.pl/?p=easyconfig) - [src](https://github.com/obsy/easyconfig)
+- luci-app-modemband - [src](https://github.com/4IceG/luci-app-modemband)

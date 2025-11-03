@@ -1,9 +1,11 @@
 #!/bin/sh
 
+#!/bin/sh
+
 #
-# (c) 2022-2024 Cezary Jackiewicz <cezary@eko.one.pl>
+# (c) 2022-2025 Cezary Jackiewicz <cezary@eko.one.pl>
 #
-# (c) 2022-2024 modified by Rafał Wabik - IceG - From eko.one.pl forum
+# (c) 2022-2025 modified by Rafał Wabik - IceG - From eko.one.pl forum
 #
 
 hextobands() {
