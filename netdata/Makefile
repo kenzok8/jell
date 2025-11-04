@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netdata
 PKG_VERSION:=2.3.2
-PKG_RELEASE:=22
+PKG_RELEASE:=23
 
 PKG_MAINTAINER:=Josef Schlehofer <pepe.schlehofer@gmail.com>, Daniel Engberg <daniel.engberg.lists@pyret.net>
 PKG_LICENSE:=GPL-3.0-or-later
@@ -105,10 +105,6 @@ define Package/netdata/install
 	$(CP) $(PKG_INSTALL_DIR)/etc/netdata $(1)/etc
 	$(INSTALL_DATA) ./files/netdata.conf $(1)/etc/netdata
 	touch $(1)/etc/netdata/.opt-out-from-anonymous-statistics
-	
-	#netdata init
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/netdata.init $(1)/etc/init.d/netdata
 
 	#netdata webdir and remove uneeded files
 	$(INSTALL_DIR) $(1)/usr/share/netdata
