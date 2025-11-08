@@ -14,7 +14,6 @@ LUCI_DEPENDS:=+luci-compat \
 		+kmod-usb-net-sierrawireless +kmod-usb-ohci \
 		+kmod-usb-serial-option +kmod-usb-serial +kmod-usb-serial-qualcomm \
 		+kmod-usb-net +kmod-usb-acm \
-		+kmod-usb-wdm +kmod-usb-net-qmi-wwan \
 		+kmod-usb-net-cdc-ether \
 		+kmod-usb-net-cdc-mbim \
 		+kmod-usb-net-rndis \
