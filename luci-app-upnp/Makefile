@@ -12,6 +12,6 @@ LUCI_DEPENDS:=+luci-base +miniupnpd +rpcd-mod-ucode
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=Jo-Philipp Wich <jo@mein.io>
 
-include $(TOPDIR)/feeds/luci/luci.mk
+include ../../luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
