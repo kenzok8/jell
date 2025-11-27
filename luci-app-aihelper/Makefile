@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=aihelper
-LUCI_DEPENDS:=+aihelper
+LUCI_DEPENDS:=+aihelper +opencode
 LUCI_MINIFY_CSS:=0
 LUCI_MINIFY_JS:=0
 

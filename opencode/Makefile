@@ -11,7 +11,7 @@ PKG_ARCH_opencode:=$(ARCH)
 
 PKG_NAME:=opencode
 PKG_VERSION:=1.0.119
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_SOURCE:=opencode-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Carseason/openwrt-packages/releases/download/prebuilt/
 PKG_HASH:=skip
@@ -20,6 +20,9 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/opencode-binary-$(PKG_VERSION)
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
+RSTRIP:=:
+STRIP:=:
+
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
@@ -27,6 +30,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=System
 	SUBMENU:=
 	TITLE:=OpenCode
+	DEPENDS:=+libstdcpp
 	URL:=https://github.com/Carseason/openwrt-packages
 endef
 
@@ -41,6 +45,7 @@ define Build/Configure
 endef
 
 define Build/Compile
+	$(STAGING_DIR_HOST)/bin/patchelf --remove-needed libc.musl-x86_64.so.1 --remove-needed libc.musl-aarch64.so.1 $(PKG_BUILD_DIR)/opencode.$(PKG_ARCH_opencode)
 endef
 
 define Package/$(PKG_NAME)/install
