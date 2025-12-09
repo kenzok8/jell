@@ -167,7 +167,7 @@
 	class="lang_<%=luci.i18n.context.lang%> <% if node then %><%= striptags( node.title ) %><% end %> <% if luci.dispatcher.context.authsession then %>logged-in<% end %>"
 	data-page="<%= table.concat(disp.context.requestpath, "-") %>">
 
-<div class="wrapper">
+<div class="wrapper animation-spans">
 		<span></span>
 		<span></span>
 		<span></span>
@@ -659,7 +659,7 @@
                             <div class="preset-color-circle" style="background-color: oklch(85% 0.18 56);"></div>
                         </button>
 
-                        <button class="preset-color-btn" data-hue="160" data-chroma="0.09" data-lightness="data-tooltip-title="mint">
+                        <button class="preset-color-btn" data-hue="160" data-chroma="0.09" data-lightness="66" data-tooltip-title="mint">
                             <div class="preset-color-circle" style="background-color: oklch(66% 0.09 160);"></div>
                         </button>
                         <button class="preset-color-btn" data-hue="130" data-chroma="0.11" data-lightness="70" data-tooltip-title="emerald">
@@ -951,7 +951,7 @@
                 <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
                      id="themeLoaderToggle" style="cursor: pointer;">
                     <div class="icon-container">
-                        <i id="themeLoaderIcon" class="bi bi-gear-fill" style="font-size: 1.8rem;"></i>
+                        <i id="themeLoaderIcon" class="bi bi-x-circle" style="font-size: 1.8rem;"></i>
                     </div>
                     <div class="text-container">
                         <span data-translate="theme_loader_btn_title">Theme Loader</span>
@@ -4960,8 +4960,12 @@ function initThemeLoaderControl() {
 }
 
 function updateToggleIcon(icon) {
-    if (icon) {
-        icon.style.color = themeLoaderEnabled ? '#0fcc45' : 'oklch(0.25 0 0)';
+    if (!icon) return;
+
+    if (themeLoaderEnabled) {
+        icon.className = 'bi bi-check-circle';
+    } else {
+        icon.className = 'bi bi-x-circle';
     }
 }
 
@@ -5302,8 +5306,11 @@ document.addEventListener("DOMContentLoaded", function () {
             localStorage.setItem('backgroundMode', 'auto');
         }
 
-        const isAnimationEnabled = localStorage.getItem('animationEnabled') !== 'false';
-        toggleAnimation(isAnimationEnabled);
+        const isAnimationEnabled = localStorage.getItem('animationSpansEnabled') === 'true';
+        const spans = document.querySelectorAll('.animation-spans span');
+        spans.forEach(span => {
+            span.style.display = isAnimationEnabled ? 'block' : 'none';
+        });
 
         const savedFont = localStorage.getItem('selectedFont') || 'default';
         applyFont(savedFont);
@@ -5408,7 +5415,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const translations = languageTranslations[currentLang] || languageTranslations['en'];
             const animationText = document.getElementById('animation-text');
             const animationIcon = document.getElementById('animation-icon');
-            const isAnimationEnabled = localStorage.getItem('animationEnabled') !== 'false';
+            const isAnimationEnabled = localStorage.getItem('animationSpansEnabled') === 'true';
 
             if (animationText) {
                 animationText.textContent = isAnimationEnabled ? 
@@ -5602,9 +5609,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
             document.getElementById('animation-toggle')?.addEventListener('click', function() {
                 const translations = languageTranslations[currentLang] || languageTranslations['en'];
-                const isAnimationEnabled = localStorage.getItem('animationEnabled') !== 'false';
+                const isAnimationEnabled = localStorage.getItem('animationSpansEnabled') === 'true';
                 const newState = !isAnimationEnabled;
-                localStorage.setItem('animationEnabled', newState);
+                localStorage.setItem('animationSpansEnabled', newState);
+
+                const spans = document.querySelectorAll('.animation-spans span');
+                spans.forEach(span => {
+                    span.style.display = newState ? 'block' : 'none';
+                });
 
                 updateAnimationToggle();
                 const message = newState ? 
@@ -5613,7 +5625,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 showLogMessage(message);
                 speakMessage(message);
                 
-                toggleAnimation(newState);
+                toggleAnimationSpans(newState);
             });
 
             document.getElementById('font-toggle')?.addEventListener('click', function() {
@@ -5820,9 +5832,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         background-size: cover !important;
                         transition: background 1s ease-in-out;
                     }
-                    .wrapper span {
-                        display: none !important;
-                    }
                 `;
             } else {
                 styleTag.innerHTML = `
@@ -5830,9 +5839,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         background: #111 !important;
                         background-image: none !important;
                         background-size: auto !important;
-                    }
-                    .wrapper span {
-                        display: block !important;
                     }
                 `;
             }
@@ -5880,9 +5886,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     transform: translate(-50%, -50%);
                     z-index: -1;
                 }
-                .video-background + .wrapper span {
-                    display: none !important;
-                }
             `;
         }
 
@@ -5926,9 +5929,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     transition: background 1s ease-in-out;
                 }
                 body:before {
-                    display: none !important;
-                }
-                .wrapper span {
                     display: none !important;
                 }
             `;
@@ -6015,10 +6015,14 @@ document.addEventListener("DOMContentLoaded", function () {
             updateSoundToggle();
         }
  
-        function toggleAnimation(enabled) {
-            const wrapper = document.querySelector('.wrapper');
-            if (wrapper) {
-                wrapper.style.display = enabled ? 'block' : 'none';
+        function toggleAnimationSpans(enabled) {
+            const animationContainer = document.querySelector('.animation-spans');
+            if (animationContainer) {
+                if (enabled) {
+                    animationContainer.classList.add('animation-enabled');
+                } else {
+                    animationContainer.classList.remove('animation-enabled');
+                }
             }
         }
 
