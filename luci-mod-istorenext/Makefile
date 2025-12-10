@@ -1,0 +1,10 @@
+
+include $(TOPDIR)/rules.mk
+
+LUCI_TITLE:=iStoreNext
+LUCI_DESCRIPTION:=LuCI module for iStoreNext
+LUCI_DEPENDS:=+luci-nginxer
+
+include $(TOPDIR)/feeds/luci/luci.mk
+
+# call BuildPackage - OpenWrt buildroot signature
