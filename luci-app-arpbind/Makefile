@@ -12,6 +12,6 @@ define Package/luci-app-arpbind/conffiles
 /etc/config/arpbind
 endef
 
-include ../../luci.mk
+include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
