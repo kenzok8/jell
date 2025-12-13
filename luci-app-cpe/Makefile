@@ -21,7 +21,7 @@ define Package/luci-app-cpe
 		+kmod-usb-net-sierrawireless +kmod-usb-ohci +kmod-usb-serial \
 		+kmod-usb-serial-option +kmod-usb-wdm \
 		+kmod-usb2 +kmod-usb3 \
-		+quectel-CM-5G +kmod-usb-net-cdc-mbim +usbutils
+		+quectel-cm +kmod-usb-net-cdc-mbim +usbutils
 endef
  
 PKG_LICENSE:=GPLv3
