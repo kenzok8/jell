@@ -1,0 +1,210 @@
+name: Build Insomclash Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag'
+        required: true
+        default: 'v1.0.0'
+      publish:
+        description: 'Publish to Release?'
+        type: boolean
+        required: true
+        default: true
+  push:
+    branches:
+      - main
+
+env:
+  MIHOMO_VERSION: v1.19.17
+
+jobs:
+  build_core:
+    permissions:
+      contents: write
+    name: Build ${{ matrix.arch }}-${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        branch:
+          - openwrt-24.10
+          - SNAPSHOT
+        arch:
+          - x86_64
+          - i386_pentium-mmx
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_generic
+          - arm_cortex-a15_neon-vfpv4
+          - arm_cortex-a9
+          - arm_cortex-a7
+          - mips_24kc
+          - mipsel_74kc
+        include:
+          - arch: x86_64
+            target: x86-64
+            insomclash_binary: insomclash-linux-amd64
+            mihomo_arch: mihomo-linux-amd64-v1
+          - arch: i386_pentium-mmx
+            target: x86-geode
+            insomclash_binary: insomclash-linux-386
+            mihomo_arch: mihomo-linux-386
+          - arch: aarch64_cortex-a53
+            target: mediatek-filogic
+            insomclash_binary: insomclash-linux-arm64
+            mihomo_arch: mihomo-linux-arm64
+          - arch: aarch64_cortex-a72
+            target: rockchip-armv8
+            insomclash_binary: insomclash-linux-arm64
+            mihomo_arch: mihomo-linux-arm64
+          - arch: aarch64_generic
+            target: armvirt-64
+            insomclash_binary: insomclash-linux-arm64
+            mihomo_arch: mihomo-linux-arm64
+          - arch: arm_cortex-a15_neon-vfpv4
+            target: armvirt-32
+            insomclash_binary: insomclash-linux-armv7
+            mihomo_arch: mihomo-linux-armv7
+          - arch: arm_cortex-a9
+            target: armvirt-32
+            insomclash_binary: insomclash-linux-armv7
+            mihomo_arch: mihomo-linux-armv7
+          - arch: arm_cortex-a7
+            target: armvirt-32
+            insomclash_binary: insomclash-linux-armv7
+            mihomo_arch: mihomo-linux-armv7
+          - arch: mips_24kc
+            target: ath79-generic
+            insomclash_binary: insomclash-linux-mips
+            mihomo_arch: mihomo-linux-mips-softfloat
+          - arch: mipsel_74kc
+            target: ramips-mt7621
+            insomclash_binary: insomclash-linux-mipsle
+            mihomo_arch: mihomo-linux-mipsle-softfloat
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download Mihomo Binary
+        run: |
+          wget -q -O mihomo.gz https://github.com/MetaCubeX/mihomo/releases/download/${{ env.MIHOMO_VERSION }}/${{ matrix.mihomo_arch }}-${{ env.MIHOMO_VERSION }}.gz
+          gunzip mihomo.gz
+          chmod +x mihomo
+
+      - name: Setup Feed Structure
+        run: |
+          mkdir -p feeds/insomclash/insomclash/core
+          mkdir -p feeds/insomclash/luci-app-insomclash
+          cp -f openwrt/insomclash/Makefile feeds/insomclash/insomclash/
+          cp -f core/${{ matrix.insomclash_binary }} feeds/insomclash/insomclash/core/insomclash
+          cp -f mihomo feeds/insomclash/insomclash/core/mihomo
+          cp -rf files feeds/insomclash/insomclash/
+          cp -rf openwrt/luci-app-insomclash/* feeds/insomclash/luci-app-insomclash/
+
+      - name: Build Package
+        uses: openwrt/gh-action-sdk@main
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
+          FEEDNAME: insomclash
+          PACKAGES: ${{ matrix.arch == 'x86_64' && 'insomclash luci-app-insomclash' || 'insomclash' }}
+          INDEX: 1
+          NO_SHFMT_CHECK: 1
+          KEY_BUILD: ${{ secrets.SIGNING_KEY_SEC }}
+
+      - name: Organize Artifacts
+        run: |
+          mkdir -p output
+          find bin/packages -name "insomclash_*.ipk" -exec cp {} output/ \;
+          find bin/packages -name "luci-app-insomclash_*.ipk" -exec cp {} output/ \;
+          find bin/packages -name "luci-app-insomclash-*.apk" -exec cp {} output/ \;
+          find bin/packages -name "insomclash-*.apk" -exec sh -c 'cp {} output/insomclash-${{ matrix.branch }}-${{ matrix.arch }}.apk' \;
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: insomclash-openwrt-${{ matrix.arch }}-${{ matrix.branch }}
+          path: output/*
+
+  build_deb:
+    name: Build Debian Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y make wget curl unzip tar binutils
+
+      - name: Build All Architectures
+        run: make build-all
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: insomclash-deb
+          path: build/*.deb
+
+  aggregate_packages:
+    needs: [build_core, build_deb]
+    if: ${{ !cancelled() }}
+    name: Aggregate All Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download OpenWrt Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: insomclash-openwrt-*
+          path: downloaded/openwrt
+          merge-multiple: true
+
+      - name: Download IoT/Debian Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: insomclash-deb
+          path: downloaded/debian
+
+      - name: List All Files
+        run: ls -R downloaded
+
+      - name: Upload Combined Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: insomclash-all-packages
+          path: downloaded/**/*
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1
+        if: ${{ inputs.publish == true }}
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          body: |
+            # Insomclash Release ${{ inputs.tag_name }}
+            
+            This release contains pre-built packages for OpenWrt and Debian/Ubuntu.
+            
+            ## 📦 Package Details
+            - **OpenWrt**: `.ipk` (Stable) and `.apk` (Snapshot).
+            - **Debian/Ubuntu**: `.deb` packages for `amd64`, `arm64`, `armhf`.
+            
+            ## 🚀 How to Install
+            
+            **OpenWrt:**
+            Download the appropriate `.ipk` or `.apk` and install via `opkg install` or `apk install`.
+            
+            **Debian/Ubuntu:**
+            Download `.deb` and run `dpkg -i insomclash_*.deb`.
+            
+            See [README](https://github.com/${{ github.repository }}) for full documentation.
+          files: downloaded/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
