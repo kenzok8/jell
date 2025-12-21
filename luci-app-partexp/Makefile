@@ -7,13 +7,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-partexp
+LUCI_TITLE:=LuCI Support for Automatic Partition Mount
+LUCI_PKGARCH:=all
+LUCI_DEPENDS:=+fdisk +block-mount +bc +blkid +parted +btrfs-progs +losetup +resize2fs +e2fsprogs +f2fs-tools +kmod-loop
 
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=Sirpdboy <herboy2008@gmail.com>
 
-LUCI_TITLE:=LuCI Support for Automatic Partition Mount
-LUCI_DEPENDS:=+fdisk +block-mount +bc +blkid +parted +btrfs-progs +losetup +resize2fs +e2fsprogs +f2fs-tools +kmod-loop
-LUCI_PKGARCH:=all
 
 
 include $(TOPDIR)/feeds/luci/luci.mk
