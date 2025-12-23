@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=rblibtorrent
 PKG_VERSION:=2.0.11
-PKG_RELEASE:=21
+PKG_RELEASE:=22
 
 PKG_SOURCE:=libtorrent-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/arvidn/libtorrent/tar.gz/v$(PKG_VERSION)?
@@ -26,7 +26,10 @@ define Package/rblibtorrent
   CATEGORY:=Libraries
   TITLE:=C++ bittorrent library by Rasterbar Software
   URL:=https://www.libtorrent.org
-  DEPENDS:=+boost +boost-system +libatomic +libc +libgcc +libopenssl +libstdcpp +USE_GLIBC:libpthread
+  DEPENDS:= \
+		+libatomic +libc +libgcc +libopenssl +libstdcpp +USE_GLIBC:libpthread \
+		+boost +boost-program_options \
+		$(if $(filter y,$(NEED_BOOST_SYSTEM)),,+boost-system)
   ABI_VERSION:=2.0
 endef
 
