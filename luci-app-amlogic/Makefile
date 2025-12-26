@@ -23,8 +23,8 @@ PKG_MAINTAINER:=ophub <https://github.com/ophub/luci-app-amlogic>
 LUCI_TITLE:=LuCI support for Amlogic, Allwinner and Rockchip related boxs
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
-	@(aarch64||arm) +bash +block-mount +dosfstools +e2fsprogs \
-	+parted +uuidgen
+	@(aarch64||arm) +bash +blkid +block-mount +curl +dosfstools +e2fsprogs \
+	+fdisk +jq +losetup +lsblk +parted +perl +pv +uuidgen
 
 define Package/$(PKG_NAME)/conffiles
 /etc/config/amlogic
