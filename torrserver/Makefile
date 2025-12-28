@@ -1,13 +1,13 @@
 # Makefile build Torrserver MatriX for OpenWrt SDK
 # add node repository in feed.conf.default for build OpenWrt current branch: e.g 24.10
 # src-git node https://github.com/nxhack/openwrt-node-packages.git;openwrt-24.10
-# Copyriht (c) Konstantine Shevlakov 2025 at <shevlakov@132lan.ru>
+# Copyright (c) Konstantine Shevlakov 2025 at <shevlakov@132lan.ru>
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=torrserver
 PKG_VERSION:=MatriX.137
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/YouROK/TorrServer.git
