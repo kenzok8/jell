@@ -1,0 +1,44 @@
+server:
+  port: "8080"
+  host: 0.0.0.0
+  mode: release
+mihomo:
+  core_path: /usr/bin/mihomo
+  config_path: /etc/insomclash/configs/config.yaml
+  working_dir: /etc/insomclash
+  auto_restart: true
+  auto_start: false
+  log_file: /var/log/mihomo.log
+  routing:
+    tcp: tun
+    udp: tun
+logging:
+  level: info
+  file: /var/log/insomclash.log
+  max_size: 100
+  max_backups: 3
+  max_age: 28
+api:
+  rate_limit: 100
+  timeout: 30
+  enable_swagger: false
+  cors:
+    enabled: true
+    allowed_origins:
+    - http://localhost:3000
+    - http://192.168.1.1:3000
+    - http://127.0.0.1:3000
+    allowed_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+    allowed_headers:
+    - Content-Type
+    - Authorization
+    - X-Requested-With
+    expose_headers:
+    - Content-Length
+    allow_credentials: true
+    max_age: 3600

@@ -1,0 +1,137 @@
+include $(TOPDIR)/rules.mk
+
+PKG_NAME:=insomclash
+PKG_VERSION:=1.0.3
+PKG_RELEASE:=2
+
+PKG_MAINTAINER:=BobbyUnknown
+PKG_LICENSE:=MIT
+
+# Mihomo version for download
+MIHOMO_VERSION:=v1.19.17
+
+include $(INCLUDE_DIR)/package.mk
+
+# Architecture mapping for insomclash binary
+ifeq ($(ARCH),x86_64)
+  INSOMCLASH_ARCH:=amd64
+  MIHOMO_ARCH:=amd64-v1
+else ifeq ($(ARCH),i386)
+  INSOMCLASH_ARCH:=386
+  MIHOMO_ARCH:=386
+else ifeq ($(ARCH),aarch64)
+  INSOMCLASH_ARCH:=arm64
+  MIHOMO_ARCH:=arm64
+else ifeq ($(ARCH),arm)
+  INSOMCLASH_ARCH:=armv7
+  MIHOMO_ARCH:=armv7
+else ifeq ($(ARCH),mips)
+  INSOMCLASH_ARCH:=mips
+  MIHOMO_ARCH:=mips-softfloat
+else ifeq ($(ARCH),mipsel)
+  INSOMCLASH_ARCH:=mipsle
+  MIHOMO_ARCH:=mipsle-softfloat
+else ifeq ($(ARCH),mips64)
+  INSOMCLASH_ARCH:=mips64
+  MIHOMO_ARCH:=mips64
+else ifeq ($(ARCH),mips64el)
+  INSOMCLASH_ARCH:=mips64le
+  MIHOMO_ARCH:=mips64le
+else ifeq ($(ARCH),riscv64)
+  INSOMCLASH_ARCH:=riscv64
+  MIHOMO_ARCH:=riscv64
+else
+  INSOMCLASH_ARCH:=amd64
+  MIHOMO_ARCH:=amd64-v1
+endif
+
+# Source directories (relative to package root, not openwrt/insomclash)
+PKG_SOURCE_DIR:=$(CURDIR)/../..
+
+define Package/insomclash
+  SECTION:=net
+  CATEGORY:=Network
+  TITLE:=Insomclash Core + Mihomo
+  URL:=https://github.com/bobbyunknown/Insomclash
+  DEPENDS:=+ca-bundle +ip-full +kmod-tun +kmod-nft-core +kmod-nft-nat +kmod-nft-tproxy +kmod-nft-socket
+endef
+
+define Package/insomclash/description
+  Insomclash + Mihomo Core Binary
+endef
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	
+	@echo "Copying insomclash binary for $(ARCH) ($(INSOMCLASH_ARCH))..."
+	$(CP) $(PKG_SOURCE_DIR)/core/insomclash-linux-$(INSOMCLASH_ARCH) $(PKG_BUILD_DIR)/insomclash
+	chmod +x $(PKG_BUILD_DIR)/insomclash
+	
+	@echo "Downloading Mihomo $(MIHOMO_VERSION) for $(MIHOMO_ARCH)..."
+	wget -q -O $(PKG_BUILD_DIR)/mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/$(MIHOMO_VERSION)/mihomo-linux-$(MIHOMO_ARCH)-$(MIHOMO_VERSION).gz"
+	gunzip -f $(PKG_BUILD_DIR)/mihomo.gz
+	chmod +x $(PKG_BUILD_DIR)/mihomo
+	
+	$(CP) -r $(PKG_SOURCE_DIR)/files/* $(PKG_BUILD_DIR)/
+
+	@echo "Downloading GeoIP assets..."
+	wget -q -O $(PKG_BUILD_DIR)/country.mmdb https://github.com/rtaserver/meta-rules-dat/releases/latest/download/country.mmdb
+	wget -q -O $(PKG_BUILD_DIR)/geoip.dat https://github.com/rtaserver/meta-rules-dat/releases/latest/download/geoip.dat
+	wget -q -O $(PKG_BUILD_DIR)/geosite.dat https://github.com/rtaserver/meta-rules-dat/releases/latest/download/geosite.dat
+	wget -q -O $(PKG_BUILD_DIR)/geoip.metadb https://github.com/rtaserver/meta-rules-dat/releases/download/latest/geoip.metadb
+
+	@echo "Downloading Zashboard..."
+	curl -sL -o $(PKG_BUILD_DIR)/zashboard.zip "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
+	mkdir -p $(PKG_BUILD_DIR)/ui/zashboard
+	unzip -q $(PKG_BUILD_DIR)/zashboard.zip -d $(PKG_BUILD_DIR)/temp_zashboard
+	mv $(PKG_BUILD_DIR)/temp_zashboard/dist/* $(PKG_BUILD_DIR)/ui/zashboard/
+	rm -rf $(PKG_BUILD_DIR)/temp_zashboard $(PKG_BUILD_DIR)/zashboard.zip
+
+	@echo "Downloading MetaCubeXD..."
+	curl -sL -o $(PKG_BUILD_DIR)/metacubexd.tgz "https://github.com/MetaCubeX/metacubexd/releases/latest/download/compressed-dist.tgz"
+	mkdir -p $(PKG_BUILD_DIR)/ui/metacubexd
+	tar -xzf $(PKG_BUILD_DIR)/metacubexd.tgz -C $(PKG_BUILD_DIR)/ui/metacubexd
+	rm $(PKG_BUILD_DIR)/metacubexd.tgz
+
+	@echo "Downloading Yacd..."
+	curl -sL -o $(PKG_BUILD_DIR)/yacd.zip "https://github.com/MetaCubeX/Yacd-meta/archive/refs/heads/gh-pages.zip"
+	unzip -q $(PKG_BUILD_DIR)/yacd.zip -d $(PKG_BUILD_DIR)/temp_yacd
+	mv $(PKG_BUILD_DIR)/temp_yacd/Yacd-meta-gh-pages $(PKG_BUILD_DIR)/ui/yacd
+	rm -rf $(PKG_BUILD_DIR)/temp_yacd $(PKG_BUILD_DIR)/yacd.zip
+endef
+
+define Build/Compile
+endef
+
+define Package/insomclash/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/share/insomclash
+	$(INSTALL_DIR) $(1)/etc/insomclash/configs
+	$(INSTALL_DIR) $(1)/etc/insomclash/proxy_providers
+	$(INSTALL_DIR) $(1)/etc/insomclash/rule_providers
+	$(INSTALL_DIR) $(1)/etc/insomclash/ui
+
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/insomclash $(1)/usr/share/insomclash/insomclash
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mihomo $(1)/usr/bin/mihomo
+
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/app.yaml $(1)/etc/insomclash/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/country.mmdb $(1)/etc/insomclash/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/geoip.dat $(1)/etc/insomclash/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/geosite.dat $(1)/etc/insomclash/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/geoip.metadb $(1)/etc/insomclash/
+
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/configs/* $(1)/etc/insomclash/configs/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/proxy_providers/* $(1)/etc/insomclash/proxy_providers/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/rule_providers/* $(1)/etc/insomclash/rule_providers/
+
+	$(CP) -r $(PKG_BUILD_DIR)/ui/* $(1)/etc/insomclash/ui/
+endef
+
+define Package/insomclash/conffiles
+/etc/insomclash/app.yaml
+/etc/insomclash/configs/config.yaml
+/etc/insomclash/proxy_providers/proxy.yaml
+/etc/insomclash/rule_providers/rule.yaml
+endef
+
+$(eval $(call BuildPackage,insomclash))

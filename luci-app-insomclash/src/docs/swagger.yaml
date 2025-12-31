@@ -1,0 +1,804 @@
+basePath: /api/v1
+definitions:
+  handler.LookupRequest:
+    properties:
+      domain:
+        type: string
+    required:
+    - domain
+    type: object
+  handler.LookupResponse:
+    properties:
+      domain:
+        type: string
+      error:
+        type: string
+      ipv4:
+        items:
+          type: string
+        type: array
+      ipv6:
+        items:
+          type: string
+        type: array
+      success:
+        type: boolean
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Backend API untuk aplikasi tunneling menggunakan mihomo
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: InsomClash API
+  version: "1.0"
+paths:
+  /app/config:
+    get:
+      consumes:
+      - application/json
+      description: Get current InsomClash application configuration
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get application configuration
+      tags:
+      - Insomclash App
+    put:
+      consumes:
+      - application/json
+      description: Update InsomClash application configuration
+      parameters:
+      - description: Configuration to update
+        in: body
+        name: config
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update application configuration
+      tags:
+      - Insomclash App
+  /app/geo/ipv4:
+    get:
+      description: Get IPv4 address with geolocation information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get IPv4 geolocation
+      tags:
+      - Insomclash App
+  /app/geo/ipv6:
+    get:
+      description: Get IPv6 address with geolocation information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get IPv6 geolocation
+      tags:
+      - Insomclash App
+  /app/ipv4:
+    get:
+      description: Get current IPv4 address
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get IPv4 address
+      tags:
+      - Insomclash App
+  /app/ipv6:
+    get:
+      description: Get current IPv6 address
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get IPv6 address
+      tags:
+      - Insomclash App
+  /backup/create:
+    post:
+      description: Create a tar.gz backup of the entire working directory
+      produces:
+      - application/gzip
+      responses:
+        "200":
+          description: Backup file
+          schema:
+            type: file
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create backup
+      tags:
+      - Backup
+  /backup/restore:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Restore configuration from uploaded tar.gz backup file
+      parameters:
+      - description: Backup file (.tar.gz)
+        in: formData
+        name: backup
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Restore backup
+      tags:
+      - Backup
+  /dns/lookup:
+    post:
+      consumes:
+      - application/json
+      description: Resolve domain name to IPv4 and IPv6 addresses
+      parameters:
+      - description: Domain to lookup
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LookupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.LookupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.LookupResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.LookupResponse'
+      summary: Lookup domain IP addresses
+      tags:
+      - DNS
+  /mihomo/{dir}:
+    get:
+      description: Get list of all files in the specified directory
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of files
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get files from directory
+      tags:
+      - Mihomo files
+    post:
+      consumes:
+      - application/json
+      description: Create a new file with the specified content
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: Filename and content
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new file
+      tags:
+      - Mihomo files
+  /mihomo/{dir}/{filename}:
+    delete:
+      description: Delete an existing file
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: Filename of the file to delete
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a file
+      tags:
+      - Mihomo files
+    get:
+      description: Get the content of a specific file
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: Filename of the file
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get file content
+      tags:
+      - Mihomo files
+    put:
+      consumes:
+      - application/json
+      description: Update the content of an existing file
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: Filename of the file
+        in: path
+        name: filename
+        required: true
+        type: string
+      - description: New content
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a file
+      tags:
+      - Mihomo files
+  /mihomo/{dir}/{filename}/download:
+    get:
+      description: Download a specific file
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: Filename of the file
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File content
+          schema:
+            type: file
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Download a file
+      tags:
+      - Mihomo files
+  /mihomo/{dir}/{filename}/rename:
+    put:
+      consumes:
+      - application/json
+      description: Rename an existing file
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: Current filename of the file
+        in: path
+        name: filename
+        required: true
+        type: string
+      - description: New filename
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Rename a file
+      tags:
+      - Mihomo files
+  /mihomo/{dir}/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new file
+      parameters:
+      - description: Directory name (configs, proxy_providers, rule_providers)
+        in: path
+        name: dir
+        required: true
+        type: string
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload a file
+      tags:
+      - Mihomo files
+  /mihomo/active-config:
+    get:
+      description: Get the currently active mihomo configuration file path
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Active config path
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get active config path
+      tags:
+      - Mihomo files
+    put:
+      consumes:
+      - application/json
+      description: Set the active mihomo configuration file path
+      parameters:
+      - description: Filename to set as active
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Error message
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: File not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Set active config path
+      tags:
+      - Mihomo files
+  /mihomo/api/{path}:
+    get:
+      consumes:
+      - application/json
+      description: Proxy requests to Mihomo core API (port 9090)
+      parameters:
+      - description: API path (e.g., /version, /proxies, /rules)
+        in: path
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Proxy to Mihomo API
+      tags:
+      - Mihomo
+  /mihomo/core-version:
+    get:
+      description: Get the version of mihomo core binary (works even when service
+        is not running)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Core version information
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties: true
+            type: object
+      tags:
+      - Mihomo
+  /mihomo/dashboard-info:
+    get:
+      description: Get external-controller port, secret, and available dashboards
+        from ui directory
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard information
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Error message
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Mihomo dashboard information
+      tags:
+      - Mihomo
+  /mihomo/restart:
+    post:
+      consumes:
+      - application/json
+      description: Restart the mihomo service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Restart mihomo service
+      tags:
+      - Mihomo
+  /mihomo/start:
+    post:
+      consumes:
+      - application/json
+      description: Start the mihomo service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Start mihomo service
+      tags:
+      - Mihomo
+  /mihomo/status:
+    get:
+      consumes:
+      - application/json
+      description: Get current status of mihomo service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get mihomo status
+      tags:
+      - Mihomo
+  /mihomo/stop:
+    post:
+      consumes:
+      - application/json
+      description: Stop the mihomo service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Stop mihomo service
+      tags:
+      - Mihomo
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

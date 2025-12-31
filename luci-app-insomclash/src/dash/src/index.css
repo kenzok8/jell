@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 240 248 255;
+    --surface: 255 255 255;
+    --text: 10 22 40;
+    --border: 226 232 240;
+  }
+
+  .dark {
+    --bg: 10 22 40;
+    --surface: 20 40 70;
+    --text: 240 248 255;
+    --border: 30 58 95;
+  }
+
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--text));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

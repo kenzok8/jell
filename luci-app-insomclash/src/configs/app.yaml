@@ -1,0 +1,50 @@
+# InsomClash Application Configuration
+
+server:
+  port: "8080"                    # API server port
+  host: 0.0.0.0                   # Bind address (0.0.0.0 for all interfaces, localhost for local only)
+  mode: release                   # Server mode: debug, release
+
+mihomo:
+  core_path: /usr/bin/mihomo      # Path to mihomo binary executable
+  config_path: /etc/insomclash/configs/config.yaml  # Active mihomo config file
+  working_dir: /etc/insomclash    # Working directory for mihomo (contains configs, providers, etc)
+  auto_restart: true              # Auto restart mihomo on crash
+  auto_start: false
+  log_file: /var/log/mihomo.log   # Mihomo log file location
+  routing:
+    tcp: redirect                 # TCP routing mode: tproxy, redirect, tun, disable
+    udp: tun                      # UDP routing mode: tproxy, tun, disable
+    tun_device: Meta              # Name of the TUN interface (default: Meta)
+
+logging:
+  level: debug                    # Log level: debug, info, warn, error
+  file: /var/log/insomclash.log   # Application log file location
+  max_size: 100                   # Maximum log file size in MB before rotation
+  max_backups: 3                  # Number of old log files to keep
+  max_age: 28                     # Maximum days to keep old log files
+
+api:
+  rate_limit: 100                 # Maximum requests per minute per IP
+  timeout: 30                     # API request timeout in seconds
+  enable_swagger: true            # Enable Swagger UI documentation at /swagger/index.html
+  cors:
+    enabled: true                 # Enable CORS for cross-origin requests
+    allowed_origins:              # Allowed origins for CORS (use * for all)
+    - http://localhost:3000
+    - http://192.168.2.1:3000
+    - http://127.0.0.1:3000
+    allowed_methods:              # Allowed HTTP methods
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+    allowed_headers:              # Allowed request headers
+    - Content-Type
+    - Authorization
+    - X-Requested-With
+    expose_headers:               # Headers exposed to browser
+    - Content-Length
+    allow_credentials: true       # Allow cookies and authentication
+    max_age: 3600                 # Preflight cache duration in seconds

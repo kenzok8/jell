@@ -1,0 +1,108 @@
+name: Publish Release from Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag'
+        required: true
+        default: 'v1.0.0'
+      workflow_run_id:
+        description: 'Workflow Run ID (from build-package.yml)'
+        required: true
+      release_notes:
+        description: 'Additional Release Notes (optional)'
+        required: false
+        default: ''
+
+jobs:
+  publish:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download All Artifacts from Build Run
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          run_id: ${{ inputs.workflow_run_id }}
+          name: insomclash-all-packages
+          path: downloaded
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List Downloaded Artifacts
+        run: |
+          echo "📦 Downloaded artifacts:"
+          ls -lhR downloaded/
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          name: Insomclash ${{ inputs.tag_name }}
+          body: |
+            # Insomclash Release ${{ inputs.tag_name }}
+            
+            ${{ inputs.release_notes }}
+            
+            This release contains pre-built packages for OpenWrt, Debian/Ubuntu, and Arch Linux.
+            
+            ## 📦 Package Details
+            - **OpenWrt**: `.ipk` (24.10) and `.apk` (25.12) packages for multiple architectures
+            - **Debian/Ubuntu**: `.deb` packages for `amd64`, `arm64`, `armhf`
+            - **Arch Linux**: `.pkg.tar.zst` packages for `x86_64`, `aarch64`, `armv7h`
+            
+            ## 🚀 Quick Install
+            
+            ### OpenWrt
+            ```bash
+            # For 24.10 (IPK)
+            opkg install insomclash_*.ipk
+            
+            # For 25.12 (APK)
+            apk add insomclash-*.apk
+            ```
+            
+            ### Debian/Ubuntu
+            ```bash
+            sudo dpkg -i insomclash_*.deb
+            sudo apt-get install -f  # Fix dependencies if needed
+            ```
+            
+            ### Arch Linux
+            ```bash
+            sudo pacman -U insomclash-*.pkg.tar.zst
+            ```
+            
+            ## 📚 Documentation
+            
+            - [Installation Guide](https://github.com/${{ github.repository }}#installation)
+            - [Configuration](https://github.com/${{ github.repository }}#configuration)
+            - [Troubleshooting](https://github.com/${{ github.repository }}#troubleshooting)
+            
+            ## 🔗 Links
+            
+            - **Repository**: https://github.com/${{ github.repository }}
+            - **Issues**: https://github.com/${{ github.repository }}/issues
+            - **Discussions**: https://github.com/${{ github.repository }}/discussions
+            
+            ---
+            
+            Built from commit: ${{ github.sha }}
+          files: downloaded/**/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "✅ Release ${{ inputs.tag_name }} published successfully!"
+          echo "🔗 View release: https://github.com/${{ github.repository }}/releases/tag/${{ inputs.tag_name }}"

@@ -1,0 +1,210 @@
+name: Build Insomclash Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag'
+        required: true
+        default: 'v1.0.0'
+      publish:
+        description: 'Publish to Release?'
+        type: boolean
+        required: true
+        default: true
+  push:
+    branches:
+      - main
+    paths:
+      - 'Makefile'
+      - 'openwrt/insomclash/Makefile'
+      - 'openwrt/luci-app-insomclash/Makefile'
+
+jobs:
+  build_openwrt:
+    permissions:
+      contents: write
+    name: Build OpenWrt ${{ matrix.arch }}-${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        branch:
+          - openwrt-24.10
+          - openwrt-25.12
+        arch:
+          - x86_64
+          - i386_pentium-mmx
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_generic
+          - arm_cortex-a15_neon-vfpv4
+          - arm_cortex-a9
+          - arm_cortex-a7
+          - mips_24kc
+          - mipsel_74kc
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Feed Structure
+        run: |
+          mkdir -p feeds/insomclash
+          mkdir -p feeds/luci-app-insomclash
+          cp -f openwrt/insomclash/Makefile feeds/insomclash/
+          cp -rf files feeds/insomclash/
+          cp -rf openwrt/luci-app-insomclash/* feeds/luci-app-insomclash/
+
+      - name: Build Package
+        uses: openwrt/gh-action-sdk@main
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
+          FEEDNAME: insomclash
+          PACKAGES: ${{ matrix.arch == 'x86_64' && 'insomclash luci-app-insomclash' || 'insomclash' }}
+          INDEX: 1
+          NO_SHFMT_CHECK: 1
+          KEY_BUILD: ${{ secrets.SIGNING_KEY_SEC }}
+
+
+      - name: Organize Artifacts
+        run: |
+          mkdir -p output
+          if [[ "${{ matrix.branch }}" == "openwrt-24.10" ]]; then
+            # OpenWrt 24.10 uses IPK
+            find bin/packages -name "insomclash_*.ipk" -exec cp {} output/ \;
+            find bin/packages -name "luci-app-insomclash_*.ipk" -exec cp {} output/ \;
+          else
+            # OpenWrt 25.12 uses APK
+            find bin/packages -name "insomclash-*.apk" ! -name "luci-app-*" -exec sh -c 'cp "$1" "output/insomclash-${{ matrix.arch }}.apk"' sh {} \;
+            find bin/packages -name "luci-app-insomclash-*.apk" -exec cp {} output/ \;
+          fi
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: insomclash-openwrt-${{ matrix.arch }}-${{ matrix.branch }}
+          path: output/*
+
+  build_debian:
+    name: Build Debian/Ubuntu Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y make wget curl unzip tar binutils
+
+      - name: Build Debian Packages
+        run: make build-deb
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: insomclash-deb
+          path: build/*.deb
+
+  build_archlinux:
+    name: Build Arch Linux Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y make wget curl unzip tar zstd
+
+      - name: Build Arch Linux Packages
+        run: make build-arch
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: insomclash-arch
+          path: build/*.pkg.tar.zst
+
+  aggregate_packages:
+    needs: [build_openwrt, build_debian, build_archlinux]
+    if: ${{ !cancelled() }}
+    name: Aggregate All Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download OpenWrt Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: insomclash-openwrt-*
+          path: downloaded/openwrt
+          merge-multiple: true
+
+      - name: Download Debian Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: insomclash-deb
+          path: downloaded/debian
+
+      - name: Download Arch Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: insomclash-arch
+          path: downloaded/arch
+
+      - name: List All Files
+        run: ls -R downloaded
+
+      - name: Upload Combined Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: insomclash-all-packages
+          path: downloaded/**/*
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1
+        if: ${{ inputs.publish == true }}
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          body: |
+            # Insomclash Release ${{ inputs.tag_name }}
+            
+            This release contains pre-built packages for OpenWrt, Debian/Ubuntu, and Arch Linux.
+            
+            ## 📦 Package Details
+            - **OpenWrt**: `.ipk` (24.10) and `.apk` (25.12) packages
+            - **Debian/Ubuntu**: `.deb` packages for `amd64`, `arm64`, `armhf`
+            - **Arch Linux**: `.pkg.tar.zst` packages for `x86_64`, `aarch64`, `armv7h`
+            
+            ## 🚀 How to Install
+            
+            **OpenWrt:**
+            ```bash
+            # For 24.10 (IPK)
+            opkg install insomclash_*.ipk
+            
+            # For 25.12 (APK)
+            apk add insomclash-*.apk
+            ```
+            
+            **Debian/Ubuntu:**
+            ```bash
+            sudo dpkg -i insomclash_*.deb
+            sudo apt-get install -f  # Fix dependencies if needed
+            ```
+            
+            **Arch Linux:**
+            ```bash
+            sudo pacman -U insomclash-*.pkg.tar.zst
+            ```
+            
+            See [README](https://github.com/${{ github.repository }}) for full documentation.
+          files: downloaded/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
