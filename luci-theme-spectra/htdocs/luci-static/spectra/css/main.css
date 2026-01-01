@@ -458,13 +458,6 @@
     animation: spin 1s linear infinite;
 }
 
-#apiKeyConfigBtn {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 #apiKeyConfigBtn.btn-pulse {
     animation: pulse 1s infinite;
     background-color: var(--color-yellow);
@@ -508,7 +501,7 @@
 
 #oadMoreButton,
 #playAllBtn {
-    background: var(--btn-primary-bg);
+
     border: none;
     color: white;
     font-weight: 500;
@@ -774,6 +767,10 @@
         height: 32px;
         font-size: 16px;
     }
+
+    #playingTitle {
+        max-width: 350px !important;
+    }
 }
 
 .youtube-preview-modal {
@@ -939,4 +936,13 @@
 
 .youtube-modal-footer .youtube-playpause-btn:hover i {
     transform: scale(1.1);
+}
+
+#playingTitle {
+    display: inline-block;
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
 }
