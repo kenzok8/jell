@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"insomclash/pkg/config"
-	"insomclash/pkg/logger"
+	"fusiontunx/pkg/config"
+	"fusiontunx/pkg/logger"
 
 	"github.com/vishvananda/netlink"
 )

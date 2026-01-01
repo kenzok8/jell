@@ -33,7 +33,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v3
         with:
           run_id: ${{ inputs.workflow_run_id }}
-          name: insomclash-all-packages
+          name: fusiontunx-all-packages
           path: downloaded
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -46,9 +46,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ inputs.tag_name }}
-          name: Insomclash ${{ inputs.tag_name }}
+          name: FusionTunX ${{ inputs.tag_name }}
           body: |
-            # Insomclash Release ${{ inputs.tag_name }}
+            # FusionTunX Release ${{ inputs.tag_name }}
             
             ${{ inputs.release_notes }}
             
@@ -64,21 +64,21 @@ jobs:
             ### OpenWrt
             ```bash
             # For 24.10 (IPK)
-            opkg install insomclash_*.ipk
+            opkg install fusiontunx_*.ipk
             
             # For 25.12 (APK)
-            apk add insomclash-*.apk
+            apk add fusiontunx-*.apk
             ```
             
             ### Debian/Ubuntu
             ```bash
-            sudo dpkg -i insomclash_*.deb
+            sudo dpkg -i fusiontunx_*.deb
             sudo apt-get install -f  # Fix dependencies if needed
             ```
             
             ### Arch Linux
             ```bash
-            sudo pacman -U insomclash-*.pkg.tar.zst
+            sudo pacman -U fusiontunx-*.pkg.tar.zst
             ```
             
             ## 📚 Documentation

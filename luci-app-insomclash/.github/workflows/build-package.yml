@@ -1,4 +1,4 @@
-name: Build Insomclash Packages
+name: Build FusionTunX Packages
 
 on:
   workflow_dispatch:
@@ -15,13 +15,43 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Makefile'
-      - 'openwrt/insomclash/Makefile'
-      - 'openwrt/luci-app-insomclash/Makefile'
 
 jobs:
+  build_packages:
+    name: Build Debian/Ubuntu & Arch Linux Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y make wget curl unzip tar binutils zstd
+
+      - name: Build All Packages (Debian + Arch)
+        run: make build-all
+
+      - name: Upload Debian Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: fusiontunx-deb
+          path: build/*.deb
+
+      - name: Upload Arch Linux Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: fusiontunx-arch
+          path: build/*.pkg.tar.zst
+
+      - name: Upload Core Binaries for OpenWrt
+        uses: actions/upload-artifact@v4
+        with:
+          name: fusiontunx-core-binaries
+          path: core/*
+
   build_openwrt:
+    needs: build_packages
     permissions:
       contents: write
     name: Build OpenWrt ${{ matrix.arch }}-${{ matrix.branch }}
@@ -51,20 +81,26 @@ jobs:
         with:
           ref: main
 
+      - name: Download Core Binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: fusiontunx-core-binaries
+          path: core
+
       - name: Setup Feed Structure
         run: |
-          mkdir -p feeds/insomclash
-          mkdir -p feeds/luci-app-insomclash
-          cp -f openwrt/insomclash/Makefile feeds/insomclash/
-          cp -rf files feeds/insomclash/
-          cp -rf openwrt/luci-app-insomclash/* feeds/luci-app-insomclash/
+          mkdir -p feeds/fusiontunx
+          mkdir -p feeds/luci-app-fusiontunx
+          cp -f openwrt/fusiontunx/Makefile feeds/fusiontunx/
+          cp -rf files feeds/fusiontunx/
+          cp -rf openwrt/luci-app-fusiontunx/* feeds/luci-app-fusiontunx/
 
       - name: Build Package
         uses: openwrt/gh-action-sdk@main
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
-          FEEDNAME: insomclash
-          PACKAGES: ${{ matrix.arch == 'x86_64' && 'insomclash luci-app-insomclash' || 'insomclash' }}
+          FEEDNAME: fusiontunx
+          PACKAGES: ${{ matrix.arch == 'x86_64' && 'fusiontunx luci-app-fusiontunx' || 'fusiontunx' }}
           INDEX: 1
           NO_SHFMT_CHECK: 1
           KEY_BUILD: ${{ secrets.SIGNING_KEY_SEC }}
@@ -75,64 +111,22 @@ jobs:
           mkdir -p output
           if [[ "${{ matrix.branch }}" == "openwrt-24.10" ]]; then
             # OpenWrt 24.10 uses IPK
-            find bin/packages -name "insomclash_*.ipk" -exec cp {} output/ \;
-            find bin/packages -name "luci-app-insomclash_*.ipk" -exec cp {} output/ \;
+            find bin/packages -name "fusiontunx_*.ipk" -exec cp {} output/ \;
+            find bin/packages -name "luci-app-fusiontunx_*.ipk" -exec cp {} output/ \;
           else
             # OpenWrt 25.12 uses APK
-            find bin/packages -name "insomclash-*.apk" ! -name "luci-app-*" -exec sh -c 'cp "$1" "output/insomclash-${{ matrix.arch }}.apk"' sh {} \;
-            find bin/packages -name "luci-app-insomclash-*.apk" -exec cp {} output/ \;
+            find bin/packages -name "fusiontunx-*.apk" ! -name "luci-app-*" -exec sh -c 'cp "$1" "output/fusiontunx-${{ matrix.arch }}.apk"' sh {} \;
+            find bin/packages -name "luci-app-fusiontunx-*.apk" -exec cp {} output/ \;
           fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: insomclash-openwrt-${{ matrix.arch }}-${{ matrix.branch }}
+          name: fusiontunx-openwrt-${{ matrix.arch }}-${{ matrix.branch }}
           path: output/*
 
-  build_debian:
-    name: Build Debian/Ubuntu Packages
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install -y make wget curl unzip tar binutils
-
-      - name: Build Debian Packages
-        run: make build-deb
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: insomclash-deb
-          path: build/*.deb
-
-  build_archlinux:
-    name: Build Arch Linux Packages
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install -y make wget curl unzip tar zstd
-
-      - name: Build Arch Linux Packages
-        run: make build-arch
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: insomclash-arch
-          path: build/*.pkg.tar.zst
-
   aggregate_packages:
-    needs: [build_openwrt, build_debian, build_archlinux]
+    needs: [build_openwrt, build_packages]
     if: ${{ !cancelled() }}
     name: Aggregate All Packages
     runs-on: ubuntu-latest
@@ -140,20 +134,20 @@ jobs:
       - name: Download OpenWrt Artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: insomclash-openwrt-*
+          pattern: fusiontunx-openwrt-*
           path: downloaded/openwrt
           merge-multiple: true
 
       - name: Download Debian Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: insomclash-deb
+          name: fusiontunx-deb
           path: downloaded/debian
 
       - name: Download Arch Linux Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: insomclash-arch
+          name: fusiontunx-arch
           path: downloaded/arch
 
       - name: List All Files
@@ -162,7 +156,7 @@ jobs:
       - name: Upload Combined Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: insomclash-all-packages
+          name: fusiontunx-all-packages
           path: downloaded/**/*
 
       - name: Create Release and Upload Assets
@@ -171,7 +165,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag_name }}
           body: |
-            # Insomclash Release ${{ inputs.tag_name }}
+            # FusionTunX Release ${{ inputs.tag_name }}
             
             This release contains pre-built packages for OpenWrt, Debian/Ubuntu, and Arch Linux.
             
@@ -185,21 +179,21 @@ jobs:
             **OpenWrt:**
             ```bash
             # For 24.10 (IPK)
-            opkg install insomclash_*.ipk
+            opkg install fusiontunx_*.ipk
             
             # For 25.12 (APK)
-            apk add insomclash-*.apk
+            apk add fusiontunx-*.apk
             ```
             
             **Debian/Ubuntu:**
             ```bash
-            sudo dpkg -i insomclash_*.deb
+            sudo dpkg -i fusiontunx_*.deb
             sudo apt-get install -f  # Fix dependencies if needed
             ```
             
             **Arch Linux:**
             ```bash
-            sudo pacman -U insomclash-*.pkg.tar.zst
+            sudo pacman -U fusiontunx-*.pkg.tar.zst
             ```
             
             See [README](https://github.com/${{ github.repository }}) for full documentation.

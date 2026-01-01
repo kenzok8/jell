@@ -4,8 +4,8 @@ server:
   mode: release
 mihomo:
   core_path: /usr/bin/mihomo
-  config_path: /etc/insomclash/configs/config.yaml
-  working_dir: /etc/insomclash
+  config_path: /etc/fusiontunx/configs/config.yaml
+  working_dir: /etc/fusiontunx
   auto_restart: true
   auto_start: false
   log_file: /var/log/mihomo.log
@@ -15,7 +15,7 @@ mihomo:
     tun_device: ""
 logging:
   level: info
-  file: /var/log/insomclash.log
+  file: /var/log/fusiontunx.log
   max_size: 100
   max_backups: 3
   max_age: 28

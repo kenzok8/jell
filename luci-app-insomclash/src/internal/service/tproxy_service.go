@@ -6,7 +6,7 @@ import (
 	"net"
 	"sort"
 
-	"insomclash/pkg/logger"
+	"fusiontunx/pkg/logger"
 
 	"github.com/sagernet/nftables"
 	"github.com/sagernet/nftables/expr"
@@ -149,7 +149,7 @@ func (tp *TProxyService) createRules() error {
 	logger.Debug("TPROXY: Creating table")
 	table := tp.conn.AddTable(&nftables.Table{
 		Family: nftables.TableFamilyINet,
-		Name:   "insomclash_tproxy",
+		Name:   "fusiontunx_tproxy",
 	})
 
 	logger.Debug("TPROXY: Creating reserved_ip set")
@@ -567,7 +567,7 @@ func (tp *TProxyService) deleteRules() error {
 	}
 
 	nft.DelTable(&nftables.Table{
-		Name:   "insomclash_tproxy",
+		Name:   "fusiontunx_tproxy",
 		Family: nftables.TableFamilyINet,
 	})
 

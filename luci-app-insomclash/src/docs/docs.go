@@ -26,7 +26,7 @@ const docTemplate = `{
     "paths": {
         "/app/config": {
             "get": {
-                "description": "Get current InsomClash application configuration",
+                "description": "Get current FusionTunX application configuration",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,7 +34,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get application configuration",
                 "responses": {
@@ -48,7 +48,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update InsomClash application configuration",
+                "description": "Update FusionTunX application configuration",
                 "consumes": [
                     "application/json"
                 ],
@@ -56,7 +56,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Update application configuration",
                 "parameters": [
@@ -103,7 +103,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv4 geolocation",
                 "responses": {
@@ -138,7 +138,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv6 geolocation",
                 "responses": {
@@ -173,7 +173,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv4 address",
                 "responses": {
@@ -208,7 +208,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv6 address",
                 "responses": {
@@ -1203,7 +1203,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "InsomClash API",
+	Title:            "FusionTunX API",
 	Description:      "Backend API untuk aplikasi tunneling menggunakan mihomo",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

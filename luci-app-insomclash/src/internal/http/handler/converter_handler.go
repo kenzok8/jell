@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"insomclash/internal/converter"
+	"fusiontunx/internal/converter"
 
 	"github.com/gin-gonic/gin"
 )

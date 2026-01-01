@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	"insomclash/pkg/logger"
+	"fusiontunx/pkg/logger"
 
 	"github.com/sagernet/nftables"
 	"github.com/sagernet/nftables/expr"
@@ -46,7 +46,7 @@ func (rs *RedirectService) createRules() error {
 	logger.Debug("REDIRECT: Creating table")
 	table := rs.conn.AddTable(&nftables.Table{
 		Family: nftables.TableFamilyINet,
-		Name:   "insomclash_redirect",
+		Name:   "fusiontunx_redirect",
 	})
 
 	outputChain := rs.conn.AddChain(&nftables.Chain{
@@ -142,7 +142,7 @@ func (rs *RedirectService) addOutputRules(table *nftables.Table, chain *nftables
 func (rs *RedirectService) deleteRules(conn *nftables.Conn) {
 	table := &nftables.Table{
 		Family: nftables.TableFamilyINet,
-		Name:   "insomclash_redirect",
+		Name:   "fusiontunx_redirect",
 	}
 	conn.DelTable(table)
 	conn.Flush()

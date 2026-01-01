@@ -1,0 +1,26 @@
+{
+    "admin/services/fusiontunx": {
+        "title": "FusionTunX",
+        "order": 50,
+        "action": {
+            "type": "alias",
+            "path": "admin/services/fusiontunx/dashboard"
+        }
+    },
+    "admin/services/fusiontunx/dashboard": {
+        "title": "Dashboard",
+        "order": 10,
+        "action": {
+            "type": "view",
+            "path": "fusiontunx/fusiontunx"
+        }
+    },
+    "admin/services/fusiontunx/server": {
+        "title": "Server",
+        "order": 20,
+        "action": {
+            "type": "view",
+            "path": "fusiontunx/server"
+        }
+    }
+}

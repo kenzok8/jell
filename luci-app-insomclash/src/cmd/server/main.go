@@ -12,19 +12,19 @@ import (
 	"syscall"
 	"time"
 
-	_ "insomclash/docs"
-	"insomclash/internal/http/router"
-	"insomclash/internal/service"
-	"insomclash/internal/ui"
-	"insomclash/pkg/config"
-	"insomclash/pkg/logger"
+	_ "fusiontunx/docs"
+	"fusiontunx/internal/http/router"
+	"fusiontunx/internal/service"
+	"fusiontunx/internal/ui"
+	"fusiontunx/pkg/config"
+	"fusiontunx/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title InsomClash API
+// @title FusionTunX API
 // @version 1.0
 // @description Backend API untuk aplikasi tunneling menggunakan mihomo
 // @termsOfService http://swagger.io/terms/
@@ -43,8 +43,8 @@ import (
 // @name Authorization
 func main() {
 	var configPath string
-	flag.StringVar(&configPath, "config", "/etc/insomclash/app.yaml", "Path to configuration file")
-	flag.StringVar(&configPath, "c", "/etc/insomclash/app.yaml", "Path to configuration file (shorthand)")
+	flag.StringVar(&configPath, "config", "/etc/fusiontunx/app.yaml", "Path to configuration file")
+	flag.StringVar(&configPath, "c", "/etc/fusiontunx/app.yaml", "Path to configuration file (shorthand)")
 	flag.Parse()
 
 	cfg, err := config.Load(configPath)

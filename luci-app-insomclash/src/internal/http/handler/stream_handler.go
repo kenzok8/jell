@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"insomclash/internal/service"
-	"insomclash/pkg/config"
+	"fusiontunx/internal/service"
+	"fusiontunx/pkg/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

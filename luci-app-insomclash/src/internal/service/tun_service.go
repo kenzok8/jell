@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"insomclash/pkg/config"
-	"insomclash/pkg/logger"
+	"fusiontunx/pkg/config"
+	"fusiontunx/pkg/logger"
 
 	"github.com/sagernet/nftables"
 	"github.com/sagernet/nftables/expr"
@@ -214,7 +214,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 			&expr.Counter{},
 			&expr.Verdict{Kind: expr.VerdictAccept},
 		},
-		UserData: []byte("Insomclash TUN Forward Out"),
+		UserData: []byte("FusionTunX TUN Forward Out"),
 	})
 
 	t.conn.InsertRule(&nftables.Rule{
@@ -237,7 +237,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 			&expr.Counter{},
 			&expr.Verdict{Kind: expr.VerdictAccept},
 		},
-		UserData: []byte("Insomclash TUN Forward Out"),
+		UserData: []byte("FusionTunX TUN Forward Out"),
 	})
 
 	t.conn.InsertRule(&nftables.Rule{
@@ -260,7 +260,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 			&expr.Counter{},
 			&expr.Verdict{Kind: expr.VerdictAccept},
 		},
-		UserData: []byte("Insomclash TUN Forward In"),
+		UserData: []byte("FusionTunX TUN Forward In"),
 	})
 
 	t.conn.InsertRule(&nftables.Rule{
@@ -283,7 +283,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 			&expr.Counter{},
 			&expr.Verdict{Kind: expr.VerdictAccept},
 		},
-		UserData: []byte("Insomclash TUN Forward In"),
+		UserData: []byte("FusionTunX TUN Forward In"),
 	})
 
 	t.conn.InsertRule(&nftables.Rule{
@@ -306,7 +306,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 			&expr.Counter{},
 			&expr.Verdict{Kind: expr.VerdictAccept},
 		},
-		UserData: []byte("Insomclash TUN Input"),
+		UserData: []byte("FusionTunX TUN Input"),
 	})
 
 	t.conn.InsertRule(&nftables.Rule{
@@ -329,7 +329,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 			&expr.Counter{},
 			&expr.Verdict{Kind: expr.VerdictAccept},
 		},
-		UserData: []byte("Insomclash TUN Input"),
+		UserData: []byte("FusionTunX TUN Input"),
 	})
 
 	t.conn.InsertRule(&nftables.Rule{
@@ -352,7 +352,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 			&expr.Counter{},
 			&expr.Verdict{Kind: expr.VerdictReturn},
 		},
-		UserData: []byte("Insomclash TUN Postrouting"),
+		UserData: []byte("FusionTunX TUN Postrouting"),
 	})
 
 	return t.createMarkingRules(routingConfig)
@@ -361,7 +361,7 @@ func (t *TUNService) createOpenWrtFw4Rules(routingConfig config.RoutingConfig) e
 func (t *TUNService) createMarkingRules(routingConfig config.RoutingConfig) error {
 	mangle := t.conn.AddTable(&nftables.Table{
 		Family: nftables.TableFamilyIPv4,
-		Name:   "insomclash_tun",
+		Name:   "fusiontunx_tun",
 	})
 
 	prerouting := t.conn.AddChain(&nftables.Chain{
@@ -579,7 +579,7 @@ func (t *TUNService) deleteRules() error {
 	}
 
 	nft.DelTable(&nftables.Table{
-		Name:   "insomclash_tun",
+		Name:   "fusiontunx_tun",
 		Family: nftables.TableFamilyIPv4,
 	})
 
@@ -595,7 +595,7 @@ func (t *TUNService) deleteRules() error {
 				rules, _ := nft.GetRules(fw4Table, chain)
 				for _, rule := range rules {
 					userData := string(rule.UserData)
-					if strings.Contains(userData, "Insomclash TUN") {
+					if strings.Contains(userData, "FusionTunX TUN") {
 						nft.DelRule(rule)
 					}
 				}

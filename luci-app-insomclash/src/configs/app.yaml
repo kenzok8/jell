@@ -1,4 +1,4 @@
-# InsomClash Application Configuration
+# FusionTunX Application Configuration
 
 server:
   port: "8080"                    # API server port
@@ -7,8 +7,8 @@ server:
 
 mihomo:
   core_path: /usr/bin/mihomo      # Path to mihomo binary executable
-  config_path: /etc/insomclash/configs/config.yaml  # Active mihomo config file
-  working_dir: /etc/insomclash    # Working directory for mihomo (contains configs, providers, etc)
+  config_path: /etc/fusiontunx/configs/config.yaml  # Active mihomo config file
+  working_dir: /etc/fusiontunx    # Working directory for mihomo (contains configs, providers, etc)
   auto_restart: true              # Auto restart mihomo on crash
   auto_start: false
   log_file: /var/log/mihomo.log   # Mihomo log file location
@@ -19,7 +19,7 @@ mihomo:
 
 logging:
   level: debug                    # Log level: debug, info, warn, error
-  file: /var/log/insomclash.log   # Application log file location
+  file: /var/log/fusiontunx.log   # Application log file location
   max_size: 100                   # Maximum log file size in MB before rotation
   max_backups: 3                  # Number of old log files to keep
   max_age: 28                     # Maximum days to keep old log files

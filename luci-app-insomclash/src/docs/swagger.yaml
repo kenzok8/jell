@@ -34,14 +34,14 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
   termsOfService: http://swagger.io/terms/
-  title: InsomClash API
+  title: FusionTunX API
   version: "1.0"
 paths:
   /app/config:
     get:
       consumes:
       - application/json
-      description: Get current InsomClash application configuration
+      description: Get current FusionTunX application configuration
       produces:
       - application/json
       responses:
@@ -52,11 +52,11 @@ paths:
             type: object
       summary: Get application configuration
       tags:
-      - Insomclash App
+      - FusionTunX App
     put:
       consumes:
       - application/json
-      description: Update InsomClash application configuration
+      description: Update FusionTunX application configuration
       parameters:
       - description: Configuration to update
         in: body
@@ -85,7 +85,7 @@ paths:
             type: object
       summary: Update application configuration
       tags:
-      - Insomclash App
+      - FusionTunX App
   /app/geo/ipv4:
     get:
       description: Get IPv4 address with geolocation information
@@ -109,7 +109,7 @@ paths:
             type: object
       summary: Get IPv4 geolocation
       tags:
-      - Insomclash App
+      - FusionTunX App
   /app/geo/ipv6:
     get:
       description: Get IPv6 address with geolocation information
@@ -133,7 +133,7 @@ paths:
             type: object
       summary: Get IPv6 geolocation
       tags:
-      - Insomclash App
+      - FusionTunX App
   /app/ipv4:
     get:
       description: Get current IPv4 address
@@ -157,7 +157,7 @@ paths:
             type: object
       summary: Get IPv4 address
       tags:
-      - Insomclash App
+      - FusionTunX App
   /app/ipv6:
     get:
       description: Get current IPv6 address
@@ -181,7 +181,7 @@ paths:
             type: object
       summary: Get IPv6 address
       tags:
-      - Insomclash App
+      - FusionTunX App
   /backup/create:
     post:
       description: Create a tar.gz backup of the entire working directory

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"insomclash/internal/service"
-	"insomclash/pkg/config"
+	"fusiontunx/internal/service"
+	"fusiontunx/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,8 +27,8 @@ func NewAppHandler(cfg *config.Config, mihomoService *service.MihomoService, con
 
 // GetConfig godoc
 // @Summary Get application configuration
-// @Description Get current InsomClash application configuration
-// @Tags Insomclash App
+// @Description Get current FusionTunX application configuration
+// @Tags FusionTunX App
 // @Accept json
 // @Produce json
 // @Success 200 {object} map[string]interface{}
@@ -46,7 +46,7 @@ func (h *AppHandler) GetConfig(c *gin.Context) {
 
 // @Summary Get IPv4 address
 // @Description Get current IPv4 address
-// @Tags Insomclash App
+// @Tags FusionTunX App
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -91,7 +91,7 @@ func (h *AppHandler) GetIPv4(c *gin.Context) {
 // GetIPv6 godoc
 // @Summary Get IPv6 address
 // @Description Get current IPv6 address
-// @Tags Insomclash App
+// @Tags FusionTunX App
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -136,7 +136,7 @@ func (h *AppHandler) GetIPv6(c *gin.Context) {
 // GetGeoIPv4 godoc
 // @Summary Get IPv4 geolocation
 // @Description Get IPv4 address with geolocation information
-// @Tags Insomclash App
+// @Tags FusionTunX App
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -197,7 +197,7 @@ func (h *AppHandler) GetGeoIPv4(c *gin.Context) {
 // GetGeoIPv6 godoc
 // @Summary Get IPv6 geolocation
 // @Description Get IPv6 address with geolocation information
-// @Tags Insomclash App
+// @Tags FusionTunX App
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -257,8 +257,8 @@ func (h *AppHandler) GetGeoIPv6(c *gin.Context) {
 
 // UpdateConfig godoc
 // @Summary Update application configuration
-// @Description Update InsomClash application configuration
-// @Tags Insomclash App
+// @Description Update FusionTunX application configuration
+// @Tags FusionTunX App
 // @Accept json
 // @Produce json
 // @Param config body map[string]interface{} true "Configuration to update"

@@ -65,8 +65,8 @@ func createDefaultConfig(path string) (*Config, error) {
 		},
 		Mihomo: MihomoConfig{
 			CorePath:    "/usr/bin/mihomo",
-			ConfigPath:  "/etc/insomclash/config/config.yaml",
-			WorkingDir:  "/etc/insomclash",
+			ConfigPath:  "/etc/fusiontunx/configs/config.yaml",
+			WorkingDir:  "/etc/fusiontunx",
 			AutoRestart: true,
 			Routing: RoutingConfig{
 				TunDevice: "Meta",
@@ -74,7 +74,7 @@ func createDefaultConfig(path string) (*Config, error) {
 		},
 		Logging: LoggingConfig{
 			Level:      getEnv("LOG_LEVEL", "info"),
-			File:       "/var/log/insomclash.log",
+			File:       "/var/log/fusiontunx.log",
 			MaxSize:    100,
 			MaxBackups: 3,
 			MaxAge:     28,

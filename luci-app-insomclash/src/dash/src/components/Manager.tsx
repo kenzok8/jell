@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Heading, 
-  Button, 
+import {
+  Box,
+  Heading,
+  Button,
   Flex,
 } from '@chakra-ui/react';
 import { Plus, RefreshCw, Upload } from 'lucide-react';
@@ -34,7 +34,7 @@ export function Manager({ type, title }: ManagerProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Toast function using notification utility
   const showToast = (title: string, description: string, status: 'success' | 'error' | 'warning' | 'info') => {
     switch (status) {
@@ -54,7 +54,7 @@ export function Manager({ type, title }: ManagerProps) {
 
   const onCreateOpen = () => setIsCreateOpen(true);
   const onCreateClose = () => setIsCreateOpen(false);
-  
+
   const onRenameOpen = () => setIsRenameOpen(true);
   const onRenameClose = () => setIsRenameOpen(false);
 
@@ -76,7 +76,7 @@ export function Manager({ type, title }: ManagerProps) {
     try {
       let endpoint = '';
       let errorMessage = '';
-      
+
       switch (type) {
         case 'configs':
           endpoint = API_ENDPOINTS.mihomo.configs;
@@ -91,7 +91,7 @@ export function Manager({ type, title }: ManagerProps) {
           errorMessage = 'Failed to fetch rule provider files';
           break;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`);
       if (!response.ok) throw new Error(errorMessage);
       const data = await response.json();
@@ -122,7 +122,7 @@ export function Manager({ type, title }: ManagerProps) {
     setIsLoading(true);
     try {
       let endpoint = '';
-      
+
       switch (type) {
         case 'configs':
           endpoint = API_ENDPOINTS.mihomo.configFile(filename);
@@ -134,7 +134,7 @@ export function Manager({ type, title }: ManagerProps) {
           endpoint = API_ENDPOINTS.mihomo.ruleProviderFile(filename);
           break;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`);
       if (!response.ok) throw new Error('Failed to fetch file content');
       const data = await response.json();
@@ -155,13 +155,13 @@ export function Manager({ type, title }: ManagerProps) {
       return;
     }
 
-    const finalFilename = !filename.endsWith('.yaml') && !filename.endsWith('.yml') 
-      ? filename + '.yaml' 
+    const finalFilename = !filename.endsWith('.yaml') && !filename.endsWith('.yml')
+      ? filename + '.yaml'
       : filename;
 
     try {
       let endpoint = '';
-      
+
       switch (type) {
         case 'configs':
           endpoint = API_ENDPOINTS.mihomo.configs;
@@ -173,7 +173,7 @@ export function Manager({ type, title }: ManagerProps) {
           endpoint = API_ENDPOINTS.mihomo.ruleProviders;
           break;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -198,7 +198,7 @@ export function Manager({ type, title }: ManagerProps) {
   const saveFileContent = async () => {
     try {
       let endpoint = '';
-      
+
       switch (type) {
         case 'configs':
           endpoint = API_ENDPOINTS.mihomo.configFile(selectedFile);
@@ -210,7 +210,7 @@ export function Manager({ type, title }: ManagerProps) {
           endpoint = API_ENDPOINTS.mihomo.ruleProviderFile(selectedFile);
           break;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'PUT',
         headers: {
@@ -243,13 +243,13 @@ export function Manager({ type, title }: ManagerProps) {
       return;
     }
 
-    const finalNewName = !newName.endsWith('.yaml') && !newName.endsWith('.yml') 
-      ? newName + '.yaml' 
+    const finalNewName = !newName.endsWith('.yaml') && !newName.endsWith('.yml')
+      ? newName + '.yaml'
       : newName;
 
     try {
       let endpoint = '';
-      
+
       switch (type) {
         case 'configs':
           endpoint = API_ENDPOINTS.mihomo.configRename(fileToRename);
@@ -261,7 +261,7 @@ export function Manager({ type, title }: ManagerProps) {
           endpoint = API_ENDPOINTS.mihomo.ruleProviderRename(fileToRename);
           break;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'PUT',
         headers: {
@@ -280,7 +280,7 @@ export function Manager({ type, title }: ManagerProps) {
       if (type === 'configs') {
         fetchActiveConfigPath();
       }
-      
+
       if (selectedFile === fileToRename) {
         setSelectedFile(finalNewName);
       }
@@ -299,11 +299,11 @@ export function Manager({ type, title }: ManagerProps) {
 
   const confirmDeleteFile = async () => {
     if (!fileToDelete) return;
-    
+
     setIsDeleting(true);
     try {
       let endpoint = '';
-      
+
       switch (type) {
         case 'configs':
           endpoint = API_ENDPOINTS.mihomo.configFile(fileToDelete);
@@ -315,7 +315,7 @@ export function Manager({ type, title }: ManagerProps) {
           endpoint = API_ENDPOINTS.mihomo.ruleProviderFile(fileToDelete);
           break;
       }
-      
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'DELETE',
       });
@@ -327,12 +327,12 @@ export function Manager({ type, title }: ManagerProps) {
       if (type === 'configs') {
         fetchActiveConfigPath();
       }
-      
+
       if (selectedFile === fileToDelete) {
         setSelectedFile('');
         setFileContent('');
       }
-      
+
       onDeleteClose();
     } catch (error) {
       console.error('Error deleting file:', error);
@@ -368,38 +368,38 @@ export function Manager({ type, title }: ManagerProps) {
 
   return (
     <Box>
-      <Flex 
-        justifyContent="space-between" 
-        alignItems={{ base: 'flex-start', sm: 'center' }} 
+      <Flex
+        justifyContent="space-between"
+        alignItems={{ base: 'flex-start', sm: 'center' }}
         mb={4}
         flexDirection={{ base: 'column', sm: 'row' }}
         gap={{ base: 2, sm: 0 }}
       >
         <Heading size="lg">{title || (type === 'configs' ? 'Config Files' : type === 'proxy_providers' ? 'Proxy Provider Files' : 'Rule Provider Files')}</Heading>
         <Flex gap={2} flexWrap="wrap">
-          <Button 
-            colorPalette="blue" 
-            size={{base: "2xs", md: "xs"}}
-            fontSize={{base: "xs", md: "sm"}}
+          <Button
+            colorPalette="blue"
+            size={{ base: "2xs", md: "xs" }}
+            fontSize={{ base: "xs", md: "sm" }}
             onClick={fetchFiles}
             disabled={isLoading}
           >
             <RefreshCw size={12} style={{ marginRight: '4px' }} />
             Refresh
           </Button>
-          <Button 
-            colorPalette="green" 
-            size={{base: "2xs", md: "xs"}}
-            fontSize={{base: "xs", md: "sm"}}
+          <Button
+            colorPalette="green"
+            size={{ base: "2xs", md: "xs" }}
+            fontSize={{ base: "xs", md: "sm" }}
             onClick={onCreateOpen}
           >
             <Plus size={12} style={{ marginRight: '4px' }} />
             New {type === 'configs' ? 'Config' : type === 'proxy_providers' ? 'Proxy' : 'Rule'}
           </Button>
-          <Button 
-            colorPalette="cyan" 
-            size={{base: "2xs", md: "xs"}}
-            fontSize={{base: "xs", md: "sm"}}
+          <Button
+            colorPalette="cyan"
+            size={{ base: "2xs", md: "xs" }}
+            fontSize={{ base: "xs", md: "sm" }}
             onClick={onUploadOpen}
           >
             <Upload size={12} style={{ marginRight: '4px' }} />
@@ -410,12 +410,12 @@ export function Manager({ type, title }: ManagerProps) {
 
       <Flex gap={6} direction={{ base: 'column', lg: 'row' }} height="calc(100vh - 200px)">
         <Box width={{ base: '100%', lg: '30%' }} height="100%">
-          <FileList 
-            files={files} 
-            selectedFile={selectedFile} 
-            onFileSelect={fetchFileContent} 
-            onRenameClick={handleRenameClick} 
-            onDeleteClick={deleteFile} 
+          <FileList
+            files={files}
+            selectedFile={selectedFile}
+            onFileSelect={fetchFileContent}
+            onRenameClick={handleRenameClick}
+            onDeleteClick={deleteFile}
             activeConfigPath={type === 'configs' ? activeConfigPath : undefined}
             onSetActiveConfig={type === 'configs' ? setActiveConfig : undefined}
             hideActiveConfig={type !== 'configs'}
@@ -423,11 +423,12 @@ export function Manager({ type, title }: ManagerProps) {
           />
         </Box>
         <Box width={{ base: '100%', lg: '70%' }} height="100%">
-          <FileEditor 
+          <FileEditor
             fileContent={fileContent}
             selectedFile={selectedFile}
             isEditing={isEditing}
             isLoading={isLoading}
+            type={type}
             onEditClick={() => setIsEditing(true)}
             onCancelEdit={() => setIsEditing(false)}
             onSaveClick={saveFileContent}
@@ -444,14 +445,14 @@ export function Manager({ type, title }: ManagerProps) {
         placeholder={`Enter ${type === 'configs' ? 'config' : type === 'proxy_providers' ? 'proxy provider' : 'rule provider'} content`}
         defaultContent={type === 'proxy_providers' ? 'proxies:\n  - name: Example\n    type: http\n    server: example.com\n    port: 7890' : ''}
       />
-      
+
       <RenameFileModal
         isOpen={isRenameOpen}
         onClose={onRenameClose}
         onRenameFile={handleRenameFile}
         currentFileName={fileToRename}
       />
-      
+
       <UploadFileModal
         isOpen={isUploadOpen}
         onClose={onUploadClose}
@@ -459,7 +460,7 @@ export function Manager({ type, title }: ManagerProps) {
         uploadEndpoint={`${API_BASE_URL}${type === 'configs' ? API_ENDPOINTS.mihomo.configs : type === 'proxy_providers' ? API_ENDPOINTS.mihomo.proxyProviders : API_ENDPOINTS.mihomo.ruleProviders}/upload`}
         title={`Upload ${type === 'configs' ? 'Config' : type === 'proxy_providers' ? 'Proxy Provider' : 'Rule Provider'}`}
       />
-      
+
       <DeleteConfirmModal
         isOpen={isDeleteOpen}
         onClose={onDeleteClose}

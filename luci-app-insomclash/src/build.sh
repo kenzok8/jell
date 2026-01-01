@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== Building InsomClash ==="
+echo "=== Building FusionTunX ==="
 
 cd "$(dirname "$0")"
 
@@ -21,7 +21,6 @@ chmod -R 755 internal/ui/dist
 
 echo "[4/4] Building Go binary (Multi-Arch)..."
 
-# Define target architectures
 platforms=(
     "linux/amd64"
     "linux/arm64"
@@ -44,20 +43,17 @@ for platform in "${platforms[@]}"; do
     platform_split=(${platform//\// })
     GOOS=${platform_split[0]}
     GOARCH=${platform_split[1]}
-    output_name="bin/insomclash-$GOOS-$GOARCH"
+    output_name="bin/fusiontunx-$GOOS-$GOARCH"
     
     if [ "$GOARCH" == "arm" ]; then
-        # ARMv5
         echo " -> Building for $GOOS/$GOARCH (ARMv5)..."
         env GIN_MODE=release CGO_ENABLED=0 GOOS=$GOOS GOARCH=$GOARCH GOARM=5 \
             go build -ldflags="-s -w" -o "${output_name}v5" ./cmd/server
 
-        # ARMv6
         echo " -> Building for $GOOS/$GOARCH (ARMv6)..."
         env GIN_MODE=release CGO_ENABLED=0 GOOS=$GOOS GOARCH=$GOARCH GOARM=6 \
             go build -ldflags="-s -w" -o "${output_name}v6" ./cmd/server
 
-        # ARMv7
         echo " -> Building for $GOOS/$GOARCH (ARMv7)..."
         env GIN_MODE=release CGO_ENABLED=0 GOOS=$GOOS GOARCH=$GOARCH GOARM=7 \
             go build -ldflags="-s -w" -o "${output_name}v7" ./cmd/server

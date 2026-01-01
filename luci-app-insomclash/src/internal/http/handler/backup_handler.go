@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"insomclash/pkg/config"
+	"fusiontunx/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,7 +37,7 @@ func (h *BackupHandler) CreateBackup(c *gin.Context) {
 
 	workingDir := h.config.Mihomo.WorkingDir
 	timestamp := time.Now().Format("20060102-150405")
-	backupFilename := fmt.Sprintf("insomclash-backup-%s.tar.gz", timestamp)
+	backupFilename := fmt.Sprintf("fusiontunx-backup-%s.tar.gz", timestamp)
 
 	tmpFile := filepath.Join(os.TempDir(), backupFilename)
 

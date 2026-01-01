@@ -83,6 +83,7 @@ obj/
 *.meta
 *.ncx
 *.nupkg
+core/
 
 _build/
 deps/

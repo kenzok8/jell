@@ -109,7 +109,7 @@ export function Home() {
       <HStack justify="space-between" align="center">
         <Box>
           <Heading size={{ base: 'xl', md: '2xl' }} mb={2} color="#00d4ff">
-            InsomClash
+            FusionTunX
           </Heading>
           <Text fontSize={{ base: 'sm', md: 'md' }} color="gray.500">
             Freedom-focused high-performance tunneling.

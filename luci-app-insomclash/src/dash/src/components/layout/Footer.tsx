@@ -7,7 +7,7 @@ export function Footer() {
             <Container maxW="7xl">
                 <HStack justify="space-between" flexWrap="wrap" gap={4}>
                     <Text fontSize="sm" color="fg.muted">
-                        © {new Date().getFullYear()} InsomClash. Advanced Proxy Management
+                        © {new Date().getFullYear()} FusionTunX. Advanced Proxy Management
                     </Text>
                     <HStack gap={4}>
                         <Text fontSize="sm" color="fg.muted">

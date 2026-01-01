@@ -1,0 +1,30 @@
+services:
+  fusiontunx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MIHOMO_VERSION: v1.19.17
+    image: fusiontunx:latest
+    container_name: fusiontunx
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./files:/etc/fusiontunx:ro
+      - ./src/bin/fusiontunx-linux-amd64:/usr/share/fusiontunx/fusiontunx:ro
+      - ./src/configs/app.yaml:/etc/fusiontunx/app.yaml:ro
+      - fusiontunx-logs:/var/log
+    environment:
+      - TZ=Asia/Jakarta
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  fusiontunx-logs:

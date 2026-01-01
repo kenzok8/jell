@@ -1,4 +1,4 @@
-module insomclash
+module fusiontunx
 
 go 1.23.12
 

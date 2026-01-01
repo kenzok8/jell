@@ -3,8 +3,8 @@ package service
 import (
 	"fmt"
 
-	"insomclash/pkg/config"
-	"insomclash/pkg/logger"
+	"fusiontunx/pkg/config"
+	"fusiontunx/pkg/logger"
 
 	"github.com/sagernet/nftables"
 )

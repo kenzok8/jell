@@ -28,7 +28,7 @@ export function BackupRestore() {
             const contentDisposition = response.headers.get('Content-Disposition');
             const filename = contentDisposition
                 ? contentDisposition.split('filename=')[1]
-                : `insomclash-backup-${new Date().toISOString().split('T')[0]}.tar.gz`;
+                : `fusiontunx-backup-${new Date().toISOString().split('T')[0]}.tar.gz`;
 
             a.download = filename;
             document.body.appendChild(a);
@@ -110,7 +110,7 @@ export function BackupRestore() {
                     <Heading size="md">Create Backup</Heading>
                 </HStack>
                 <Text color="fg.muted" mb={4}>
-                    Download a complete backup of your InsomClash configuration including all configs, proxy providers, and rule providers.
+                    Download a complete backup of your FusionTunX configuration including all configs, proxy providers, and rule providers.
                 </Text>
                 <Button
                     onClick={handleCreateBackup}

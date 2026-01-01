@@ -1,10 +1,10 @@
-# Makefile.deb - Insomclash Debian Packaging
+# Makefile.deb - FusionTunX Debian Packaging
 
-PKG_NAME:=insomclash
+PKG_NAME:=fusiontunx
 PKG_VERSION:=1.0.3
-PKG_RELEASE:=146
+PKG_RELEASE:=147
 PKG_MAINTAINER:=BobbyUnknown
-PKG_DESC:=Insomclash Core + Mihomo
+PKG_DESC:=FusionTunX Core + Mihomo
 PKG_ARCH_AMD64:=amd64
 PKG_ARCH_ARM64:=arm64
 PKG_ARCH_ARMHF:=armhf
@@ -19,9 +19,9 @@ CORE_DIR:=core
 FILES_DIR:=files
 
 # Binary mappings
-BIN_AMD64:=insomclash-linux-amd64
-BIN_ARM64:=insomclash-linux-arm64
-BIN_ARMHF:=insomclash-linux-armv7
+BIN_AMD64:=fusiontunx-linux-amd64
+BIN_ARM64:=fusiontunx-linux-arm64
+BIN_ARMHF:=fusiontunx-linux-armv7
 
 # Mihomo Configuration
 MIHOMO_VERSION:=v1.19.17
@@ -38,7 +38,7 @@ URL_GEOIP_DAT:=https://github.com/rtaserver/meta-rules-dat/releases/latest/downl
 URL_GEOSITE:=https://github.com/rtaserver/meta-rules-dat/releases/latest/download/geosite.dat
 URL_GEOIP_META:=https://github.com/rtaserver/meta-rules-dat/releases/download/latest/geoip.metadb
 
-.PHONY: all clean download-assets deb-amd64 deb-arm64 deb-armhf arch-x86_64 arch-aarch64 arch-armv7h build-all build-deb build-arch
+.PHONY: all clean download-assets build-core deb-amd64 deb-arm64 deb-armhf arch-x86_64 arch-aarch64 arch-armv7h build-all build-deb build-arch
 
 all: build-deb build-arch
 
@@ -48,8 +48,19 @@ build-arch: arch-x86_64 arch-aarch64 arch-armv7h
 
 build-all: all
 
+build-core:
+	@echo "Building binaries from source..."
+	cd src && bash build.sh
+	@echo "Copying binaries to core directory..."
+	mkdir -p $(CORE_DIR)
+	cp src/bin/fusiontunx-linux-amd64 $(CORE_DIR)/$(BIN_AMD64)
+	cp src/bin/fusiontunx-linux-arm64 $(CORE_DIR)/$(BIN_ARM64)
+	cp src/bin/fusiontunx-linux-armv7 $(CORE_DIR)/$(BIN_ARMHF)
+	@echo "Core binaries ready in $(CORE_DIR)/"
+
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf $(CORE_DIR)
 
 download-assets:
 	mkdir -p $(BUILD_DIR)/assets
@@ -83,21 +94,21 @@ download-assets:
 	rm -rf $(BUILD_DIR)/assets/temp_yacd
 
 # Template for building package
-# Usage: $(call build_deb, ARCH, INSOMCLASH_BINARY, MIHOMO_ARCH_STRING)
+# Usage: $(call build_deb, ARCH, FUSIONTUNX_BINARY, MIHOMO_BINARY)
 define build_deb
 	@echo "Building package for $(1)..."
 	$(eval PKG_DIR := $(BUILD_DIR)/$(PKG_NAME)_$(PKG_VERSION)-$(PKG_RELEASE)_$(1))
 	rm -rf $(PKG_DIR)
-	mkdir -p $(PKG_DIR)/usr/share/insomclash
+	mkdir -p $(PKG_DIR)/usr/share/fusiontunx
 	mkdir -p $(PKG_DIR)/usr/bin
-	mkdir -p $(PKG_DIR)/etc/insomclash
+	mkdir -p $(PKG_DIR)/etc/fusiontunx
 	mkdir -p $(PKG_DIR)/lib/systemd/system
 	mkdir -p $(PKG_DIR)/DEBIAN
 
-	# Copy Insomclash Binary
+	# Copy FusionTunX Binary
 	@if [ -f $(CORE_DIR)/$(2) ]; then \
-		cp $(CORE_DIR)/$(2) $(PKG_DIR)/usr/share/insomclash/insomclash; \
-		chmod +x $(PKG_DIR)/usr/share/insomclash/insomclash; \
+		cp $(CORE_DIR)/$(2) $(PKG_DIR)/usr/share/fusiontunx/fusiontunx; \
+		chmod +x $(PKG_DIR)/usr/share/fusiontunx/fusiontunx; \
 	else \
 		echo "Error: $(CORE_DIR)/$(2) not found!"; \
 		exit 1; \
@@ -115,13 +126,13 @@ define build_deb
 	chmod +x $(PKG_DIR)/usr/bin/mihomo
 
 	# Copy Config Files
-	cp -r $(FILES_DIR)/* $(PKG_DIR)/etc/insomclash/
+	cp -r $(FILES_DIR)/* $(PKG_DIR)/etc/fusiontunx/
 	
 	# Copy Assets
-	cp $(BUILD_DIR)/assets/*.mmdb $(PKG_DIR)/etc/insomclash/ || true
-	cp $(BUILD_DIR)/assets/*.dat $(PKG_DIR)/etc/insomclash/ || true
-	cp $(BUILD_DIR)/assets/*.metadb $(PKG_DIR)/etc/insomclash/ || true
-	cp -r $(BUILD_DIR)/assets/ui $(PKG_DIR)/etc/insomclash/
+	cp $(BUILD_DIR)/assets/*.mmdb $(PKG_DIR)/etc/fusiontunx/ || true
+	cp $(BUILD_DIR)/assets/*.dat $(PKG_DIR)/etc/fusiontunx/ || true
+	cp $(BUILD_DIR)/assets/*.metadb $(PKG_DIR)/etc/fusiontunx/ || true
+	cp -r $(BUILD_DIR)/assets/ui $(PKG_DIR)/etc/fusiontunx/
 	
 	# Create Control File
 	echo "Package: $(PKG_NAME)" > $(PKG_DIR)/DEBIAN/control
@@ -132,29 +143,29 @@ define build_deb
 	echo "Maintainer: $(PKG_MAINTAINER)" >> $(PKG_DIR)/DEBIAN/control
 	echo "Depends: iproute2, ca-certificates, iptables, nftables" >> $(PKG_DIR)/DEBIAN/control
 	echo "Description: $(PKG_DESC)" >> $(PKG_DIR)/DEBIAN/control
-	echo "  Insomclash core binary packaged for Debian/Ubuntu" >> $(PKG_DIR)/DEBIAN/control
+	echo "  FusionTunX core binary packaged for Debian/Ubuntu" >> $(PKG_DIR)/DEBIAN/control
 
 	# Create Systemd Service
-	echo "[Unit]" > $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "Description=Insomclash Service" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "After=network.target" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "[Service]" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "ExecStart=/usr/share/insomclash/insomclash -c /etc/insomclash/app.yaml" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "Restart=always" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "RestartSec=5" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "User=root" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "[Install]" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
-	echo "WantedBy=multi-user.target" >> $(PKG_DIR)/lib/systemd/system/insomclash.service
+	echo "[Unit]" > $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "Description=FusionTunX Service" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "After=network.target" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "[Service]" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "ExecStart=/usr/share/fusiontunx/fusiontunx -c /etc/fusiontunx/app.yaml" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "Restart=always" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "RestartSec=5" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "User=root" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "[Install]" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
+	echo "WantedBy=multi-user.target" >> $(PKG_DIR)/lib/systemd/system/fusiontunx.service
 
 	# Create postinst script to reload systemd
 	echo "#!/bin/sh" > $(PKG_DIR)/DEBIAN/postinst
 	echo "set -e" >> $(PKG_DIR)/DEBIAN/postinst
 	echo "if [ \"\$$1\" = \"configure\" ]; then" >> $(PKG_DIR)/DEBIAN/postinst
 	echo "    systemctl daemon-reload" >> $(PKG_DIR)/DEBIAN/postinst
-	echo "    systemctl enable insomclash" >> $(PKG_DIR)/DEBIAN/postinst
-	echo "    systemctl restart insomclash || true" >> $(PKG_DIR)/DEBIAN/postinst
+	echo "    systemctl enable fusiontunx" >> $(PKG_DIR)/DEBIAN/postinst
+	echo "    systemctl restart fusiontunx || true" >> $(PKG_DIR)/DEBIAN/postinst
 	echo "fi" >> $(PKG_DIR)/DEBIAN/postinst
 	chmod 755 $(PKG_DIR)/DEBIAN/postinst
 
@@ -162,8 +173,8 @@ define build_deb
 	echo "#!/bin/sh" > $(PKG_DIR)/DEBIAN/prerm
 	echo "set -e" >> $(PKG_DIR)/DEBIAN/prerm
 	echo "if [ \"\$$1\" = \"remove\" ]; then" >> $(PKG_DIR)/DEBIAN/prerm
-	echo "    systemctl stop insomclash || true" >> $(PKG_DIR)/DEBIAN/prerm
-	echo "    systemctl disable insomclash || true" >> $(PKG_DIR)/DEBIAN/prerm
+	echo "    systemctl stop fusiontunx || true" >> $(PKG_DIR)/DEBIAN/prerm
+	echo "    systemctl disable fusiontunx || true" >> $(PKG_DIR)/DEBIAN/prerm
 	echo "fi" >> $(PKG_DIR)/DEBIAN/prerm
 	chmod 755 $(PKG_DIR)/DEBIAN/prerm
 
@@ -172,30 +183,30 @@ define build_deb
 	@echo "Package created at $(PKG_DIR).deb"
 endef
 
-deb-amd64: download-assets
+deb-amd64: build-core download-assets
 	$(call build_deb,$(PKG_ARCH_AMD64),$(BIN_AMD64),$(MIHOMO_ARCH_AMD64))
 
-deb-arm64: download-assets
+deb-arm64: build-core download-assets
 	$(call build_deb,$(PKG_ARCH_ARM64),$(BIN_ARM64),$(MIHOMO_ARCH_ARM64))
 
-deb-armhf: download-assets
+deb-armhf: build-core download-assets
 	$(call build_deb,$(PKG_ARCH_ARMHF),$(BIN_ARMHF),$(MIHOMO_ARCH_ARMHF))
 
 # Template for building Arch Linux package
-# Usage: $(call build_arch, ARCH, INSOMCLASH_BINARY, MIHOMO_ARCH_STRING)
+# Usage: $(call build_arch, ARCH, FUSIONTUNX_BINARY, MIHOMO_BINARY)
 define build_arch
 	@echo "Building Arch package for $(1)..."
 	$(eval PKG_DIR := $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)-$(PKG_RELEASE)-$(1))
 	rm -rf $(PKG_DIR)
-	mkdir -p $(PKG_DIR)/usr/share/insomclash
+	mkdir -p $(PKG_DIR)/usr/share/fusiontunx
 	mkdir -p $(PKG_DIR)/usr/bin
-	mkdir -p $(PKG_DIR)/etc/insomclash
+	mkdir -p $(PKG_DIR)/etc/fusiontunx
 	mkdir -p $(PKG_DIR)/usr/lib/systemd/system
 
-	# Copy Insomclash Binary
+	# Copy FusionTunX Binary
 	@if [ -f $(CORE_DIR)/$(2) ]; then \
-		cp $(CORE_DIR)/$(2) $(PKG_DIR)/usr/share/insomclash/insomclash; \
-		chmod +x $(PKG_DIR)/usr/share/insomclash/insomclash; \
+		cp $(CORE_DIR)/$(2) $(PKG_DIR)/usr/share/fusiontunx/fusiontunx; \
+		chmod +x $(PKG_DIR)/usr/share/fusiontunx/fusiontunx; \
 	else \
 		echo "Error: $(CORE_DIR)/$(2) not found!"; \
 		exit 1; \
@@ -213,33 +224,33 @@ define build_arch
 	chmod +x $(PKG_DIR)/usr/bin/mihomo
 
 	# Copy Config Files
-	cp -r $(FILES_DIR)/* $(PKG_DIR)/etc/insomclash/
+	cp -r $(FILES_DIR)/* $(PKG_DIR)/etc/fusiontunx/
 	
 	# Copy Assets
-	cp $(BUILD_DIR)/assets/*.mmdb $(PKG_DIR)/etc/insomclash/ || true
-	cp $(BUILD_DIR)/assets/*.dat $(PKG_DIR)/etc/insomclash/ || true
-	cp $(BUILD_DIR)/assets/*.metadb $(PKG_DIR)/etc/insomclash/ || true
-	cp -r $(BUILD_DIR)/assets/ui $(PKG_DIR)/etc/insomclash/
+	cp $(BUILD_DIR)/assets/*.mmdb $(PKG_DIR)/etc/fusiontunx/ || true
+	cp $(BUILD_DIR)/assets/*.dat $(PKG_DIR)/etc/fusiontunx/ || true
+	cp $(BUILD_DIR)/assets/*.metadb $(PKG_DIR)/etc/fusiontunx/ || true
+	cp -r $(BUILD_DIR)/assets/ui $(PKG_DIR)/etc/fusiontunx/
 
 	# Create Systemd Service
-	echo "[Unit]" > $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "Description=Insomclash Service" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "After=network.target" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "[Service]" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "ExecStart=/usr/share/insomclash/insomclash -c /etc/insomclash/app.yaml" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "Restart=always" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "RestartSec=5" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "User=root" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "[Install]" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
-	echo "WantedBy=multi-user.target" >> $(PKG_DIR)/usr/lib/systemd/system/insomclash.service
+	echo "[Unit]" > $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "Description=FusionTunX Service" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "After=network.target" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "[Service]" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "ExecStart=/usr/share/fusiontunx/fusiontunx -c /etc/fusiontunx/app.yaml" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "Restart=always" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "RestartSec=5" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "User=root" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "[Install]" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
+	echo "WantedBy=multi-user.target" >> $(PKG_DIR)/usr/lib/systemd/system/fusiontunx.service
 
 	# Create .PKGINFO
 	echo "pkgname = $(PKG_NAME)" > $(PKG_DIR)/.PKGINFO
 	echo "pkgver = $(PKG_VERSION)-$(PKG_RELEASE)" >> $(PKG_DIR)/.PKGINFO
 	echo "pkgdesc = $(PKG_DESC)" >> $(PKG_DIR)/.PKGINFO
-	echo "url = https://github.com/BobbyUnknown/Insomclash" >> $(PKG_DIR)/.PKGINFO
+	echo "url = https://github.com/bobbyunknown/FusionTunX" >> $(PKG_DIR)/.PKGINFO
 	echo "builddate = $$(date +%s)" >> $(PKG_DIR)/.PKGINFO
 	echo "packager = $(PKG_MAINTAINER)" >> $(PKG_DIR)/.PKGINFO
 	echo "size = $$(du -sb $(PKG_DIR) | cut -f1)" >> $(PKG_DIR)/.PKGINFO
@@ -252,18 +263,18 @@ define build_arch
 	# Create .install script
 	echo "post_install() {" > $(PKG_DIR)/.INSTALL
 	echo "    systemctl daemon-reload" >> $(PKG_DIR)/.INSTALL
-	echo "    systemctl enable insomclash" >> $(PKG_DIR)/.INSTALL
-	echo "    systemctl start insomclash || true" >> $(PKG_DIR)/.INSTALL
+	echo "    systemctl enable fusiontunx" >> $(PKG_DIR)/.INSTALL
+	echo "    systemctl start fusiontunx || true" >> $(PKG_DIR)/.INSTALL
 	echo "}" >> $(PKG_DIR)/.INSTALL
 	echo "" >> $(PKG_DIR)/.INSTALL
 	echo "post_upgrade() {" >> $(PKG_DIR)/.INSTALL
 	echo "    systemctl daemon-reload" >> $(PKG_DIR)/.INSTALL
-	echo "    systemctl restart insomclash || true" >> $(PKG_DIR)/.INSTALL
+	echo "    systemctl restart fusiontunx || true" >> $(PKG_DIR)/.INSTALL
 	echo "}" >> $(PKG_DIR)/.INSTALL
 	echo "" >> $(PKG_DIR)/.INSTALL
 	echo "pre_remove() {" >> $(PKG_DIR)/.INSTALL
-	echo "    systemctl stop insomclash || true" >> $(PKG_DIR)/.INSTALL
-	echo "    systemctl disable insomclash || true" >> $(PKG_DIR)/.INSTALL
+	echo "    systemctl stop fusiontunx || true" >> $(PKG_DIR)/.INSTALL
+	echo "    systemctl disable fusiontunx || true" >> $(PKG_DIR)/.INSTALL
 	echo "}" >> $(PKG_DIR)/.INSTALL
 
 	# Create .MTREE (file list)
@@ -274,11 +285,11 @@ define build_arch
 	@echo "Package created at $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)-$(PKG_RELEASE)-$(1).pkg.tar.zst"
 endef
 
-arch-x86_64: download-assets
+arch-x86_64: build-core download-assets
 	$(call build_arch,$(PKG_ARCH_ARCH_X86_64),$(BIN_AMD64),$(MIHOMO_ARCH_AMD64))
 
-arch-aarch64: download-assets
+arch-aarch64: build-core download-assets
 	$(call build_arch,$(PKG_ARCH_ARCH_AARCH64),$(BIN_ARM64),$(MIHOMO_ARCH_ARM64))
 
-arch-armv7h: download-assets
+arch-armv7h: build-core download-assets
 	$(call build_arch,$(PKG_ARCH_ARCH_ARMV7H),$(BIN_ARMHF),$(MIHOMO_ARCH_ARMHF))

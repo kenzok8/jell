@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "Backend API untuk aplikasi tunneling menggunakan mihomo",
-        "title": "InsomClash API",
+        "title": "FusionTunX API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
@@ -19,7 +19,7 @@
     "paths": {
         "/app/config": {
             "get": {
-                "description": "Get current InsomClash application configuration",
+                "description": "Get current FusionTunX application configuration",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,7 +27,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get application configuration",
                 "responses": {
@@ -41,7 +41,7 @@
                 }
             },
             "put": {
-                "description": "Update InsomClash application configuration",
+                "description": "Update FusionTunX application configuration",
                 "consumes": [
                     "application/json"
                 ],
@@ -49,7 +49,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Update application configuration",
                 "parameters": [
@@ -96,7 +96,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv4 geolocation",
                 "responses": {
@@ -131,7 +131,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv6 geolocation",
                 "responses": {
@@ -166,7 +166,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv4 address",
                 "responses": {
@@ -201,7 +201,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Insomclash App"
+                    "FusionTunX App"
                 ],
                 "summary": "Get IPv6 address",
                 "responses": {

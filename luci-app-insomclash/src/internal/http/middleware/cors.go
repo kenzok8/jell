@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"insomclash/pkg/config"
+	"fusiontunx/pkg/config"
 	"strconv"
 	"strings"
 

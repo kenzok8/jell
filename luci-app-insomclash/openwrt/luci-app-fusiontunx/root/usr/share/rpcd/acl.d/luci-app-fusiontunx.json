@@ -1,0 +1,31 @@
+{
+    "luci-app-fusiontunx": {
+        "description": "Grant access to FusionTunX status and control",
+        "read": {
+            "ubus": {
+                "service": [
+                    "list"
+                ]
+            },
+            "file": {
+                "/etc/init.d/fusiontunx": [
+                    "read"
+                ]
+            }
+        },
+        "write": {
+            "file": {
+                "/etc/init.d/fusiontunx": [
+                    "exec"
+                ]
+            },
+            "ubus": {
+                "service": [
+                    "start",
+                    "stop",
+                    "delete"
+                ]
+            }
+        }
+    }
+}

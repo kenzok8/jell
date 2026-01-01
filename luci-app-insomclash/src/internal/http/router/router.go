@@ -1,10 +1,10 @@
 package router
 
 import (
-	"insomclash/internal/http/handler"
-	"insomclash/internal/http/middleware"
-	"insomclash/internal/service"
-	"insomclash/pkg/config"
+	"fusiontunx/internal/http/handler"
+	"fusiontunx/internal/http/middleware"
+	"fusiontunx/internal/service"
+	"fusiontunx/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
