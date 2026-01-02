@@ -7,13 +7,13 @@ PKG_RELEASE:=4
 PKG_MAINTAINER:=BobbyUnknown
 PKG_LICENSE:=MIT
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/bobbyunknown/FusionTunX.git
-PKG_SOURCE_VERSION:=dev
-PKG_HASH:=skip
-#PKG_MIRROR_HASH:=f37155115e9e96661b5c5d41f7c33d0af6babaebe66dbe9017858292d6cb4589
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+# Direct download configuration - change GIT_BRANCH to switch branches
+GIT_BRANCH:=dev
+
+# Direct download method (no git)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://github.com/bobbyunknown/FusionTunX/archive/refs/heads/$(GIT_BRANCH).tar.gz?
+PKG_HASH:=skip
 
 PKG_BUILD_DEPENDS:=node/host golang/host
 
@@ -34,6 +34,12 @@ endef
 
 define Package/fusiontunx/description
   FusionTunX + Mihomo Core Binary
+endef
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(HOST_TAR) -C $(PKG_BUILD_DIR) --strip-components=1 -xzf $(DL_DIR)/$(PKG_SOURCE)
+	$(Build/Patch)
 endef
 
 define Build/Compile

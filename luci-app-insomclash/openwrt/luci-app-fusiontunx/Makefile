@@ -25,7 +25,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-fusiontunx
 PKG_VERSION:=1.0.3
-PKG_RELEASE:=2
+PKG_RELEASE:=4
 
 PKG_MAINTAINER:=BobbyUnknown <bobbyun.known88@gmail.com>
 

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release Tag'
+        description: 'Release Tag (e.g., v1.0.0 or v1.0.0-beta.1)'
         required: true
         default: 'v1.0.0'
       workflow_run_id:
@@ -26,8 +26,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Download All Artifacts from Build Run
         uses: dawidd6/action-download-artifact@v3
@@ -46,59 +44,23 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ inputs.tag_name }}
-          name: FusionTunX ${{ inputs.tag_name }}
           body: |
             # FusionTunX Release ${{ inputs.tag_name }}
             
             ${{ inputs.release_notes }}
-            
-            This release contains pre-built packages for OpenWrt, Debian/Ubuntu, and Arch Linux.
-            
-            ## 📦 Package Details
-            - **OpenWrt**: `.ipk` (24.10) and `.apk` (25.12) packages for multiple architectures
+
+            This release contains pre-built packages for OpenWrt, Debian/Ubuntu, Arch Linux, and standalone core binaries.
+
+            ## Package Details
+            - **OpenWrt**: `.ipk` (24.10) and `.apk` (25.12) packages
             - **Debian/Ubuntu**: `.deb` packages for `amd64`, `arm64`, `armhf`
             - **Arch Linux**: `.pkg.tar.zst` packages for `x86_64`, `aarch64`, `armv7h`
-            
-            ## 🚀 Quick Install
-            
-            ### OpenWrt
-            ```bash
-            # For 24.10 (IPK)
-            opkg install fusiontunx_*.ipk
-            
-            # For 25.12 (APK)
-            apk add fusiontunx-*.apk
-            ```
-            
-            ### Debian/Ubuntu
-            ```bash
-            sudo dpkg -i fusiontunx_*.deb
-            sudo apt-get install -f  # Fix dependencies if needed
-            ```
-            
-            ### Arch Linux
-            ```bash
-            sudo pacman -U fusiontunx-*.pkg.tar.zst
-            ```
-            
-            ## 📚 Documentation
-            
-            - [Installation Guide](https://github.com/${{ github.repository }}#installation)
-            - [Configuration](https://github.com/${{ github.repository }}#configuration)
-            - [Troubleshooting](https://github.com/${{ github.repository }}#troubleshooting)
-            
-            ## 🔗 Links
-            
-            - **Repository**: https://github.com/${{ github.repository }}
-            - **Issues**: https://github.com/${{ github.repository }}/issues
-            - **Discussions**: https://github.com/${{ github.repository }}/discussions
-            
-            ---
-            
-            Built from commit: ${{ github.sha }}
+            - **Core Binaries**: Standalone binaries for all architectures (useful for other Linux distros)
+
+            See [README](https://github.com/${{ github.repository }}) for full documentation.
           files: downloaded/**/*
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(inputs.tag_name, '-dev') || contains(inputs.tag_name, '-beta') || contains(inputs.tag_name, '-alpha') || contains(inputs.tag_name, '-rc') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

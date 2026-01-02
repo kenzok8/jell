@@ -1,0 +1,89 @@
+name: Clean GitHub Actions Cache
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to clean cache (leave empty for all branches)'
+        required: false
+        type: string
+      cache_key_pattern:
+        description: 'Cache key pattern to delete (e.g., "buildx-", leave empty for all)'
+        required: false
+        type: string
+
+jobs:
+  clean-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Clean Cache
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          
+          REPO="${{ github.repository }}"
+          BRANCH="${{ inputs.branch }}"
+          PATTERN="${{ inputs.cache_key_pattern }}"
+          
+          echo "Repository: $REPO"
+          echo "Branch filter: ${BRANCH:-all branches}"
+          echo "Pattern filter: ${PATTERN:-all caches}"
+          
+          gh cache list --repo "$REPO" --limit 100 || echo "No caches found"
+          
+          DELETED_FILE=$(mktemp)
+          FAILED_FILE=$(mktemp)
+          echo "0" > "$DELETED_FILE"
+          echo "0" > "$FAILED_FILE"
+          
+          LIMIT=1000
+          
+          while IFS= read -r cache; do
+            CACHE_ID=$(echo "$cache" | jq -r '.id')
+            CACHE_KEY=$(echo "$cache" | jq -r '.key')
+            CACHE_REF=$(echo "$cache" | jq -r '.ref')
+            
+            if [ -n "$BRANCH" ] && [[ "$CACHE_REF" != *"$BRANCH"* ]]; then
+              continue
+            fi
+            
+            if [ -n "$PATTERN" ] && [[ "$CACHE_KEY" != *"$PATTERN"* ]]; then
+              continue
+            fi
+            
+            echo "Deleting: $CACHE_KEY (ID: $CACHE_ID, Ref: $CACHE_REF)"
+            
+            if gh cache delete "$CACHE_ID" --repo "$REPO" 2>/dev/null; then
+              echo $(($(cat "$DELETED_FILE") + 1)) > "$DELETED_FILE"
+            else
+              echo $(($(cat "$FAILED_FILE") + 1)) > "$FAILED_FILE"
+              echo "Failed to delete cache ID: $CACHE_ID"
+            fi
+          done < <(gh cache list --repo "$REPO" --limit "$LIMIT" --json id,key,ref | jq -c '.[]')
+          
+          DELETED=$(cat "$DELETED_FILE")
+          FAILED=$(cat "$FAILED_FILE")
+          
+          rm -f "$DELETED_FILE" "$FAILED_FILE"
+          
+          echo "Deleted: $DELETED"
+          echo "Failed: $FAILED"
+          
+          gh cache list --repo "$REPO" --limit 20 || echo "No remaining caches"
+          
+          echo "DELETED=$DELETED" >> $GITHUB_ENV
+          echo "FAILED=$FAILED" >> $GITHUB_ENV
+
+      - name: Summary
+        run: |
+          echo "### Cache Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch filter**: ${{ inputs.branch || 'all branches' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pattern filter**: ${{ inputs.cache_key_pattern || 'all caches' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deleted**: ${DELETED:-0}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Failed**: ${FAILED:-0}" >> $GITHUB_STEP_SUMMARY
