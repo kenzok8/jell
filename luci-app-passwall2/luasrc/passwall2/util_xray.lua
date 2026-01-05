@@ -1205,12 +1205,18 @@ function gen_config(var)
 				end
 			end)
 
-			if default_balancerTag then
-				table.insert(rules, {
+			if default_outboundTag or default_balancerTag then
+				local rule = {
 					ruleTag = "default",
-					balancerTag = default_balancerTag,
-					network = "tcp,udp"
-				})
+					outboundTag = default_outboundTag,
+					balancerTag = default_balancerTag
+				}
+				if node.domainStrategy == "IPIfNonMatch" then
+					rule.ip = { "0.0.0.0/0", "::/0" }
+				else
+					rule.network = "tcp,udp"
+				end
+				table.insert(rules, rule)
 			end
 
 			routing = {
