@@ -1,9 +1,13 @@
-# Copyright (C) 2020-2021 Hyy2001X <https://github.com/Hyy2001X>
+# Copyright (C) 2020-2026 Hyy2001X <https://github.com/Hyy2001X>
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=LuCI Support for Shutdown Target
 PKG_NAME:=luci-app-shutdown
+
+PKG_LICENSE:=GPL-3.0-or-later
+
+LUCI_TITLE:=LuCI Support for shutdown/reboot
+LUCI_DEPENDS:=+luci-base
 LUCI_PKGARCH:=all
 
 include $(TOPDIR)/feeds/luci/luci.mk
