@@ -8,7 +8,7 @@ PKG_LICENSE:=GPL-3.0-or-later
 
 LUCI_TITLE:=LuCI support for iPerf3 Server
 LUCI_DESCRIPTION:=Configure and manage multiple iperf3 server instances with LuCI status/actions.
-LUCI_DEPENDS:=+iperf3 +rpcd +rpcd-mod-uci +rpcd-mod-file
+LUCI_DEPENDS:=+iperf3
 
 LUCI_PKGARCH:=all
 
