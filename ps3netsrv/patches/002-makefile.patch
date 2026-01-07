@@ -1,12 +1,13 @@
---- a/Makefile
-+++ b/Makefile
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2025-11-11 15:02:34.000000000 -0300
++++ b/Makefile	2025-11-11 16:07:14.000000000 -0300
 @@ -1,11 +1,11 @@
 -OS = windows
 +OS = linux
  BUILD_TYPE = release_static
  
  OUTPUT := ps3netsrv
- OBJS = src/main.o src/padlock.o src/aes.o src/compat.o src/mem.o src/File.o src/VIsoFile.o
+ OBJS = src/main.o src/padlock.o src/aes.o src/compat.o src/mem.o src/File.o src/VIsoFile2.o
  
 -CFLAGS = -Wall -Wno-format -I./include -std=gnu99 -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DPOLARSSL
 -CPPFLAGS += -Wall -Wno-format -I./include -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DPOLARSSL
@@ -15,7 +16,7 @@
  
  #CFLAGS += -Doff64_t=off_t
  #CPPFLAGS += -Doff64_t=off_t
-@@ -25,7 +25,7 @@ LDFLAGS = -L.
+@@ -33,7 +33,7 @@ LDFLAGS = -L.
  LIBS = -lstdc++
  
  ifeq ($(OS), linux)
