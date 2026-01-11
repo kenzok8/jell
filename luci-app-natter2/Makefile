@@ -6,7 +6,7 @@ PKG_NAME:=luci-app-natter2
 
 LUCI_TITLE:=LuCI Support for Natter v2.2.1
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+natter2 +coreutils-nohup
+LUCI_DEPENDS:=+natter2
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
