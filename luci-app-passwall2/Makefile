@@ -1,4 +1,5 @@
 # Copyright (C) 2022-2025 xiaorouji
+# Copyright (C) 2026 Openwrt-Passwall Organization
 #
 # This is free software, licensed under the GNU General Public License v3.
 
@@ -6,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-passwall2
 PKG_VERSION:=26.1.1
-PKG_RELEASE:=238
+PKG_RELEASE:=239
 PKG_PO_VERSION:=$(PKG_VERSION)
 
 PKG_CONFIG_DEPENDS:= \
