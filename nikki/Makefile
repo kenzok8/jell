@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_VERSION:=2025.12.21
-PKG_RELEASE:=82
+PKG_VERSION:=2026.01.16
+PKG_RELEASE:=83
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
@@ -34,6 +34,8 @@ define Package/nikki
   URL:=https://wiki.metacubex.one
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +curl +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun
   PROVIDES:=mihomo
+  ALTERNATIVES:=\
+    300:/usr/bin/mihomo:/usr/libexec/nikki
 endef
 
 define Package/nikki/description
@@ -46,7 +48,10 @@ define Package/nikki/conffiles
 endef
 
 define Package/nikki/install
-	$(call GoPackage/Package/Install/Bin,$(1))
+	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
+
+	$(INSTALL_DIR) $(1)/usr/libexec/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/mihomo $(1)/usr/libexec/nikki
 
 	$(INSTALL_DIR) $(1)/etc/nikki
 	$(INSTALL_DIR) $(1)/etc/nikki/ucode
