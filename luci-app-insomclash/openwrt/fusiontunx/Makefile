@@ -17,12 +17,22 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 
 PKG_BUILD_DEPENDS:=node/host golang/host
 
-MIHOMO_VERSION:=v1.19.17
+MIHOMO_VERSION:=v1.19.18
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 GO_PKG:=github.com/bobbyunknown/FusionTunX
+
+# Determine Mihomo arch suffix
+MIHOMO_ARCH:=$(GO_ARCH)
+ifeq ($(GO_ARCH),arm)
+  MIHOMO_ARCH:=armv$(or $(GO_ARM),7)
+else ifeq ($(findstring mips,$(GO_ARCH)),mips)
+  MIHOMO_ARCH:=$(GO_ARCH)-$(or $(GO_MIPS),softfloat)
+else ifeq ($(GO_ARCH),aarch64)
+  MIHOMO_ARCH:=arm64
+endif
 
 define Package/fusiontunx
   SECTION:=net
@@ -55,14 +65,15 @@ define Build/Compile
 
 	@echo "Compiling FusionTunX Go binary..."
 	cd $(PKG_BUILD_DIR)/src && \
-		GOOS=linux GOARCH=$(GO_ARCH) CGO_ENABLED=1 \
-		CC=$(TARGET_CC) CXX=$(TARGET_CXX) \
-		CGO_CFLAGS="$(TARGET_CFLAGS)" \
-		CGO_LDFLAGS="$(TARGET_LDFLAGS)" \
+		GOOS=linux \
+		GOARCH=$(GO_ARCH) \
+		$(if $(findstring arm,$(GO_ARCH)),GOARM=$(or $(GO_ARM),7)) \
+		$(if $(findstring mips,$(GO_ARCH)),GOMIPS=$(or $(GO_MIPS),softfloat)) \
+		CGO_ENABLED=0 \
 		go build -v -trimpath -ldflags="-s -w" -o $(PKG_BUILD_DIR)/fusiontunx ./cmd/server
 
 	@echo "Downloading Mihomo $(MIHOMO_VERSION)..."
-	wget -q -O $(PKG_BUILD_DIR)/mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/$(MIHOMO_VERSION)/mihomo-linux-$(GO_ARCH)-$(MIHOMO_VERSION).gz"
+	wget -q -O $(PKG_BUILD_DIR)/mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/$(MIHOMO_VERSION)/mihomo-linux-$(MIHOMO_ARCH)-$(MIHOMO_VERSION).gz"
 	gunzip -f $(PKG_BUILD_DIR)/mihomo.gz
 	chmod +x $(PKG_BUILD_DIR)/mihomo
 

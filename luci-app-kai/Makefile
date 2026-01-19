@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=kai
-LUCI_DEPENDS:=+kai
+LUCI_DEPENDS:=+kai +kai_session
 LUCI_MINIFY_CSS:=0
 LUCI_MINIFY_JS:=0
 

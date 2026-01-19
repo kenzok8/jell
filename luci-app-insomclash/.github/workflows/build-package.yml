@@ -12,6 +12,26 @@ on:
         type: boolean
         required: true
         default: true
+      build_debian_arch:
+        description: 'Build Debian/Arch packages?'
+        type: boolean
+        default: true
+      build_openwrt_x86:
+        description: 'Build OpenWrt x86?'
+        type: boolean
+        default: true
+      build_openwrt_arm64:
+        description: 'Build OpenWrt ARM64?'
+        type: boolean
+        default: true
+      build_openwrt_arm32:
+        description: 'Build OpenWrt ARM32?'
+        type: boolean
+        default: true
+      build_openwrt_mips:
+        description: 'Build OpenWrt MIPS?'
+        type: boolean
+        default: true
   push:
     branches:
       - main
@@ -21,17 +41,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Enable/disable specific build jobs by commenting out these variables
-env:
-  BUILD_DEBIAN_ARCH: 'true'      # Debian/Ubuntu & Arch Linux packages
-  BUILD_OPENWRT_X86: 'true'      # x86_64, i386_pentium-mmx
-  BUILD_OPENWRT_ARM64: 'true'    # aarch64_cortex-a53, a72, generic
-  BUILD_OPENWRT_ARM32: 'true'    # arm_cortex-a15, a9, a7
-  BUILD_OPENWRT_MIPS: 'true'     # mips_24kc, mipsel_74kc
+# To disable a specific build job, comment out the entire job section below
 
 jobs:
   build_packages:
-    if: ${{ env.BUILD_DEBIAN_ARCH == 'true' }}
+    if: ${{ github.event_name == 'push' || inputs.build_debian_arch }}
     name: Build Debian/Ubuntu & Arch Linux Packages
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +83,7 @@ jobs:
 
   # Job 1: x86 architectures
   build_openwrt_x86:
-    if: ${{ env.BUILD_OPENWRT_X86 == 'true' }}
+    if: ${{ github.event_name == 'push' || inputs.build_openwrt_x86 }}
     permissions:
       contents: write
     name: Build OpenWrt x86_${{ matrix.arch }}-${{ matrix.branch }}
@@ -124,7 +138,7 @@ jobs:
 
   # Job 2: ARM64 Cortex-A
   build_openwrt_arm64:
-    if: ${{ env.BUILD_OPENWRT_ARM64 == 'true' }}
+    if: ${{ github.event_name == 'push' || inputs.build_openwrt_arm64 }}
     permissions:
       contents: write
     name: Build OpenWrt ARM64_${{ matrix.arch }}-${{ matrix.branch }}
@@ -177,7 +191,7 @@ jobs:
 
   # Job 3: ARM32 Cortex-A
   build_openwrt_arm32:
-    if: ${{ env.BUILD_OPENWRT_ARM32 == 'true' }}
+    if: ${{ github.event_name == 'push' || inputs.build_openwrt_arm32 }}
     permissions:
       contents: write
     name: Build OpenWrt ARM32_${{ matrix.arch }}-${{ matrix.branch }}
@@ -230,7 +244,7 @@ jobs:
 
   # Job 4: MIPS
   build_openwrt_mips:
-    if: ${{ env.BUILD_OPENWRT_MIPS == 'true' }}
+    if: ${{ github.event_name == 'push' || inputs.build_openwrt_mips }}
     permissions:
       contents: write
     name: Build OpenWrt MIPS_${{ matrix.arch }}-${{ matrix.branch }}

@@ -1,141 +1,199 @@
-# Insomclash
+# FusionTunX
 
 [🇮🇩 Indonesia](README.md)
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/bobbyunknown/insomclash/total?style=for-the-badge)](https://github.com/bobbyunknown/insomclash)
-[![GitHub Release](https://img.shields.io/github/v/release/bobbyunknown/insomclash?style=for-the-badge)](https://github.com/bobbyunknown/insomclash/releases)
+[![GitHub Downloads](https://img.shields.io/github/downloads/bobbyunknown/FusionTunX/total?style=flat-square)](https://github.com/bobbyunknown/FusionTunX)
+[![GitHub Release](https://img.shields.io/github/v/release/bobbyunknown/FusionTunX?style=flat-square)](https://github.com/bobbyunknown/FusionTunX/releases)
 
-#### Support me:
-[![Sociabuzz](https://img.shields.io/badge/Sociabuzz-1DA1F2?style=for-the-badge&logo=sociabuzz&logoColor=white)](https://sociabuzz.com/bobbyunknown/tribe)
-[![Saweria](https://img.shields.io/badge/Saweria-FFA500?style=for-the-badge&logo=saweria&logoColor=white)](https://saweria.co/widgets/qr?streamKey=48ea6792454c7732924b663381c69521)
+**FusionTunX** is a controller and manager for Mihomo (Clash Meta) designed for OpenWrt and Linux Server. This application provides a modern web interface to manage proxies with advanced routing.
 
+## Features
 
-#### Telegram group:
-[![SanTech](https://img.shields.io/badge/SanTech-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+TuLCASzJrVJmNzM1)
+- **Core Management**: Full control of Mihomo (start/stop/restart, config management, log monitoring)
+- **Routing Mode**: TUN, TProxy, Redirect, Mixed mode
+- **OpenWrt Integration**: Firewall 4 (nftables), LuCI app, procd service
+- **Web Dashboard**: React + Vite with embedded UI
+- **RESTful API**: Complete API with Swagger documentation
+- **Real-time Monitoring**: WebSocket for log streaming
 
-**Insomclash** is a lightweight yet powerful controller and manager for the **Mihomo** (Clash Meta) core, designed specifically for **OpenWrt** and **Linux Server** (such as Debian/Ubuntu/Arch Linux) systems. This application facilitates easy proxy connection management with advanced routing capabilities and a modern web interface.
+### Dashboard Features
 
-This repository serves as the **official build and packaging center** for Insomclash, supporting OpenWrt (IPK/APK), Debian/Ubuntu (DEB), and Arch Linux (PKG).
+- Core control (start/stop/restart)
+- File manager (edit config.yaml, providers, rules)
+- Subscription converter
+- Backup & restore
+- Connection monitor
+- Log viewer (real-time WebSocket)
 
-## 🌟 Key Features
-
-*   **Core Management**: A specialized wrapper for the Mihomo binary aimed at efficiently handling the application lifecycle (start/stop/restart), configuration management, and log monitoring.
-*   **Advanced Routing Modes**:
-    *   **TUN Mode**: Supports full Layer 3 tunneling with automatic route management.
-    *   **TProxy Mode**: Transparent Proxy support for comprehensive network traffic handling.
-    *   **Redirect Mode**: Basic support for traffic redirection.
-*   **Deep OpenWrt Integration**:
-    *   **Firewall 4 (fw4) Support**: Automatically detects and integrates with OpenWrt's modern `fw4` (nftables) system for reliable traffic interception.
-    *   **LuCI App**: Native integration with the OpenWrt web interface (`luci-app-insomclash`), allowing direct configuration from your router's GUI.
-*   **Modern Web Dashboard**:
-    *   **React-based Dashboard**: Responsive and modern interface.
-    *   **Full Core Control**: Start/Stop/Restart the Mihomo service directly from the web.
-    *   **File Manager & Editor**: Edit configuration files (`config.yaml`), proxy providers, and rule providers without needing SSH.
-    *   **Backup & Restore**: Easy-to-use Insomclash configuration backup feature.
-    *   **Subscription Converter**: Built-in tool for converting proxy subscription formats.
-    *   **Log & Monitoring**: View core logs in real-time via WebSocket.
-    *   **DNS Management**: Easily configure DNS settings.
-
-<details>
-<summary><b>📸 Screenshots (Click to view)</b></summary>
-<br>
-
-| **Dashboard** | **Tools** |
-| :---: | :---: |
-| <img src="img/dash1.png" alt="Dashboard" width="100%"> | <img src="img/tools.png" alt="Tools" width="100%"> |
-
-| **File Manager** | **Log Monitor** |
-| :---: | :---: |
-| <img src="img/manager.png" alt="Manager" width="100%"> | <img src="img/log.png" alt="Log" width="100%"> |
-
-<p align="center">
-  <b>Overview</b><br>
-  <img src="img/dash2.png" alt="Overview" width="80%">
-</p>
-
-</details>
-*   **Multi-Architecture Support**:
-    *   **x86**: `x86_64` (AMD64)
-    *   **ARM**: `aarch64` (ARM64), `armv7` (ARMHF)
-    *   **MIPS**: `mips_24kc`, `mipsel_74kc` (OpenWrt Targets)
-*   **Auto-Update**: Automatic asset management (GeoIP, GeoSite, UI).
-
-## 📦 Installation
+## Installation
 
 ### OpenWrt
 
-Supported versions: **STABLE IPK** and **SNAPSHOT APK**.
+Download from [Releases](https://github.com/bobbyunknown/FusionTunX/releases), then install:
 
-1.  **Download** the latest release from the [Releases](https://github.com/bobbyunknown/Insomclash/releases) page.
-2.  Extract the archive and locate the folder corresponding to your router's architecture (e.g., `aarch64_cortex-a53`).
-3.  Upload the `.ipk` files to your router (e.g., using `scp` or WinSCP).
-4.  Install the packages:
-    ```bash
-    # Update package list first
-    opkg update
+```bash
+# OpenWrt 24.10 (IPK)
+opkg update
+opkg install fusiontunx_*.ipk luci-app-fusiontunx_*.ipk
 
-    # Install core and LuCI app
-    opkg install insomclash_*.ipk luci-app-insomclash_*.ipk
-    ```
-5.  Access the interface via **LuCI -> Services -> Insomclash** or the standalone dashboard at `http://router-ip:9090/ui`.
+# OpenWrt 25.12 (APK)
+apk add fusiontunx-*.apk luci-app-fusiontunx-*.apk
+```
 
-### Debian / Ubuntu (Linux Server)
+Access via LuCI → Services → FusionTunX or `http://router-ip:8080`
 
-Supported architectures: **amd64**, **arm64**, **armhf**.
+### Debian/Ubuntu
 
-1.  **Download** the `.deb` package from the [Releases](https://github.com/bobbyunknown/Insomclash/releases) page.
-2.  Install using `dpkg`:
-    ```bash
-    sudo dpkg -i insomclash_*.deb
-    
-    # If there are missing dependencies:
-    sudo apt-get install -f
-    ```
-3.  The service will start automatically. You can manage it via systemd:
-    ```bash
-    sudo systemctl status insomclash
-    sudo systemctl restart insomclash
-    ```
-4.  Configuration files are located in `/etc/insomclash/`.
+```bash
+sudo dpkg -i fusiontunx_*.deb
+sudo apt-get install -f  # if dependency error
+```
+
+Service runs automatically. Access at `http://localhost:8080`
 
 ### Arch Linux
 
-Supported architectures: **x86_64**, **aarch64**, **armv7h**.
-
-1.  **Download** the `.pkg.tar.zst` package from the [Releases](https://github.com/bobbyunknown/Insomclash/releases) page.
-2.  Install using `pacman`:
-    ```bash
-    sudo pacman -U insomclash-*.pkg.tar.zst
-    ```
-3.  The service will start automatically. You can manage it via systemd:
-    ```bash
-    sudo systemctl status insomclash
-    sudo systemctl restart insomclash
-    ```
-4.  Configuration files are located in `/etc/insomclash/`.
-
-## 🛠️ Build from Source
-
-This repository contains the build capability and packaging logic.
-
-### Prerequisites
-*   Linux Environment (Ubuntu 22.04+ recommended)
-*   `make`, `curl`, `wget`, `git`
-
-### Build All Packages
-To build everything (OpenWrt Packages + Debian Packages + Arch Linux Packages) locally:
+**Via AUR:**
 
 ```bash
-# Clone this repo
-git clone https://github.com/bobbyunknown/Insomclash.git
-cd Insomclash
+# Using yay
+yay -S fusiontunx
 
-# Run build
-make build-all
+# Or using paru
+paru -S fusiontunx
 ```
 
-Build results (Artifacts) will be stored in the `build/` folder (for Debian and Arch Linux) and `bin/` (for OpenWrt).
+**Manual install:**
 
-## 📄 License
+```bash
+sudo pacman -U fusiontunx-*.pkg.tar.zst
+```
 
-This project is licensed under the **MIT License**.
+Service runs automatically. Access at `http://localhost:8080`
+
+### Standalone Binary
+
+Download binary from [Releases](https://github.com/bobbyunknown/FusionTunX/releases):
+
+```bash
+chmod +x fusiontunx-linux-amd64
+./fusiontunx-linux-amd64 -c /path/to/app.yaml
+```
+
+## Build from Source
+
+### Build Debian/Arch/Binaries
+
+```bash
+git clone https://github.com/bobbyunknown/FusionTunX.git
+cd FusionTunX
+
+# Build all
+make all
+
+# Or specific
+make build-deb      # Debian packages
+make build-arch     # Arch packages  
+make build-binaries # Standalone binaries
+```
+
+Output:
+- Debian: `build/*.deb`
+- Arch: `build/*.pkg.tar.zst`
+- Binaries: `bin/fusiontunx-linux-*`
+
+### Build for OpenWrt
+
+**Method 1: Add to feeds**
+
+```bash
+# In OpenWrt build root
+echo "src-git fusiontunx https://github.com/bobbyunknown/FusionTunX.git;main" >> feeds.conf.default
+./scripts/feeds update fusiontunx
+./scripts/feeds install -a -p fusiontunx
+
+# Select package in menuconfig
+make menuconfig
+# Network -> fusiontunx
+# LuCI -> Applications -> luci-app-fusiontunx
+
+# Build
+make package/fusiontunx/compile V=s
+make package/luci-app-fusiontunx/compile V=s
+```
+
+**Method 2: Manual copy**
+
+```bash
+# Copy to package folder
+cp -r openwrt/fusiontunx /path/to/openwrt/package/
+cp -r openwrt/luci-app-fusiontunx /path/to/openwrt/package/feeds/luci/
+
+# Build
+cd /path/to/openwrt
+make package/fusiontunx/compile V=s
+make package/luci-app-fusiontunx/compile V=s
+```
+
+Packages will be in `bin/packages/your_arch/`
+
+## Configuration
+
+File: `/etc/fusiontunx/app.yaml`
+
+```yaml
+server:
+  host: "0.0.0.0"
+  port: "8080"
+  mode: "release"
+
+logging:
+  level: "info"
+  file: "/var/log/fusiontunx.log"
+
+mihomo:
+  binary: "/usr/bin/mihomo"
+  config: "/etc/fusiontunx/configs/config.yaml"
+  working_dir: "/etc/fusiontunx"
+
+api:
+  enable_swagger: false
+```
+
+## API
+
+API documentation available at `/docs` (if `enable_swagger: true`)
+
+Main endpoints:
+- `GET /api/v1/mihomo/status` - Core status
+- `POST /api/v1/mihomo/start` - Start core
+- `POST /api/v1/mihomo/stop` - Stop core
+- `GET /api/v1/config` - Get config
+- `POST /api/v1/config` - Update config
+- `WS /api/v1/logs` - Log streaming
+
+## Contributing
+
+Pull requests accepted on **dev** branch. Don't submit directly to main.
+
+1. Fork repository
+2. Create branch (`git checkout -b feature/feature-name`)
+3. Commit (`git commit -m 'Add feature'`)
+4. Push (`git push origin feature/feature-name`)
+5. Create Pull Request to **dev** branch
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
+
+## Credits
+
+- [Mihomo](https://github.com/MetaCubeX/mihomo) - Clash Meta core
+- [Gin](https://github.com/gin-gonic/gin) - Web framework
+- [React](https://react.dev/) + [Vite](https://vitejs.dev/) - Frontend
+
+## Support
+
+- Issues: [GitHub Issues](https://github.com/bobbyunknown/FusionTunX/issues)
+- Telegram: [SanTech Group](https://t.me/+TuLCASzJrVJmNzM1)
+- Donate: [Sociabuzz](https://sociabuzz.com/bobbyunknown/tribe) | [Saweria](https://saweria.co/widgets/qr?streamKey=48ea6792454c7732924b663381c69521)
