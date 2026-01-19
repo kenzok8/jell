@@ -1,6 +1,5 @@
 -- Copyright (C) 2018-2020 L-WRT Team
 -- Copyright (C) 2021-2025 xiaorouji
--- Copyright (C) 2026 Openwrt-Passwall Organization
 
 module("luci.controller.passwall", package.seeall)
 local api = require "luci.passwall.api"
@@ -391,7 +390,12 @@ function connect_status()
 	local proxy_mode = uci:get(appname, "@global[0]", "tcp_proxy_mode") or "proxy"
 	local localhost_proxy = uci:get(appname, "@global[0]", "localhost_proxy") or "1"
 	local socks_server = (localhost_proxy == "0") and api.get_cache_var("GLOBAL_TCP_SOCKS_server") or ""
-	url = "-w %{http_code}:%{time_pretransfer} " .. url
+
+	-- 兼容 curl 8.6 time_starttransfer 错误
+	local curl_ver = api.get_bin_version_cache("/usr/bin/curl", "-V 2>/dev/null | head -n 1 | awk '{print $2}' | cut -d. -f1,2 | tr -d ' \n'") or "0"
+	url = (curl_ver == "8.6") and "-w %{http_code}:%{time_appconnect} https://" .. url
+		or "-w %{http_code}:%{time_starttransfer} http://" .. url
+
 	if socks_server and socks_server ~= "" then
 		if (chn_list == "proxy" and gfw_list == "0" and proxy_mode ~= "proxy" and baidu ~= nil) or (chn_list == "0" and gfw_list == "0" and proxy_mode == "proxy") then
 		-- 中国列表+百度 or 全局
@@ -401,7 +405,7 @@ function connect_status()
 			url = "-x socks5h://" .. socks_server .. " " .. url
 		end
 	end
-	local result = luci.sys.exec('/usr/bin/curl --connect-timeout 3 --max-time 5 -o /dev/null -I -sk ' .. url)
+	local result = luci.sys.exec('/usr/bin/curl --max-time 5 -o /dev/null -I -sk ' .. url)
 	local code = tonumber(luci.sys.exec("echo -n '" .. result .. "' | awk -F ':' '{print $1}'") or "0")
 	if code ~= 0 then
 		local use_time_str = luci.sys.exec("echo -n '" .. result .. "' | awk -F ':' '{print $2}'")
@@ -554,11 +558,15 @@ function delete_select_nodes()
 	local ids = http.formvalue("ids")
 	local redirect = http.formvalue("redirect")
 	string.gsub(ids, '[^' .. "," .. ']+', function(w)
-		local socks
+		if (uci:get(appname, "@global[0]", "tcp_node") or "") == w then
+			uci:delete(appname, '@global[0]', "tcp_node")
+		end
+		if (uci:get(appname, "@global[0]", "udp_node") or "") == w then
+			uci:delete(appname, '@global[0]', "udp_node")
+		end
 		uci:foreach(appname, "socks", function(t)
 			if t["node"] == w then
 				uci:delete(appname, t[".name"])
-				socks = "Socks_" .. t[".name"]
 			end
 			local auto_switch_node_list = uci:get(appname, t[".name"], "autoswitch_backup_node") or {}
 			for i = #auto_switch_node_list, 1, -1 do
@@ -568,24 +576,16 @@ function delete_select_nodes()
 			end
 			uci:set_list(appname, t[".name"], "autoswitch_backup_node", auto_switch_node_list)
 		end)
-		local tcp_node = uci:get(appname, "@global[0]", "tcp_node") or ""
-		if tcp_node == w or tcp_node == socks then
-			uci:delete(appname, '@global[0]', "tcp_node")
-		end
-		local udp_node = uci:get(appname, "@global[0]", "udp_node") or ""
-		if udp_node == w or udp_node == socks then
-			uci:delete(appname, '@global[0]', "udp_node")
-		end
 		uci:foreach(appname, "haproxy_config", function(t)
 			if t["lbss"] == w then
 				uci:delete(appname, t[".name"])
 			end
 		end)
 		uci:foreach(appname, "acl_rule", function(t)
-			if t["tcp_node"] == w or t["tcp_node"] == socks then
+			if t["tcp_node"] == w then
 				uci:delete(appname, t[".name"], "tcp_node")
 			end
-			if t["udp_node"] == w or t["udp_node"] == socks then
+			if t["udp_node"] == w then
 				uci:delete(appname, t[".name"], "udp_node")
 			end
 		end)
@@ -605,7 +605,7 @@ function delete_select_nodes()
 					local changed = false
 					local new_nodes = {}
 					for _, node in ipairs(nodes) do
-						if node ~= w and node ~= socks then
+						if node ~= w then
 							table.insert(new_nodes, node)
 						else
 							changed = true
@@ -616,7 +616,7 @@ function delete_select_nodes()
 					end
 				end
 			end
-			if t["fallback_node"] == w or t["fallback_node"] == socks then
+			if t["fallback_node"] == w then
 				uci:delete(appname, t[".name"], "fallback_node")
 			end
 		end)

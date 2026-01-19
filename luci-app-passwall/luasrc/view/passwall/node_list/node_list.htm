@@ -26,6 +26,10 @@ table td, .table .td {
 	box-shadow: darkgrey 10px 10px 30px 5px;
 }
 
+._now_use {
+	color: red !important;
+}
+
 ._now_use_bg {
 	background: #5e72e445 !important;
 }
@@ -68,6 +72,7 @@ table td, .table .td {
 	padding: 0 !important;
 	line-height: inherit;
 	user-select: none;
+	color: #00000070;
 	align-self: stretch;
 }
 
@@ -210,6 +215,8 @@ table td, .table .td {
 	//<![CDATA[
 	let auto_detection_time = "<%=api.uci_get_type("global_other", "auto_detection_time", "0")%>"
 	let show_node_info = "<%=api.uci_get_type("global_other", "show_node_info", "0")%>"
+
+	var node_list = [];
 
 	var ajax = {
 		post: function(url, data, fn_success, timeout, fn_timeout) {
@@ -488,9 +495,9 @@ table td, .table .td {
 						dom.classList.add("_now_use_bg");
 						//var v = "<a style='color: red'>当前TCP节点：</a>" + document.getElementById("cbid.passwall." + id + ".remarks").value;
 						//document.getElementById("cbi-passwall-" + id + "-remarks").innerHTML = v;
-						var dom_remarks = dom.querySelector("td.pw-remark");
+						var dom_remarks = document.getElementById("cbi-passwall-" + id + "-remarks");
 						if (dom_remarks) {
-							dom_remarks.style.color = 'red';
+							dom_remarks.classList.add("_now_use");
 						}
 					}
 				}
@@ -504,9 +511,9 @@ table td, .table .td {
 							dom.title = '<%=api.i18n.translatef("Currently using %s node", "UDP")%>';
 						}
 						dom.classList.add("_now_use_bg");
-						var dom_remarks = dom.querySelector("td.pw-remark");
+						var dom_remarks = document.getElementById("cbi-passwall-" + id + "-remarks");
 						if (dom_remarks) {
-							dom_remarks.style.color = 'red';
+							dom_remarks.classList.add("_now_use");
 						}
 					}
 				}
@@ -750,12 +757,6 @@ table td, .table .td {
 			}
 		}
 	}
-
-	function escape_html(s) {
-		return s.replace(/[&<>"']/g, c => ({
-			"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-		}[c]));
-	}
 </script>
 
 <script type="text/template" id="nodes-table-template">
@@ -909,7 +910,7 @@ table td, .table .td {
 						} else {
 							innerHTML = innerHTML.split("{{tcping}}").join('<span class="tcping_value" cbiid="{{id}}">---</span>');
 						}
-						innerHTML = innerHTML.split("{{url_test}}").join('<span class="ping"><a href="javascript:void(0)" onclick="javascript:urltest_node(\'{{id}}\', this)" title="<%:TLS handshake test, latency for reference only%>"><%:Test%></a></span>');
+						innerHTML = innerHTML.split("{{url_test}}").join('<span class="ping"><a href="javascript:void(0)" onclick="javascript:urltest_node(\'{{id}}\', this)"><%:Test%></a></span>');
 						innerHTML = innerHTML.split("{{id}}").join(o[".name"]);
 						innerHTML = innerHTML.split("{{group}}").join(o["group"] || "");
 						let node_remarks = get_remarks_name(o);
@@ -939,7 +940,7 @@ table td, .table .td {
 
 				tab_ul_li_html +=
 					'<li group_name="' + group + '" id="tab.passwall.nodes.' + group + '" class="cbi-tab">' +
-						'<a onclick="this.blur(); return cbi_t_switch(\'passwall.nodes\', \'' + group + '\')" href="<%=REQUEST_URI%>?tab.passwall.nodes=' + group + '">' + escape_html(group_name) + " | " + "<font style='color: red'>" + group_nodes[group].length + '</font></a>' +
+						'<a onclick="this.blur(); return cbi_t_switch(\'passwall.nodes\', \'' + group + '\')" href="<%=REQUEST_URI%>?tab.passwall.nodes=' + group + '">' + group_name + " | " + "<font style='color: red'>" + group_nodes[group].length + '</font></a>' +
 					'</li>'
 				tab_content_html +=
 					'<div class="cbi-tabcontainer" id="container.passwall.nodes.' + group + '" style="display: none;">' +

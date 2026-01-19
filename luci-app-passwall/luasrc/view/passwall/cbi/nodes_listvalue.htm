@@ -104,7 +104,7 @@ window.lv_dropdown_data["<%=cbid%>"] = <%=json.stringify(dropdown_data)%>;
 	<div id="<%=cbid%>.panel" class="cbi-listvalue-panel lv-dropdown-panel" style="display:none;">
 		<!-- 搜索框 -->
 		<div style="padding:8px;border-bottom:1px solid #f0f0f0;">
-			<input id="<%=cbid%>.search" class="cbi-input-text lv-dropdown-search" type="text" placeholder="🔍 <%:Search nodes...%>" inputmode="search" enterkeyhint="done" />
+			<input id="<%=cbid%>.search" class="cbi-input-text lv-dropdown-search" type="text" placeholder="<%:Search nodes...%>" />
 		</div>
 		<!-- 列表容器 -->
 		<div id="<%=cbid%>.list" style="padding:8px;">
@@ -139,7 +139,7 @@ window.lv_dropdown_data["<%=cbid%>"] = <%=json.stringify(dropdown_data)%>;
 			lv_openPanel(cbid,display,panel,listContainer,hiddenSelect,searchInput);
 		}
 	});
-	lv_registerAdaptive(cbid);
+	lv_adaptiveStyle(cbid);	// copy select styles
 })();
 //]]>
 </script>

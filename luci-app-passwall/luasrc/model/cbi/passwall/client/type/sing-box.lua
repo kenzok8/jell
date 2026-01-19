@@ -77,7 +77,6 @@ for k, e in ipairs(api.get_valid_nodes()) do
 			id = e[".name"],
 			remark = e["remark"],
 			type = e["type"],
-			address = e["address"],
 			chain_proxy = e["chain_proxy"],
 			group = e["group"]
 		}
@@ -115,10 +114,6 @@ o:depends({ [_n("protocol")] = "_urltest" })
 o.widget = "checkbox"
 o.template = appname .. "/cbi/nodes_multivalue"
 o.group = {}
-for k, v in pairs(socks_list) do
-	o:value(v.id, v.remark)
-	o.group[#o.group+1] = v.group or ""
-end
 for i, v in pairs(nodes_table) do
 	o:value(v.id, v.remark)
 	o.group[#o.group+1] = v.group or ""
@@ -156,7 +151,7 @@ o:value("https://www.google.com/generate_204", "Google")
 o:value("https://www.youtube.com/generate_204", "YouTube")
 o:value("https://connect.rom.miui.com/generate_204", "MIUI (CN)")
 o:value("https://connectivitycheck.platform.hicloud.com/generate_204", "HiCloud (CN)")
-o.default = o.keylist[3]
+o.default = "https://www.gstatic.com/generate_204"
 o.description = translate("The URL used to detect the connection status.")
 
 o = s:option(Value, _n("urltest_interval"), translate("Test interval"))
@@ -185,7 +180,7 @@ o.description = translate("The idle timeout.") .. "<br>" ..
 o = s:option(Flag, _n("urltest_interrupt_exist_connections"), translate("Interrupt existing connections"))
 o:depends({ [_n("protocol")] = "_urltest" })
 o.default = "0"
-o.description = translate("Interrupt existing connections when the selected outbound has changed.") 
+o.description = translate("Interrupt existing connections when the selected outbound has changed.")
 
 -- [[ 分流模块 ]]
 if #nodes_table > 0 then
@@ -240,13 +235,10 @@ m.uci:foreach(appname, "shunt_rules", function(e)
 			local pt = s:option(ListValue, _n(e[".name"] .. "_proxy_tag"), string.format('* <a style="color:red">%s</a>', e.remarks .. " " .. translate("Preproxy")))
 			pt:value("", translate("Close"))
 			pt:value("main", translate("Preproxy Node"))
-			pt:depends("__hide__", "1")
 			for k, v in pairs(nodes_table) do
 				o:value(v.id, v.remark)
 				o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
-				if not api.is_local_ip(v.address) then  --本地节点禁止使用前置
-					pt:depends({ [_n("protocol")] = "_shunt", [_n("preproxy_enabled")] = true, [_n(e[".name"])] = v.id })
-				end
+				pt:depends({ [_n("protocol")] = "_shunt", [_n("preproxy_enabled")] = true, [_n(e[".name"])] = v.id })
 			end
 		end
 	end
@@ -283,13 +275,10 @@ if #nodes_table > 0 then
 	local dpt = s:option(ListValue, _n("default_proxy_tag"), string.format('* <a style="color:red">%s</a>', translate("Default Preproxy")), translate("When using, localhost will connect this node first and then use this node to connect the default node."))
 	dpt:value("", translate("Close"))
 	dpt:value("main", translate("Preproxy Node"))
-	dpt:depends("__hide__", "1")
 	for k, v in pairs(nodes_table) do
 		o:value(v.id, v.remark)
 		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
-		if not api.is_local_ip(v.address) then
-			dpt:depends({ [_n("protocol")] = "_shunt", [_n("preproxy_enabled")] = true, [_n("default_node")] = v.id })
-		end
+		dpt:depends({ [_n("protocol")] = "_shunt", [_n("preproxy_enabled")] = true, [_n("default_node")] = v.id })
 	end
 end
 
@@ -554,8 +543,8 @@ o:depends({ [_n("ech")] = true })
 o.validate = function(self, value)
 	value = value:gsub("^%s+", ""):gsub("%s+$","\n"):gsub("\r\n","\n"):gsub("[ \t]*\n[ \t]*", "\n")
 	value = value:gsub("^%s*\n", "")
-	if value:sub(-1) == "\n" then  
-		value = value:sub(1, -2)  
+	if value:sub(-1) == "\n" then
+		value = value:sub(1, -2)
 	end
 	return value
 end
@@ -588,10 +577,10 @@ if singbox_tags:find("with_utls") then
 	o:depends({ [_n("protocol")] = "socks", [_n("tls")] = true })
 	o:depends({ [_n("protocol")] = "trojan", [_n("tls")] = true })
 	o:depends({ [_n("protocol")] = "anytls", [_n("tls")] = true })
-	
+
 	o = s:option(Value, _n("reality_publicKey"), translate("Public Key"))
 	o:depends({ [_n("reality")] = true })
-	
+
 	o = s:option(Value, _n("reality_shortId"), translate("Short Id"))
 	o:depends({ [_n("reality")] = true })
 end
@@ -648,12 +637,18 @@ o = s:option(DynamicList, _n("tcp_guise_http_path"), translate("HTTP Path"))
 o.placeholder = "/"
 o:depends({ [_n("tcp_guise")] = "http" })
 
+o = s:option(Value, _n("tcp_guise_http_user_agent"), translate("User-Agent"))
+o:depends({ [_n("tcp_guise")] = "http" })
+
 -- [[ HTTP部分 ]]--
 o = s:option(DynamicList, _n("http_host"), translate("HTTP Host"))
 o:depends({ [_n("transport")] = "http" })
 
 o = s:option(Value, _n("http_path"), translate("HTTP Path"))
 o.placeholder = "/"
+o:depends({ [_n("transport")] = "http" })
+
+o = s:option(Value, _n("http_user_agent"), translate("User-Agent"))
 o:depends({ [_n("transport")] = "http" })
 
 o = s:option(Flag, _n("http_h2_health_check"), translate("Health check"))
@@ -675,6 +670,9 @@ o = s:option(Value, _n("ws_path"), translate("WebSocket Path"))
 o.placeholder = "/"
 o:depends({ [_n("transport")] = "ws" })
 
+o = s:option(Value, _n("ws_user_agent"), translate("User-Agent"))
+o:depends({ [_n("transport")] = "ws" })
+
 o = s:option(Flag, _n("ws_enableEarlyData"), translate("Enable early data"))
 o:depends({ [_n("transport")] = "ws" })
 
@@ -691,6 +689,9 @@ o:depends({ [_n("transport")] = "httpupgrade" })
 
 o = s:option(Value, _n("httpupgrade_path"), translate("HTTPUpgrade Path"))
 o.placeholder = "/"
+o:depends({ [_n("transport")] = "httpupgrade" })
+
+o = s:option(Value, _n("httpupgrade_user_agent"), translate("User-Agent"))
 o:depends({ [_n("transport")] = "httpupgrade" })
 
 -- [[ gRPC部分 ]]--
@@ -711,13 +712,6 @@ o:depends({ [_n("grpc_health_check")] = true })
 o = s:option(Flag, _n("grpc_permit_without_stream"), translate("Permit without stream"))
 o.default = "0"
 o:depends({ [_n("grpc_health_check")] = true })
-
--- [[ User-Agent ]]--
-o = s:option(Value, _n("user_agent"), translate("User-Agent"))
-o:depends({ [_n("tcp_guise")] = "http" })
-o:depends({ [_n("transport")] = "http" })
-o:depends({ [_n("transport")] = "ws" })
-o:depends({ [_n("transport")] = "httpupgrade" })
 
 -- [[ Mux ]]--
 o = s:option(Flag, _n("mux"), translate("Mux"))

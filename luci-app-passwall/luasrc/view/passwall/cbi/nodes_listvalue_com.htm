@@ -5,6 +5,10 @@
 --	Copyright: copyright(c)2025–2027
 --	Description: Passwall(2) UI template
 -- It is the common part of the template and cannot be used independently
+
+local api = require "luci.passwall.api"
+local appname = api.appname
+
 %>
 <style>
 /* 主下拉按钮的下箭头 */
@@ -69,18 +73,6 @@
 	min-width: 220px;
 	white-space: nowrap;
 }
-@media (max-width: 1152px) {
-	.lv-dropdown-container {
-		white-space: normal;
-	}
-}
-@media (max-width: 600px) {
-	.lv-dropdown-container {
-		display: block;
-		white-space: normal;
-	}
-}
-
 .lv-dropdown-display {
 	cursor: pointer;
 	display: inline-flex;
@@ -136,6 +128,9 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	text-align: left !important;
+}
+ #cbi-<%=appname%>-socks .td.cbi-value-field > div {
+	white-space: nowrap;
 }
 </style>
 
@@ -223,7 +218,7 @@
 		if (!rgb) return 'unknown'; // Handle invalid colors
 		// Calculate YIQ brightness (human eye perception)
 		const brightness = ((rgb.r * 299) + (rgb.g * 587) + (rgb.b * 114)) / 1000;
-		
+
 		return brightness > 128 ? 'light' : 'dark';
 	}
 
@@ -249,11 +244,9 @@
 		return lv_rgbToHex(r, g, b);
 	}
 
-	// copy select styles
 	function lv_adaptiveStyle(cbid) {
 		const display = document.getElementById(cbid + ".display");
 		const hiddenSelect = document.getElementById(cbid);
-		const panel = document.getElementById(cbid + ".panel");
 		if (hiddenSelect && display) {
 			const elOption = hiddenSelect.getElementsByTagName("option")[0]
 			const styleSelect = window.getComputedStyle(hiddenSelect)
@@ -262,26 +255,15 @@
 
 			const styleNode = document.createElement('style')
 			const styleNames = ["width", "color", "height", "padding", "margin", "lineHeight", "border", "borderRadius", "minWidth", "minHeight"]
-			if (styleSelect.borderBottomStyle !== "none") {
-				styleNames.push("borderBottomWidth", "borderBottomStyle", "borderBottomColor");
-			}
 			document.head.appendChild(styleNode)
 			// trace back from option -> select -> body for background color
-			const panelRadius = styleSelect.borderRadius;
 			const optionColor = !lv_isTransparent(styleOption.backgroundColor) ? styleOption.backgroundColor : !lv_isTransparent(styleSelect.backgroundColor) ? styleSelect.backgroundColor : styleBody.backgroundColor
 			const titleColor = lv_getColorSchema(optionColor) === "light" ? lv_darker(optionColor, 30) : lv_lighter(optionColor, 30)
 			const selectStyleCSS = [`#${CSS.escape(cbid + ".display")} {`, lv_style2Css(styleSelect, styleNames), lv_style2Css(styleSelect, ["backgroundColor"]), "}"]
-			const optionStyleCSS = [`#${CSS.escape(cbid + ".panel")}  {`, lv_style2Css(styleOption, styleNames), `background-color: ${optionColor};`, `border-radius: ${panelRadius};`, "}"]
+			const optionStyleCSS = [`#${CSS.escape(cbid + ".panel")}  {`, lv_style2Css(styleOption, styleNames), `background-color: ${optionColor};`, "}"]
 			const titleStyleCSS = [`#${CSS.escape(cbid + ".panel")} .lv-group-title  {`, `background-color: ${titleColor} !important;`, "}"]
 			styleNode.textContent = [].concat(selectStyleCSS, optionStyleCSS, titleStyleCSS).join("\n")
 		}
-	}
-
-	function lv_idSafe(id) {
-		return id
-			.trim()
-			.replace(/\s+/g, "-")
-			.replace(/[\x00-\x1F\x7F]/g, "");
 	}
 
 	// 高亮当前选中的项
@@ -333,7 +315,7 @@
 					span.style.color = "#007bff";
 					span.style.fontWeight = "600";
 				} else {
-					span.style.color = "";
+					span.style.color = "#666";
 					span.style.fontWeight = "normal";
 				}
 			}
@@ -383,8 +365,7 @@
 
 	// 切换单个组（点击组标题）
 	function lv_toggleGroup(listContainer, cbid, g) {
-		g = lv_idSafe(g);
-		const group = listContainer.querySelector(".lv-group[data-group='" + g + "']");
+		const group = listContainer.querySelector(".lv-group[data-group='" + g.replace(/'/g, "\\'") + "']");
 		if (!group) return;
 		const ul = group.querySelector(".lv-group-list");
 		const arrow = document.getElementById("arrow-" + cbid + "-" + g);
@@ -485,13 +466,7 @@
 		}
 		panel.style.left = rect.left + "px";
 		panel.style.top = top + "px";
-		const panelRect = panel.getBoundingClientRect();
-		const displayWidth = rect.width;
-		const remainingWidth = window.innerWidth - panelRect.left - 12;
-		const maxWidth = Math.max(displayWidth, Math.floor(remainingWidth));
-		panel.style.maxWidth = maxWidth + "px";
-		panel.style.minWidth = displayWidth + "px";
-		panel.style.width = "auto";
+		panel.style.minWidth = rect.width + "px";
 		panel.style.visibility = "";
 	}
 
@@ -585,14 +560,14 @@
 			const items = data.groups[gname];
 
 			html += `
-			<div class="lv-group" data-group="${lv_idSafe(gname)}" style="margin-bottom:8px;">
-				<div class="lv-group-title" data-group-name="${lv_idSafe(gname)}">
-					<span class="lv-arrow-right" id="arrow-${cbid}-${lv_idSafe(gname)}"></span>
+			<div class="lv-group" data-group="${lv_escape_html(gname)}" style="margin-bottom:8px;">
+				<div class="lv-group-title" data-group-name="${lv_escape_html(gname)}">
+					<span class="lv-arrow-right" id="arrow-${cbid}-${gname}"></span>
 					<b style="margin-left:6px;">${lv_escape_html(gname)}</b>
-					<span id="group-count-${cbid}-${lv_idSafe(gname)}"
-						style="margin-left:8px;">(0/${items.length})</span>
+					<span id="group-count-${cbid}-${gname}"
+						style="margin-left:8px;color:#666;">(0/${items.length})</span>
 				</div>
-				<ul id="group-${cbid}-${lv_idSafe(gname)}" class="lv-group-list" style="display:none">
+				<ul id="group-${cbid}-${gname}" class="lv-group-list" style="display:none">
 			`;
 
 			items.forEach(item => {
@@ -626,37 +601,28 @@
 			if(!li || li === listContainer) return;
 			const key = li.getAttribute('data-key') || "";
 			const text = li.querySelector(".lv-item-label")?.textContent || li.textContent || key;
-
-			const changed = key !== hiddenSelect.value;
-			if (changed) {
-				//改值
+			if (key !== hiddenSelect.value) {
+				//动态改值
 				hiddenSelect.options[0].value = key;
-				hiddenSelect.options[0].text = key;
 				hiddenSelect.value = key;
 				labelSpan.textContent = text;
 				labelSpan.title = text;
+				setTimeout(() => {
+					try {
+						const evt = new Event('change', { bubbles: true });
+						hiddenSelect.dispatchEvent(evt);
+					} catch(e){}
+				}, 0);
 				lv_highlightSelectedItem(listContainer, hiddenSelect);
 				lv_updateGroupCounts(cbid, listContainer, hiddenSelect, searchInput);
 			}
 			lv_closePanel(cbid,panel,listContainer,hiddenSelect,searchInput);
-			if (changed) {
-				setTimeout(() => {
-					hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
-				}, 0);
-			}
 		});
 
 		// 搜索功能
 		searchInput.addEventListener("input", function() {
 			lv_filterList(this.value, cbid, listContainer, hiddenSelect, searchInput);
 			lv_repositionPanel(panel, display);
-		});
-		searchInput.addEventListener('keydown', function(e) {
-			const isEnter = e.key === "Enter" || e.keyCode === 13;
-			if (!isEnter) return;
-			e.stopPropagation();
-			e.preventDefault();
-			searchInput.blur();
 		});
 
 		// 切换组
@@ -669,22 +635,27 @@
 				}
 			});
 		});
+
+		// 设置宽度
+		panel.style.maxWidth = lv_getPanelMaxWidth(display);
+		panel.style.minWidth = display.getBoundingClientRect().width + "px";
+		panel.style.width = "auto";
 	}
 
-	const lv_adaptiveControls = new Set();
-	function lv_registerAdaptive(cbid) {
-		lv_adaptiveControls.add(cbid);
-		lv_adaptiveStyle(cbid);
-	}
-	let lv_adaptiveTicking = false;
-	window.addEventListener("resize", () => {
-		if (!lv_adaptiveTicking) {
-			lv_adaptiveTicking = true;
-			requestAnimationFrame(() => {
-				lv_adaptiveControls.forEach(cbid => lv_adaptiveStyle(cbid));
-				lv_adaptiveTicking = false;
-			});
+	function lv_getPanelMaxWidth(display) {
+		if (!display) return 0;
+		const rectW = el => el && el.getBoundingClientRect().width;
+		const fallback = rectW(display) || 0;
+		const cbiValue = display.closest(".cbi-value");
+		if (cbiValue) {
+			const valueW = rectW(cbiValue);
+			const titleW = rectW(cbiValue.querySelector(".cbi-value-title"));
+			if (valueW) {
+				return Math.floor(titleW ? valueW - titleW : valueW);
+			}
 		}
-	});
+		const fieldW = rectW(display.closest(".cbi-value-field"));
+		return Math.floor(fieldW || fallback);
+	}
 //]]>
 </script>

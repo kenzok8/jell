@@ -64,12 +64,11 @@ end
 local new_port
 
 local function get_new_port()
-	local cmd_format = ". /usr/share/passwall/utils.sh ; echo -n $(get_new_port %s tcp)"
-	local set_port = 0
-	if new_port and tonumber(new_port) then
-		set_port = tonumber(new_port) + 1
+	if new_port then
+		new_port = tonumber(sys.exec(string.format("echo -n $(/usr/share/%s/app.sh get_new_port %s tcp)", appname, new_port + 1)))
+	else
+		new_port = tonumber(sys.exec(string.format("echo -n $(/usr/share/%s/app.sh get_new_port auto tcp)", appname)))
 	end
-	new_port = tonumber(sys.exec(string.format(cmd_format, set_port == 0 and "auto" or set_port)))
 	return new_port
 end
 
@@ -96,7 +95,7 @@ function gen_outbound(flag, node, tag, proxy_table)
 			local relay_port = node.port
 			new_port = get_new_port()
 			local config_file = string.format("%s_%s_%s.json", flag, tag, new_port)
-			if tag and node_id and not tag:find(node_id) then
+			if tag and node_id and tag ~= node_id then
 				config_file = string.format("%s_%s_%s_%s.json", flag, tag, node_id, new_port)
 			end
 			if run_socks_instance then
@@ -207,8 +206,8 @@ function gen_outbound(flag, node, tag, proxy_table)
 						local first = node.tcp_guise_http_path[1]
 						return (first == "" or not first) and "/" or first
 					end)() or "/",
-				headers = node.user_agent and {
-					["User-Agent"] = node.user_agent
+				headers = node.tcp_guise_http_user_agent and {
+					["User-Agent"] = node.tcp_guise_http_user_agent
 				} or nil,
 				idle_timeout = (node.http_h2_health_check == "1") and node.http_h2_read_idle_timeout or nil,
 				ping_timeout = (node.http_h2_health_check == "1") and node.http_h2_health_check_timeout or nil,
@@ -221,8 +220,8 @@ function gen_outbound(flag, node, tag, proxy_table)
 				type = "http",
 				host = node.http_host or {},
 				path = node.http_path or "/",
-				headers = node.user_agent and {
-					["User-Agent"] = node.user_agent
+				headers = node.http_user_agent and {
+					["User-Agent"] = node.http_user_agent
 				} or nil,
 				idle_timeout = (node.http_h2_health_check == "1") and node.http_h2_read_idle_timeout or nil,
 				ping_timeout = (node.http_h2_health_check == "1") and node.http_h2_health_check_timeout or nil,
@@ -234,9 +233,9 @@ function gen_outbound(flag, node, tag, proxy_table)
 			v2ray_transport = {
 				type = "ws",
 				path = node.ws_path or "/",
-				headers = (node.ws_host or node.user_agent) and {
+				headers = (node.ws_host or node.ws_user_agent) and {
 					Host = node.ws_host,
-					["User-Agent"] = node.user_agent
+					["User-Agent"] = node.ws_user_agent
 				} or nil,
 				max_early_data = tonumber(node.ws_maxEarlyData) or nil,
 				early_data_header_name = (node.ws_earlyDataHeaderName) and node.ws_earlyDataHeaderName or nil --要与 Xray-core 兼容，请将其设置为 Sec-WebSocket-Protocol。它需要与服务器保持一致。
@@ -248,8 +247,8 @@ function gen_outbound(flag, node, tag, proxy_table)
 				type = "httpupgrade",
 				host = node.httpupgrade_host,
 				path = node.httpupgrade_path or "/",
-				headers = node.user_agent and {
-					["User-Agent"] = node.user_agent
+				headers = node.httpupgrade_user_agent and {
+					["User-Agent"] = node.httpupgrade_user_agent
 				} or nil
 			}
 		end
@@ -517,7 +516,8 @@ end
 
 function gen_config_server(node)
 	local outbounds = {
-		{ type = "direct", tag = "direct" }
+		{ type = "direct", tag = "direct" },
+		{ type = "block", tag = "block" }
 	}
 
 	local tls = {
@@ -822,10 +822,8 @@ function gen_config_server(node)
 	local route = {
 		rules = {
 			{
-				ip_is_private = true,
-				action = node.accept_lan == "1" and "route" or "reject",
-				outbound = node.accept_lan == "1" and "direct" or nil
-
+				ip_cidr = { "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" },
+				outbound = (node.accept_lan == nil or node.accept_lan == "0") and "block" or "direct"
 			}
 		}
 	}
@@ -876,6 +874,26 @@ function gen_config_server(node)
 		for k, v in pairs(config.outbounds[index]) do
 			if k:find("_") == 1 then
 				config.outbounds[index][k] = nil
+			end
+		end
+	end
+
+	if version_ge_1_11_0 then
+		-- Migrate logics
+		-- https://sing-box.sagernet.org/migration/
+		for i = #config.outbounds, 1, -1 do
+			local value = config.outbounds[i]
+			if value.type == "block" then
+				-- https://sing-box.sagernet.org/migration/#migrate-legacy-special-outbounds-to-rule-actions
+				table.remove(config.outbounds, i)
+			end
+		end
+		-- https://sing-box.sagernet.org/migration/#migrate-legacy-special-outbounds-to-rule-actions
+		for i = #config.route.rules, 1, -1 do
+			local value = config.route.rules[i]
+			if value.outbound == "block" then
+				value.action = "reject"
+				value.outbound = nil
 			end
 		end
 	end
@@ -988,7 +1006,8 @@ function gen_config(var)
 					tag = "redirect_tcp",
 					listen = "::",
 					listen_port = tonumber(tcp_redir_port),
-					sniff = true
+					sniff = true,
+					sniff_override_destination = (singbox_settings.sniff_override_destination == "1") and true or false,
 				}
 				table.insert(inbounds, inbound)
 			else
@@ -998,7 +1017,8 @@ function gen_config(var)
 					network = "tcp",
 					listen = "::",
 					listen_port = tonumber(tcp_redir_port),
-					sniff = true
+					sniff = true,
+					sniff_override_destination = (singbox_settings.sniff_override_destination == "1") and true or false,
 				}
 				table.insert(inbounds, inbound)
 			end
@@ -1011,7 +1031,8 @@ function gen_config(var)
 				network = "udp",
 				listen = "::",
 				listen_port = tonumber(udp_redir_port),
-				sniff = true
+				sniff = true,
+				sniff_override_destination = (singbox_settings.sniff_override_destination == "1") and true or false,
 			}
 			table.insert(inbounds, inbound)
 		end
@@ -1040,30 +1061,12 @@ function gen_config(var)
 					end
 				end
 				if is_new_ut_node then
-					local ut_node
-					if ut_node_id:find("Socks_") then
-						local socks_id = ut_node_id:sub(1 + #"Socks_")
-						local socks_node = uci:get_all(appname, socks_id) or nil
-						if socks_node then
-							ut_node = {
-								type = "sing-box",
-								protocol = "socks",
-								address = "127.0.0.1",
-								port = socks_node.port,
-								uot = "1",
-								remarks = "Socks_" .. socks_node.port
-							}
-						end
-					else
-						ut_node = uci:get_all(appname, ut_node_id)
-					end
-					if ut_node then
-						local outbound = gen_outbound(flag, ut_node, ut_node_tag, { fragment = singbox_settings.fragment == "1" or nil, record_fragment = singbox_settings.record_fragment == "1" or nil, run_socks_instance = not no_run })
-						if outbound then
-							outbound.tag = outbound.tag .. ":" .. ut_node.remarks
-							table.insert(outbounds, outbound)
-							valid_nodes[#valid_nodes + 1] = outbound.tag
-						end
+					local ut_node = uci:get_all(appname, ut_node_id)
+					local outbound = gen_outbound(flag, ut_node, ut_node_tag, { fragment = singbox_settings.fragment == "1" or nil, record_fragment = singbox_settings.record_fragment == "1" or nil, run_socks_instance = not no_run })
+					if outbound then
+						outbound.tag = outbound.tag .. ":" .. ut_node.remarks
+						table.insert(outbounds, outbound)
+						valid_nodes[#valid_nodes + 1] = outbound.tag
 					end
 				end
 			end
@@ -1311,7 +1314,7 @@ function gen_config(var)
 							end
 						end
 					end
-					
+
 					local rule = {
 						inbound = inboundTag,
 						outbound = outboundTag,
@@ -1528,7 +1531,7 @@ function gen_config(var)
 				server = dns_socks_address,
 				server_port = tonumber(dns_socks_port)
 			})
-		else 
+		else
 			default_outTag = COMMON.default_outbound_tag
 		end
 
@@ -1577,7 +1580,7 @@ function gen_config(var)
 					inet4_range = "198.18.0.0/15",
 					inet6_range = "fc00::/18",
 				}
-				
+
 				table.insert(dns.servers, {
 					tag = fakedns_tag,
 					address = "fakeip",
@@ -1637,7 +1640,7 @@ function gen_config(var)
 				table.insert(dns.servers, remote_server)
 			end
 
-			if remote_dns_fake then		
+			if remote_dns_fake then
 				table.insert(dns.servers, {
 					tag = fakedns_tag,
 					type = "fakeip",
@@ -1686,7 +1689,7 @@ function gen_config(var)
 					port = tonumber(direct_dns_port) or 53
 					direct_dns_server = "tcp://" .. direct_dns_tcp_server .. ":" .. port
 				end
-		
+
 				table.insert(dns.servers, {
 					tag = "direct",
 					address = direct_dns_server,
@@ -1705,7 +1708,7 @@ function gen_config(var)
 					direct_dns_server = direct_dns_tcp_server
 					type = "tcp"
 				end
-		
+
 				table.insert(dns.servers, {
 					tag = "direct",
 					type = type,
@@ -1792,7 +1795,7 @@ function gen_config(var)
 				end
 			end
 		end
-	
+
 		table.insert(inbounds, {
 			type = "direct",
 			tag = "dns-in",
@@ -1812,7 +1815,7 @@ function gen_config(var)
 			outbound = "dns-out"
 		})
 	end
-	
+
 	if inbounds or outbounds then
 		local config = {
 			log = {
@@ -1949,6 +1952,7 @@ function gen_config(var)
 						action = "sniff"
 					})
 					value.sniff = nil
+					value.sniff_override_destination = nil
 				end
 				if value.domain_strategy then
 					table.insert(config.route.rules, 1, {
@@ -2036,7 +2040,7 @@ function gen_proto_config(var)
 		}
 		if outbound then table.insert(outbounds, outbound) end
 	end
-	
+
 	local config = {
 		log = {
 			disabled = true,

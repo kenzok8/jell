@@ -12,7 +12,6 @@ local trojan_type = {}
 local vmess_type = {}
 local vless_type = {}
 local hysteria2_type = {}
-local xray_version = api.get_app_version("xray")
 if has_ss then
 	local s = "shadowsocks-libev"
 	table.insert(ss_type, s)
@@ -39,9 +38,6 @@ if has_xray then
 	table.insert(ss_type, s)
 	table.insert(vmess_type, s)
 	table.insert(vless_type, s)
-	if api.compare_versions(xray_version, ">=", "26.1.13") then
-		table.insert(hysteria2_type, s)
-	end
 end
 if has_hysteria2 then
 	local s = "hysteria2"
@@ -49,15 +45,29 @@ if has_hysteria2 then
 end
 
 m = Map(appname)
-api.set_apply_on_parse(m)
 
-function m.on_before_save(self)
+function m.commit_handler(self)
 	if self.no_commit then
 		return
 	end
 	self.uci:foreach(appname, "subscribe_list", function(e)
 		self:del(e[".name"], "md5")
 	end)
+end
+
+if api.is_js_luci() then
+	m.apply_on_parse = false
+	m.on_after_apply = function(self)
+		uci:foreach(appname, "subscribe_list", function(e)
+			uci:delete(appname, e[".name"], "md5")
+		end)
+		uci:commit(appname)
+		api.showMsg_Redirect()
+	end
+	m.render = function(self, ...)
+		Map.render(self, ...)
+		api.optimize_cbi_ui()
+	end
 end
 
 -- [[ Subscribe Settings ]]--
@@ -233,6 +243,6 @@ o.cfgvalue = function(self, section)
 	section, translate("Manual subscription"))
 end
 
-m:append(Template(appname .. "/node_subscribe/js"))
+s:append(Template(appname .. "/node_subscribe/js"))
 
 return m
