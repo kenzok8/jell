@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-09 19:09+0080\n"
-"PO-Revision-Date: 2025-03-01 13:22+0080\n"
+"PO-Revision-Date: 2026-01-19 19:21+0080\n"
 "Last-Translator: xiechangan123\n"
 "Language: zh-cn\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
@@ -48,10 +48,10 @@ msgid "UDP Server (IPv6)"
 msgstr "UDP服务器（IPv6）"
 
 msgid "Balancer Strategy"
-msgstr "负载均衡器配置"
+msgstr "负载均衡策略"
 
 msgid "Strategy <code>leastPing</code> requires observatory (see "Extra Options" tab) to be enabled."
-msgstr "配置<code>leastPing</code>需要启用后台连接观测（参阅“扩展选项”选项卡）。"
+msgstr "配置<code>leastPing</code>需要启用观测功能（参阅“扩展选项”选项卡）"
 
 msgid "Enable Transparent Proxy"
 msgstr "启用透明代理"
@@ -85,6 +85,9 @@ msgstr "服务器列表"
 
 msgid "Servers are referenced by index (order in the following list). Deleting servers may result in changes of upstream servers actually used by proxy and bridge."
 msgstr "服务器按索引引用（以列表中的顺序），删除服务器可能会导致代理和桥接使用的上游服务器发生更改。"
+
+msgid "Alias / MAC Address"
+msgstr "别名/MAC地址"
 
 msgid "Alias (optional)"
 msgstr "别名（可选）"
@@ -264,7 +267,7 @@ msgid "WARNING: These features are experimental, may cause a lot of problems and
 msgstr "警告：这些功能是实验性的，可能会导致很多问题，无法保证跨次要版本兼容。"
 
 msgid "Inbounds"
-msgstr "入站代理"
+msgstr "入站"
 
 msgid "Transparent proxy port (TCP4)"
 msgstr "透明代理端口（TCP4）"
@@ -309,7 +312,7 @@ msgid "Inbound Type"
 msgstr "入站类型"
 
 msgid "LAN Hosts Access Control"
-msgstr "访问控制"
+msgstr "LAN访问控制"
 
 msgid "Devices to enable IPv4 tproxy"
 msgstr "启用IPv4透明代理的设备"
@@ -411,7 +414,7 @@ msgid "DNS Settings"
 msgstr "DNS设置"
 
 msgid "DNS"
-msgstr "路由设置"
+msgstr "DNS设置"
 
 msgid "Fast DNS"
 msgstr "快速DNS"
@@ -501,16 +504,16 @@ msgid "Transparent Proxy Rules"
 msgstr "透明代理规则"
 
 msgid "Outbound Routing"
-msgstr "出站路由"
+msgstr "Outbound路由"
 
 msgid "GeoIP Direct Code List (IPv4)"
-msgstr "GeoIP直连域名列表（IPv4）"
+msgstr "GeoIP直连ip列表（IPv4）"
 
 msgid "Hosts in these GeoIP sets will not be forwarded through Xray. Remove all items to forward all non-private hosts."
-msgstr "此GeoIP列表中的域名不会被Xray转发，未设置即为转发所有非私有域名。"
+msgstr "GeoIP列表内的ip不会被Xray转发，未设置即为转发所有非私有ip。"
 
 msgid "GeoIP Direct Code List (IPv6)"
-msgstr "GeoIP直连域名列表（IPv6）"
+msgstr "GeoIP直连ip列表（IPv6）"
 
 msgid ""
 "Resource file /usr/share/xray/geoip.dat not exist. All network traffic will "
@@ -531,13 +534,13 @@ msgid "Bypassed IP"
 msgstr "绕过IP"
 
 msgid "Requests to these IPs won't be forwarded through Xray."
-msgstr "这些IP不会被Xray转发。"
+msgstr "这些ip不会被Xray转发。"
 
 msgid "Forwarded IP"
 msgstr "转发IP"
 
 msgid "Requests to these IPs will always be handled by Xray (but still might be bypassed by Xray itself, like private addresses).<br/>Useful for some really strange network. If you really need to forward private addresses, try Manual Transparent Proxy below."
-msgstr "这些IP始终由Xray转发（私有地址可能会被Xray绕过）。<br/>对一些奇怪的网络有用，确需转发私人地址，尝试下面的手动透明代理。"
+msgstr "这些ip始终由Xray转发（私有ip地址可能会被Xray绕过）<br/>对一些奇怪的网络有用，确需转发私有ip地址，尝试下面的手动透明代理。"
 
 msgid "Default Ports Policy"
 msgstr "默认端口策略"
@@ -636,7 +639,7 @@ msgid "Default Fallback HTTP Server"
 msgstr "默认回落HTTP服务器"
 
 msgid "Only HTTP/1.1 supported here. For HTTP/2 upstream, use Fallback Servers below"
-msgstr "只支持HTTP/1.1。如使用HTTP/2，使用下面的回落服务。"
+msgstr "只支持HTTP/1.1，如使用HTTP/2，使用下面的回落服务"
 
 msgid "Fallback Servers"
 msgstr "回落服务器"
@@ -660,7 +663,7 @@ msgid "Custom Configuration Hook"
 msgstr "自定义配置钩子"
 
 msgid "Read <a href="https://ucode.mein.io/">ucode Documentation</a> for the language used. Code filled here may need to change after upgrading luci-app-xray."
-msgstr "参阅<a href="https://ucode.mein.io/">ucode Documentation</a>获取帮助。升级luci-app-xray后，此处填写的代码可能需要更改"
+msgstr "参阅<a href=\"https://ucode.mein.io/">ucode Documentation</a>获取帮助，升级luci-app-xray后，此处填写的代码可能需要更改"
 
 msgid "Stream Security"
 msgstr "传输层安全"
