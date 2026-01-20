@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-09 19:09+0080\n"
-"PO-Revision-Date: 2026-01-19 19:21+0080\n"
+"PO-Revision-Date: 2026-01-20 12:15+0080\n"
 "Last-Translator: xiechangan123\n"
 "Language: zh-cn\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
@@ -13,9 +13,6 @@ msgstr ""
 "\n"
 "X-Loco-Source-Locale: zh_CN\n"
 "X-Loco-Parser: loco_parse_po\n"
-
-msgid "Xray"
-msgstr "Xray"
 
 msgid "General Settings"
 msgstr "通用设置"
@@ -27,67 +24,46 @@ msgid "Enable Xray Service"
 msgstr "启用Xray服务"
 
 msgid "Uncheck this to disable the entire Xray service."
-msgstr "取消选中禁用全部Xray服务。"
+msgstr "取消选中禁用全部Xray服务"
 
 msgid "TCP Server (IPv4)"
-msgstr "TCP服务器（IPv4）"
+msgstr "TCP4服务器"
 
 msgid "Select multiple outbound servers to enable load balancing. Select none to disable TCP Outbound."
-msgstr "选择多个出站服务器以启用负载平衡，未设置将禁用TCP出站。"
+msgstr "选择多个出站服务器以启用负载均衡，未设置将禁用TCP出站"
 
 msgid "UDP Server (IPv4)"
-msgstr "UDP服务器（IPv4）"
+msgstr "UDP4服务器"
 
 msgid "Select multiple outbound servers to enable load balancing. Select none to disable UDP Outbound."
-msgstr "选择多个出站服务器以启用负载平衡，未设置将禁用UDP出站。"
+msgstr "选择多个出站服务器以启用负载均衡，未设置将禁用UDP出站"
 
 msgid "TCP Server (IPv6)"
-msgstr "TCP服务器（IPv6）"
+msgstr "TCP6服务器"
 
 msgid "UDP Server (IPv6)"
-msgstr "UDP服务器（IPv6）"
+msgstr "UDP6服务器"
 
 msgid "Balancer Strategy"
 msgstr "负载均衡策略"
 
 msgid "Strategy <code>leastPing</code> requires observatory (see "Extra Options" tab) to be enabled."
-msgstr "配置<code>leastPing</code>需要启用观测功能（参阅“扩展选项”选项卡）"
-
-msgid "Enable Transparent Proxy"
-msgstr "启用透明代理"
+msgstr "配置<code>leastPing</code>需要启用观测功能（参阅“扩展选项”标签）"
 
 msgid "This enables DNS query forwarding and TProxy for both TCP and UDP connections."
-msgstr "启用TCP和UDP透明代理、DNS查询转发。"
-
-msgid "Enable Sniffing"
-msgstr "启用域名嗅探"
-
-msgid "If sniffing is enabled, requests will be routed according to domain settings in \"DNS Settings\" tab."
-msgstr "如果启用，DNS请求会按照DNS设置选项中的规则进行转发。"
-
-msgid "Bittorrent Direct"
-msgstr "BT下载直连"
-
-msgid "If enabled, no bittorrent request will be forwarded through Xray."
-msgstr "如果启用，BT下载请求不会被Xray转发。"
+msgstr "启用TCP和UDP透明代理、DNS查询转发"
 
 msgid "Enable Xray API Service"
 msgstr "启用Xray API服务"
 
 msgid "Xray API Service uses port 8080 and GRPC protocol. Also callable via <code>xray api</code> or <code>ubus call xray</code>. See <a href=\"https://xtls.github.io/document/command.html#xray-api\">here</a> for help."
-msgstr "使用8080端口和GRPC协议的Xray API服务，也可通过<code>xray api</code>或<code>ubus call xray</code>调用。参阅<a href=\"https://xtls.github.io/document/command.html#xray-api\">此处</a>获取帮助。"
-
-msgid "Server List"
-msgstr "服务器列表"
+msgstr "使用8080端口和gRPC协议的Xray API服务，也可通过<code>xray api</code>或<code>ubus call xray</code>调用。参阅<a href=\"https://xtls.github.io/document/command.html#xray-api\">此处</a>获取帮助。"
 
 msgid "Xray Servers"
-msgstr "服务器列表"
+msgstr "节点列表"
 
 msgid "Servers are referenced by index (order in the following list). Deleting servers may result in changes of upstream servers actually used by proxy and bridge."
-msgstr "服务器按索引引用（以列表中的顺序），删除服务器可能会导致代理和桥接使用的上游服务器发生更改。"
-
-msgid "Alias / MAC Address"
-msgstr "别名/MAC地址"
+msgstr "节点以列表中的顺序索引引用，删除节点可能会导致代理和桥接使用的上游服务器发生更改。"
 
 msgid "Alias (optional)"
 msgstr "别名（可选）"
@@ -197,16 +173,16 @@ msgid "Proxy Settings"
 msgstr "代理设置"
 
 msgid "Transparent proxy port (TCP4)"
-msgstr "TCP透明代理端口(TCP4)"
+msgstr "TCP4透明代理端口"
 
 msgid "Transparent proxy port (UDP4)"
-msgstr "UDP透明代理端口(UDP4)"
+msgstr "UDP4透明代理端口"
 
 msgid "Transparent proxy port (TCP6)"
-msgstr "TCP透明代理端口(TCP6)"
+msgstr "TCP6透明代理端口"
 
 msgid "Transparent proxy port (UDP6)"
-msgstr "UDP透明代理端口(UDP6)"
+msgstr "UDP6透明代理端口"
 
 msgid "Socks5 proxy port"
 msgstr "Socks5代理端口"
@@ -270,16 +246,16 @@ msgid "Inbounds"
 msgstr "入站"
 
 msgid "Transparent proxy port (TCP4)"
-msgstr "透明代理端口（TCP4）"
+msgstr "TCP4透明代理端口"
 
 msgid "Transparent proxy port (UDP4)"
-msgstr "透明代理端口（UDP4）"
+msgstr "UDP4透明代理端口"
 
 msgid "Transparent proxy port (TCP6)"
-msgstr "透明代理端口（TCP6）"
+msgstr "TCP6透明代理端口"
 
 msgid "Transparent proxy port (UDP6)"
-msgstr "透明代理端口（UDP6）"
+msgstr "UDP6透明代理端口"
 
 msgid "Address Pool (IPv4)"
 msgstr "地址池（IPv4）"
@@ -315,52 +291,52 @@ msgid "LAN Hosts Access Control"
 msgstr "LAN访问控制"
 
 msgid "Devices to enable IPv4 tproxy"
-msgstr "启用IPv4透明代理的设备"
+msgstr "IPv4透明代理接口"
 
 msgid "Enable IPv4 transparent proxy on these interfaces / network devices."
-msgstr "在这些接口/网络设备上启用IPv4透明代理。"
+msgstr "在这些接口上启用IPv4透明代理"
 
 msgid "Devices to enable IPv6 tproxy"
-msgstr "启用IPv6透明代理的设备"
+msgstr "IPv6透明代理接口"
 
 msgid "Enable IPv6 transparent proxy on these interfaces / network devices."
-msgstr "在这些接口/网络设备上启用IPv6透明代理。"
+msgstr "在这些接口上启用IPv6透明代理"
 
 msgid "Devices to disable IPv4 tproxy"
-msgstr "禁用IPv4透明代理的设备"
+msgstr "禁用IPv4透明代理接口"
 
 msgid "This overrides per-device settings below. FakeDNS and manual transparent proxy won't be affected by this option."
 msgstr "这将覆盖下面的设备设置，FakeDNS和手动透明代理不会受到此选项的影响。"
 
 msgid "Devices to disable IPv6 tproxy"
-msgstr "禁用IPv6透明代理的设备"
+msgstr "禁用IPv6透明代理接口"
 
 msgid "Per-device settings here override per-interface enabling settings above. FakeDNS and manual transparent proxy won't be affected by these options."
 msgstr "此处的设备设置将覆盖上述已启用接口设置，FakeDNS和手动透明代理不会受到这些选项的影响。"
 
-msgid "MAC Address"
-msgstr "MAC地址"
+msgid "Alias / MAC Address"
+msgstr "别名/MAC地址"
 
 msgid "Extra inbound (TCP4)"
-msgstr "扩展入站（TCP4）"
+msgstr "TCP4扩展入站"
 
 msgid "Extra inbound (UDP4)"
-msgstr "扩展入站（UDP4）"
+msgstr "UDP4扩展入站"
 
 msgid "Extra inbound (TCP6)"
-msgstr "扩展入站（TCP6）"
+msgstr "TCP6扩展入站"
 
 msgid "Extra inbound (UDP6)"
-msgstr "扩展入站（UDP6）"
+msgstr "UDP6扩展入站"
 
 msgid "Dynamic Direct"
 msgstr "动态直连"
 
 msgid "Access Control Strategy (IPv4)"
-msgstr "访问控制策略（IPv4）"
+msgstr "IPv4访问控制策略"
 
 msgid "Access Control Strategy (IPv6)"
-msgstr "访问控制策略（IPv6）"
+msgstr "IPv6访问控制策略"
 
 msgid "Enable for IPv4 TCP"
 msgstr "启用IPv4 TCP"
@@ -411,9 +387,6 @@ msgid "Bypass Transparent Proxy"
 msgstr "绕过透明代理"
 
 msgid "DNS Settings"
-msgstr "DNS设置"
-
-msgid "DNS"
 msgstr "DNS设置"
 
 msgid "Fast DNS"
@@ -507,13 +480,13 @@ msgid "Outbound Routing"
 msgstr "Outbound路由"
 
 msgid "GeoIP Direct Code List (IPv4)"
-msgstr "GeoIP直连ip列表（IPv4）"
+msgstr "GeoIP直连IPv4列表"
 
 msgid "Hosts in these GeoIP sets will not be forwarded through Xray. Remove all items to forward all non-private hosts."
 msgstr "GeoIP列表内的ip不会被Xray转发，未设置即为转发所有非私有ip。"
 
 msgid "GeoIP Direct Code List (IPv6)"
-msgstr "GeoIP直连ip列表（IPv6）"
+msgstr "GeoIP直连IPv6列表"
 
 msgid ""
 "Resource file /usr/share/xray/geoip.dat not exist. All network traffic will "
@@ -684,7 +657,7 @@ msgid "[Same as Main Server]"
 msgstr "[与主服务相同]"
 
 msgid "WARNING: at least one of asset files (geoip.dat, geosite.dat) is not found under /usr/share/xray. Xray may not work properly. See <a href=\"https://github.com/yichya/luci-app-xray\">here</a> for help."
-msgstr "警告：/usr/share/xray目录下至少一个资源文件（geoip.dat, geosite.dat）不存在。Xray可能无法正常工作。参阅<a href=\"https://github.com/yichya/luci-app-xray\">此处</a>报告问题或提出请求。"
+msgstr "警告：/usr/share/xray目录下资源文件（geoip.dat，geosite.dat）不存在。Xray可能无法正常工作。参阅<a href=\"https://github.com/yichya/luci-app-xray\">此处</a>报告问题或提出请求。"
 
 msgid "Asset files check: "
 msgstr "资源检查："
