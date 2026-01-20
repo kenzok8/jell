@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-09 19:09+0080\n"
-"PO-Revision-Date: 2026-01-20 12:15+0080\n"
+"PO-Revision-Date: 2026-01-20 16:28+0080\n"
 "Last-Translator: xiechangan123\n"
 "Language: zh-cn\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
@@ -20,38 +20,38 @@ msgstr "通用设置"
 msgid "Xray Executable Path"
 msgstr "Xray运行目录"
 
+msgid "WARNING: at least one of asset files (geoip.dat, geosite.dat) is not found under /usr/share/xray. Xray may not work properly. See <a href=\"https://github.com/yichya/luci-app-xray\">here</a> for help."
+msgstr "警告：/usr/share/xray目录下资源文件（geoip.dat，geosite.dat）不存在。Xray可能无法正常工作。参阅<a href=\"https://github.com/yichya/luci-app-xray\">此处</a>报告问题或提出请求。"
+
 msgid "Enable Xray Service"
 msgstr "启用Xray服务"
 
 msgid "Uncheck this to disable the entire Xray service."
-msgstr "取消选中禁用全部Xray服务"
+msgstr "未启用则禁用Xray服务"
 
 msgid "TCP Server (IPv4)"
-msgstr "TCP4服务器"
+msgstr "TCP4节点"
 
 msgid "Select multiple outbound servers to enable load balancing. Select none to disable TCP Outbound."
-msgstr "选择多个出站服务器以启用负载均衡，未设置将禁用TCP出站"
+msgstr "选择多个出站节点以启用负载均衡，未设置则禁用tcp出站。"
 
 msgid "UDP Server (IPv4)"
-msgstr "UDP4服务器"
+msgstr "UDP4节点"
 
 msgid "Select multiple outbound servers to enable load balancing. Select none to disable UDP Outbound."
-msgstr "选择多个出站服务器以启用负载均衡，未设置将禁用UDP出站"
+msgstr "选择多个出站节点以启用负载均衡，未设置则禁用udp出站。"
 
 msgid "TCP Server (IPv6)"
-msgstr "TCP6服务器"
+msgstr "TCP6节点"
 
 msgid "UDP Server (IPv6)"
-msgstr "UDP6服务器"
+msgstr "UDP6节点"
 
 msgid "Balancer Strategy"
 msgstr "负载均衡策略"
 
 msgid "Strategy <code>leastPing</code> requires observatory (see "Extra Options" tab) to be enabled."
-msgstr "配置<code>leastPing</code>需要启用观测功能（参阅“扩展选项”标签）"
-
-msgid "This enables DNS query forwarding and TProxy for both TCP and UDP connections."
-msgstr "启用TCP和UDP透明代理、DNS查询转发"
+msgstr "配置<code>leastPing</code>需要启用观测功能（参阅“扩展选项”标签）。"
 
 msgid "Enable Xray API Service"
 msgstr "启用Xray API服务"
@@ -69,19 +69,49 @@ msgid "Alias (optional)"
 msgstr "别名（可选）"
 
 msgid "Server Hostname"
-msgstr "服务器"
-
-msgid "Domain Strategy"
-msgstr "域名策略"
+msgstr "地址"
 
 msgid "Server Port"
 msgstr "端口"
 
+msgid "Email / Username"
+msgstr "邮箱/用户名"
+
+msgid "Optional; username for SOCKS / HTTP outbound, email for other outbound."
+msgstr "socks/http出站使用用户名，其它出站使用邮箱（可选）。"
+
 msgid "UserId / Password"
 msgstr "UID/密码"
 
-msgid "Fill user_id for vmess / VLESS, or password for shadowsocks / trojan (also supports <a href=\"https://github.com/XTLS/Xray-core/issues/158\">Xray UUID Mapping</a>)"
-msgstr "vmess/vless使用UID，shadowsocks/trojan使用密码（支持<a href=\"https://github.com/XTLS/Xray-core/issues/158\">Xray UUID映射</a>）。"
+msgid "Fill user_id for vmess / VLESS, or password for other outbound (also supports <a href="https://github.com/XTLS/Xray-core/issues/158">Xray UUID Mapping</a>)"
+msgstr "vmess/vless使用uid，其它出站使用密码（支持<a href=\"https://github.com/XTLS/Xray-core/issues/158\">Xray UUID Mapping</a>）。"
+
+msgid "Server Hostname Resolving"
+msgstr "地址解析"
+
+msgid "Domain Strategy"
+msgstr "域名策略"
+
+msgid "Whether to use IPv4 or IPv6 address if Server Hostname is a domain."
+msgstr "地址是域名时可使用ipv4或ipv6。"
+
+msgid "Resolve Domain via DNS"
+msgstr "解析域名DNS"
+
+msgid "Specify a DNS to resolve server hostname. Be careful of possible recursion."
+msgstr "指定DNS来解析域名，注意可能的递归问题。"
+
+msgid "Resolve Domain DNS Method"
+msgstr "DNS协议"
+
+msgid "Effective when DNS above is set. Direct methods will bypass Xray completely so it may get blocked."
+msgstr "上述dns设置生效时有效。直连方式会绕过Xray因此可能会被阻止。"
+
+msgid "Expected Server IPs"
+msgstr "预期服务器IP"
+
+msgid "Filter resolved IPs by GeoIP or CIDR. Resource file <code>geoip.dat</code> is required for GeoIP filtering."
+msgstr "通过geoip或cidr过滤已解析的IP。geoip过滤需要资源文件<code>geoip.dat</code>。"
 
 msgid "Protocol Settings"
 msgstr "协议设置"
@@ -91,9 +121,6 @@ msgstr "协议"
 
 msgid "Encrypt Method"
 msgstr "加密方式"
-
-msgid "AlterID"
-msgstr "额外ID"
 
 msgid "Transport Settings"
 msgstr "传输设置"
@@ -108,7 +135,7 @@ msgid "Dialer Proxy"
 msgstr "拨号代理"
 
 msgid "Similar to <a href=\"https://xtls.github.io/config/outbound.html#proxysettingsobject\">ProxySettings.Tag</a>"
-msgstr "类似于<a href=\"https://xtls.github.io/config/outbound.html#proxysettingsobject\">出站代理配置</a>"
+msgstr "类似于<a href=\"https://xtls.github.io/config/outbound.html#proxysettingsobject\">ProxySettings.Tag</a>"
 
 msgid ""
 "Configurations here override settings in the previous tabs with the following rules: "
@@ -240,7 +267,7 @@ msgid "Enable transparent proxy on these interfaces."
 msgstr "在这些接口上启用透明代理"
 
 msgid "WARNING: These features are experimental, may cause a lot of problems and are not guaranteed to be compatible across minor versions."
-msgstr "警告：这些功能是实验性的，可能会导致很多问题，无法保证跨次要版本兼容。"
+msgstr "警告：这些功能是实验性的，可能会导致很多问题，无法保证跨版本兼容。"
 
 msgid "Inbounds"
 msgstr "入站"
@@ -632,9 +659,6 @@ msgstr "发送代理协议版本"
 msgid "Custom Options"
 msgstr "自定义选项"
 
-msgid "Custom Configuration Hook"
-msgstr "自定义配置钩子"
-
 msgid "Read <a href="https://ucode.mein.io/">ucode Documentation</a> for the language used. Code filled here may need to change after upgrading luci-app-xray."
 msgstr "参阅<a href=\"https://ucode.mein.io/">ucode Documentation</a>获取帮助，升级luci-app-xray后，此处填写的代码可能需要更改"
 
@@ -655,9 +679,6 @@ msgstr "流控模式"
 
 msgid "[Same as Main Server]"
 msgstr "[与主服务相同]"
-
-msgid "WARNING: at least one of asset files (geoip.dat, geosite.dat) is not found under /usr/share/xray. Xray may not work properly. See <a href=\"https://github.com/yichya/luci-app-xray\">here</a> for help."
-msgstr "警告：/usr/share/xray目录下资源文件（geoip.dat，geosite.dat）不存在。Xray可能无法正常工作。参阅<a href=\"https://github.com/yichya/luci-app-xray\">此处</a>报告问题或提出请求。"
 
 msgid "Asset files check: "
 msgstr "资源检查："
