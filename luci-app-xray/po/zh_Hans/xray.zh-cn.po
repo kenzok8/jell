@@ -51,7 +51,7 @@ msgid "Balancer Strategy"
 msgstr "负载均衡策略"
 
 msgid "Strategy <code>leastPing</code> requires observatory (see "Extra Options" tab) to be enabled."
-msgstr "配置<code>leastPing</code>需要启用观测功能（参阅“扩展选项”标签）。"
+msgstr "策略<code>leastPing</code>需要启用观测功能（参阅“扩展选项”标签）。"
 
 msgid "Enable Xray API Service"
 msgstr "启用Xray API服务"
@@ -284,24 +284,6 @@ msgstr "TCP6透明代理端口"
 msgid "Transparent proxy port (UDP6)"
 msgstr "UDP6透明代理端口"
 
-msgid "Address Pool (IPv4)"
-msgstr "地址池（IPv4）"
-
-msgid "Address Pool Size (IPv4)"
-msgstr "地址池大小（IPv4）"
-
-msgid "Address Pool (IPv6)"
-msgstr "地址池（IPv6）"
-
-msgid "Address Pool Size (IPv6)"
-msgstr "地址池大小（IPv6）"
-
-msgid "FakeDNS Routing"
-msgstr "FakeDNS路由"
-
-msgid "See <a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a> for details."
-msgstr "参阅<a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a>获取帮助。"
-
 msgid "Extra Inbounds"
 msgstr "扩展入站"
 
@@ -314,6 +296,21 @@ msgstr "监听地址"
 msgid "Inbound Type"
 msgstr "入站类型"
 
+msgid "Username (Optional)"
+msgstr "用户名（可选）"
+
+msgid "Password (Optional)"
+msgstr "密码（可选）"
+
+msgid "Specify Outbound"
+msgstr "指定出站"
+
+msgid "If not selected, this inbound will use global settings (including sniffing settings)."
+msgstr "如未选择，此出站将使用全局设置（包括嗅探设置）。"
+
+msgid "Select multiple outbounds for load balancing. If none selected, requests will be sent via direct outbound."
+msgstr "选择多个出站以启用负载均衡。如未选择，请求将通过直接出站发送。"
+
 msgid "LAN Hosts Access Control"
 msgstr "LAN访问控制"
 
@@ -321,25 +318,25 @@ msgid "Devices to enable IPv4 tproxy"
 msgstr "IPv4透明代理接口"
 
 msgid "Enable IPv4 transparent proxy on these interfaces / network devices."
-msgstr "在这些接口上启用ipv4透明代理"
+msgstr "在这些接口/网络设备上启用ipv4透明代理"
 
 msgid "Devices to enable IPv6 tproxy"
 msgstr "IPv6透明代理接口"
 
 msgid "Enable IPv6 transparent proxy on these interfaces / network devices."
-msgstr "在这些接口上启用ipv6透明代理"
+msgstr "在这些接口/网络设备上启用ipv6透明代理"
 
 msgid "Devices to disable IPv4 tproxy"
 msgstr "禁用IPv4透明代理接口"
 
 msgid "This overrides per-device settings below. FakeDNS and manual transparent proxy won't be affected by this option."
-msgstr "此选项覆盖下面的设备设置。FakeDNS和手动透明代理不受此选项的影响。"
+msgstr "此选项会覆盖下面每个设备的设置。FakeDNS和手动透明代理不受此选项影响。"
 
 msgid "Devices to disable IPv6 tproxy"
 msgstr "禁用IPv6透明代理接口"
 
 msgid "Per-device settings here override per-interface enabling settings above. FakeDNS and manual transparent proxy won't be affected by these options."
-msgstr "此处的设备设置将覆盖上述已启用接口。FakeDNS和手动透明代理不受这些选项的影响。"
+msgstr "此处的设备设置将覆盖上述接口设置。FakeDNS和手动透明代理不受这些选项影响。"
 
 msgid "Alias / MAC Address"
 msgstr "别名/MAC地址"
@@ -446,7 +443,7 @@ msgid "Secure DNS"
 msgstr "安全DNS"
 
 msgid "DNS for resolving known polluted domains (specify forwarded domain rules here)"
-msgstr "用于解析已知污染的域名（指定域名转发规则）。"
+msgstr "用于解析已知污染域名（指定域名转发规则）。"
 
 msgid "Forwarded domain rules"
 msgstr "域名转发规则"
@@ -472,7 +469,7 @@ msgid "Default DNS"
 msgstr "默认DNS"
 
 msgid "DNS for resolving other sites (not in the rules above) and DNS records other than A or AAAA (TXT and MX for example)"
-msgstr "用于解析其他站点的DNS（不在上述规则中）和A或AAAA以外的DNS记录（例如TXT和MX）。"
+msgstr "用于解析其他站点（不在上述规则中）和A或AAAA以外的DNS记录（例如TXT和MX）。"
 
 msgid "Blocked domain rules"
 msgstr "阻止域名规则"
@@ -500,11 +497,38 @@ msgstr "阻止回环"
 msgid "Return <code>127.127.127.127</code> as response for blocked domain rules. If not selected, <code>NXDOMAIN</code> will be returned."
 msgstr "对阻止域名规则返回<code>127.127.127.127</code>，未设置将返回回环地址Loopback Address。"
 
+msgid "Address Pool (IPv4)"
+msgstr "IPv4地址池"
+
+msgid "Address Pool Size (IPv4)"
+msgstr "IPv4地址池大小"
+
+msgid "Address Pool (IPv6)"
+msgstr "IPv6地址池"
+
+msgid "Address Pool Size (IPv6)"
+msgstr "IPv6地址池大小"
+
+msgid "FakeDNS Routing"
+msgstr "FakeDNS路由"
+
+msgid "See <a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a> for details."
+msgstr "参阅<a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a>获取帮助。"
+
+msgid "Domain names"
+msgstr "域名"
+
+msgid "Force Forward server (TCP)"
+msgstr "TCP强制转发服务器"
+
+msgid "Force Forward server (UDP)"
+msgstr "UDP强制转发服务器"
+
 msgid "Transparent Proxy Rules"
 msgstr "透明代理规则"
 
 msgid "Outbound Routing"
-msgstr "Outbound路由"
+msgstr "入站路由"
 
 msgid "GeoIP Direct Code List (IPv4)"
 msgstr "GeoIP直连IPv4列表"
@@ -549,13 +573,13 @@ msgid "Forwarded TCP Ports"
 msgstr "TCP转发端口"
 
 msgid "Requests to these TCP Ports will be forwarded through Xray. Recommended ports: 80, 443, 853"
-msgstr "对这些TCP端口的请求会被Xray转发。建议端口：80、443、853。"
+msgstr "对这些tcp端口的请求会被Xray转发。建议端口：80、443、853。"
 
 msgid "Forwarded UDP Ports"
 msgstr "UDP转发端口"
 
 msgid "Requests to these UDP Ports will be forwarded through Xray. Recommended ports: 53, 443"
-msgstr "对这些UDP端口的请求会被Xray转发。建议端口：53、443。"
+msgstr "对这些udp端口的请求会被Xray转发。建议端口：53、443。"
 
 msgid "Bypassed TCP Ports"
 msgstr "TCP绕过端口"
@@ -570,10 +594,10 @@ msgid "Requests to these UDP Ports won't be forwarded through Xray."
 msgstr "对这些UDP端口的请求不会被Xray转发。"
 
 msgid "Manual Transparent Proxy"
-msgstr "自定义透明代理"
+msgstr "手动透明代理"
 
 msgid "Compared to iptables REDIRECT, Xray could do NAT46 / NAT64 (for example accessing IPv6 only sites). See <a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a> for details."
-msgstr "相比iptables重定向，Xray可以进行NAT46/NAT64（对于某些仅IPv6的网站）。参阅<a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a>获取帮助。"
+msgstr "相比iptables重定向，Xray可以使用NAT46/NAT64（例如访问仅支持ipv6的网站）。参阅<a href=\"https://github.com/v2ray/v2ray-core/issues/2233\">FakeDNS</a>获取帮助。"
 
 msgid "Source Address"
 msgstr "源地址"
@@ -597,16 +621,10 @@ msgid "Avoid dnsmasq filtering RFC1918 IP addresses (and some TESTNET addresses 
 msgstr "避免Dnsmasq过滤RFC1918私有IP地址及某些测试网IP地址。"
 
 msgid "Force Forward (TCP)"
-msgstr "强制转发（TCP）"
-
-msgid "Force Forward server (TCP)"
-msgstr "强制转发服务器（TCP）"
+msgstr "TCP强制转发"
 
 msgid "Force Forward (UDP)"
-msgstr "强制转发（UDP）"
-
-msgid "Force Forward server (UDP)"
-msgstr "强制转发服务器（UDP）"
+msgstr "UDP强制转发"
 
 msgid "This destination must be forwarded through an outbound server."
 msgstr "此目标必须通过出站服务器转发。"
