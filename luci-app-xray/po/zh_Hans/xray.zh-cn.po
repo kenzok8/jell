@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-09 19:09+0080\n"
-"PO-Revision-Date: 2026-01-20 16:28+0080\n"
+"PO-Revision-Date: 2026-01-21 11:42+0080\n"
 "Last-Translator: xiechangan123\n"
 "Language: zh-cn\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
@@ -51,13 +51,7 @@ msgid "Balancer Strategy"
 msgstr "负载均衡策略"
 
 msgid "Strategy <code>leastPing</code> requires observatory (see "Extra Options" tab) to be enabled."
-msgstr "策略<code>leastPing</code>需要启用观测功能（参阅“扩展选项”标签）。"
-
-msgid "Enable Xray API Service"
-msgstr "启用Xray API服务"
-
-msgid "Xray API Service uses port 8080 and GRPC protocol. Also callable via <code>xray api</code> or <code>ubus call xray</code>. See <a href=\"https://xtls.github.io/document/command.html#xray-api\">here</a> for help."
-msgstr "使用8080端口和gRPC协议的Xray API服务，也可通过<code>xray api</code>或<code>ubus call xray</code>调用。参阅<a href=\"https://xtls.github.io/document/command.html#xray-api\">此处</a>获取帮助。"
+msgstr "策略<code>leastPing</code>需要启用后台连接观测功能（参阅“扩展选项”标签）。"
 
 msgid "Xray Servers"
 msgstr "节点列表"
@@ -83,8 +77,8 @@ msgstr "socks/http出站使用用户名，其它出站使用邮箱（可选）�
 msgid "UserId / Password"
 msgstr "UID/密码"
 
-msgid "Fill user_id for vmess / VLESS, or password for other outbound (also supports <a href="https://github.com/XTLS/Xray-core/issues/158">Xray UUID Mapping</a>)"
-msgstr "vmess/vless使用uid，其它出站使用密码（支持<a href=\"https://github.com/XTLS/Xray-core/issues/158\">Xray UUID Mapping</a>）。"
+msgid "Fill user_id for vmess / VLESS, or password for shadowsocks / trojan (also supports <a href="https://github.com/XTLS/Xray-core/issues/158">Xray UUID Mapping</a>)"
+msgstr "vmess/vless使用uid，其它出站使用密码（支持<a href="https://github.com/XTLS/Xray-core/issues/158">Xray UUID Mapping</a>）。"
 
 msgid "Server Hostname Resolving"
 msgstr "地址解析"
@@ -250,7 +244,7 @@ msgid ""
 "extra ports, 5300 - 5303 will be used for DNS requests.<br/>Increasing this "
 "value may help reduce the possibility of temporary DNS lookup failures."
 msgstr ""
-"在多个端口上监听DNS请求（所有端口都用作dnsmasq上游服务器）。"
+"在多个端口上监听DNS请求（全部端口都用作dnsmasq上游服务器）。"
 "</br>例如Xray DNS服务器端口为5300并使用3个额外端口，则5300-5303将用于DNS请求。"
 "</br>添加额外端口可能有助于减少临时DNS查找失败的可能性。"
 
@@ -534,7 +528,7 @@ msgid "GeoIP Direct Code List (IPv4)"
 msgstr "GeoIP直连IPv4列表"
 
 msgid "Hosts in these GeoIP sets will not be forwarded through Xray. Remove all items to forward all non-private hosts."
-msgstr "GeoIP列表内的ip不会被Xray转发，未设置即为转发所有非私有ip。"
+msgstr "GeoIP列表内的ip不会被Xray转发，未设置即为转发全部非私有ip。"
 
 msgid "GeoIP Direct Code List (IPv6)"
 msgstr "GeoIP直连IPv6列表"
@@ -545,7 +539,7 @@ msgid ""
 "feature, or<br/><a href=\"https://github.com/v2fly/geoip\">download one</a> "
 "(maybe disable transparent proxy first) and upload it to your router."
 msgstr ""
-"资源文件<code>/usr/share/xray/geoip.dat</code>不存在。所有网络将被转发。"
+"资源文件<code>/usr/share/xray/geoip.dat</code>不存在。全部网络将被转发。"
 "添加资源文件后重新编译固件，或从<a href=\"https://github.com/v2fly/geoip\">此处</a>下载后上传到路由器。"
 
 msgid "Routing Domain Strategy"
@@ -602,23 +596,38 @@ msgstr "相比iptables重定向，Xray可以使用NAT46/NAT64（例如访问仅�
 msgid "Source Address"
 msgstr "源地址"
 
+msgid "Fill an IP address or a rule like <code>geoip:cn</code> or <code>ext:/geoip/cloudflare.dat:cloudflare</code>."
+msgstr "填写ip或规则，例如<code>geoip:cn</code>或<code>ext:/geoip/cloudflare.dat:cloudflare</code>。"
+
 msgid "Source Port"
 msgstr "源端口"
+
+msgid "Leave empty to forward all ports."
+msgstr "留空表示转发全部端口。"
 
 msgid "Destination Address"
 msgstr "目标地址"
 
+msgid "Leave empty to keep original address unchanged."
+msgstr "留空表示保持原始地址不变。"
+
 msgid "Destination Port"
 msgstr "目标端口"
+
+msgid "Fill <code>0</code> to keep original port unchanged."
+msgstr "填写<code>0</code>表示保持原始端口不变。"
 
 msgid "Domain names to associate"
 msgstr "关联域名"
 
+msgid "Resolve these domains to Source Address above. Only possible when an IP address is used."
+msgstr "将这些域名解析到上面的源地址。仅在使用IP时才可能有效。"
+
 msgid "Exempt rebind protection"
 msgstr "豁免重绑定保护"
 
-msgid "Avoid dnsmasq filtering RFC1918 IP addresses (and some TESTNET addresses as well) from result."
-msgstr "避免Dnsmasq过滤RFC1918私有IP地址及某些测试网IP地址。"
+msgid "Avoid dnsmasq filtering RFC1918 IP addresses (and some TESTNET addresses as well) from result.<br/>Must be enabled for TESTNET addresses (<code>192.0.2.0/24</code>, <code>198.51.100.0/24</code>, <code>203.0.113.0/24</code>). Addresses like <a href="https://www.as112.net/">AS112 Project</a> (<code>192.31.196.0/24</code>, <code>192.175.48.0/24</code>) or <a href="https://www.nyiix.net/technical/rtbh/">NYIIX RTBH</a> (<code>198.32.160.7</code>) can avoid that."
+msgstr "避免dnsmasq过滤RFC1918私有ip地址（以及某些测试网络地址）。<br/>对于测试网络地址（<code>192.0.2.0/24</code>、<code>198.51.100.0/24</code>、<code>203.0.113.0/24</code>）必须启用。形如<a href=\"https://www.as112.net/\">AS112 Project</a>（<code>192.31.196.0/24</code>、<code>192.175.48.0/24</code>）或<a href=\"https://www.nyiix.net/technical/rtbh/\">NYIIX RTBH</a>（<code>198.32.160.7</code>）网络地址可避免过滤。"
 
 msgid "Force Forward (TCP)"
 msgstr "TCP强制转发"
@@ -627,19 +636,19 @@ msgid "Force Forward (UDP)"
 msgstr "UDP强制转发"
 
 msgid "This destination must be forwarded through an outbound server."
-msgstr "此目标必须通过出站服务器转发。"
+msgstr "目标地址必须通过出站服务器转发。"
 
 msgid "HTTPS Server"
-msgstr "HTTPS服务器"
+msgstr "服务器设置"
 
 msgid "Enable Xray HTTPS Server"
-msgstr "启用Xray HTTPS服务"
+msgstr "启用Xray HTTPS服务器"
 
 msgid "This will start a HTTPS server which serves both as an inbound for Xray and a reverse proxy web server."
-msgstr "这将启动一个HTTPS服务器，该服务器既用作Xray的入站服务器，又用作反向代理Web服务器。"
+msgstr "启用一个既用作入站亦可作为反向web代理的https服务器。"
 
 msgid "Xray HTTPS Server Port"
-msgstr "Xray HTTPS服务端口"
+msgstr "端口"
 
 msgid "This port needs to be set <code>accept input</code> manually in firewall settings."
 msgstr "此端口需要在系统防火墙<code>accept input</code>中手动设置。"
@@ -651,28 +660,19 @@ msgid "Private Key File"
 msgstr "私钥"
 
 msgid "Only protocols which support fallback are available. Note that REALITY does not support fallback right now."
-msgstr "只支持可以回落的协议。注意REALITY目前不支持回落。"
+msgstr "只支持可以回落的协议。注意reality目前不支持回落。"
 
 msgid "Default Fallback HTTP Server"
 msgstr "默认回落HTTP服务器"
 
 msgid "Only HTTP/1.1 supported here. For HTTP/2 upstream, use Fallback Servers below"
-msgstr "只支持HTTP/1.1，如使用HTTP/2，使用下面的回落服务"
+msgstr "只支持http/1.1。对于http/2上游服务器，使用下面的回落服务器"
 
 msgid "Fallback Servers"
 msgstr "回落服务器"
 
 msgid "Specify upstream servers here."
 msgstr "指定上游服务器。"
-
-msgid "SNI"
-msgstr "服务器域名（SNI）"
-
-msgid "ALPN"
-msgstr "应用层传输协议（ALPN）"
-
-msgid "Xver"
-msgstr "发送代理协议版本"
 
 msgid "Custom Options"
 msgstr "自定义选项"
@@ -722,23 +722,29 @@ msgstr "启用DNS日志"
 msgid "DNS log will also be written to System Log."
 msgstr "DNS查询日志将被记录在系统日志中。"
 
+msgid "Enable Xray API Service"
+msgstr "启用Xray API服务"
+
+msgid "Xray API Service uses port 8080 and GRPC protocol. Also callable via <code>xray api</code> or <code>ubus call xray</code>. See <a href=\"https://xtls.github.io/document/command.html#xray-api\">here</a> for help."
+msgstr "使用8080端口和gRPC协议的Xray API服务。也可通过<code>xray api</code>或<code>ubus call xray</code>调用。参阅<a href=\"https://xtls.github.io/document/command.html#xray-api\">此处</a>获取帮助。"
+
 msgid "Enable Statistics"
 msgstr "启用统计信息"
 
 msgid "Enable statistics of inbounds / outbounds data. Use Xray API to query values."
-msgstr "启用入站/出站数据的统计信息，使用Xray API查询数据。"
+msgstr "启用入站/出站数据的统计信息。使用Xray API查询数据。"
 
 msgid "Enable Observatory"
-msgstr "启用后台连接观测"
+msgstr "启用连接观测"
 
 msgid "Enable latency measurement for TCP and UDP outbounds."
-msgstr "为TCP和UDP出站启用后台连接观测。"
+msgstr "启用对tcp和udp出站的延迟测量。"
 
 msgid "Enable Firewall Counters"
 msgstr "启用防火墙计数器"
 
 msgid "Add <a href=\"/cgi-bin/luci/admin/status/nftables\">counters to firewall4</a> for transparent proxy rules. (Not supported in all OpenWrt versions. )"
-msgstr "为透明代理规则添加<a href=\"/cgi-bin/luci/admin/status/nftables\">counters to firewall4</a>（不支持OpenWrt所有版本）。"
+msgstr "为透明代理规则添加<a href=\"/cgi-bin/luci/admin/status/nftables\">counters to firewall4</a>（不支持OpenWrt全部版本）。"
 
 msgid "Enable Xray Metrics Server"
 msgstr "启用Xray指标服务"
@@ -750,7 +756,7 @@ msgid "Xray Metrics Server Port"
 msgstr "Xray指标服务端口"
 
 msgid "Metrics may be sensitive so think twice before setting it as Default Fallback HTTP Server."
-msgstr "指标可能很敏感，审慎将其设置为默认回退HTTP服务器。"
+msgstr "指标可能很敏感审慎将其设置为默认回落http服务器。"
 
 msgid "Handshake Timeout"
 msgstr "握手超时"
