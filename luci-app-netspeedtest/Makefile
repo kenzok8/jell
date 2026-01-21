@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2021-2025  sirpdboy  <herboy2008@gmail.com> 
+# Copyright (C) 2021-2026  sirpdboy  <herboy2008@gmail.com> 
 # https://github.com/sirpdboy/luci-app-netspeedtest
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
