@@ -11,7 +11,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-nezha-agentv1
-LUCI_TITLE:=LuCI support for nezha agent
+LUCI_TITLE:=Nezha Agent is the client version 2 of the Nezha Panel.
 LUCI_DEPENDS:=+nezha-agentv1
 LUCI_PKGARCH:=all
 PKG_MAINTAINER:=<https://github.com/2018nuoyan/openwrt_nezha/>
