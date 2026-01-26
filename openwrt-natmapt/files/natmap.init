@@ -154,7 +154,7 @@ hostname_match() {
 	[ "$#" -ge 1 ] || return 1
 	local _hostname="$1"
 
-	echo "$_hostname" | grep -E "^[[:alnum:]][-[:alnum:]]{0,62}(\.[[:alnum:]][-[:alnum:]]{0,62})+\.?$"
+	echo "$_hostname" | grep -E "^[[:alnum:]][-[:alnum:]]{0,62}(\.[[:alnum:]][-[:alnum:]]{0,62})*\.?$"
 }
 
 # ip_match <family> <ipaddr>
