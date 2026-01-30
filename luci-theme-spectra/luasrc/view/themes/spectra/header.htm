@@ -1,0 +1,4315 @@
+<%#
+	Argon is a clean HTML5 theme for LuCI. It is based on luci-theme-material Argon Template
+
+	luci-theme-argon
+	Copyright 2020 Jerrykuku <jerrykuku@qq.com>
+
+	Have a bug? Please create an issue here on GitHub!
+	https://github.com/jerrykuku/luci-theme-argon/issues
+
+	luci-theme-material:
+	Copyright 2015 Lutty Yang <lutty@wcan.in>
+
+	Argon Theme
+	https://demos.creative-tim.com/argon-dashboard/index.html
+
+	Licensed to the public under the Apache License 2.0
+-%>
+
+<%
+	local sys = require "luci.sys"
+	local util = require "luci.util"
+	local http = require "luci.http"
+	local disp = require "luci.dispatcher"
+	local ver = require "luci.version"
+        local mode = 'normal'
+	local boardinfo = util.ubus("system", "board")
+
+	local node = disp.context.dispatched
+
+	local fs = require "nixio.fs"
+	local nutil = require "nixio.util"
+	local uci = require 'luci.model.uci'.cursor()
+
+	-- send as HTML5
+	http.prepare_content("text/html")
+
+	-- Custom settings
+	local mode = 'normal'
+	local dark_css = fs.readfile('/www/luci-static/spectra/css/dark.css')
+	local bar_color = '#5e72e4'
+	local primary, dark_primary, blur_radius, blur_radius_dark, blur_opacity
+	if fs.access('/etc/config/spectra') then
+		primary = uci:get_first('spectra', 'global', 'primary')
+		dark_primary = uci:get_first('spectra', 'global', 'dark_primary')
+		blur_radius = uci:get_first('spectra', 'global', 'blur')
+		blur_radius_dark = uci:get_first('spectra', 'global', 'blur_dark')
+		blur_opacity = uci:get_first('spectra', 'global', 'transparency')
+		blur_opacity_dark = uci:get_first('spectra', 'global', 'transparency_dark')
+		mode = uci:get_first('spectra', 'global', 'mode')
+		bar_color = mode == 'dark' and dark_primary or primary
+	end
+
+	-- Brand name
+	local brand_name = boardinfo.hostname or "?"
+-%>
+
+<!DOCTYPE html>
+<html lang="<%=luci.i18n.context.lang%>">
+
+<head>
+<script>
+(function() {
+    try {
+        const savedSettings = localStorage.getItem('appColorSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            const root = document.documentElement;
+            
+            root.style.setProperty('--base-hue', settings.hue || 347.01);
+            root.style.setProperty('--base-chroma', settings.chroma || 0.061);
+            root.style.setProperty('--base-lightness', settings.lightness || 99);
+            
+            const hue = settings.hue || 260;
+            root.style.setProperty('--base-hue-1', hue + 20);
+            root.style.setProperty('--base-hue-2', hue + 200);
+            root.style.setProperty('--base-hue-3', hue + 135);
+            root.style.setProperty('--base-hue-4', hue + 80);
+            root.style.setProperty('--base-hue-5', hue + 270);
+            root.style.setProperty('--base-hue-6', hue + 170);
+            root.style.setProperty('--base-hue-7', hue + 340);
+            
+            const isLight = (settings.lightness || 30) > 60;
+            root.setAttribute('data-theme', isLight ? 'light' : 'dark');
+            
+            const textL = isLight ? 20 : 95;
+            root.style.setProperty('--text-primary', `oklch(${textL}% 0 0)`);
+        }
+    } catch (e) {
+        console.error('Error loading saved colors:', e);
+    }
+})();
+</script>
+    <meta charset="utf-8">
+    <title>
+        <%=striptags( (boardinfo.hostname or "?") .. ( (node and node.title) and ' - ' .. translate(node.title) or '')) %>
+        - LuCI</title>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+    <meta name="format-detection" content="telephone=no, email=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="full-screen" content="yes">
+    <meta name="x5-page-mode" content="app">
+    <meta name="browsermode" content="application">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="msapplication-TileColor" content="<%=bar_color%>">
+    <meta name="application-name" content="<%=striptags( (boardinfo.hostname or "?") ) %> - LuCI">
+    <meta name="apple-mobile-web-app-title" content="<%=striptags( (boardinfo.hostname or "?") ) %> - LuCI">
+    <link rel="apple-touch-icon" sizes="60x60" href="<%=media%>/icon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="<%=media%>/icon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="<%=media%>/icon/apple-icon-144x144.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="<%=media%>/icon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="<%=media%>/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="<%=media%>/icon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="<%=media%>/icon/favicon-16x16.png">
+    <link rel="manifest" href="<%=media%>/icon/manifest.json"  crossorigin="use-credentials">
+    <meta name="msapplication-TileColor" content="<%=bar_color%>">
+    <meta name="msapplication-TileImage" content="<%=media%>/icon/ms-icon-144x144.png">
+    <meta name="theme-color" content="<%=bar_color%>">
+    <link rel="stylesheet" href="<%=media%>/css/cascade.css?v=2.2.10.10">
+    <script src="/luci-static/spectra/js/i18n.js"></script>
+    <link href="/luci-static/spectra/css/bootstrap-icons.css" rel="stylesheet">
+    <link href="/luci-static/spectra/css/weather-icons.min.css" rel="stylesheet">
+    <link href="/luci-static/spectra/css/all.min.css" rel="stylesheet">
+    <link href="/luci-static/spectra/css/spark.css" rel="stylesheet">
+    <style title="text/css">
+        <% if mode == 'normal' then %>
+            @media (prefers-color-scheme: dark) {
+                <%=dark_css%>
+            }
+        <% elseif mode == 'dark' then %>
+            <%=dark_css%>
+        <% end -%>
+        <% if fs.access('/etc/config/spectra') then %>
+        :root {
+            --primary: <%=primary%>;
+            --dark-primary: <%=dark_primary%>;
+            --blur-radius:<%=blur_radius%>px;
+            --blur-opacity:<%=blur_opacity%>;
+            --blur-radius-dark:<%=blur_radius_dark%>px;
+            --blur-opacity-dark:<%=blur_opacity_dark%>;
+        }
+        <% end -%>
+    </style>
+	<link rel="shortcut icon" href="<%=media%>/favicon.ico">
+	<% if node and node.css then %>
+	<link rel="stylesheet" href="<%=resource%>/<%=node.css%>">
+	<% end -%>
+	<% if css then %>
+	<style title="text/css">
+		<%=css %>
+	</style>
+	<% end -%>
+	<script src="<%=media%>/js/polyfill.min.js?v=2.2.10.10"></script>
+	<script src="<%=url('admin/translations', luci.i18n.context.lang)%>?v=<%=ver.luciversion%>"></script>
+	<script src="<%=resource%>/cbi.js?v=<%=ver.luciversion%>"></script>
+	<script src="<%=resource%>/luci.js?v=<%=ver.luciversion%>"></script>
+	<script src="/luci-static/spectra/js/jquery.min.js"></script>
+        <link rel="stylesheet" href="/luci-static/spectra/css/uikit.min.css">
+        <script src="/luci-static/spectra/js/uikit.min.js"></script>
+        <script src="/luci-static/spectra/js/uikit-icons.min.js"></script>
+        <script src="/luci-static/spectra/js/service.js"></script>
+        <script src="/luci-static/spectra/js/networkCheck.js"></script>
+        <script src="/luci-static/spectra/js/player.js"></script>
+</head>
+
+<body
+	theme="<%=mode%>"
+	class="lang_<%=luci.i18n.context.lang%> <% if node then %><%= striptags( node.title ) %><% end %> <% if luci.dispatcher.context.authsession then %>logged-in<% end %>"
+	data-page="<%= table.concat(disp.context.requestpath, "-") %>">
+
+<div class="wrapper animation-spans">
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+</div>
+<header>
+    <div class="fill">
+        <div class="container">
+            <a class="showSide"></a>
+        <div class="navbar-container">
+            <div class="navbar-left">
+                <div class="nav-icon">
+                    <a id="oc" href="/cgi-bin/luci/admin/services/openclash">
+                        <img src="<%=media%>/navbar/clash.gif" data-tooltip-title="OpenClash">
+                    </a>
+                </div>
+                <div class="nav-icon">
+                    <a href="/cgi-bin/luci/admin/services/nekobox">
+                        <img src="<%=media%>/navbar/yacd.gif" data-tooltip-title="NekoBox">
+                    </a>
+                </div>
+                <div class="nav-icon">
+                    <a href="/cgi-bin/luci/admin/services/spectra">
+                        <img src="<%=media%>/navbar/tinyfm.gif" data-tooltip-title="Spectra">
+                    </a>
+                </div>
+                <div class="nav-icon" id="realtime">
+                    <a href="/cgi-bin/luci/admin/status/realtime">
+                        <img src="<%=media%>/navbar/netmon.gif" data-tooltip-title="Realtime">
+                    </a>
+                </div>
+                <div class="nav-icon">
+                    <a href="/cgi-bin/luci/admin/services/ttyd">
+                        <img src="<%=media%>/navbar/terminal.gif" data-tooltip-title="TTYD">
+                    </a>
+                </div>
+                <div class="nav-icon" id="homeproxy">
+                    <a href="/cgi-bin/luci/admin/services/homeproxy">
+                        <img src="<%=media%>/navbar/modem.gif" data-tooltip-title="HomeProxy">
+                    </a>
+                </div>
+                <div class="nav-icon" id="networkIcon">
+                    <a href="/cgi-bin/luci/admin/network/network">
+                        <img src="<%=media%>/navbar/wifi.gif" data-tooltip-title="Interface">
+                    </a>
+                </div>
+
+                <div class="nav-icon" id="control-panel-toggle" uk-toggle="target: #control-panel-modal">
+                        <img id="wifiIcon" src="<%=media%>/navbar/interface.gif" data-tooltip-title="control_panel" style="cursor:pointer;">
+                </div>
+
+                <div class="app-icon-btn"  id="panel" onclick="openControlPanel()">
+                   <a  style="cursor: pointer;" data-tooltip-title="ui_control">
+                       <i class="fas fa-sliders-h"></i>
+                   </a>
+               </div>
+
+                <div class="app-icon-btn"  id="colorpanel" onclick="advancedColorControl.open()">
+                   <a  style="cursor: pointer;" data-tooltip-title="advancedColorControl">
+                       <i class="fas fa-palette"></i>
+                   </a>
+               </div>
+
+                <div class="app-icon-btn"  id="colorPickerBtn" onclick="document.getElementById('colorPicker').click()">
+                   <a  style="cursor: pointer;" data-tooltip-title="selectBackgroundColor">
+                       <i class="fas fa-moon"></i>
+                   </a>
+                       <input type="color" id="colorPicker" value="#0f3460" style="display: none;">
+               </div>
+
+                <div class="icon-group">
+                        <button class="translation-toggle app-icon-btn" onclick="toggleTranslation()" data-tooltip-title="online_translation"><i class="fas fa-language"></i></button>
+                </div>
+            </div>
+
+            <div class="weather-card" style="position:relative; display:flex; align-items:center; padding:10px; border-radius:8px; color:white;  height:50px; margin-top:5px;">
+              <div style="flex:1; display:flex; align-items:center; gap:25px;">   
+                  <div id="iconContainer" style="position:relative; width:50px; height:48px; overflow:hidden;"> 
+                      <img id="loadingIcon" src="/luci-static/ipip/img/loading.svg" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:50px; height:50px;" />
+                      <i id="weatherIcon" class="wi" style="position:absolute; top:57%; left:50%; transform:translate(-50%, -50%); font-size:35px; width:40px; height:40px; display:none; color:#FFD700;"></i>
+                  </div>
+                <div style="display:flex; flex-direction:column; justify-content:center; line-height:1;">
+                  <div id="cityNameDisplay" style="font-weight:bold; font-size:16px; color:var(--color-green); margin-bottom:8px;">
+                  </div>
+                  <div id="weatherText" style="font-size:16px; color:rgb(255, 0, 255);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ip-container" style="transform: translateY(4px);">
+                <div class="imgBox">
+                    <img id="flag" title="">
+                    <div class="loading" id="loading" style="display:none;">
+                        <img src="/luci-static/ipip/img/loading.svg" alt="loading">
+                     </div>
+                </div>
+                <div class="ip-text">
+                    <span id="d-ip"></span>
+                    <span id="ipip"></span>
+                </div>
+            </div>
+
+            <div id="result-overlay"></div>
+
+            <div id="result" class="navbar-right">
+                <div class="site-icon" onclick="pingHost('baidu', 'Baidu', 'https://www.baidu.com')">
+                    <img src="/luci-static/ipip/img/site_icon_01.png" id="baidu-normal" alt="Baidu">
+                    <img src="/luci-static/ipip/img/site_icon1_01.png" id="baidu-gray" alt="Baidu">
+                </div>
+                <div class="site-icon" onclick="pingHost('taobao', 'Taobao', 'https://www.taobao.com')">
+                    <img src="/luci-static/ipip/img/site_icon_02.png" id="taobao-normal" alt="Taobao">
+                    <img src="/luci-static/ipip/img/site_icon1_02.png" id="taobao-gray" alt="Taobao">
+                </div>
+                <div class="site-icon" onclick="pingHost('google', 'Google', 'https://www.google.com')">
+                    <img src="/luci-static/ipip/img/site_icon_03.png" id="google-normal" alt="Google">
+                    <img src="/luci-static/ipip/img/site_icon1_03.png" id="google-gray" alt="Google">
+                </div>
+                <div class="site-icon" onclick="pingHost('youtube', 'YouTube', 'https://www.youtube.com')">
+                    <img src="/luci-static/ipip/img/site_icon_04.png" id="youtube-normal" alt="YouTube">
+                    <img src="/luci-static/ipip/img/site_icon1_04.png" id="youtube-gray" alt="YouTube">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="languageModal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-dialog-scale">
+        <div class="language-modal-header">
+            <div class="language-modal-header-content">
+                <img id="currentFlag" src="/luci-static/ipip/flags/cn.svg" class="language-modal-flag">
+                <h2 class="language-modal-title" data-translate="select_language"></h2>
+            </div>
+            <button class="uk-modal-close-default" type="button" uk-close></button>
+        </div>
+        <div class="language-modal-body">
+            <div class="uk-margin">
+                <label class="language-form-label" data-translate="select_language"></label>
+                <select id="languageSelect" class="uk-select">
+                    <option value="zh" data-translate="simplified_chinese"></option>
+                    <option value="hk" data-translate="traditional_chinese"></option>
+                    <option value="en" data-translate="english"></option>
+                    <option value="ko" data-translate="korean"></option>
+                    <option value="vi" data-translate="vietnamese"></option>
+                    <option value="th" data-translate="thailand"></option>
+                    <option value="ja" data-translate="japanese"></option>
+                    <option value="ru" data-translate="russian"></option>
+                    <option value="de" data-translate="germany"></option>
+                    <option value="fr" data-translate="france"></option>
+                    <option value="ar" data-translate="arabic"></option>
+                    <option value="es" data-translate="spanish"></option>
+                    <option value="bn" data-translate="bangladesh"></option>
+                </select>
+            </div>
+            <div id="voiceSelectContainer" class="language-voice-container">
+                <label class="language-form-label" id="voiceSelectTitle" data-translate="voice_select_title"></label>
+                <select id="voiceSelect" class="uk-select">
+                    <option value="" data-translate="select_voice_placeholder"></option>
+                </select>
+            </div>
+            <div class="language-checkbox-container">
+                <input type="checkbox" id="voiceToggle" checked class="uk-checkbox">
+                <span id="voiceLabel" data-translate="voice_label"></span>
+            </div>
+        </div>        
+        <div class="language-modal-footer">
+            <div class="language-modal-footer-buttons">
+                <button type="button" class="uk-button uk-button-gray uk-modal-close" data-translate="cancel"></button>
+                <button type="button" class="uk-button uk-button-primary" onclick="saveLanguage()" data-translate="save"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="floatingLyrics">
+    <div class="floating-controls">
+        <button class="ctrl-btn" onclick="changeTrack(-1, true)" data-tooltip-title="previous_track">
+            <i class="fas fa-backward"></i>
+        </button>
+        <button class="ctrl-btn" id="floatingPlayBtn" onclick="togglePlay()" data-tooltip-title="play_pause">
+            <i class="bi bi-play-fill"></i>
+        </button>
+        <button class="ctrl-btn" onclick="changeTrack(1, true)" data-tooltip-title="next_track">
+            <i class="fas fa-forward"></i>
+        </button>
+        <button class="ctrl-btn" id="floatingRepeatBtn" onclick="toggleRepeat()" data-tooltip-title="order_play">
+            <i class="bi bi-arrow-repeat"></i>
+        </button>
+        <button class="ctrl-btn" id="goFirstBtn">
+            <i class="fas fa-circle-left"></i>
+        </button>
+        <button class="ctrl-btn toggleFloatingLyricsBtn" data-tooltip-title="toggle_floating_lyrics">
+            <i class="bi bi-display floatingIcon"></i>
+        </button>
+    </div>
+    <div id="floatingCurrentSong" class="vertical-title"></div>
+    <div class="vertical-lyrics"></div>
+</div>
+
+<div class="music-modal" id="musicModal">
+    <div class="music-modal-content">
+        <div class="modal-header">
+            <div class="header-left">
+                <h2 class="modal-title"><i class="fa-solid fa-music"></i> <span data-translate="music_player">Music Player</span></h2>
+            </div>
+            <div class="header-controls">
+                <button type="button" class="control-btn fullscreen-btn" onclick="toggleFullscreen()" data-tooltip-title="fullscreen">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </button>
+                <button type="button" class="control-btn fullscreen-close-btn" onclick="closeMusicModal()" data-tooltip-title="close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="modal-body">
+            <div class="music-layout">
+                <div class="playlist-section">
+                    <div class="playlist-header">
+                        <h6 class="playlist-title" data-translate="playlist">Playlist</h6>
+                            <button class="control-btn" onclick="openUrlModal()" data-tooltip-title="custom_playlist">
+                                <i class="bi bi-music-note-list"></i>
+                            </button>
+                        </div>
+                    <div class="playlist-container">
+                        <div class="playlist" id="playlist"></div>
+                    </div>
+                </div>
+                
+                <div class="lyrics-section">
+                    <h6 class="lyrics-title" data-translate="lyrics">Lyrics</h6>
+                    <div class="lyrics-content">
+                        <div id="floatingLyrics"></div>
+                        <div id="currentSong" class="current-song"></div>
+                        <div class="lyrics-container" id="lyricsContainer"></div>
+                        <div class="visualizer-container" id="visualizerContainer" style="display: none;">
+                            <canvas id="audioVisualizer"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="player-controls">
+                <div class="control-section">
+                    <div class="left-controls">
+                        <div class="playback-controls">
+                            <button class="control-btn" onclick="changeTrack(-1, true)" data-tooltip-title="previous_track">
+                                <i class="bi bi-caret-left-fill"></i>
+                            </button>
+                            <button class="control-btn play-pause-btn" id="playPauseBtn" onclick="togglePlay()" data-tooltip-title="play_pause">
+                                <i class="bi bi-play-fill"></i>
+                            </button>
+                            <button class="control-btn" onclick="changeTrack(1, true)" data-tooltip-title="next_track">
+                                <i class="bi bi-caret-right-fill"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="info-display">
+                            <div class="artist-image-container">
+                                <div class="artist-image" id="artistImage" data-tooltip-title="switch_interface">
+                                    <div class="default-avatar">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <img id="artistImg" src="" alt="Artist" style="display: none;">
+                                </div>
+                            </div>
+
+                            <div class="time-display">
+                                <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                            </div>
+                            <div class="music-progress-container">
+                                <div class="music-progress">
+                                    <div class="music-progress-bar" id="progressBar"></div>
+                                </div>
+                            </div>
+                            <button class="control-btn" id="speedToggle" data-tooltip-title="playback_speed">
+                                <span id="speedLabel">1×</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="music-control-group">
+                        <div class="volume-control">
+                            <button class="control-btn" id="repeatBtn" onclick="toggleRepeat()" data-tooltip-title="order_play">
+                                <i class="fa fa-sync-alt"></i>
+                            </button>
+                            <button class="control-btn" id="volumeToggle" data-tooltip-title="volume">
+                                <i class="bi bi-volume-up-fill"></i>
+                            </button>
+                            <button class="control-btn toggleFloatingLyricsBtn" data-tooltip-title="toggle_floating_lyrics">
+                                <i class="bi bi-display floating-icon"></i>
+                            </button>
+                            <button class="control-btn" id="updatePlaylistBtn" onclick="updatePlaylist()" data-tooltip-title="update_playlist">
+                                <i class="fa fa-sync-alt"></i>
+                            </button>
+                            <button class="control-btn" onclick="toggleVisualizer()" data-tooltip-title="toggle_visualizer">
+                                <i class="bi bi-bar-chart"></i>
+                            </button>
+                            <div class="volume-panel-container" id="volumePanel">
+                                <div class="volume-slider-wrapper">
+                                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                                </div>
+                                <div class="volume-percentage" id="volumePercentage">100%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="advanced-color-control-modal uk-modal-dialog-scale" id="advancedColorControlModal">
+    <div class="advanced-color-control-modal-content">
+        <button class="advanced-color-control-close-btn" id="closeAdvancedColorControl">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="advanced-color-control-header-left">
+            <div class="advanced-color-control-logo-left">
+                <svg width="131" height="131" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="oklch(0.86 0.18 200deg)" stop-opacity="0.9"/>
+                            <stop offset="70%" stop-color="oklch(0.42 0.08 200deg)" stop-opacity="0.4"/>
+                            <stop offset="100%" stop-color="oklch(0.12 0.01 200deg)" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="outerGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="oklch(0.42 0.08 200deg)" stop-opacity="0"/>
+                            <stop offset="100%" stop-color="oklch(0.86 0.18 200deg)" stop-opacity="0.08"/>
+                        </radialGradient>
+                        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+                            <feFlood flood-color="oklch(0.86 0.18 200deg)" flood-opacity="0.25"/>
+                            <feComposite in2="blur" operator="in"/>
+                            <feMerge>
+                                <feMergeNode/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    <circle cx="210" cy="210" r="202" fill="url(#outerGlow)"/>
+                    <circle cx="210" cy="210" r="200" fill="oklch(0.20 0.02 250deg)"/>
+                    <circle cx="210" cy="185" r="120" fill="url(#coreGlow)" filter="url(#softGlow)"/>
+                    
+                    <g id="matrix" transform="translate(210 180)" 
+                       stroke="oklch(0.86 0.18 200deg)" 
+                       stroke-width="1.5" 
+                       stroke-opacity="0.7" 
+                       fill="none">
+                        <g id="rotor">
+                            <circle cx="0" cy="0" r="85"/>
+                            <path d="M-73.6,42.5 L0,85 L73.6,42.5 M-73.6,-42.5 L0,-85 L73.6,-42.5"/>
+                            <line x1="-73.6" y1="42.5" x2="-73.6" y2="-42.5"/>
+                            <line x1="73.6" y1="42.5" x2="73.6" y2="-42.5"/>
+                            <line x1="0" y1="85" x2="0" y2="-85"/>
+                            <animateTransform 
+                                attributeName="transform" 
+                                type="rotate" 
+                                from="0" to="360" 
+                                dur="12s" 
+                                repeatCount="indefinite"
+                                calcMode="linear"/>
+                        </g>
+                    </g>
+                    
+                    <circle cx="210" cy="180" r="10" fill="oklch(0.86 0.18 200deg)" filter="url(#softGlow)">
+                        <animate attributeName="r" 
+                                 values="10;14;10" 
+                                 keyTimes="0;0.5;1" 
+                                 dur="3s" 
+                                 repeatCount="indefinite"/>
+                        <animate attributeName="fill" 
+                                 values="oklch(0.86 0.18 200deg);oklch(0.92 0.15 170deg);oklch(0.86 0.18 200deg)" 
+                                 keyTimes="0;0.5;1" 
+                                 dur="6s" 
+                                 repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <text x="210" y="315" 
+                          text-anchor="middle"
+                          font-family="'Segoe UI', 'SF Mono', monospace"
+                          font-weight="700" 
+                          font-size="38"
+                          letter-spacing="3" 
+                          fill="oklch(0.95 0.12 200deg)"
+                          style="text-shadow: 0 0 10px rgba(134, 246, 255, 0.5);">
+                        HUEMATRIX
+                        <animate attributeName="fill" 
+                                 values="oklch(0.95 0.12 200deg);oklch(0.86 0.18 200deg)" 
+                                 keyTimes="0;1" 
+                                 dur="8s" 
+                                 repeatCount="indefinite"
+                                 calcMode="spline"
+                                 keySplines="0.42 0 0.58 1"/>
+                    </text>
+                    
+                    <text x="210" y="355" 
+                          text-anchor="middle"
+                          font-family="'Segoe UI', 'SF Mono', monospace"
+                          font-weight="300" 
+                          font-size="26"
+                          letter-spacing="5" 
+                          fill="oklch(0.95 0.12 200deg)" 
+                          opacity="0.85">
+                        v2.0
+                        <animate attributeName="opacity" 
+                                 values="0.85;1;0.85" 
+                                 keyTimes="0;0.5;1" 
+                                 dur="4s" 
+                                 repeatCount="indefinite"/>
+                    </text>
+                </svg>
+            </div>
+                      
+            <div class="advanced-color-control-title-left">
+                <h6 class="advanced-color-control-modal-title" data-translate="advancedColorControl">
+                    Advanced Color Control
+                </h6>
+                <p class="advanced-color-control-subtitle" data-translate="advancedColorControlSubtitle">
+                    HueMatrix 2.0 — Next-Generation Color Engine
+                </p>
+            </div>
+        </div>
+        
+        <div class="advanced-color-controls-container">
+            <div class="advanced-color-control-section">
+                <h3 class="advanced-color-control-section-title">
+                    <i class="fas fa-sliders-h"></i> <span data-translate="colorControl">Color Control</span>
+                </h3>
+                
+                <div class="advanced-color-control-group">
+                    <div class="advanced-color-control-label">
+                        <i class="fas fa-circle"></i> <span data-translate="hue">Hue</span>
+                        <span class="advanced-color-control-value" id="advancedHueValue">260°</span>
+                    </div>
+                    <div class="advanced-color-control-slider-container">
+                        <input type="range" min="0" max="360" value="260" class="advanced-color-control-slider" id="advancedHueSlider">
+                    </div>
+                </div>
+                
+                <div class="advanced-color-control-group">
+                    <div class="advanced-color-control-label">
+                        <i class="fas fa-sun"></i> <span data-translate="chroma">Chroma</span>
+                        <span class="advanced-color-control-value" id="advancedChromaValue">0.25</span>
+                    </div>
+                    <div class="advanced-color-control-slider-container">
+                        <input type="range" min="0" max="0.5" step="0.01" value="0.25" class="advanced-color-control-slider chroma" id="advancedChromaSlider">
+                    </div>
+                </div>
+                
+                <div class="advanced-color-control-group">
+                    <div class="advanced-color-control-label">
+                        <i class="fas fa-adjust"></i> <span data-translate="lightness">Lightness</span>
+                        <span class="advanced-color-control-value" id="advancedLightnessValue">85%</span>
+                    </div>
+                    <div class="advanced-color-control-slider-container">
+                        <input type="range" min="0" max="100" value="85" class="advanced-color-control-slider lightness" id="advancedLightnessSlider">
+                    </div>
+                </div>
+
+                <h6 class="preset-colors-title">
+                    <i class="fas fa-palette"></i> <span data-translate="presetColors">Preset Colors</span>
+                </h6>
+                <div class="preset-colors-section">
+                    <div class="preset-colors-grid">
+                        <button class="preset-color-btn" data-hue="250" data-chroma="0.08" data-lightness="30" data-tooltip-title="midnight blue">
+                            <div class="preset-color-circle" style="background-color: oklch(30% 0.08 250);"></div>
+                        </button>
+                        <button class="preset-color-btn" data-hue="190" data-chroma="0.07" data-lightness="30" data-tooltip-title="cyan">
+                            <div class="preset-color-circle" style="background-color: oklch(30% 0.07 190);"></div>
+                        </button>
+
+                        <button class="preset-color-btn" data-hue="267" data-chroma="0.25" data-lightness="85" data-tooltip-title="sky blue">
+                            <div class="preset-color-circle" style="background-color: oklch(85% 0.25 267);"></div>
+                        </button>
+                        <button class="preset-color-btn" data-hue="56" data-chroma="0.18" data-lightness="85" data-tooltip-title="yellow">
+                            <div class="preset-color-circle" style="background-color: oklch(85% 0.18 56);"></div>
+                        </button>
+
+                        <button class="preset-color-btn" data-hue="160" data-chroma="0.09" data-lightness="66" data-tooltip-title="mint">
+                            <div class="preset-color-circle" style="background-color: oklch(66% 0.09 160);"></div>
+                        </button>
+                        <button class="preset-color-btn" data-hue="130" data-chroma="0.11" data-lightness="70" data-tooltip-title="emerald">
+                            <div class="preset-color-circle" style="background-color: oklch(70% 0.11 130);"></div>
+                        </button>
+
+                        <button class="preset-color-btn" data-hue="25" data-chroma="0.15" data-lightness="71" data-tooltip-title="coral">
+                            <div class="preset-color-circle" style="background-color: oklch(71% 0.15 25);"></div>
+                        </button>
+                        <button class="preset-color-btn" data-hue="5" data-chroma="0.18" data-lightness="47" data-tooltip-title="ruby">
+                            <div class="preset-color-circle" style="background-color: oklch(47% 0.18 5);"></div>
+                        </button>
+
+                        <button class="preset-color-btn" data-hue="290" data-chroma="0.14" data-lightness="46" data-tooltip-title="amethyst">
+                            <div class="preset-color-circle" style="background-color: oklch(46% 0.14 290);"></div>
+                        </button>
+                        <button class="preset-color-btn" data-hue="320" data-chroma="0.16" data-lightness="69" data-tooltip-title="magenta">
+                            <div class="preset-color-circle" style="background-color: oklch(69% 0.16 320);"></div>
+                        </button>
+
+                        <button class="preset-color-btn" data-hue="260" data-chroma="0.01" data-lightness="95" data-tooltip-title="pure white">
+                            <div class="preset-color-circle" style="background-color: oklch(95% 0.01 260);"></div>
+                        </button>
+                        <button class="preset-color-btn" data-hue="269" data-chroma="0.01" data-lightness="15"data-tooltip-title="pure black">
+                            <div class="preset-color-circle" style="background-color: oklch(15% 0.01 269);"></div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="advanced-color-control-buttons">
+                    <button class="advanced-color-control-reset-btn" id="advancedResetBtn">
+                        <i class="fas fa-undo"></i> <span data-translate="reset">Reset</span>
+                    </button>
+                    <button class="advanced-color-control-save-btn" id="advancedSaveBtn">
+                        <i class="fas fa-save"></i> <span data-translate="save">Save</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="advanced-color-control-section advanced-color-preview-section">
+                <h3 class="advanced-color-control-section-title">
+                    <i class="fas fa-eye-dropper"></i> <span data-translate="colorPreview">Color Preview</span>
+                </h3>
+                
+                <div class="advanced-color-preview-display" id="advancedColorPreview" data-translate="currentColor">
+                    Current Color
+                </div>
+                
+                <div class="advanced-color-info-group">
+                    <div class="advanced-color-info-label"><i class="fas fa-swatchbook"></i> <span data-translate="oklchValue">OKLCH Value</span></div>
+                    <div class="advanced-color-info-value" id="advancedOklchValue">oklch(85% 0.25 260)</div>
+                    
+                    <div class="advanced-color-info-label"><i class="fas fa-adjust"></i> <span data-translate="contrast">Contrast</span></div>
+                    <div>
+                        <span class="advanced-color-contrast-badge" id="advancedContrastBadge">
+                            <i class="fas fa-check-circle"></i> <span data-translate="contrastExcellent">Excellent (AAA)</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="control-panel-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body uk-modal-dialog-scale">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <h2 class="uk-modal-title">
+            <span uk-icon="icon: cog; ratio: 1.8"></span>
+            <span data-translate="control_panel">Control Panel</span>
+        </h2>
+        
+        <style>
+            .control-card {
+                height: 120px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                border-radius: 10px;
+                color: var(--text-primary);
+            }
+
+            .control-card:hover {
+                transform: scale(1.06);
+                background: oklch(var(--l) var(--c) var(--base-hue-1)) !important;
+                color: var(--color-white-strong) !important;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+                z-index: 2;
+            }
+
+            .control-card:hover .text-container span {
+                color: var(--color-white-strong) !important;
+            }
+
+            .control-card.disabled {
+                pointer-events: none;
+                opacity: 0.5;
+            }
+
+            .control-card.selected {
+                color: var(--accent-secondary) !important;
+            }
+
+            .control-card .icon-container {
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 32px;
+                color: inherit;
+            }
+
+            .control-card .text-container {
+                font-size: 0.9rem;
+                text-align: center;
+                line-height: 1.2;
+                color: inherit;
+            }
+
+            .control-card .icon-container i,
+            .control-card .icon-container span {
+                color: inherit;
+            }
+
+             .uk-input, .uk-select, .uk-textarea {
+                 border-radius: var(--radius-small);
+                 border: var(--border-strong) !important;
+            }
+
+             .uk-select {
+                 border-bottom-left-radius: var(--radius-small);
+                 border-bottom-right-radius: var(--radius-small);
+                 transition: border-radius 0.2s ease;
+            }
+
+            .uk-select:focus {
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+            }
+        </style>
+
+        <div class="uk-grid-small uk-child-width-1-2 uk-child-width-1-4@l" uk-grid>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="spectra-theme-toggle" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i id="theme-icon" class="bi bi-moon-fill" style="font-size:1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span id="theme-text" data-translate="theme_dark">Dark Mode</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-primary uk-card-hover uk-card-body uk-text-center control-card theme-settings-btn" 
+                     style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span uk-icon="icon: settings; ratio: 1.5"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="theme_settings">Theme Settings</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-secondary uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="master-switch" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span id="power-icon" class="bi bi-toggle-off" style="font-size: 1.8rem;"></span>
+                    </div>
+                    <div class="text-container">
+                        <span id="switch-text" data-translate="status_disabled">Disabled</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-success uk-card-hover uk-card-body uk-text-center control-card sound-toggle" 
+                     style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span id="sound-icon" class="bi bi-volume-up" style="font-size: 1.8rem;"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="background_sound">Background Sound</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     data-mode="video" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span uk-icon="icon: video-camera; ratio: 1.5"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="mode_video">Video Mode</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     data-mode="image" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span uk-icon="icon: image; ratio: 1.5"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="mode_image">Image Mode</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     data-mode="solid" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-moon-stars-fill" style="font-size: 1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="mode_solid">Dark Mode</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     data-mode="auto" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span uk-icon="icon: star; ratio: 1.5"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="mode_auto">Auto Mode</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card object-fit-btn" 
+                     style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span uk-icon="icon: expand; ratio: 1.5"></span>
+                    </div>
+                    <div class="text-container">
+                        <span id="fit-text" data-translate="fit_cover">Default Crop</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="animation-toggle" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span uk-icon="icon: reddit; ratio: 1.5"></span>
+                    </div>
+                    <div class="text-container">
+                        <span id="animation-text" data-translate="animation_settings">Animation Settings</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="font-toggle" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-type" style="font-size: 1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span id="font-text" data-translate="font_default">Default Font</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="themeOpenUpdateConfirmBtn" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-cloud-download" style="font-size:1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="theme_download">Theme Download</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     onclick="openMusicModal()" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-music-note-beamed" style="font-size:1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="music_player">Music Player</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="themeLoaderToggle" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i id="themeLoaderIcon" class="bi bi-x-circle" style="font-size: 1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="theme_loader_btn_title">Theme Loader</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     onclick="myAppIP.showDetailModal()" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-globe" style="font-size:1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="ip_details">IP Details</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="openEditModal" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-pencil-square" style="font-size: 1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="edit_ip_database">Edit IP Database</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="setCityBtn" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-geo-alt" style="font-size:1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="set_city">Set City</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     onclick="openLanguageModal()" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-translate" style="font-size:1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="select_language">Language</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     onclick="clearCache()" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <i class="bi bi-eraser" style="font-size:1.8rem;"></i>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="clear_button"></span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card info-btn" 
+                     style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span uk-icon="icon: info; ratio: 1.5"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="usage_guide">Usage Guide</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="usage-guide-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body uk-modal-dialog-scale">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <h2 class="uk-modal-title" data-translate="usage_guide">Usage Guide</h2>
+        <div class="uk-alert-primary" uk-alert>
+            <p data-translate="guide_video_mode">1. Video Mode: Default file name is "bg.mp4"</p>
+            <p data-translate="guide_image_mode">2. Image Mode: Default file names are "bg1-20.jpg"</p>
+            <p data-translate="guide_dark_mode">3. Dark Mode: Transparent background + spectrum animation</p>
+            <p data-translate="guide_light_mode">4. Light Mode: Switch via theme settings, automatically turns off control switch</p>
+            <p data-translate="guide_theme_settings">5. Theme Settings: Support custom backgrounds, clear background for mode switching</p>
+            <p data-translate="guide_mode_switching">6. Mode Switching: Image/Video modes only work in dark mode</p>
+            <p>
+                <span data-translate="guide_project_link">7. Project Address:</span>
+                <a href="https://github.com/Thaolga/openwrt-nekobox" target="_blank" class="uk-button uk-button-primary uk-button-small uk-margin-small-left">
+                    <span uk-icon="icon: github"></span>
+                    <span data-translate="visit_github">Visit GitHub</span>
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="theme-settings-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body uk-width-xxlarge uk-modal-dialog-scale">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <h2 class="uk-modal-title" data-translate="theme_settings">Theme Settings</h2>
+        <iframe id="theme-iframe" 
+                src="/spectra/index.php"
+                style="width: 100%; height: 80vh; border: none; border-radius: 5px;">
+        </iframe>
+    </div>
+</div>
+
+<div id="animation-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        
+        <h2 class="uk-modal-title">
+            <span uk-icon="icon: reddit; ratio: 1.8" class="uk-margin-small-right"></span>
+            <span data-translate="animation_settings">Animation Settings</span>
+        </h2>   
+  
+        <div class="uk-grid-small uk-child-width-1-3" uk-grid>
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="cube-lights-toggle" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span class="bi bi-brightness-high-fill" style="font-size: 1.8rem;"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="cube_lights">Cube Lights</span>
+                    </div>
+                    <div class="status-text">
+                        <span id="cube-lights-status" data-translate="status_off">Off</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="cube-animation-toggle" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span class="bi bi-box-seam" style="font-size: 1.8rem;"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="cube_animation">Cube Animation</span>
+                    </div>
+                    <div class="status-text">
+                        <span id="cube-animation-status" data-translate="status_off">Off</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="uk-card uk-card-small uk-card-default uk-card-hover uk-card-body uk-text-center control-card" 
+                     id="snow-animation-toggle" style="cursor: pointer;">
+                    <div class="icon-container">
+                        <span class="bi bi-snow" style="font-size: 1.8rem;"></span>
+                    </div>
+                    <div class="text-container">
+                        <span data-translate="snow_animation">Snow Animation</span>
+                    </div>
+                    <div class="status-text">
+                        <span id="snow-animation-status" data-translate="status_off">Off</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="controlPanel" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body uk-border-rounded uk-modal-dialog-scale">
+        <div class="uk-flex uk-flex-between uk-flex-middle uk-margin-bottom">
+            <h2 class="uk-modal-title uk-margin-remove">
+                <span uk-icon="icon: settings; ratio: 1.8" class="uk-margin-small-right"></span>
+                <span data-translate="ui_control">UI Control</span>
+            </h2>
+            <button class="uk-modal-close-default" type="button" uk-close></button>
+        </div>
+        <div class="uk-child-width-1-2@m uk-grid-small" uk-grid>
+            <div>
+                <div class="uk-card uk-card-default uk-card-hover uk-card-small uk-border-rounded" onclick="toggleVisibility('.icon-group')">
+                    <div class="uk-card-body uk-flex uk-flex-middle">
+                        <span uk-icon="icon: image; ratio: 1.5" class="uk-margin-small-right"></span>
+                        <div class="uk-flex-1">
+                            <div class="uk-card-title uk-text-small uk-margin-remove" data-translate="tool_icons">Tool Icons</div>
+                            <div id="iconGroupStatus" class="uk-text-meta uk-text-capitalize" data-translate="status_show">Show</div>
+                        </div>
+                        <span uk-icon="icon: chevron-right" class="uk-text-muted"></span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-default uk-card-hover uk-card-small uk-border-rounded" onclick="toggleVisibility('.weather-card')">
+                    <div class="uk-card-body uk-flex uk-flex-middle">
+                        <span uk-icon="icon: cloud-upload; ratio: 1.5" class="uk-margin-small-right"></span>
+                        <div class="uk-flex-1">
+                            <div class="uk-card-title uk-text-small uk-margin-remove" data-translate="weather_info">Weather Info</div>
+                            <div id="weatherStatus" class="uk-text-meta uk-text-capitalize" data-translate="status_show">Show</div>
+                        </div>
+                        <span uk-icon="icon: chevron-right" class="uk-text-muted"></span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-default uk-card-hover uk-card-small uk-border-rounded" onclick="toggleVisibility('.ip-container')">
+                    <div class="uk-card-body uk-flex uk-flex-middle">
+                        <span uk-icon="icon: location; ratio: 1.5" class="uk-margin-small-right"></span>
+                        <div class="uk-flex-1">
+                            <div class="uk-card-title uk-text-small uk-margin-remove" data-translate="ip_info">IP Info</div>
+                            <div id="ipStatus" class="uk-text-meta uk-text-capitalize" data-translate="status_show">Show</div>
+                        </div>
+                        <span uk-icon="icon: chevron-right" class="uk-text-muted"></span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="uk-card uk-card-default uk-card-hover uk-card-small uk-border-rounded" onclick="toggleVisibility('#result')">
+                    <div class="uk-card-body uk-flex uk-flex-middle">
+                        <span uk-icon="icon: star; ratio: 1.5" class="uk-margin-small-right"></span>
+                        <div class="uk-flex-1">
+                            <div class="uk-card-title uk-text-small uk-margin-remove" data-translate="site_status">Site Status</div>
+                            <div id="navbarRightStatus" class="uk-text-meta uk-text-capitalize" data-translate="status_show">Show</div>
+                        </div>
+                        <span uk-icon="icon: chevron-right" class="uk-text-muted"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="uk-margin-top">
+            <button onclick="resetAllSettings()" class="uk-button uk-button-danger uk-border-rounded uk-width-1-1">
+                <span uk-icon="icon: refresh" class="uk-margin-small-right"></span>
+                <span data-translate="reset_all">Reset All Settings</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="overlay" class="overlay" onclick="closeControlPanel()"></div>
+
+<div id="global-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-dialog-scale">
+        <div class="uk-modal-header uk-padding-small">
+            <h2 class="uk-modal-title uk-margin-remove">
+                <i class="fas fa-broom"></i>
+                <span data-translate="modal_title">Confirm Modal</span>
+            </h2>
+            <button class="uk-modal-close-default" type="button" uk-close></button>
+        </div>
+        <div class="uk-modal-body uk-text-center uk-padding-small">
+            <span uk-icon="icon: trash; ratio: 1.5" class="uk-text-warning"></span>
+            <p id="global-modal-text" class="uk-margin-small-top uk-margin-remove-bottom"></p>
+        </div>
+        <div class="uk-modal-footer uk-border-rounded-bottom">
+            <div class="uk-flex uk-flex-right uk-grid-small" uk-grid>
+                <div>
+                    <button class="uk-button uk-button-danger uk-border-rounded" id="global-modal-confirm-btn"><i class="bi bi-check-lg"></i> <span data-translate="modal_confirm"Confirm</button>
+                </div>
+                <div>
+                    <button class="uk-button uk-button-gray  uk-border-rounded" id="global-modal-cancel-btn"><i class="bi bi-x-lg"></i> <span data-translate="cancel"> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="urlModal" 
+     style="display:none; 
+            position:fixed; 
+            top:50%; 
+            left:50%; 
+            transform:translate(-50%, -50%); 
+            width:550px; 
+            padding:20px; 
+            border-radius:12px; 
+            background: var(--bg-container);
+            color: var(--text-primary);
+            box-shadow:0 4px 15px rgba(0,0,0,0.4); 
+            z-index:10009;">
+  <h3 style="margin-bottom:15px; font-size:20px; color:var(--accent-color);" data-translate="custom_playlist">Custom Playlist</h3>
+  <input id="playlistUrl" placeholder="URL" 
+         style="padding:8px; width:100%; border-radius:6px; border:1px solid #ccc; margin-bottom:15px;">
+  
+  <div style="text-align:right;">
+    <button onclick="resetToDefault()" class="cbi-button cbi-button-remove" data-translate="reset_default">Reset to Default</button>
+    <button onclick="savePlaylistUrl()" class="cbi-button cbi-button-save" data-translate="save">Save</button>
+    <button onclick="closeUrlModal()" class="btn cbi-button-neutral" data-translate="cancel">Cancel</button>
+  </div>
+</div>
+
+<div id="edit-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-large uk-modal-dialog-scale">
+        <div class="uk-modal-header">
+            <div class="uk-flex uk-flex-between uk-flex-middle">
+                <h2 class="uk-modal-title uk-margin-remove">
+                    <span uk-icon="icon: server; ratio: 1.5" class="uk-margin-small-right"></span>
+                    <span data-translate="edit_ip_database">Edit IP Database</span>
+                </h2>
+                <div class="uk-flex uk-flex-middle">
+                    <button class="uk-icon-button uk-margin-small-right" id="fullscreen-toggle"
+                        data-tooltip-title="fullscreen">
+                        <span uk-icon="icon: expand; ratio: 2"></span>
+                    </button>
+                    <button class="uk-modal-close-default uk-icon-button" type="button" uk-close></button>
+                </div>
+            </div>
+        </div>
+        <div class="uk-modal-body uk-padding-remove">
+            <div id="loading-indicator" class="uk-text-center uk-padding">
+                <div class="uk-margin-bottom">
+                    <div class="uk-spinner" uk-spinner="ratio: 2"></div>
+                </div>
+                <span class="uk-text-muted" data-translate="loading_editor">Loading editor...</span>
+            </div>
+            <div id="editor-container" style="display: none; width: 100%; height: 500px;"></div>
+        </div>
+        <div class="uk-modal-footer uk-text-right">
+            <button class="uk-button uk-button-danger" id="clear-btn" data-translate="clear">Clear</button>
+            <button class="uk-button uk-button-primary uk-margin-small-left" id="save-btn" data-translate="save">Save</button>
+            <button class="uk-button uk-button-secondary uk-margin-small-left uk-modal-close" data-translate="close">Close</button>
+        </div>
+    </div>
+</div>
+
+<div id="cityModal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-dialog-scale">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <div class="uk-modal-header">
+            <h2 id="modalTitle" class="uk-modal-title"></h2>
+        </div>
+        <div class="uk-modal-body">
+            <div class="uk-margin">
+                <label class="uk-form-label" for="cityInput"></label>
+                <div class="uk-form-controls">
+                    <input id="cityInput" class="uk-input" type="text" placeholder="">
+                </div>
+            </div>
+            <div id="lastUpdated" class="cbi-value-description" style="font-size:13px; color:var(--text-primary); display:none;">
+            </div>
+        </div>
+        <div class="uk-modal-footer uk-text-right">
+            <button id="clearCacheBtn" class="uk-button uk-button-danger"></button>
+            <button id="saveCityBtn" class="uk-button uk-margin-small-left uk-button-primary"></button>
+            <button id="closeCityModal" class="uk-button uk-margin-small-left uk-button-gray uk-modal-close"></button>
+        </div>
+    </div>
+</div>
+
+<div id="themeUpdateConfirmModal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-dialog-scale">
+        <div class="uk-modal-header uk-padding-small">
+            <h2 class="uk-modal-title uk-margin-remove">
+                <i class="bi bi-cloud-download" style="font-size:1.8rem;"></i>
+                <span data-translate="theme_download">Theme Download</span>
+            </h2>
+            <button class="uk-modal-close-default" type="button" uk-close></button>
+        </div>
+        <div class="uk-modal-body">
+            <div class="uk-margin-bottom">
+                <h6 class="uk-text-bold uk-margin-small-bottom" data-translate="version_check_label">Version Check</h6>
+                <div id="themeCurrentVersionInfo" class="uk-alert uk-alert-primary uk-margin-small-bottom" data-translate="current_version">Current Version</div>
+                <div id="themeLatestVersionInfo" class="uk-alert uk-alert-success" data-translate="fetching_version">Fetching version info...</div>
+            </div>
+            <div class="uk-margin-top">
+                <h6 class="uk-text-bold uk-margin-small-bottom" data-translate="command_install_label">Command Installation</h6>
+                <div class="uk-inline uk-width-1-1">
+                    <textarea id="themeCopyCommand" class="uk-textarea uk-form-blank uk-background-muted" rows="3" readonly style="resize: none; font-family: monospace;">
+wget -O /root/nekobox.sh https://raw.githubusercontent.com/Thaolga/openwrt-nekobox/nekobox/nekobox.sh && chmod 0755 /root/nekobox.sh && /root/nekobox.sh
+                    </textarea>
+                </div>
+            </div>
+            <div class="uk-margin-top">
+                <label class="uk-flex uk-flex-middle">
+                    <input id="themeAutoCheckToggle" class="uk-checkbox" type="checkbox" checked style="position: relative; top: -0.1px; left: 2.5px;">
+                    <span class="uk-margin-small-left" data-translate="auto_check_updates">
+                        Enable automatic update checks
+                    </span>
+                </label>
+            </div>
+        </div>
+        <div class="uk-modal-footer uk-text-right">
+            <button id="themeCopyCommandBtn" class="uk-button uk-button-success" data-translate="copy_command">Copy</button>
+            <a id="themeConfirmUpdateLink" href="#" target="_blank" class="uk-button uk-button-primary uk-margin-small-left" data-translate="download_local">Download</a>
+            <button id="themeUpdateBtn" class="uk-button uk-button-danger uk-margin-small-left" data-translate="update_plugin">Update</button>
+            <button class="uk-button uk-button-gray uk-margin-small-left uk-modal-close" data-translate="close">Close</button>
+        </div>
+    </div>
+</div>
+<div id="themeUpdateStatusModal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-dialog-scale">
+        <div class="uk-modal-header">
+            <h3 class="uk-modal-title">
+                <span uk-icon="icon: cloud-download; ratio: 1.1" class="uk-margin-small-right"></span>
+                <span id="themeUpdateStatusLabel" data-translate="updateModalLabel">Update Progress</span>
+            </h3>
+            <button class="uk-modal-close-default" type="button" uk-close></button>
+        </div>
+        <div class="uk-modal-body">
+            <div id="themeUpdateDescription" class="uk-alert uk-alert-info uk-margin-bottom" data-translate="updateDescription">Installing theme update...</div>
+            <pre id="themeLogOutput" class="uk-background-muted uk-padding-small" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap;">Waiting for the operation to begin...</pre>
+        </div>
+    </div>
+</div>
+
+<div id="newVersionAlertModal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-small uk-modal-dialog-scale">
+        <div class="uk-modal-header uk-padding-small">
+            <h3 class="uk-modal-title uk-margin-remove">
+                <i class="bi bi-arrow-up-circle-fill uk-text-primary"></i>
+                <span data-translate="update_available">Update Available</span>
+            </h3>
+            <button class="uk-modal-close-default" type="button" uk-close></button>
+        </div>
+        <div class="uk-modal-body">
+            <p class="uk-text-center" data-translate="new_version_available">
+                New theme version available!
+            </p>
+            <p class="uk-text-center uk-text-large uk-text-bold uk-margin-small-top" id="newVersionNumber">
+                Loading...
+            </p>
+        </div>
+        <div class="uk-modal-footer uk-text-right">
+            <button id="startUpdateBtn" class="uk-button uk-button-primary uk-margin-small-left" data-translate="update_now">
+                Update Now
+            </button>
+            <button class="uk-button uk-button-gray uk-modal-close uk-margin-small-left" data-translate="close">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const advancedColorControl = {
+    isOpen: false,
+
+    init() {
+        this.bindEvents();
+        this.updateUI();
+        const hueSlider = document.getElementById('advancedHueSlider');
+        const chromaSlider = document.getElementById('advancedChromaSlider');
+        const lightnessSlider = document.getElementById('advancedLightnessSlider');
+    
+        if (hueSlider) hueSlider.value = currentHue;
+        if (chromaSlider) chromaSlider.value = currentChroma;
+        if (lightnessSlider) lightnessSlider.value = currentLightness;
+    },
+
+    bindEvents() {
+        const openBtn = document.querySelector('.app-icon-btn[onclick*="advancedColorControl.open"]');
+        if (openBtn) {
+            openBtn.onclick = () => this.open();
+        }
+
+        const closeBtn = document.getElementById('closeAdvancedColorControl');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.close());
+        }
+
+        const modal = document.getElementById('advancedColorControlModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.close();
+                }
+            });
+        }
+
+        this.bindSliderEvents();
+        this.bindPresetColorEvents();
+        this.bindButtonEvents();
+    },
+
+    bindSliderEvents() {
+        const sliders = [
+            { id: 'advancedHueSlider', prop: 'hue', format: v => `${v}°` },
+            { id: 'advancedChromaSlider', prop: 'chroma', format: v => v.toFixed(2) },
+            { id: 'advancedLightnessSlider', prop: 'lightness', format: v => `${v}%` }
+        ];
+
+        sliders.forEach(({ id, prop, format }) => {
+            const slider = document.getElementById(id);
+            const valueDisplay = document.getElementById(id.replace('Slider', 'Value'));
+            
+            if (slider && valueDisplay) {
+                slider.addEventListener('input', (e) => {
+                    if (prop === 'hue') currentHue = parseFloat(e.target.value);
+                    if (prop === 'chroma') currentChroma = parseFloat(e.target.value);
+                    if (prop === 'lightness') currentLightness = parseFloat(e.target.value);
+                    
+                    valueDisplay.textContent = format(parseFloat(e.target.value));
+                    this.updateColor();
+                });
+            }
+        });
+    },
+
+    bindButtonEvents() {
+        const resetBtn = document.getElementById('advancedResetBtn');
+        const saveBtn = document.getElementById('advancedSaveBtn');
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetToDefault());
+        }
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveAndClose());
+        }
+    },
+
+    bindPresetColorEvents() {
+        const presetButtons = document.querySelectorAll('.preset-color-btn');
+        presetButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const hue = parseFloat(button.dataset.hue);
+                const chroma = parseFloat(button.dataset.chroma);
+                const lightness = parseFloat(button.dataset.lightness);
+                
+                currentHue = hue;
+                currentChroma = chroma;
+                currentLightness = lightness;
+                
+                this.updateUI();
+                this.updateColor();
+                
+                const hexColor = oklchToHex(hue, chroma, lightness);
+                addToRecentColors(hexColor);
+                
+                const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+                const colorName = button.getAttribute('data-tooltip-title') || 'color';
+                const successMsg = translations['presetColorApplied']?.replace('%s', translations[colorName] || colorName) || `Preset ${colorName} applied successfully.`;
+                
+                if (typeof showLogMessage === 'function') {
+                    showLogMessage(successMsg);
+                }
+                if (colorVoiceEnabled) {
+                    speakMessage(successMsg);
+                }
+            });
+        });
+    },
+
+    open() {
+        this.isOpen = true;
+        const modal = document.getElementById('advancedColorControlModal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+        this.updateUI();
+    },
+
+    close() {
+        this.isOpen = false;
+        const modal = document.getElementById('advancedColorControlModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    },
+
+    updateColor() {
+        applyColorSettings(false);
+        this.updatePreview();
+    },
+
+    updatePreview() {
+        const preview = document.getElementById('advancedColorPreview');
+        const oklchValue = document.getElementById('advancedOklchValue');
+        const contrastBadge = document.getElementById('advancedContrastBadge');
+
+        if (preview) {
+            const hexColor = oklchToHex(currentHue, currentChroma, currentLightness);
+            preview.style.backgroundColor = hexColor;
+            
+            const textColor = currentLightness > 60 ? '#000000' : '#ffffff';
+            preview.style.color = textColor;
+            preview.textContent = hexColor;
+            const ratio = window.calculateContrastRatioForText(hexColor, textColor);
+
+            if (contrastBadge) {
+                this.updateContrastBadge(contrastBadge, ratio);
+                const contrastValue = document.getElementById('advancedContrastValue');
+
+                if (!contrastValue) {
+                    this.createContrastValueDisplay();
+                } else {
+                    contrastValue.textContent = ratio.toFixed(2) + ':1';
+                }
+            }
+        }
+
+        if (oklchValue) {
+            oklchValue.textContent = `oklch(${Math.round(currentLightness)}% ${currentChroma.toFixed(2)} ${Math.round(currentHue)}°)`;
+        }
+    },
+
+    createContrastValueDisplay() {
+        const contrastGroup = document.querySelector('.advanced-color-info-group');
+        if (contrastGroup) {
+            const existingLabel = contrastGroup.querySelector('.advanced-color-contrast-value');
+            if (!existingLabel) {
+                const contrastValueHtml = `
+                    <div class="advanced-color-info-value advanced-color-contrast-value" id="advancedContrastValue">0:1</div>
+                `;
+                const badgeElement = contrastGroup.querySelector('.advanced-color-contrast-badge');
+                if (badgeElement) {
+                    badgeElement.insertAdjacentHTML('beforebegin', contrastValueHtml);
+                }
+            }
+        }
+    },
+
+    calculateContrastRatio() {
+        const hexColor = oklchToHex(currentHue, currentChroma, currentLightness);
+        return window.calculateContrastRatio(hexColor);
+    },
+
+    updateContrastBadge(badge, ratio) {
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        let level, icon, text;
+        
+        if (ratio >= 7) {
+            level = 'excellent';
+            icon = 'fas fa-check-circle';
+            text = translations['contrastExcellent'] || 'Excellent (AAA)';
+        } else if (ratio >= 4.5) {
+            level = 'good';
+            icon = 'fas fa-check-circle';
+            text = translations['contrastGood'] || 'Good (AA)';
+        } else if (ratio >= 3) {
+            level = 'fair';
+            icon = 'fas fa-info-circle';
+            text = translations['contrastFair'] || 'Fair';
+        } else {
+            level = 'poor';
+            icon = 'fas fa-exclamation-triangle';
+            text = translations['contrastPoor'] || 'Poor';
+        }
+        
+        badge.className = `advanced-color-contrast-badge contrast-${level}`;
+        badge.innerHTML = `<i class="${icon}"></i> ${text}`;
+    },
+
+    updateUI() {
+        const hueSlider = document.getElementById('advancedHueSlider');
+        const chromaSlider = document.getElementById('advancedChromaSlider');
+        const lightnessSlider = document.getElementById('advancedLightnessSlider');
+
+        if (hueSlider) hueSlider.value = currentHue;
+        if (chromaSlider) chromaSlider.value = currentChroma;
+        if (lightnessSlider) lightnessSlider.value = currentLightness;
+
+        const hueValue = document.getElementById('advancedHueValue');
+        const chromaValue = document.getElementById('advancedChromaValue');
+        const lightnessValue = document.getElementById('advancedLightnessValue');
+
+        if (hueValue) hueValue.textContent = `${Math.round(currentHue)}°`;
+        if (chromaValue) chromaValue.textContent = currentChroma.toFixed(2);
+        if (lightnessValue) lightnessValue.textContent = `${currentLightness}%`;
+
+        this.updatePreview();
+    },
+
+    resetToDefault() {
+        currentHue = 260;
+        currentChroma = 0.25;
+        currentLightness = 85;
+        
+        this.updateUI();
+        this.updateColor();
+    },
+
+    saveAndClose() {
+        applyColorSettings(true);
+        this.close();
+    }
+};
+
+function initResponsiveHide() {
+    function checkScreenSize() {
+        const isMobile = window.innerWidth <= 768;
+        const colorPickerBtn = document.getElementById('colorPickerBtn');
+        
+        if (colorPickerBtn) {
+            colorPickerBtn.style.display = isMobile ? 'none' : '';
+        }
+    }
+    
+    checkScreenSize();
+    
+    window.addEventListener('resize', checkScreenSize);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initResponsiveHide();
+    advancedColorControl.init();
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const currentSong = document.querySelector('#currentSong');
+    const floatingCurrentSong = document.getElementById('floatingCurrentSong');
+    const logo = document.querySelector('#logo.royal-style');
+
+    let usedColors = [];
+    let usedLogBoxColors = [];
+    let usedWeatherColors = [];
+
+    function getColorListFromTheme() {
+        const styles = getComputedStyle(document.documentElement);
+        const lightness = styles.getPropertyValue('--l').trim();
+        const chroma = styles.getPropertyValue('--c').trim();
+        const colors = [];
+        for (let i = 1; i <= 7; i++) {
+            const hue = styles.getPropertyValue(`--base-hue-${i}`).trim();
+            if (hue) {
+                const color = `oklch(${lightness} ${chroma} ${hue})`;
+                colors.push(color);
+            }
+        }
+        return colors;
+    }
+ 
+   function getNextColor(colorList) {
+        if (usedColors.length >= colorList.length) {
+            usedColors = [];
+        }
+        
+        const remaining = colorList.filter(c => !usedColors.includes(c));
+        if (remaining.length === 0) {
+            usedColors = [];
+            return colorList[Math.floor(Math.random() * colorList.length)];
+        }
+        
+        const next = remaining[Math.floor(Math.random() * remaining.length)];
+        usedColors.push(next);
+        return next;
+    }
+
+    let isLogoSplit = false;
+    function splitLogo() {
+        if (!logo || isLogoSplit) return;
+
+        const text = logo.textContent?.trim();
+        if (!text) return;
+
+        const style = document.createElement('style');
+        style.textContent = `
+        @keyframes floaty {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }`;
+        document.head.appendChild(style);
+
+        logo.innerHTML = '';
+        [...text].forEach((char, i) => {
+            const span = document.createElement('span');
+            span.textContent = char;
+            span.style.transition = 'color 0.8s ease';
+            span.style.animation = 'floaty 2.5s ease-in-out infinite';
+            span.style.animationDelay = `${i * 0.1}s`;
+            logo.appendChild(span);
+        });
+
+        isLogoSplit = true;
+    }
+
+    function rotateColors() {
+        const colorList = getColorListFromTheme();
+        if (colorList.length === 0) return;
+
+        if (logo && !isLogoSplit) {
+            splitLogo();
+        }
+
+        if (currentSong) {
+            currentSong.style.color = getNextColor(colorList);
+        }
+        if (floatingCurrentSong) {
+            floatingCurrentSong.style.color = getNextColor(colorList);
+        }
+
+        if (logo && isLogoSplit) {
+            logo.querySelectorAll('span').forEach(span => {
+                span.style.color = getNextColor(colorList);
+            });
+        }
+    }
+
+    function getLogBoxColorListFromTheme() {
+        const styles = getComputedStyle(document.documentElement);
+        const lightness = '35%';
+        const chroma = styles.getPropertyValue('--c').trim();
+        const colors = new Set();
+        for (let i = 1; i <= 7; i++) {
+            let hue = styles.getPropertyValue(`--base-hue-${i}`).trim();
+            if (!hue) continue;
+            let color = `oklch(${lightness} ${chroma} ${hue})`;
+            colors.add(color);
+        }
+        return Array.from(colors);
+    }
+
+    function getNextLogBoxColor(colorList) {
+        if (usedLogBoxColors.length >= colorList.length) {
+            usedLogBoxColors = [];
+        }
+        const remaining = colorList.filter(c => !usedLogBoxColors.includes(c));
+        const next = remaining[Math.floor(Math.random() * remaining.length)];
+        usedLogBoxColors.push(next);
+        return next;
+    }
+
+    function getWeatherGradientColors() {
+        const styles = getComputedStyle(document.documentElement);
+        const colors = [];
+        for (let i = 1; i <= 7; i++) {
+            const hue = styles.getPropertyValue(`--base-hue-${i}`).trim();
+            if (!hue) continue;
+            const mainColor = `oklch(60% 0.2 ${hue})`;
+            const darkColor = `oklch(45% 0.2 ${hue})`;
+            colors.push([mainColor, darkColor]);
+        }
+        return colors;
+    }
+
+    function getNextWeatherGradient(colorList) {
+        if (usedWeatherColors.length >= colorList.length) {
+            usedWeatherColors = [];
+        }
+        const remaining = colorList.filter((c, index) => !usedWeatherColors.includes(index));
+        const nextIndex = remaining.length > 0 ? 
+            colorList.indexOf(remaining[Math.floor(Math.random() * remaining.length)]) : 
+            Math.floor(Math.random() * colorList.length);
+        usedWeatherColors.push(nextIndex);
+        return colorList[nextIndex];
+    }
+
+    function rotateLogBoxColors() {
+        const colorList = getLogBoxColorListFromTheme();
+        if (colorList.length === 0) return;
+        document.querySelectorAll('.log-box[data-dynamic-bg="true"]').forEach(box => {
+            const color = getNextLogBoxColor(colorList);
+            box.style.background = color;
+        });
+    }
+
+    function rotateWeatherBoxColors() {
+        const gradientColors = getWeatherGradientColors();
+        if (gradientColors.length === 0) return;
+        document.querySelectorAll('.toast-message.info').forEach(box => {
+            const [color1, color2] = getNextWeatherGradient(gradientColors);
+            box.style.background = `linear-gradient(145deg, ${color1}, ${color2})`;
+        });
+    }
+
+    splitLogo();
+    rotateColors();
+    rotateLogBoxColors();
+    rotateWeatherBoxColors();
+
+    setInterval(rotateColors, 2000);
+    setInterval(rotateLogBoxColors, 4000);
+    setInterval(rotateWeatherBoxColors, 2000);
+});
+</script>
+
+<script>
+function showGlobalModal(options = {}) {
+    const modal = UIkit.modal('#global-modal');
+    const modalText = document.getElementById('global-modal-text');
+    const confirmBtn = document.getElementById('global-modal-confirm-btn');
+    const cancelBtn = document.getElementById('global-modal-cancel-btn');
+
+    modalText.innerHTML = options.defaultText || '';
+    confirmBtn.style.display = options.showConfirm === false ? 'none' : 'inline-block';
+
+    if (typeof updateUIText === 'function') updateUIText();
+
+    modal.show();
+
+    const hideModal = () => modal.hide();
+
+    confirmBtn.onclick = () => { 
+        hideModal(); 
+        options.onConfirm && options.onConfirm(); 
+    };
+    
+    cancelBtn.onclick = () => { 
+        hideModal(); 
+        options.onCancel && options.onCancel(); 
+    };
+}
+
+function clearCache() {
+    const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+    const confirmText = translations.cache_clear_confirm || 'Are you sure you want to clear the cache?';
+
+    speakMessage(confirmText);
+
+    showGlobalModal({
+        defaultText: confirmText,
+        onConfirm: () => {
+            localStorage.clear();
+            sessionStorage.clear();
+            sessionStorage.setItem('cacheCleared', 'true');
+            location.reload(true);
+        }
+    });
+}
+
+window.addEventListener('load', function() {
+    const translations = languageTranslations[currentLang] || languageTranslations['zh'];  
+    if (sessionStorage.getItem('cacheCleared') === 'true') {
+        const message = translations['cache_clear_done'] || 'Cache cleared';
+        showLogMessage(message);
+        speakMessage(message);
+        sessionStorage.removeItem('cacheCleared');
+    }
+});
+</script>
+
+<script>
+function toggleFullscreen() {
+    const modal = document.getElementById('musicModal');
+    const fullscreenBtn = document.querySelector('.fullscreen-btn');
+    const fullscreenIcon = fullscreenBtn.querySelector('i');
+    
+    if (modal.classList.contains('fullscreen')) {
+        modal.classList.remove('fullscreen');
+        fullscreenIcon.className = 'bi bi-arrows-fullscreen';
+        fullscreenBtn.classList.remove('active');
+        
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    } else {
+        modal.classList.add('fullscreen');
+        fullscreenIcon.className = 'bi bi-fullscreen-exit';
+        fullscreenBtn.classList.add('active');
+        
+        const modalContent = modal.querySelector('.music-modal-content');
+        if (modalContent.requestFullscreen) {
+            modalContent.requestFullscreen();
+        } else if (modalContent.webkitRequestFullscreen) {
+            modalContent.webkitRequestFullscreen();
+        } else if (modalContent.msRequestFullscreen) {
+            modalContent.msRequestFullscreen();
+        }
+    }
+}
+
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+function handleFullscreenChange() {
+    const modal = document.getElementById('musicModal');
+    const fullscreenBtn = document.querySelector('.fullscreen-btn');
+    const fullscreenIcon = fullscreenBtn.querySelector('i');
+    
+    const isFullscreen = document.fullscreenElement || 
+                         document.webkitFullscreenElement || 
+                         document.msFullscreenElement;
+    
+    if (!isFullscreen && modal.classList.contains('fullscreen')) {
+        modal.classList.remove('fullscreen');
+        fullscreenIcon.className = 'bi bi-arrows-fullscreen';
+        fullscreenBtn.classList.remove('active');
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('musicModal');
+        if (modal.classList.contains('fullscreen')) {
+            toggleFullscreen();
+        }
+    }
+});
+</script>
+
+<script>
+document.addEventListener('keydown', function (event) {
+    const target = event.target;
+    const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+    if (isTyping) return;
+
+    switch (event.code) {
+        case 'Space':
+            event.preventDefault();
+            togglePlay();
+            break;
+        case 'ArrowLeft':
+            event.preventDefault();
+            changeTrack(-1, true);
+            break;
+        case 'ArrowRight':
+            event.preventDefault();
+            changeTrack(1, true);
+            break;
+        case 'ArrowUp':
+            event.preventDefault();
+            document.querySelector('.toggleFloatingLyricsBtn')?.click();
+            break;
+        case 'Insert':
+            document.getElementById('repeatBtn')?.click();
+            break;
+        case 'ArrowDown':
+            event.preventDefault();
+            const musicModal = document.getElementById('musicModal');
+            if (musicModal) {
+                const computedStyle = window.getComputedStyle(musicModal);
+                if (computedStyle.display !== 'none') {
+                    closeMusicModal();
+                } else {
+                    openMusicModal();
+                }
+            }
+            break;
+        case 'Escape':
+            event.preventDefault();
+            closeMusicModal();
+            break;
+    }
+});
+
+document.getElementById('goFirstBtn')?.addEventListener('click', function() {
+    const translations = languageTranslations[currentLang] || languageTranslations['zh'];  
+    if (currentTrackIndex !== 0) {
+        currentTrackIndex = 0;
+        loadTrack(songs[0]);
+    }
+    const message = translations['back_to_first'] || 'Returned to the first song in the playlist';
+    showLogMessage(message);
+    speakMessage(message);
+});
+</script>
+
+<script>
+(function() {
+  const LYRICS_STORAGE_PREFIX = 'musicPlayer_';
+
+  const toggleBtns = document.querySelectorAll('.toggleFloatingLyricsBtn');
+  const box = document.getElementById('floatingLyrics');
+
+  const savedState = localStorage.getItem(`${LYRICS_STORAGE_PREFIX}floatingLyricsVisible`) === 'true';
+  const savedLeft = localStorage.getItem(`${LYRICS_STORAGE_PREFIX}floatingLyricsLeft`);
+  const savedTop = localStorage.getItem(`${LYRICS_STORAGE_PREFIX}floatingLyricsTop`);
+
+  box.classList.toggle('visible', savedState);
+  box.style.resize = 'none';
+  box.style.overflow = 'auto';
+  box.style.position = 'absolute';
+
+  if (savedLeft && savedTop) {
+    box.style.left = savedLeft;
+    box.style.top = savedTop;
+  } else {
+    box.style.left = '20px';
+    box.style.top = '20px';
+  }
+
+  toggleBtns.forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isNowVisible = box.classList.toggle('visible');
+      const translations = languageTranslations[currentLang] || languageTranslations['zh'];   
+      localStorage.setItem(`${LYRICS_STORAGE_PREFIX}floatingLyricsVisible`, isNowVisible);
+
+      const msgKey = isNowVisible
+        ? 'floating_lyrics_enabled'
+        : 'floating_lyrics_disabled';
+      const message = translations[msgKey] ||
+        (isNowVisible
+          ? "Floating lyrics enabled"
+          : "Floating lyrics disabled");
+      showLogMessage(message);
+      speakMessage(message); 
+   });
+  });
+
+  let isDragging = false, offsetX = 0, offsetY = 0;
+
+  box.addEventListener('mousedown', e => {
+    if (e.target.closest('.ctrl-btn')) return;
+    e.preventDefault();
+    isDragging = true;
+    offsetX = e.clientX - box.offsetLeft;
+    offsetY = e.clientY - box.offsetTop;
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    updatePosition(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      savePosition();
+    }
+  });
+
+  let touchId = null;
+
+  box.addEventListener('touchstart', e => {
+    if (e.target.closest('.ctrl-btn')) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchId = touch.identifier;
+    offsetX = touch.clientX - box.offsetLeft;
+    offsetY = touch.clientY - box.offsetTop;
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (!touchId) return;
+    const touch = Array.from(e.touches).find(t => t.identifier === touchId);
+    if (!touch) return;
+    updatePosition(touch.clientX, touch.clientY);
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    if (touchId) {
+      touchId = null;
+      savePosition();
+    }
+  });
+
+  function updatePosition(clientX, clientY) {
+    const newLeft = (clientX - offsetX) + 'px';
+    const newTop = (clientY - offsetY) + 'px';
+    box.style.left = newLeft;
+    box.style.top = newTop;
+  }
+
+  function savePosition() {
+    localStorage.setItem(`${LYRICS_STORAGE_PREFIX}floatingLyricsLeft`, box.style.left);
+    localStorage.setItem(`${LYRICS_STORAGE_PREFIX}floatingLyricsTop`, box.style.top);
+  }
+})();
+</script>
+
+<script>
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+}
+
+function makeModalDraggable(modalElement, { headerSelector, contentSelector }) {
+    const modalHeader = modalElement.querySelector(headerSelector);
+    const modalContent = modalElement.querySelector(contentSelector);
+    
+    if (!modalHeader || !modalContent) {
+        return;
+    }
+    
+    if (isMobileDevice()) {
+        modalHeader.style.cursor = 'default';
+        return;
+    }
+    
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    modalHeader.style.cursor = 'grab';
+    
+    modalHeader.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDrag);
+
+    modalHeader.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
+
+    function startDrag(e) {
+        if (e.target.closest('button')) return;
+        
+        isDragging = true;
+        offsetX = e.clientX - modalContent.offsetLeft;
+        offsetY = e.clientY - modalContent.offsetTop;
+        
+        modalContent.style.cursor = 'grabbing';
+        modalContent.style.userSelect = 'none';
+        
+        e.preventDefault();
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+        
+        const newLeft = e.clientX - offsetX;
+        const newTop = e.clientY - offsetY;
+        
+        const maxX = window.innerWidth - modalContent.offsetWidth;
+        const maxY = window.innerHeight - modalContent.offsetHeight;
+        
+        modalContent.style.left = Math.max(0, Math.min(newLeft, maxX)) + 'px';
+        modalContent.style.top = Math.max(0, Math.min(newTop, maxY)) + 'px';
+        modalContent.style.position = 'fixed';
+        modalContent.style.margin = '0';
+        modalContent.style.transform = 'none';
+    }
+
+    function stopDrag() {
+        if (isDragging) {
+            isDragging = false;
+            modalContent.style.cursor = '';
+            modalContent.style.userSelect = 'auto';
+        }
+    }
+
+    function handleTouchStart(e) {
+        if (e.target.closest('button')) return;
+        
+        const touch = e.touches[0];
+        isDragging = true;
+        offsetX = touch.clientX - modalContent.offsetLeft;
+        offsetY = touch.clientY - modalContent.offsetTop;
+        
+        modalContent.style.cursor = 'grabbing';
+        modalContent.style.userSelect = 'none';
+        
+        e.preventDefault();
+    }
+
+    function handleTouchMove(e) {
+        if (!isDragging) return;
+        
+        const touch = e.touches[0];
+        const newLeft = touch.clientX - offsetX;
+        const newTop = touch.clientY - offsetY;
+        
+        const maxX = window.innerWidth - modalContent.offsetWidth;
+        const maxY = window.innerHeight - modalContent.offsetHeight;
+        
+        modalContent.style.left = Math.max(0, Math.min(newLeft, maxX)) + 'px';
+        modalContent.style.top = Math.max(0, Math.min(newTop, maxY)) + 'px';
+        modalContent.style.position = 'fixed';
+        modalContent.style.margin = '0';
+        modalContent.style.transform = 'none';
+        
+        e.preventDefault();
+    }
+
+    function handleTouchEnd() {
+        if (isDragging) {
+            isDragging = false;
+            modalContent.style.cursor = '';
+            modalContent.style.userSelect = 'auto';
+        }
+    }
+    
+    function resetModalPosition() {
+        modalContent.style.position = '';
+        modalContent.style.left = '';
+        modalContent.style.top = '';
+        modalContent.style.margin = '';
+        modalContent.style.transform = '';
+    }
+    
+    const closeButtons = modalElement.querySelectorAll('.uk-modal-close, .uk-modal-close-default, [uk-close]');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', resetModalPosition);
+    });
+    
+    modalElement.addEventListener('click', function(e) {
+        if (e.target === modalElement) {
+            resetModalPosition();
+        }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modalElement.classList.contains('uk-open')) {
+            resetModalPosition();
+        }
+    });
+    
+    if (typeof UIkit !== 'undefined') {
+        UIkit.util.on(modalElement, 'hide', resetModalPosition);
+    }
+}
+
+function initAllModalDrag() {
+    const allModals = document.querySelectorAll('[uk-modal], .uk-modal, .modal, [class*="modal"]');
+    
+    allModals.forEach((modal, index) => {
+        const selectors = [
+            { header: '.uk-modal-header', content: '.uk-modal-dialog' },
+            { header: '.modal-header', content: '.music-modal-content' },
+            { header: '.header', content: '.content' },
+            { header: '.uk-flex-between', content: '.uk-modal-dialog' },
+            { header: '.language-modal-header', content: '.uk-modal-dialog' },
+            { header: '.uk-modal-title', content: '.uk-modal-dialog' }
+        ];
+        
+        for (let selector of selectors) {
+            const modalHeader = modal.querySelector(selector.header);
+            const modalContent = modal.querySelector(selector.content);
+            
+            if (modalHeader && modalContent) {
+                makeModalDraggable(modal, {
+                    headerSelector: selector.header,
+                    contentSelector: selector.content
+                });
+                break;
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initAllModalDrag);
+</script>
+
+<script>
+const defaultSettings = {
+    '.icon-group': true,
+    '.weather-card': false,
+    '.ip-container': true,
+    '#result': true
+};
+
+function openControlPanel() {
+    UIkit.modal('#controlPanel').show();
+    updateStatusDisplay();
+}
+
+function closeControlPanel() {
+    UIkit.modal('#controlPanel').hide();
+}
+
+function toggleVisibility(selector) {
+    const element = document.querySelector(selector);
+    const currentState = localStorage.getItem(selector);
+    const newState = currentState === 'hidden' ? 'visible' : 'hidden';
+    
+    if (newState === 'hidden') {
+        element.classList.add('control-panel-hidden');
+    } else {
+        element.classList.remove('control-panel-hidden');
+    }
+    
+    localStorage.setItem(selector, newState);
+    updateStatusDisplay();
+    
+    const statusText = newState === 'hidden' ? languageTranslations[currentLang]['status_hide'] : languageTranslations[currentLang]['status_show'];
+    const statusMap = {
+        '.icon-group': languageTranslations[currentLang]['tool_icons'],
+        '.weather-card': languageTranslations[currentLang]['weather_info'],
+        '.ip-container': languageTranslations[currentLang]['ip_info'],
+        '#result': languageTranslations[currentLang]['site_status']
+    };
+    const panelName = statusMap[selector] || selector;
+
+    const logMsg = `${panelName} ${statusText}`;
+    if (typeof showLogMessage === 'function') showLogMessage(logMsg);
+    if (typeof speakMessage === 'function') speakMessage(logMsg);
+}
+
+function updateStatusDisplay() {
+    const statusMap = {
+        '.icon-group': 'iconGroupStatus',
+        '.weather-card': 'weatherStatus', 
+        '.ip-container': 'ipStatus',
+        '#result': 'navbarRightStatus'
+    };
+    
+    Object.entries(statusMap).forEach(([selector, statusId]) => {
+        const element = document.querySelector(selector);
+        const statusElement = document.getElementById(statusId);
+        const savedState = localStorage.getItem(selector);
+
+        if (statusElement) {
+            if (savedState === 'hidden' || (element && element.classList.contains('control-panel-hidden'))) {
+                statusElement.textContent = languageTranslations[currentLang]['status_hide'];
+                statusElement.className = 'uk-text-meta uk-text-capitalize uk-text-danger';
+            } else {
+                statusElement.textContent = languageTranslations[currentLang]['status_show'];
+                statusElement.className = 'uk-text-meta uk-text-capitalize uk-text-success';
+            }
+        }
+    });
+}
+
+function resetAllSettings() {
+    Object.keys(defaultSettings).forEach(selector => {
+        localStorage.removeItem(selector);
+        const element = document.querySelector(selector);
+        if (element) {
+            element.classList.remove('control-panel-hidden');
+        }
+    });
+    updateStatusDisplay();
+    const resetText = languageTranslations[currentLang]['reset_all'];
+    const logMsg = `${resetText}`;
+    if (typeof showLogMessage === 'function') showLogMessage(logMsg);
+    if (typeof speakMessage === 'function') speakMessage(logMsg);
+}
+
+(function() {
+    const style = document.createElement('style');
+    style.textContent = '.control-panel-hidden { display: none !important; }';
+    document.head.appendChild(style);
+    
+    const selectors = ['.icon-group', '.weather-card', '.ip-container', '#result'];
+    selectors.forEach(selector => {
+        const element = document.querySelector(selector);
+        const savedState = localStorage.getItem(selector);
+
+        if (savedState === 'hidden' || (savedState === null && defaultSettings[selector] === false)) {
+            if (element) {
+                element.classList.add('control-panel-hidden');
+                localStorage.setItem(selector, 'hidden');
+            }
+        }
+    });
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateStatusDisplay();
+});
+</script>
+
+<script>
+let monacoEditor = null;
+let isMonacoLoaded = false;
+let monacoLoadingPromise = null;
+
+function loadMonacoEditor() {
+    if (isMonacoLoaded) return Promise.resolve();
+    if (monacoLoadingPromise) return monacoLoadingPromise;
+
+    monacoLoadingPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js';
+        
+        script.onload = () => {
+            require.config({ 
+                paths: { 
+                    vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' 
+                } 
+            });
+            
+            require(['vs/editor/editor.main'], () => {
+                isMonacoLoaded = true;
+                resolve();
+            });
+        };
+        
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+
+    return monacoLoadingPromise;
+}
+
+function updateEditorSize() {
+    if (!monacoEditor) return;
+    
+    const modal = document.getElementById('edit-modal');
+    const editorContainer = document.getElementById('editor-container');
+    const dialog = modal.querySelector('.uk-modal-dialog');
+    const isFullscreen = modal.classList.contains('uk-modal-full');
+    
+    const headerHeight = modal.querySelector('.uk-modal-header').offsetHeight;
+    const footerHeight = modal.querySelector('.uk-modal-footer').offsetHeight;
+    
+    if (isFullscreen) {
+        const availableHeight = window.innerHeight - headerHeight - footerHeight;
+        editorContainer.style.height = availableHeight + 'px';
+        dialog.style.width = '100%';
+        dialog.style.margin = '0';
+        dialog.style.maxWidth = '100%';
+    } else {
+        const normalHeight = Math.floor(window.innerHeight * 0.6);
+        editorContainer.style.height = normalHeight + 'px';
+        dialog.style.width = '1200px';
+        dialog.style.margin = 'auto';
+        dialog.style.maxWidth = '90%';
+    }
+    
+    monacoEditor.layout();
+}
+
+function initializeMonacoEditor(jsonData) {
+    const editorContainer = document.getElementById('editor-container');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    
+    loadingIndicator.style.display = 'none';
+    editorContainer.style.display = 'block';
+    
+    monaco.editor.defineTheme('custom-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+            { token: '', background: '1e1e1e' }
+        ],
+        colors: {
+            'editor.background': '#1e1e1e',
+            'editor.lineHighlightBackground': '#2a2a2a',
+            'editorLineNumber.foreground': '#858585'
+        }
+    });
+    
+    monacoEditor = monaco.editor.create(editorContainer, {
+        value: JSON.stringify(jsonData, null, 2),
+        language: 'json',
+        theme: 'custom-dark',
+        fontSize: 14,
+        lineNumbers: 'on',
+        wordWrap: 'on',
+        minimap: {
+            enabled: true
+        },
+        scrollBeyondLastLine: false,
+        automaticLayout: false,
+        formatOnPaste: true,
+        formatOnType: true,
+        folding: true,
+        foldingHighlight: true,
+        renderLineHighlight: 'all',
+        renderWhitespace: 'none',
+        tabSize: 2,
+        insertSpaces: true,
+        autoClosingBrackets: 'always',
+        autoIndent: 'full',
+        bracketPairColorization: {
+            enabled: true
+        },
+        guides: {
+            bracketPairs: true
+        }
+    });
+    
+    const jsonModel = monacoEditor.getModel();
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        validate: true,
+        allowComments: false,
+        schemas: []
+    });
+    
+    monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+        document.getElementById('save-btn').click();
+    });
+    
+    monacoEditor.addCommand(monaco.KeyCode.F11, () => {
+        document.getElementById('fullscreen-toggle').click();
+    });
+    
+    monacoEditor.addCommand(monaco.KeyCode.Escape, () => {
+        const modal = document.getElementById('edit-modal');
+        if (modal.classList.contains('uk-modal-full')) {
+            document.getElementById('fullscreen-toggle').click();
+        }
+    });
+    
+    monacoEditor.addCommand(monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF, () => {
+        monacoEditor.getAction('editor.action.formatDocument').run();
+    });
+    
+    updateEditorSize();
+}
+
+async function showEditModal() {
+    const modal = UIkit.modal('#edit-modal');
+    
+    document.getElementById('loading-indicator').style.display = 'block';
+    document.getElementById('editor-container').style.display = 'none';
+    document.getElementById('editor-container').innerHTML = '';
+    
+    modal.show();
+    if (typeof updateUIText === 'function') updateUIText();
+    
+    try {
+        const [_, jsonData] = await Promise.all([
+            loadMonacoEditor(),
+            fetch('/spectra/lib/ip_cache.json?_=' + Date.now())
+                .then(r => r.json())
+                .catch(() => ({}))
+        ]);
+        initializeMonacoEditor(jsonData);
+    } catch (error) {
+        console.error('Failed to load Monaco editor:', error);
+        document.getElementById('loading-indicator').innerHTML = `
+            <div class="uk-alert uk-alert-danger">
+                <span data-translate="load_error">Failed to load editor</span>
+            </div>
+        `;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('fullscreen-toggle').addEventListener('click', function () {
+        const modal = document.getElementById('edit-modal');
+        modal.classList.toggle('uk-modal-full');
+        
+        const icon = this.querySelector('span[uk-icon]');
+        const isFullscreen = modal.classList.contains('uk-modal-full');
+        icon.setAttribute('uk-icon', isFullscreen ? 'icon: shrink' : 'icon: expand');
+        
+        setTimeout(updateEditorSize, 100);
+    });
+    
+    document.getElementById('clear-btn').addEventListener('click', function() {
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        const confirmText = translations.clear_confirm || "Are you sure to clear the IP database?";
+        
+        showGlobalModal({
+            defaultText: confirmText,
+            onConfirm: async () => {
+                try {
+                    const res = await fetch('/spectra/edit_ip_cache.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({})
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        const message = translations.clear_success || "IP database cleared";
+                        if (typeof showLogMessage === 'function') showLogMessage(message);
+                        if (typeof speakMessage === 'function') speakMessage(message);
+                        if (monacoEditor) {
+                            monacoEditor.setValue('{}');
+                            setTimeout(() => {
+                                monacoEditor.getAction('editor.action.formatDocument').run();
+                            }, 100);
+                        }
+                    } else {
+                        const message = translations.clear_fail || "Clear failed";
+                        if (typeof showLogMessage === 'function') showLogMessage(message);
+                        if (typeof speakMessage === 'function') speakMessage(message);
+                    }
+                } catch(e) {
+                    const message = translations.clear_fail || "Clear failed";
+                    if (typeof showLogMessage === 'function') showLogMessage(message);
+                    if (typeof speakMessage === 'function') speakMessage(message);
+                    console.error(e);
+                }
+            }
+        });
+    });
+    
+    document.getElementById('save-btn').addEventListener('click', function() {
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        
+        if (!monacoEditor) {
+            if (typeof showLogMessage === 'function') showLogMessage(translations.save_fail || "Save failed");
+            return;
+        }
+        
+        let newContent;
+        try { 
+            newContent = JSON.parse(monacoEditor.getValue()); 
+        } catch(e) { 
+            if (typeof showLogMessage === 'function') {
+                showLogMessage(translations.json_error || "JSON format error, please check!");
+            }
+            return; 
+        }
+        
+        fetch('/spectra/edit_ip_cache.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(newContent)
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) { 
+                const message = translations.save_success || "Saved successfully";
+                if (typeof showLogMessage === 'function') showLogMessage(message);
+                if (typeof speakMessage === 'function') speakMessage(message);
+                UIkit.modal('#edit-modal').hide();
+            } else {
+                if (typeof showLogMessage === 'function') {
+                    showLogMessage(translations.save_fail || "Save failed");
+                }
+            }
+        })
+        .catch(() => {
+            if (typeof showLogMessage === 'function') {
+                showLogMessage(translations.save_fail || "Save failed");
+            }
+        });
+    });
+    
+    window.addEventListener('resize', updateEditorSize);
+    
+    if (document.getElementById('openEditModal')) {
+        document.getElementById('openEditModal').addEventListener('click', showEditModal);
+    }
+    
+    UIkit.util.on('#edit-modal', 'shown', updateEditorSize);
+    UIkit.util.on('#edit-modal', 'hidden', function() {
+        if (monacoEditor) {
+            monacoEditor.dispose();
+            monacoEditor = null;
+        }
+    });
+});
+</script>
+
+<script>
+const showLogMessage = (function() {
+    const activeLogs = new Set();
+    const BASE_OFFSET = 20;
+    const MARGIN = 10;
+
+    function createIcon(type) {
+        const icons = {
+            error: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z',
+            warning: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z',
+            info: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'
+        };
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="${icons[type] || icons.info}"/></svg>`;
+        return `data:image/svg+xml;base64,${btoa(svg)}`;
+    }
+
+    function updatePositions() {
+        let verticalPos = BASE_OFFSET;
+        activeLogs.forEach(log => {
+            log.style.transform = `translateY(${verticalPos}px)`;
+            verticalPos += log.offsetHeight + MARGIN;
+        });
+    }
+
+    return function(message, type='info') {
+        const logBox = document.createElement('div');
+        logBox.className = `toast-message ${type}`;
+        logBox.innerHTML = `
+            <div class="toast-message-content">
+                <span class="toast-message-icon" style="background-image:url('${createIcon(type)}')"></span>
+                ${decodeURIComponent(message)}
+                <button class="toast-close-btn"></button>
+            </div>
+        `;
+        logBox.querySelector('.toast-close-btn').onclick = () => {
+            logBox.classList.add('exiting');
+            setTimeout(() => { logBox.remove(); activeLogs.delete(logBox); updatePositions(); }, 300);
+        };
+        logBox.addEventListener('mouseenter', () => logBox.style.animationPlayState = 'paused');
+        logBox.addEventListener('mouseleave', () => logBox.style.animationPlayState = 'running');
+
+        document.body.appendChild(logBox);
+        activeLogs.add(logBox);
+        requestAnimationFrame(() => { updatePositions(); });
+
+        setTimeout(() => {
+            logBox.classList.add('exiting');
+            setTimeout(() => { logBox.remove(); activeLogs.delete(logBox); updatePositions(); }, 300);
+        }, 12000);
+    };
+})();
+</script>
+
+<audio id="bell-audio" preload="auto">
+  <source src="/luci-static/spectra/img/bells.mp3" type="audio/mp3">
+</audio>
+
+<script>
+let city = localStorage.getItem('city') || 'Beijing';
+const apiKey = 'fc8bd2637768c286c6f1ed5f1915eb22';
+let currentWeatherData = null;
+const cityModal = UIkit.modal('#cityModal');
+
+const CACHE_REFRESH_INTERVAL = 10 * 60 * 1000;
+
+const weatherIcon = document.getElementById('weatherIcon');
+const weatherText = document.getElementById('weatherText');
+const cityNameDisplay = document.getElementById('cityNameDisplay');
+const cityInput = document.getElementById('cityInput');
+const saveCityBtn = document.getElementById('saveCityBtn');
+const setCityBtn = document.getElementById('setCityBtn');
+
+const closeCityModal = document.getElementById('closeCityModal');
+const clearCacheBtn = document.getElementById('clearCacheBtn');
+const lastUpdatedDiv = document.getElementById('lastUpdated');
+
+const unifiedLanguageMap = {
+    'zh': { api: 'zh-CN', weather: 'zh_cn', display: 'zh' },
+    'hk': { api: 'zh-TW', weather: 'zh_tw', display: 'hk' },
+    'en': { api: 'en-US', weather: 'en', display: 'en' },
+    'ja': { api: 'ja-JP', weather: 'ja', display: 'ja' },
+    'ko': { api: 'ko-KR', weather: 'kr', display: 'ko' },
+    'fr': { api: 'fr-FR', weather: 'fr', display: 'fr' },
+    'de': { api: 'de-DE', weather: 'de', display: 'de' },
+    'es': { api: 'es-ES', weather: 'es', display: 'es' },
+    'ru': { api: 'ru-RU', weather: 'ru', display: 'ru' },
+    'th': { api: 'th-TH', weather: 'th', display: 'th' },
+    'bn': { api: 'bn-IN', weather: 'bn', display: 'bn' },
+    'ar': { api: 'ar-SA', weather: 'ar', display: 'ar' },
+    'vi': { api: 'vi-VN', weather: 'vi', display: 'vi' }
+};
+
+const modalTranslations = {
+    zh: {
+        modalTitle: "设置城市",
+        saveBtn: "保存",
+        cancelBtn: "取消",
+        clearBtn: "清空缓存",
+        invalidCityEmpty: "城市不能为空",
+        invalidCityChinese: "城市不能包含中文",
+        invalidCityFormat: "城市必须以大写英文字母开头",
+        citySaved: "已保存城市: {city}",
+        cacheCleared: "天气信息已被清空",
+        lastUpdated: "最后更新: {time}",
+        neverUpdated: "从未更新",
+        weatherError: "无法获取天气数据"
+    },
+    en: {
+        modalTitle: "Set City",
+        saveBtn: "Save",
+        cancelBtn: "Cancel",
+        clearBtn: "Clear Cache",
+        invalidCityEmpty: "City cannot be empty",
+        invalidCityChinese: "City cannot contain Chinese characters",
+        invalidCityFormat: "City must start with uppercase English letter",
+        citySaved: "City saved: {city}",
+        cacheCleared: "Weather data has been cleared",
+        lastUpdated: "Last updated: {time}",
+        neverUpdated: "Never updated",
+        weatherError: "Unable to fetch weather data"
+    },
+    hk: {
+        modalTitle: "設置城市",
+        saveBtn: "儲存",
+        cancelBtn: "取消",
+        clearBtn: "清空緩存",
+        invalidCityEmpty: "城市不能為空",
+        invalidCityChinese: "城市不能包含中文",
+        invalidCityFormat: "城市必須以大寫英文字母開頭",
+        citySaved: "已儲存城市: {city}",
+        cacheCleared: "天氣信息已被清空",
+        lastUpdated: "最後更新: {time}",
+        neverUpdated: "從未更新",
+        weatherError: "無法獲取天氣資料"
+    },
+    de: {
+        modalTitle: "Stadt festlegen",
+        saveBtn: "Speichern",
+        cancelBtn: "Abbrechen",
+        clearBtn: "Cache löschen",
+        invalidCityEmpty: "Stadt darf nicht leer sein",
+        invalidCityChinese: "Stadt darf keine chinesischen Zeichen enthalten",
+        invalidCityFormat: "Stadt muss mit einem Großbuchstaben beginnen",
+        citySaved: "Stadt gespeichert: {city}",
+        cacheCleared: "Wetterdaten wurden gelöscht",
+        lastUpdated: "Zuletzt aktualisiert: {time}",
+        neverUpdated: "Nie aktualisiert",
+        weatherError: "Wetterdaten konnten nicht abgerufen werden"
+    },
+    fr: {
+        modalTitle: "Définir la ville",
+        saveBtn: "Enregistrer",
+        cancelBtn: "Annuler",
+        clearBtn: "Effacer le cache",
+        invalidCityEmpty: "La ville ne peut pas être vide",
+        invalidCityChinese: "La ville ne peut pas contenir de caractères chinois",
+        invalidCityFormat: "La ville doit commencer par une lettre majuscule",
+        citySaved: "Ville enregistrée: {city}",
+        cacheCleared: "Les données météo ont été effacées",
+        lastUpdated: "Dernière mise à jour: {time}",
+        neverUpdated: "Jamais mis à jour",
+        weatherError: "Impossible d’obtenir les données météo"
+    },
+    ko: {
+        modalTitle: "도시 설정",
+        saveBtn: "저장",
+        cancelBtn: "취소",
+        clearBtn: "캐시 지우기",
+        invalidCityEmpty: "도시는 비어 있을 수 없습니다",
+        invalidCityChinese: "도시에는 한자(중국어)를 포함할 수 없습니다",
+        invalidCityFormat: "도시는 영어 대문자로 시작해야 합니다",
+        citySaved: "도시 저장됨: {city}",
+        cacheCleared: "날씨 정보가 지워졌습니다",
+        lastUpdated: "마지막 업데이트: {time}",
+        neverUpdated: "업데이트되지 않음",
+        weatherError: "날씨 데이터를 가져올 수 없습니다"
+    },
+    ja: {
+        modalTitle: "都市設定",
+        saveBtn: "保存",
+        cancelBtn: "キャンセル",
+        clearBtn: "キャッシュをクリア",
+        invalidCityEmpty: "都市は空にできません",
+        invalidCityChinese: "都市に漢字を含めることはできません",
+        invalidCityFormat: "都市は英語の大文字で始まる必要があります",
+        citySaved: "都市を保存しました: {city}",
+        cacheCleared: "天気情報がクリアされました",
+        lastUpdated: "最終更新: {time}",
+        neverUpdated: "更新されていません",
+        weatherError: "天気データを取得できませんでした"
+    },
+    bn: {
+        modalTitle: "শহর সেট করুন",
+        saveBtn: "সংরক্ষণ",
+        cancelBtn: "বাতিল",
+        clearBtn: "ক্যাশে সাফ করুন",
+        invalidCityEmpty: "শহর খালি থাকতে পারে না",
+        invalidCityChinese: "শহরে চীনা অক্ষর থাকতে পারে না",
+        invalidCityFormat: "শহরটি ইংরেজি বড় হাতের অক্ষর দিয়ে শুরু করতে হবে",
+        citySaved: "শহর সংরক্ষিত: {city}",
+        cacheCleared: "আবহাওয়ার তথ্য সাফ করা হয়েছে",
+        lastUpdated: "সর্বশেষ আপডেট: {time}",
+        neverUpdated: "কখনও আপডেট করা হয়নি",
+        weatherError: "আবহাওয়ার ডেটা আনতে ব্যর্থ"
+    },
+    vi: {
+        modalTitle: "Đặt thành phố",
+        saveBtn: "Lưu",
+        cancelBtn: "Hủy",
+        clearBtn: "Xóa bộ nhớ cache",
+        invalidCityEmpty: "Thành phố không được để trống",
+        invalidCityChinese: "Thành phố không được chứa chữ Hán",
+        invalidCityFormat: "Thành phố phải bắt đầu bằng chữ cái tiếng Anh viết hoa",
+        citySaved: "Đã lưu thành phố: {city}",
+        cacheCleared: "Thông tin thời tiết đã được xóa",
+        lastUpdated: "Cập nhật lần cuối: {time}",
+        neverUpdated: "Chưa bao giờ cập nhật",
+        weatherError: "Không thể lấy dữ liệu thời tiết"
+    },
+    th: {
+        modalTitle: "ตั้งค่าเมือง",
+        saveBtn: "บันทึก",
+        cancelBtn: "ยกเลิก",
+        clearBtn: "ล้างแคช",
+        invalidCityEmpty: "เมืองต้องไม่ว่าง",
+        invalidCityChinese: "เมืองห้ามมีตัวอักษรจีน",
+        invalidCityFormat: "เมืองต้องขึ้นต้นด้วยตัวอักษรอังกฤษตัวใหญ่",
+        citySaved: "บันทึกเมืองแล้ว: {city}",
+        cacheCleared: "ล้างข้อมูลสภาพอากาศเรียบร้อยแล้ว",
+        lastUpdated: "อัปเดตล่าสุด: {time}",
+        neverUpdated: "ยังไม่เคยอัปเดต",
+        weatherError: "ไม่สามารถดึงข้อมูลสภาพอากาศได้"
+    },
+    ar: {
+        modalTitle: "تعيين المدينة",
+        saveBtn: "حفظ",
+        cancelBtn: "إلغاء",
+        clearBtn: "مسح الذاكرة المؤقتة",
+        invalidCityEmpty: "لا يمكن أن تكون المدينة فارغة",
+        invalidCityChinese: "لا يمكن أن تحتوي المدينة على أحرف صينية",
+        invalidCityFormat: "يجب أن تبدأ المدينة بحرف إنجليزي كبير",
+        citySaved: "تم حفظ المدينة: {city}",
+        cacheCleared: "تم مسح معلومات الطقس",
+        lastUpdated: "آخر تحديث: {time}",
+        neverUpdated: "لم يتم التحديث مطلقًا",
+        weatherError: "تعذر الحصول على بيانات الطقس"
+    },
+    ru: {
+        modalTitle: "Установить город",
+        saveBtn: "Сохранить",
+        cancelBtn: "Отмена",
+        clearBtn: "Очистить кэш",
+        invalidCityEmpty: "Город не может быть пустым",
+        invalidCityChinese: "Город не может содержать китайские иероглифы",
+        invalidCityFormat: "Город должен начинаться с заглавной английской буквы",
+        citySaved: "Город сохранен: {city}",
+        cacheCleared: "Информация о погоде была очищена",
+        lastUpdated: "Последнее обновление: {time}",
+        neverUpdated: "Никогда не обновлялось",
+        weatherError: "Не удалось получить данные о погоде"
+    },
+    es: {
+        modalTitle: "Establecer ciudad",
+        saveBtn: "Guardar",
+        cancelBtn: "Cancelar",
+        clearBtn: "Limpiar caché",
+        invalidCityEmpty: "La ciudad no puede estar vacía",
+        invalidCityChinese: "La ciudad no puede contener caracteres chinos",
+        invalidCityFormat: "La ciudad debe comenzar con letra mayúscula",
+        citySaved: "Ciudad guardada: {city}",
+        cacheCleared: "La información del clima ha sido borrada",
+        lastUpdated: "Última actualización: {time}",
+        neverUpdated: "Nunca actualizado",
+        weatherError: "No se pudieron obtener los datos del clima"
+    }
+};
+
+let forceRefresh = false;
+
+async function getModalLang() {
+    try {
+        const lang = await getRealTimeLanguage();
+        return modalTranslations[lang] ? lang : 'en';
+    } catch(e) {
+        return 'en';
+    }
+}
+
+async function performTranslation(text, targetLang) {
+    if (!text) return text;
+    const apiTargetLang = unifiedLanguageMap[targetLang.toLowerCase()]?.api || targetLang.toLowerCase();
+    const sourceLang = 'en';
+    try {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${apiTargetLang}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Translation API error');
+        const data = await response.json();
+        if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+            return data.responseData.translatedText;
+        } else {
+            throw new Error('Invalid translation response');
+        }
+    } catch (error) {
+        console.error('Translation error:', error);
+        return text;
+    }
+}
+
+async function updateModalLanguage() {
+    const lang = await getModalLang();
+    modalTitle.textContent = modalTranslations[lang].modalTitle;
+    saveCityBtn.textContent = modalTranslations[lang].saveBtn;
+    closeCityModal.textContent = modalTranslations[lang].cancelBtn;
+    clearCacheBtn.textContent = modalTranslations[lang].clearBtn; 
+    cityInput.placeholder = modalTranslations[lang].modalTitle;
+}
+
+async function clearWeatherCache() {
+    try {
+        const response = await fetch('/spectra/weather_translation.php?action=clear');
+        if (response.ok) {
+            await showModalMessage("cacheCleared");           
+            await updateLastUpdatedDisplay();
+            console.log('Weather cache cleared successfully');
+        } else {
+            throw new Error('Failed to clear cache');
+        }
+    } catch (error) {
+        console.error('Error clearing weather cache:', error);
+        showLogMessage(encodeURIComponent('Failed to clear cache'), 'error');
+    }
+}
+
+async function updateLastUpdatedDisplay() {
+    try {
+        const cache = await readTranslationCache(city);
+        const lang = await getModalLang();
+        
+        if (cache.updated) {
+            const date = new Date(cache.updated);
+            const formattedTime = date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }).replace(/\//g, '/');
+            
+            lastUpdatedDiv.textContent = modalTranslations[lang].lastUpdated.replace('{time}', formattedTime);
+            lastUpdatedDiv.style.display = 'block';
+        } else {
+            lastUpdatedDiv.textContent = modalTranslations[lang].neverUpdated;
+            lastUpdatedDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error updating last updated display:', error);
+        lastUpdatedDiv.style.display = 'none';
+    }
+}
+
+async function showModalMessage(key, params={}) {
+    const lang = await getModalLang();
+    let msg = modalTranslations[lang][key] || key;
+    for(const k in params) msg = msg.replace(`{${k}}`, params[k]);
+    showLogMessage(encodeURIComponent(msg), key === 'citySaved' || key === 'cacheCleared' ? 'info' : 'warning');
+    if (typeof speakMessage === 'function') speakMessage(msg);
+}
+
+function validateCity(value) {
+    const chinesePattern = /[\u4e00-\u9fff]/;
+    const startsUpper = /^[A-Z]/;
+    if(!value) return "invalidCityEmpty";
+    if(chinesePattern.test(value)) return "invalidCityChinese";
+    if(!startsUpper.test(value)) return "invalidCityFormat";
+    return null;
+}
+
+async function saveCity() {
+    const value = cityInput.value.trim();
+    const errKey = validateCity(value);
+    if(errKey) {
+        await showModalMessage(errKey);
+        return;
+    }
+    city = value;
+    localStorage.setItem('city', city);
+    await showModalMessage("citySaved", {city});
+    forceRefresh = true;
+    fetchWeather();
+    closeModal();
+}
+
+async function openCityModal() {
+    cityInput.value = city;
+    cityModal.show();
+    await updateModalLanguage();
+    await updateLastUpdatedDisplay(); 
+}
+
+clearCacheBtn.addEventListener('click', clearWeatherCache);
+
+function closeModal() {
+    cityModal.hide();
+}
+
+document.getElementById('setCityBtn').addEventListener('click', openCityModal);
+document.getElementById('closeCityModal').addEventListener('click', closeModal);
+document.getElementById('saveCityBtn').addEventListener('click', saveCity);
+document.getElementById('clearCacheBtn').addEventListener('click', clearWeatherCache);
+
+function getWeatherColor(iconCode) {
+    switch(iconCode) {
+        case '01d': return 'oklch(var(--l) var(--c) var(--base-hue-1))';
+        case '01n': return 'oklch(var(--l) var(--c) var(--base-hue))';
+        case '02d': return 'oklch(var(--l) var(--c) var(--base-hue-2))';
+        case '02n': return 'oklch(var(--l) var(--c) var(--base-hue-2))';
+        case '03d': return 'oklch(var(--l) var(--c) var(--base-hue-3))';
+        case '03n': return 'oklch(var(--l) var(--c) var(--base-hue-3))';
+        case '04d': return 'oklch(var(--l) var(--c) var(--base-hue-4))';
+        case '04n': return 'oklch(var(--l) var(--c) var(--base-hue-4))';
+        case '09d': return 'oklch(var(--l) var(--c) var(--base-hue-5))';
+        case '09n': return 'oklch(var(--l) var(--c) var(--base-hue-5))';
+        case '10d': return 'oklch(var(--l) var(--c) var(--base-hue-6))';
+        case '10n': return 'oklch(var(--l) var(--c) var(--base-hue-6))';
+        case '11d': return 'oklch(var(--l) var(--c) var(--base-hue-7))';
+        case '11n': return 'oklch(var(--l) var(--c) var(--base-hue-7))';
+        case '13d': return 'oklch(var(--l) var(--c) var(--base-hue-1))';
+        case '13n': return 'oklch(var(--l) var(--c) var(--base-hue-1))';
+        case '50d': return 'oklch(var(--l) var(--c) var(--base-hue-2))';
+        case '50n': return 'oklch(var(--l) var(--c) var(--base-hue-2))';
+        default: return 'oklch(var(--l) var(--c) var(--base-hue))';
+    }
+}
+
+function owmCodeToWiClass(code) {
+    const map = {
+        '01d': 'wi-day-sunny', '01n': 'wi-night-clear',
+        '02d': 'wi-day-cloudy', '02n': 'wi-night-cloudy',
+        '03d': 'wi-cloud', '03n': 'wi-cloud',
+        '04d': 'wi-cloudy', '04n': 'wi-cloudy',
+        '09d': 'wi-showers', '09n': 'wi-showers',
+        '10d': 'wi-day-rain', '10n': 'wi-night-alt-rain',
+        '11d': 'wi-thunderstorm', '11n': 'wi-thunderstorm',
+        '13d': 'wi-snow', '13n': 'wi-snow',
+        '50d': 'wi-fog', '50n': 'wi-fog'
+    };
+    return map[code] || 'wi-na';
+}
+
+async function getWeatherLangParam() {
+    try {
+        let lang = (await getRealTimeLanguage()).toLowerCase();
+        return unifiedLanguageMap[lang]?.weather || 'en';
+    } catch (e) {
+        return 'en';
+    }
+}
+
+async function readTranslationCache(city) {
+    try {
+        const res = await fetch('/spectra/weather_translation.php');
+        if (!res.ok) throw new Error('Failed to load cache: ' + res.status);
+        const data = await res.json();
+        const cityData = data.cities?.[city] || {};
+        return {
+            translations: cityData.translations || {},
+            updated: cityData.updated || null,
+            temp: cityData.temp ?? null
+        };
+    } catch (e) {
+        console.error('readTranslationCache error:', e);
+        return { translations: {}, updated: null };
+    }
+}
+
+async function saveTranslationCache(city, translations, extra = {}) {
+    try {
+        const payload = { 
+            city: city, 
+            translations: translations,
+            icon: extra.icon || '',
+            temp: currentWeatherData?.main?.temp ?? null,
+            forceUpdate: forceRefresh
+        };
+        const res = await fetch('/spectra/weather_translation.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const text = await res.text();
+        //console.log('saveTranslationCache resp:', res.status, text);
+        return res.ok;
+    } catch (e) {
+        console.error('saveTranslationCache error:', e);
+        return false;
+    }
+}
+
+function isCacheExpired(updatedTime) {
+    if (!updatedTime) return true;
+    const updated = new Date(updatedTime);
+    return (Date.now() - updated.getTime()) > CACHE_REFRESH_INTERVAL;
+}
+
+async function translateWeatherDesc(descList) {
+    if (!Array.isArray(descList) || descList.length === 0) return { text: '', city: city };
+    const cache = await readTranslationCache(city);
+    const lang = (await getRealTimeLanguage()).toLowerCase();
+    const existingTranslations = cache.translations || {};
+    const currentLangData = existingTranslations[lang]
+        ? JSON.parse(JSON.stringify(existingTranslations[lang]))
+        : { weather: {}, city: '' };
+    const cachedWeather = currentLangData.weather || {};
+    let cachedCity = currentLangData.city || '';
+    const result = [];
+    const translationsToUpdate = { weather: {}, city: cachedCity };
+    const fullDesc = descList.join(', ');
+
+    if (forceRefresh || !cachedWeather[fullDesc]) {
+        try {
+            const t = await performTranslation(fullDesc, lang);
+            translationsToUpdate.weather[fullDesc] = t;
+            result.push(t);
+        } catch {
+            translationsToUpdate.weather[fullDesc] = fullDesc;
+            result.push(fullDesc);
+        }
+    } else {
+        result.push(cachedWeather[fullDesc]);
+    }
+    
+    if (forceRefresh || !cachedCity) {
+        try {
+            const tCity = await performTranslation(city, lang);
+            translationsToUpdate.city = tCity;
+            cachedCity = tCity;
+        } catch {
+            translationsToUpdate.city = city;
+            cachedCity = city;
+        }
+    } else {
+        translationsToUpdate.city = cachedCity;
+    }
+    
+    const updatedCache = JSON.parse(JSON.stringify(existingTranslations));
+    updatedCache[lang] = {
+        weather: { ...cachedWeather, ...translationsToUpdate.weather },
+        city: translationsToUpdate.city
+    };
+    await saveTranslationCache(city, updatedCache);
+    return { text: result.join('，'), city: cachedCity };
+}
+
+function hasUntranslatedContent(langData) {
+    if (!langData || !langData.weather) return true;
+    for (const [key, value] of Object.entries(langData.weather)) {
+        if (!isProperlyTranslated(value, key, 'any')) {
+            return true;
+        }
+    }
+    if (langData.city && !isProperlyTranslated(langData.city, langData.city, 'any')) {
+        return true;
+    }
+    return false;
+}
+
+function isProperlyTranslated(translatedText, originalText, lang) {
+    if (translatedText === originalText) {
+        return false;
+    }
+    if (lang !== 'en' && isMostlyEnglish(translatedText)) {
+        return false;
+    }
+    if (['zh', 'ja', 'ko', 'hk', 'tw'].includes(lang) && !containsNonLatin(translatedText)) {
+        return false;
+    }
+    return true;
+}
+
+function isMostlyEnglish(text) {
+    const englishPattern = /^[a-zA-Z\s.,!?']+$/;
+    return englishPattern.test(text);
+}
+
+function containsNonLatin(text) {
+    const nonLatinPattern = /[^\u0000-\u007F]/;
+    return nonLatinPattern.test(text);
+}
+
+setInterval(async () => {
+    forceRefresh = true;
+    await fetchWeather();
+    forceRefresh = false;
+}, CACHE_REFRESH_INTERVAL);
+
+async function updateWeatherUI(data, iconCode) {
+    document.getElementById('loadingIcon').style.display = 'none';
+    const cache = await readTranslationCache(city);
+    const lang = (await getRealTimeLanguage()).toLowerCase();
+    const cachedIcon = cache.translations?.[lang]?.lastIcon || iconCode;
+    const weatherIcon = document.getElementById('weatherIcon');
+    weatherIcon.className = `wi ${owmCodeToWiClass(cachedIcon)}`;
+    weatherIcon.style.display = 'inline-block';
+    weatherIcon.style.color = getWeatherColor(cachedIcon);
+
+    const temp = cache.temp != null ? cache.temp.toFixed(1) : Math.round(data.main.temp);
+    const descList = data?.weather?.map(w => w.description) || [];
+    const { text: translatedDesc, city: translatedCity } = await translateWeatherDesc(descList);
+
+    document.getElementById('weatherText').textContent = `${translatedDesc} ${temp}℃`;
+    cityNameDisplay.textContent = translatedCity;
+
+    const updatedCache = {
+        ...cache.translations,
+        [lang]: {
+            ...cache.translations?.[lang],
+            lastIcon: cachedIcon
+        }
+    };
+    await saveTranslationCache(city, updatedCache, { icon: cachedIcon });
+}
+
+async function updateCityNameDisplay(name) {
+    try {
+        const lang = await getRealTimeLanguage();
+        const translatedCityName = await performTranslation(name, lang);
+        cityNameDisplay.textContent = translatedCityName;
+    } catch(e) {
+        cityNameDisplay.textContent = name;
+    }
+}
+
+async function fetchWeather() {
+    const langParam = await getWeatherLangParam();
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=${langParam}`;
+    const loadingIcon = document.getElementById('loadingIcon');
+    loadingIcon.style.display = 'inline-block';
+    try {
+        const res = await fetch(url);
+        if (!res.ok) {
+            throw new Error('Network not OK');
+        }
+        const data = await res.json();
+        if (data.weather && data.main) {
+            currentWeatherData = data;
+            const iconCode = data.weather[0].icon || '';
+            await updateWeatherUI(data, iconCode);
+            
+            if (forceRefresh) {
+                await updateLastUpdatedDisplay();
+            }
+        } else {
+            throw new Error('Invalid data');
+        }
+    } catch (err) {
+        const lang = await getModalLang();
+        weatherText.textContent = modalTranslations[lang].weatherError;
+        weatherIcon.style.display = 'none';
+        if (typeof speakMessage === 'function') {
+            //speakMessage(modalTranslations[lang].weatherError);
+        }
+    } finally {
+        loadingIcon.style.display = 'none';
+        forceRefresh = false;
+    }
+}
+setCityBtn.addEventListener('click', openCityModal);
+closeCityModal.addEventListener('click', closeModal);
+saveCityBtn.addEventListener('click', saveCity);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await updateModalLanguage();
+    fetchWeather();
+    setInterval(fetchWeather, CACHE_REFRESH_INTERVAL);
+});
+
+let lastSpokenHour = null;
+const audio = document.getElementById("bell-audio");
+
+document.addEventListener("click", () => {
+    audio.muted = false;
+    audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+    }).catch(() => {});
+}, { once: true });
+
+async function speakTimeNow() {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
+    if (minute === 59 && second === 50 && lastSpokenHour !== (hour + 1) % 24) {
+        lastSpokenHour = (hour + 1) % 24;
+        try {
+            audio.currentTime = 0;
+            await audio.play();
+            setTimeout(() => {
+                doSpeak(lastSpokenHour);
+            }, 10000);
+        } catch {}
+    }
+}
+
+async function doSpeak(hour) {
+    const lang = await getRealTimeLanguage();
+    let message = '';
+    if (lang.startsWith('zh') || lang.startsWith('zh-tw') || lang.startsWith('hk')) {
+        let period = '';
+        if (hour >= 0 && hour < 6) period = '凌晨';
+        else if (hour >= 6 && hour < 12) period = '早上';
+        else if (hour >= 12 && hour < 18) period = '下午';
+        else period = '晚上';
+        message = `整点报时，现在是北京时间${period}${hour}点整`;
+    } else {
+        const displayHour = hour % 12 || 12;
+        const period = hour >= 12 ? 'PM' : 'AM';
+        message = `It is now ${displayHour} ${period}.`;
+    }
+    if (typeof speakMessage === 'function') {
+        speakMessage(message);
+    }
+}
+
+setInterval(speakTimeNow, 1000);
+
+async function refreshUIAfterLanguageChange() {
+    await updateModalLanguage();
+    const cache = await readTranslationCache(city);
+    const lang = (await getRealTimeLanguage()).toLowerCase();
+    if (isCacheExpired(cache.updated) || !cache.translations?.[lang]?.weather) {
+        await fetchWeather();
+    } else if (currentWeatherData) {
+        await updateWeatherUI(currentWeatherData);
+    }
+}
+
+let lastLang = null;
+setInterval(async () => {
+    const lang = await getRealTimeLanguage();
+    if (lang !== lastLang) {
+        lastLang = lang;
+        refreshUIAfterLanguageChange();
+    }
+}, 8000);
+
+const weatherCard = document.querySelector('.weather-card');
+const loadingIcon = document.getElementById('loadingIcon');
+
+weatherCard.style.cursor = 'pointer';
+
+weatherCard.addEventListener('click', async (event) => {
+    if (event.target.closest('#setCityBtn') || event.target.closest('#saveCityBtn')) return;
+    loadingIcon.style.display = 'inline-block';
+    try {
+        await fetchWeather();
+    } finally {
+        loadingIcon.style.display = 'none';
+    }
+});
+</script>
+
+<script>
+
+let themeLoaderEnabled = localStorage.getItem('themeLoaderEnabled') === 'true';
+let navigationInProgress = false;
+let navigationTimeout = null;
+
+const excludedPages = [
+    '/admin/system/package-manager',
+    '/admin/status/processes',
+    '/admin/status/realtime',
+    '/admin/system/system-log',
+    '/admin/network/diagnostics'
+];
+
+function createThemeLoader() {
+    const loader = document.createElement('div');
+    loader.id = 'theme-loader';
+    loader.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(
+            135deg,
+            color-mix(in oklch, var(--bg-body), var(--color-cyan) 10%),
+            color-mix(in oklch, var(--bg-container), var(--color-cyan) 8%),
+            color-mix(in oklch, var(--bg-body), var(--bg-container) 5%)
+        );
+        background-size: 400% 400%;
+        animation: theme-gradient-move 8s ease infinite;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--text-primary);
+        font-family: "Segoe UI", system-ui, sans-serif;
+        backdrop-filter: var(--glass-blur);
+    `;
+
+    const content = document.createElement('div');
+    content.className = 'theme-loader-content';
+    content.style.cssText = `
+        text-align: center;
+        backdrop-filter: var(--glass-blur);
+        padding: 3rem 4rem;
+        border-radius: var(--radius);
+        background: color-mix(in oklch, var(--bg-container), transparent 40%);
+        border: var(--glass-border);
+        box-shadow: var(--breathing-glow),
+                    0 20px 60px oklch(0 0 0 / calc(var(--shadow-intensity) + 0.2));
+        animation: theme-loader-float 3s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+    `;
+
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(
+            from 0deg,
+            var(--accent-color),
+            var(--color-cyan),
+            var(--color-magenta),
+            var(--accent-color)
+        );
+        opacity: 0.1;
+        animation: theme-rotate 10s linear infinite;
+        z-index: -1;
+    `;
+
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'loader-icon-container';
+    iconContainer.style.cssText = `
+        position: relative;
+        margin-bottom: 2rem;
+    `;
+
+    const halo = document.createElement('div');
+    halo.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        border: 2px solid var(--accent-color);
+        border-radius: 50%;
+        animation: theme-pulse 2s ease-out infinite;
+        opacity: 0.6;
+    `;
+
+    const icon = document.createElement('div');
+    icon.className = 'loader-icon';
+    icon.style.cssText = `
+        font-size: 4rem;
+        animation: theme-bounce 1.5s ease-in-out infinite alternate;
+        filter: drop-shadow(0 4px 12px oklch(0 0 0 / 0.3));
+        position: relative;
+        z-index: 2;
+    `;
+    icon.textContent = '🌌';
+
+    const title = document.createElement('div');
+    title.className = 'loader-title';
+    title.style.cssText = `
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-family: 'Cinzel Decorative', serif;
+        background: linear-gradient(135deg, var(--text-primary), var(--accent-color), var(--color-magenta));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 2px 4px oklch(0 0 0 / 0.2);
+        letter-spacing: 2px;
+        animation: theme-title-glow 2s ease-in-out infinite alternate;
+    `;
+    title.textContent = 'SPECTRA';
+
+    const subtitle = document.createElement('div');
+    subtitle.className = 'loader-subtitle';
+    subtitle.style.cssText = `
+        font-size: 1rem;
+        opacity: 0.8;
+        color: var(--text-secondary);
+        font-family: 'Cinzel Decorative', serif;
+        letter-spacing: 1px;
+        margin-top: 0.5rem;
+    `;
+    subtitle.textContent = 'Loading Interface';
+
+    const progressContainer = document.createElement('div');
+    progressContainer.style.cssText = `
+        width: 200px;
+        height: 4px;
+        background: color-mix(in oklch, var(--bg-container), transparent 60%);
+        border-radius: 2px;
+        margin: 2rem auto 0;
+        overflow: hidden;
+        position: relative;
+    `;
+
+    const progressBar = document.createElement('div');
+    progressBar.className = 'loader-progress';
+    progressBar.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 30%;
+        background: linear-gradient(90deg, 
+            var(--accent-color), 
+            var(--color-cyan),
+            var(--accent-color)
+        );
+        background-size: 200% 100%;
+        animation: theme-progress 2s ease-in-out infinite, theme-shimmer 3s ease-in-out infinite;
+        border-radius: 2px;
+    `;
+
+    iconContainer.appendChild(halo);
+    iconContainer.appendChild(icon);
+    content.appendChild(backgroundEffect);
+    content.appendChild(iconContainer);
+    content.appendChild(title);
+    content.appendChild(subtitle);
+    content.appendChild(progressContainer);
+    progressContainer.appendChild(progressBar);
+    loader.appendChild(content);
+    document.body.appendChild(loader);
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes theme-gradient-move {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes theme-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes theme-bounce {
+            0% { 
+                transform: scale(1) translateY(0px) rotate(0deg);
+                filter: drop-shadow(0 4px 12px oklch(0 0 0 / 0.3));
+            }
+            100% { 
+                transform: scale(1.1) translateY(-10px) rotate(5deg);
+                filter: drop-shadow(0 8px 24px var(--accent-color));
+            }
+        }
+        
+        @keyframes theme-pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.3;
+                box-shadow: 0 0 0 0 var(--accent-color);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 0.6;
+                box-shadow: 0 0 0 10px transparent;
+            }
+        }
+        
+        @keyframes theme-loader-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes theme-progress {
+            0% { left: -30%; }
+            100% { left: 100%; }
+        }
+        
+        @keyframes theme-shimmer {
+            0%, 100% { background-position: -200% 0; }
+            50% { background-position: 200% 0; }
+        }
+        
+        @keyframes theme-title-glow {
+            0% {
+                filter: drop-shadow(0 0 5px color-mix(in oklch, var(--accent-color), transparent 50%));
+                background-position: 0% 50%;
+            }
+            100% {
+                filter: drop-shadow(0 0 20px var(--accent-color)) 
+                        drop-shadow(0 0 30px color-mix(in oklch, var(--color-magenta), transparent 60%));
+                background-position: 100% 50%;
+            }
+        }
+        
+        .theme-loader-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                color-mix(in oklch, var(--color-white), transparent 80%),
+                transparent
+            );
+            animation: theme-shine 3s ease-in-out infinite;
+        }
+        
+        @keyframes theme-shine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    return loader;
+}
+
+function initThemeLoaderControl() {
+    const toggleBtn = document.getElementById('themeLoaderToggle');
+    if (!toggleBtn) return;
+    
+    const icon = toggleBtn.querySelector('i');
+    updateToggleIcon(icon);
+    
+    toggleBtn.addEventListener('click', function() {
+        themeLoaderEnabled = !themeLoaderEnabled;
+        localStorage.setItem('themeLoaderEnabled', themeLoaderEnabled.toString());
+        
+        updateToggleIcon(icon);
+        
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        const logKey = themeLoaderEnabled ? 'theme_loader_enabled_log' : 'theme_loader_disabled_log';
+        
+        if (translations[logKey]) {
+            showLogMessage(translations[logKey]);
+            speakMessage(translations[logKey]);
+        }
+    });
+}
+
+function updateToggleIcon(icon) {
+    if (!icon) return;
+
+    if (themeLoaderEnabled) {
+        icon.className = 'bi bi-check-circle';
+    } else {
+        icon.className = 'bi bi-x-circle';
+    }
+}
+
+function shouldUseLoader(url) {
+    if (!themeLoaderEnabled) {
+        return false;
+    }
+    
+    const isExcluded = excludedPages.some(path => url.includes(path));
+    if (isExcluded) {
+        //console.log('Theme loader: Page excluded from loader:', url);
+        return false;
+    }
+    
+    if (url.includes('#') || !url.includes('/cgi-bin/luci/')) {
+        return false;
+    }
+    
+    return true;
+}
+
+function hideLoader() {
+    const loader = document.getElementById('theme-loader');
+    if (!loader) return;
+    
+    navigationInProgress = false;
+    
+    if (navigationTimeout) {
+        clearTimeout(navigationTimeout);
+        navigationTimeout = null;
+    }
+    
+    if (loader.style.display === 'flex') {
+        loader.style.opacity = '0';
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 600);
+    }
+}
+
+function showLoader() {
+    const loader = document.getElementById('theme-loader');
+    if (!loader) return;
+    
+    loader.style.display = 'flex';
+    setTimeout(() => {
+        loader.style.opacity = '1';
+    }, 10);
+}
+
+function enhanceNavigation() {
+    const loader = createThemeLoader();
+    initThemeLoaderControl();
+    
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (!link || !link.href) return;
+        
+        const targetUrl = link.href;
+        
+        if (!targetUrl.includes('/cgi-bin/luci/')) {
+            return;
+        }
+        
+        if (!shouldUseLoader(targetUrl)) {
+            return;
+        }
+        
+        e.preventDefault();
+        
+        if (navigationInProgress) {
+            //console.log('Theme loader: Navigation already in progress');
+            return;
+        }
+        
+        navigationInProgress = true;
+        
+        //console.log('Theme loader: Starting navigation to', targetUrl);
+        
+        showLoader();
+        
+        navigationTimeout = setTimeout(() => {
+            console.warn('Theme loader: Navigation timeout, forcing redirect to', targetUrl);
+            hideLoader();
+            window.location.href = targetUrl;
+        }, 6000);
+        
+        const content = document.querySelector('.main-content') || document.body;
+        content.classList.add('page-transition', 'page-hidden');
+        
+        setTimeout(() => {
+            try {
+                //console.log('Theme loader: Executing navigation to', targetUrl);
+                window.location.href = targetUrl;
+            } catch (error) {
+                console.error('Theme loader: Navigation error:', error);
+                hideLoader();
+                window.location.href = targetUrl;
+            }
+        }, 800);
+    });
+    
+    function handlePageLoad() {
+        //console.log('Theme loader: Page loaded, hiding loader');
+        hideLoader();
+        
+        const content = document.querySelector('.main-content') || document.body;
+        if (content) {
+            content.classList.add('page-transition');
+            content.classList.remove('page-hidden');
+        }
+    }
+    
+    window.addEventListener('load', handlePageLoad);
+    document.addEventListener('DOMContentLoaded', handlePageLoad);
+    
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            setTimeout(handlePageLoad, 100);
+        }
+    });
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.querySelector('.main-content') || document.body;
+            if (content) {
+                content.classList.add('page-transition');
+                content.classList.remove('page-hidden');
+            }
+        });
+    } else {
+        const content = document.querySelector('.main-content') || document.body;
+        if (content) {
+            content.classList.add('page-transition');
+            content.classList.remove('page-hidden');
+        }
+    }
+    
+    setTimeout(handlePageLoad, 3000);
+}
+
+enhanceNavigation();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const autoCheckSetting = localStorage.getItem('themeAutoCheck');
+    const autoCheckToggle = document.getElementById('themeAutoCheckToggle');
+    
+    if (autoCheckSetting !== null) {
+        autoCheckToggle.checked = autoCheckSetting === 'true';
+    } else {
+        autoCheckToggle.checked = true;
+        localStorage.setItem('themeAutoCheck', 'true');
+    }
+    
+    autoCheckToggle.addEventListener('change', function() {
+        localStorage.setItem('themeAutoCheck', this.checked.toString());
+        
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        const message = this.checked ? 
+            (translations['auto_check_enabled'] || 'Automatic update checks enabled') : 
+            (translations['auto_check_disabled'] || 'Automatic update checks disabled');
+        
+        if (typeof showLogMessage === 'function') showLogMessage(message);
+        if (typeof speakMessage === 'function') speakMessage(message);
+    });
+    
+    if (autoCheckToggle.checked) {
+        setTimeout(function() {
+            checkNewVersion();
+        }, 5000);
+    }
+
+    function checkNewVersion() {
+        if (!autoCheckToggle.checked) return;
+        fetch('/spectra/check_theme_update.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.needsUpdate === true && data.version) {
+                    document.getElementById('newVersionNumber').textContent = data.version;
+                    UIkit.modal('#newVersionAlertModal').show();
+
+                    document.getElementById('startUpdateBtn').onclick = function() {
+                        UIkit.modal('#newVersionAlertModal').hide();
+                        UIkit.modal('#themeUpdateStatusModal').show();
+                        startThemeInstallation();
+                    };
+                }
+            })
+            .catch(error => {
+                //console.log('Version check failed:', error);
+            });
+    }
+
+    const themeOpenBtn = document.getElementById('themeOpenUpdateConfirmBtn');
+    if (themeOpenBtn) {
+        themeOpenBtn.addEventListener('click', function() {
+            UIkit.modal('#themeUpdateConfirmModal').show();
+            updateUIText();
+            checkThemeUpdate();
+        });
+    }
+
+    document.getElementById('themeCopyCommandBtn').addEventListener('click', function() {
+        const copyTextarea = document.getElementById('themeCopyCommand');
+        copyTextarea.select();
+        document.execCommand('copy');
+        
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        const message = translations['command_copied'] || 'Command copied to clipboard!';
+        
+        if (typeof showLogMessage === 'function') showLogMessage(message);
+        if (typeof speakMessage === 'function') speakMessage(message);
+    });
+
+    document.getElementById('themeUpdateBtn').addEventListener('click', function() {
+        UIkit.modal('#themeUpdateConfirmModal').hide();
+        UIkit.modal('#themeUpdateStatusModal').show();
+        startThemeInstallation();
+    });
+
+    function checkThemeUpdate() {
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        const versionInfo = document.getElementById('themeLatestVersionInfo');
+        const currentVersionInfo = document.getElementById('themeCurrentVersionInfo');
+        const downloadLink = document.getElementById('themeConfirmUpdateLink');
+
+        currentVersionInfo.textContent = translations['unable_to_fetch_current_version'] || 'Fetching current version...';
+        versionInfo.textContent = translations['fetching_version'] || 'Fetching version info...';
+        downloadLink.href = '#';
+
+        fetch('/spectra/check_theme_update.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.currentVersion) {
+                    currentVersionInfo.textContent = `${translations['current_version'] || 'Current Version'}: ${data.currentVersion}`;
+                } else {
+                    currentVersionInfo.textContent = translations['unable_to_fetch_current_version'] || 'Unable to fetch the current version info';
+                }
+
+                if (data.version && data.url) {
+                    versionInfo.textContent = `${translations['latest_version'] || 'Latest Version'}: ${data.version}`;
+                    downloadLink.href = data.url;
+ 
+                    if (data.version !== data.currentVersion) {
+                        versionInfo.classList.add('uk-alert-success');
+                        versionInfo.classList.remove('uk-alert-warning');
+                    }
+                } else {
+                    versionInfo.textContent = translations['unable_to_fetch_version'] || 'Unable to fetch the latest version info';
+                }
+            })
+            .catch(() => {
+                versionInfo.textContent = translations['request_failed'] || 'Request failed, please try again later';
+            });
+    }
+
+    function startThemeInstallation() {
+        const logOutput = document.getElementById('themeLogOutput');
+        const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+        
+        logOutput.textContent = '🔄 Starting installation...\n';
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 180000);
+
+        fetch('/spectra/install_theme.php', { 
+            method: 'POST',
+            signal: controller.signal
+        })
+        .then(response => {
+            clearTimeout(timeoutId);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            function read() {
+                return reader.read().then(({ done, value }) => {
+                    if (done) {
+                        if (logOutput.textContent.includes('🎉 INSTALLATION_SUCCESS')) {
+                            const message = translations['installation_complete'] || 'Installation complete!';
+                            showSuccessMessage(message);
+                            setTimeout(() => UIkit.modal('#themeUpdateStatusModal').hide(), 5000);
+                        } else {
+                            setTimeout(() => UIkit.modal('#themeUpdateStatusModal').hide(), 5000);
+                        }
+                        return;
+                    }
+                    
+                    const text = decoder.decode(value, { stream: true });
+                    logOutput.textContent += text;
+                    logOutput.scrollTop = logOutput.scrollHeight;
+                    return read();
+                });
+            }
+            return read();
+        })
+        .catch(error => {
+            clearTimeout(timeoutId);
+            const message = translations['installation_complete'] || 'Installation complete!';
+            showSuccessMessage(message);
+            setTimeout(() => UIkit.modal('#themeUpdateStatusModal').hide(), 8000);
+        });
+    }
+
+    function showSuccessMessage(message) {
+        if (typeof showLogMessage === 'function') showLogMessage(message);
+        if (typeof speakMessage === 'function') speakMessage(message);
+        
+        UIkit.notification({
+            message: message,
+            status: 'success',
+            pos: 'top-center',
+            timeout: 5000
+        });
+    }
+
+    if (typeof updateUIText === 'function') {
+        updateUIText();
+    }
+});
+</script>
+
+<script>
+let cardLayoutActive = false;
+
+function toggleCardLayout() {
+    const translations = languageTranslations[currentLang] || languageTranslations['zh'];
+    const routerIP = window.location.hostname || window.location.host.split(':')[0];
+    const phpFile = 'scp add_js.php';
+    const encodedFile = phpFile.replace(' ', '%20');
+    
+    const button = document.getElementById('card-layout-btn');
+    
+    const action = cardLayoutActive ? 'remove' : 'add';
+    
+    const originalText = button.textContent;
+    button.textContent = translations['message_processing'] || 'Processing...';
+    button.disabled = true;
+    
+    const xhr = new XMLHttpRequest();
+    const url = `http://${routerIP}/spectra/${encodedFile}?action=${action}`;
+    
+    xhr.open('GET', url, true);
+    xhr.timeout = 10000;
+    
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            cardLayoutActive = !cardLayoutActive;
+            
+            const newText = cardLayoutActive 
+                ? (translations['message_remove_card_layout'] || 'Remove Card Layout') 
+                : (translations['message_add_card_layout'] || 'Add Card Layout');
+            
+            button.textContent = newText;
+            button.disabled = false;
+            
+            localStorage.setItem('cardLayoutStatus', cardLayoutActive ? 'active' : 'inactive');
+            
+            const successMsg = action === 'remove' 
+                ? (translations['message_card_layout_removed'] || 'Card layout removed, please refresh page to see changes') 
+                : (translations['message_card_layout_added'] || 'Card layout added, please refresh page to see changes');
+            
+            if (typeof showLogMessage === 'function') {
+                showLogMessage(successMsg);
+            }
+            if (typeof colorVoiceEnabled !== 'undefined' && colorVoiceEnabled) {
+                speakMessage(successMsg);
+            }
+
+            setTimeout(() => location.reload(), 3000);
+
+        } else {
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+    };
+    
+    xhr.onerror = function() {
+        button.textContent = originalText;
+        button.disabled = false;
+    };
+    
+    xhr.ontimeout = function() {
+        button.textContent = originalText;
+        button.disabled = false;
+    };
+    
+    xhr.send();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const toolbar = document.querySelector('.pw-toolbar-field');
+    
+    if (toolbar && !document.getElementById('card-layout-btn')) {
+        const buttonHTML = `<button class="btn cbi-button cbi-button-edit" id="card-layout-btn">Loading...</button>`;
+        
+        const applyBtn = toolbar.querySelector('input[name="cbi.apply"]');
+        if (applyBtn) {
+            applyBtn.insertAdjacentHTML('beforebegin', buttonHTML);
+        } else {
+            toolbar.insertAdjacentHTML('beforeend', buttonHTML);
+        }
+        
+        const newBtn = document.getElementById('card-layout-btn');
+        if (newBtn) {
+            const savedStatus = localStorage.getItem('cardLayoutStatus');
+            cardLayoutActive = savedStatus === 'active';
+            
+            setTimeout(() => {
+                const translations = languageTranslations[currentLang] || languageTranslations['hk'];
+                newBtn.textContent = cardLayoutActive 
+                    ? translations['message_remove_card_layout'] || 'Remove Card Layout'
+                    : translations['message_add_card_layout'] || 'Add Card Layout';
+            }, 100);
+            
+            newBtn.addEventListener('click', toggleCardLayout);
+        }
+    }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    function getAnimationState(key) {
+        const value = localStorage.getItem(key);
+        return value === 'true';
+    }
+    
+    function updateCardStatus(cardId, isActive) {
+            const translations = languageTranslations[currentLang] || languageTranslations['hk'];
+        const statusElement = document.getElementById(cardId + '-status');
+        if (statusElement) {
+            statusElement.textContent = isActive
+                ? (translations['status_on'] || 'Enabled') 
+                : (translations['status_off'] || 'Disabled');
+            statusElement.style.color = isActive ? '#32d296' : '#f0506e';
+        }
+    }
+    
+    function toggleAnimationSpans(enabled) {
+        const container = document.querySelector('.animation-spans');
+        if (!container) return;
+        const spans = container.querySelectorAll('span');
+        spans.forEach(span => span.style.display = enabled ? 'block' : 'none');
+        container.classList.toggle('animation-enabled', enabled);
+    }
+    
+    let cubeTimer = null;
+    function startCubeAnimation() {
+        if (cubeTimer) return;
+        cubeTimer = setInterval(() => {
+            const box = document.createElement('div');
+            box.className = 'animated-box';
+            document.body.appendChild(box);
+            box.style.left = Math.random() * window.innerWidth + 'px';
+            box.style.top = Math.random() * window.innerHeight + 'px';
+            setTimeout(() => box.remove(), 3000);
+        }, 1000);
+    }
+    
+    function stopCubeAnimation() {
+        clearInterval(cubeTimer);
+        cubeTimer = null;
+        document.querySelectorAll('.animated-box').forEach(box => box.remove());
+    }
+    
+    function createSnowflakes() {
+        stopSnowflakes();
+        
+        for (let i = 0; i < 80; i++) {
+            let snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            let size = Math.random() * 10 + 5 + 'px';
+            snowflake.style.width = size;
+            snowflake.style.height = size;
+            let speed = Math.random() * 3 + 2 + 's';
+            snowflake.style.animationDuration = speed;
+            let leftPosition = Math.random() * 100 + 'vw';
+            snowflake.style.left = leftPosition;
+            snowflake.style.animationDelay = Math.random() * 5 + 's';
+            document.body.appendChild(snowflake);
+        }
+    }
+    
+    function stopSnowflakes() {
+        document.querySelectorAll('.snowflake').forEach(snowflake => snowflake.remove());
+    }
+    
+    const isCubeLightsOn = getAnimationState('cubeLightsActive');
+    updateCardStatus('cube-lights', isCubeLightsOn);
+    toggleAnimationSpans(isCubeLightsOn);
+    
+    const isCubeAnimationOn = getAnimationState('cubeAnimationActive');
+    updateCardStatus('cube-animation', isCubeAnimationOn);
+    if (isCubeAnimationOn) startCubeAnimation();
+    
+    const isSnowAnimationOn = getAnimationState('snowAnimationActive');
+    updateCardStatus('snow-animation', isSnowAnimationOn);
+    if (isSnowAnimationOn) {
+        createSnowflakes();
+    }
+    
+    document.getElementById('animation-toggle').addEventListener('click', function() {
+        UIkit.modal('#animation-modal').show();
+        updateUIText();
+    });
+    
+    document.getElementById('animation-modal').addEventListener('click', function(event) {
+        const translations = languageTranslations[currentLang] || languageTranslations['hk'];
+        const clickedCard = event.target.closest('.uk-card.uk-card-body');
+        if (!clickedCard) return;
+        
+        const cardId = clickedCard.id;
+        
+        if (cardId === 'cube-lights-toggle') {
+            const newState = !getAnimationState('cubeLightsActive');
+            localStorage.setItem('cubeLightsActive', newState);
+            updateCardStatus('cube-lights', newState);
+            toggleAnimationSpans(newState);
+            const successMsg = newState
+                ? translations['log_cube_lights_on'] || 'Cube lights enabled'
+                : translations['log_cube_lights_off'] || 'Cube lights disabled';
+            showLogMessage(successMsg);
+            speakMessage(successMsg);
+        }
+        else if (cardId === 'cube-animation-toggle') {
+            const newState = !getAnimationState('cubeAnimationActive');
+            localStorage.setItem('cubeAnimationActive', newState);
+            updateCardStatus('cube-animation', newState);
+            if (newState) startCubeAnimation(); else stopCubeAnimation();
+               const successMsg = newState
+                ? translations['log_cube_anim_on'] || 'Cube animation enabled'
+                : translations['log_cube_anim_off'] || 'Cube animation disabled';
+            showLogMessage(successMsg);
+            speakMessage(successMsg);
+        }
+        else if (cardId === 'snow-animation-toggle') {
+            const newState = !getAnimationState('snowAnimationActive');
+            localStorage.setItem('snowAnimationActive', newState);
+            updateCardStatus('snow-animation', newState);
+            if (newState) createSnowflakes(); else stopSnowflakes();
+            const successMsg = newState
+                ? translations['log_snow_on'] || 'Snow animation enabled'
+                : translations['log_snow_off'] || 'Snow animation disabled';
+            showLogMessage(successMsg);
+            speakMessage(successMsg);
+        }
+    });
+});
+</script>
+
+<script>
+function updatemenu(){1==document.getElementById("responsive-menu").checked?(document.getElementById("menu").style.borderBottomRightRadius="0",document.getElementById("menu").style.borderBottomLeftRadius="0"):document.getElementById("menu").style.borderRadius="0px"}
+</script>
+
+</header>
+	<div class="main">
+		<div class="main-left" id="mainmenu" style="display:none">
+			<div class="sidenav-header d-flex align-items-center">
+				<a id="logo" href="#" class="royal-style"><%=brand_name%></a>	
+				<div class="ml-auto">
+					<!-- Sidenav toggler -->
+					<div class="sidenav-toggler d-none d-xl-block active" data-action="sidenav-unpin"
+						data-target="#sidenav-main">
+						<div class="sidenav-toggler-inner">
+							<i class="sidenav-toggler-line"></i>
+							<i class="sidenav-toggler-line"></i>
+							<i class="sidenav-toggler-line"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="main-right">									
+			<div class="darkMask"></div>
+			<div id="maincontent">
+				<div class="container">
+					<%- if luci.sys.process.info("uid") == 0 and luci.sys.user.getuser("root") and not luci.sys.user.getpasswd("root") then -%>
+					<div class="alert-message error">
+						<h4><%:No password set!%></h4>
+						<p><%:There is no password set on this router. Please configure a root password to protect the web interface.%>
+						</p>
+						<% if disp.lookup("admin/system/admin") then %>
+						<div class="right"><a class="btn"
+								href="<%=url("admin/system/admin")%>"><%:Go to password configuration...%></a></div>
+						<% end %>
+					</div>
+					<%- end -%>
+
+					<noscript>
+						<div class="alert-message error">
+							<h4><%:JavaScript required!%></h4>
+							<p><%:You must enable JavaScript in your browser or LuCI will not work properly.%></p>
+						</div>
+					</noscript>
+
+					<div id="tabmenu" style="display:none"></div>

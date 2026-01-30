@@ -1,0 +1,5 @@
+--- luci-app-nekobox/htdocs/nekobox/lib/theme.txt
++++ luci-app-nekobox/htdocs/nekobox/lib/theme.txt
+@@ -1 +1 @@
+-pink.css
++light.css

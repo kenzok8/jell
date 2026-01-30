@@ -1,0 +1,38 @@
+{
+	"admin/services/neko": {
+		"title": "Neko",
+		"action": {
+			"type": "firstchild"
+		},
+		"depends": {
+			"acl": [ "luci-app-neko" ]
+		}
+	},
+
+	"admin/services/neko/neko": {
+		"title": "HOME",
+		"order": 1,
+		"action": {
+			"type": "view",
+			"path": "neko/neko"
+		}
+	},
+
+	"admin/services/neko/yacd": {
+		"title": "YACD",
+		"order": 2,
+		"action": {
+			"type": "view",
+			"path": "neko/yacd"
+		}
+	},
+
+	"admin/services/neko/manager": {
+		"title": "FILEMANAGER",
+		"order": 3,
+		"action": {
+			"type": "view",
+			"path": "neko/manager"
+		}
+	}
+}
