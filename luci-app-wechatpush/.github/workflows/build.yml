@@ -24,7 +24,7 @@ env:
   # Note: this method does not support' master' or' openwrt-23.05' and other branch names.
   # 2. 设置要编译的 OpenWrt 版本 (必须是官方的正式发布版标签, 例如 'v23.05.3')
   #    注意：此方法不支持 'master' 或 'openwrt-23.05' 等分支名
-  OPENWRT_VERSION: 'v23.05.3'
+  OPENWRT_VERSION: 'v25.12.0-rc1'
 
   # 3. Specify the SDK save directory, generally without modification.
   # 3. 指定SDK保存目录，一般不用修改
@@ -38,20 +38,16 @@ permissions:
 
 jobs:
   build:
-    name: Build for ${{ matrix.target.name }}
+    name: Build Package (all architectures)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         target:
-          # The compiled path is found here in https://downloads.openwrt.org/releases/24.10.3/targets, and the name is anything.
-          # 编译的path在https://downloads.openwrt.org/releases/24.10.3/targets 这里查找，name随意
-          - name: x86_64
+          # 由于本包为架构无关包 (PKGARCH:=all)，只需使用一个目标平台进行构建
+          # 构建产物可用于所有架构 (x86、arm、mips 等)
+          - name: all
             path: x86/64
-          #- name: mediatek_filogic
-          #  path: mediatek/filogic
-          #- name: mips_mt7621
-          #  path: ramips/mt7621
 
     steps:
       # 步骤 1: 检出代码
@@ -62,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential rsync unzip zstd
+          sudo apt-get install -y build-essential rsync unzip zstd python3-pyelftools
 
       # 步骤 3: 缓存 OpenWrt SDK
       # 缓存已下载和初步设置好的 SDK 目录。
@@ -107,7 +103,46 @@ jobs:
 
           echo "Updating feeds..."
           cd ${{ env.SDK_DIR }}
-          ./scripts/feeds update -a
+          
+          # 查看原始 feeds 配置
+          echo "Original feeds configuration:"
+          cat feeds.conf.default
+          
+          # Retry logic for feeds update (handles transient network issues)
+          max_retries=5
+          retry_count=0
+          while [ $retry_count -lt $max_retries ]; do
+            echo "Attempt $((retry_count + 1)) of $max_retries to update feeds..."
+            
+            # 每次重试前都替换为 GitHub 镜像源
+            echo "Replacing feeds URLs with GitHub mirrors..."
+            sed -i 's|https://git.openwrt.org/openwrt/openwrt.git|https://github.com/openwrt/openwrt.git|g' feeds.conf.default
+            sed -i 's|https://git.openwrt.org/feed/packages.git|https://github.com/openwrt/packages.git|g' feeds.conf.default
+            sed -i 's|https://git.openwrt.org/project/luci.git|https://github.com/openwrt/luci.git|g' feeds.conf.default
+            sed -i 's|https://git.openwrt.org/feed/routing.git|https://github.com/openwrt/routing.git|g' feeds.conf.default
+            sed -i 's|https://git.openwrt.org/feed/telephony.git|https://github.com/openwrt/telephony.git|g' feeds.conf.default
+            
+            if [ $retry_count -eq 0 ]; then
+              echo "Updated feeds configuration:"
+              cat feeds.conf.default
+            fi
+            
+            if ./scripts/feeds update -a; then
+              echo "Feeds update successful"
+              break
+            else
+              retry_count=$((retry_count + 1))
+              if [ $retry_count -lt $max_retries ]; then
+                wait_time=$((60 * retry_count))
+                echo "Feeds update failed, waiting ${wait_time} seconds before retry..."
+                sleep $wait_time
+              else
+                echo "::error::Feeds update failed after $max_retries attempts"
+                exit 1
+              fi
+            fi
+          done
+          
           ./scripts/feeds install -a
           cd ..
 
@@ -128,12 +163,26 @@ jobs:
           fi
           mkdir -p ./package/${PACKAGE_NAME}
           rsync -a --delete "$pkg_src"/ ./package/${PACKAGE_NAME}/
+          
+          # 添加 wrtbwmon 包（从第三方源）
+          echo "Adding wrtbwmon package..."
+          git clone --depth=1 https://github.com/brvphoenix/wrtbwmon.git package/wrtbwmon
+          
           translation_pkg=${PACKAGE_NAME#luci-app-}
           mkdir -p ./bin/packages
-          find ./bin/packages -type f -name "${PACKAGE_NAME}*.ipk" -delete
-          find ./bin/packages -type f -name "luci-i18n-${translation_pkg}-*.ipk" -delete
+          find ./bin/packages -type f -name "${PACKAGE_NAME}*.apk" -delete
+          find ./bin/packages -type f -name "luci-i18n-${translation_pkg}-*.apk" -delete
           {
             echo "CONFIG_PACKAGE_${PACKAGE_NAME}=m"
+            echo "CONFIG_PACKAGE_${PACKAGE_NAME}_Enable_Traffic_Monitoring=y"
+            echo "CONFIG_PACKAGE_${PACKAGE_NAME}_Enable_Local_Disk_Information_Detection=y"
+            echo "CONFIG_PACKAGE_${PACKAGE_NAME}_Enable_Host_Information_Detection=y"
+            echo "CONFIG_PACKAGE_wrtbwmon=m"
+            echo "CONFIG_PACKAGE_lsblk=m"
+            echo "CONFIG_PACKAGE_smartmontools=m"
+            echo "CONFIG_PACKAGE_smartmontools-drivedb=m"
+            echo "CONFIG_PACKAGE_openssh-client=m"
+            echo "CONFIG_PACKAGE_openssh-keygen=m"
             echo "CONFIG_PACKAGE_luci-i18n-${translation_pkg}-zh-cn=m"
             echo "CONFIG_LUCI_LANG_zh_Hans=y"
           } > .config
@@ -145,21 +194,21 @@ jobs:
         run: |
           make package/${PACKAGE_NAME}/compile V=s -j$(($(nproc) + 1))
 
-      # 步骤 7: 查找并准备 .ipk 文件
-      - name: Find and prepare .ipk file
-        id: find_ipk
+      # 步骤 7: 查找并准备 .apk 文件
+      - name: Find and prepare .apk file
+        id: find_apk
         working-directory: ${{ env.SDK_DIR }}
         run: |
           translation_pkg=${PACKAGE_NAME#luci-app-}
           rm -rf upload
           mkdir -p upload
-          find ./bin/packages -type f \( -name "${PACKAGE_NAME}*.ipk" -o -name "luci-i18n-${translation_pkg}-*.ipk" \) | while read -r ipk; do
-            rel_path=${ipk#./}
-            echo "Found IPK: $rel_path"
-            cp "$ipk" upload/
+          find ./bin/packages -type f \( -name "${PACKAGE_NAME}*.apk" -o -name "luci-i18n-${translation_pkg}-*.apk" -o -name "wrtbwmon*.apk" -o -name "lsblk*.apk" -o -name "smartmontools*.apk" -o -name "openssh-client*.apk" -o -name "openssh-keygen*.apk" \) | while read -r apk; do
+            rel_path=${apk#./}
+            echo "Found apk: $rel_path"
+            cp "$apk" upload/
           done
-          if ! find upload -maxdepth 1 -type f -name '*.ipk' | grep -q '.'; then
-            echo "::error::No IPK files found in ./bin/packages/"
+          if ! find upload -maxdepth 1 -type f -name '*.apk' | grep -q '.'; then
+            echo "::error::No apk files found in ./bin/packages/"
             # 显示编译输出目录树，方便调试
             echo "Directory tree of ./bin/:"
             ls -R ./bin/
@@ -167,12 +216,12 @@ jobs:
           fi
           echo "path=upload" >> $GITHUB_OUTPUT
 
-      # 步骤 8: 上传 .ipk 文件作为构建产物
-      - name: Upload .ipk artifact
+      # 步骤 8: 上传 .apk 文件作为构建产物
+      - name: Upload .apk artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ matrix.target.name }}
-          path: ${{ env.SDK_DIR }}/${{ steps.find_ipk.outputs.path }}
+          path: ${{ env.SDK_DIR }}/${{ steps.find_apk.outputs.path }}
           if-no-files-found: error
 
   release:
@@ -192,4 +241,4 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: release-assets/**/*.ipk
+          files: release-assets/**/*.apk
