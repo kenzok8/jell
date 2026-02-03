@@ -1,0 +1,1614 @@
+#!/bin/sh
+# Copyright 2025 timsaya
+
+. /usr/share/libubox/jshn.sh
+
+# 从UCI配置读取端口号，如果读取失败则使用默认端口8686
+BANDIX_PORT=$(uci get bandix.general.port 2>/dev/null || echo "8686")
+readonly BANDIX_API_BASE="http://127.0.0.1:$BANDIX_PORT"
+readonly BANDIX_DEVICES_API="$BANDIX_API_BASE/api/traffic/devices"
+readonly BANDIX_LIMITS_API="$BANDIX_API_BASE/api/traffic/limits"
+readonly BANDIX_METRICS_API="$BANDIX_API_BASE/api/traffic/metrics"
+readonly BANDIX_CONNECTION_API="$BANDIX_API_BASE/api/connection/devices"
+readonly BANDIX_DNS_QUERIES_API="$BANDIX_API_BASE/api/dns/queries"
+readonly BANDIX_DNS_STATS_API="$BANDIX_API_BASE/api/dns/stats"
+readonly BANDIX_SCHEDULE_LIMITS_API="$BANDIX_API_BASE/api/traffic/limits/schedule"
+readonly BANDIX_TRAFFIC_USAGE_RANKING_API="$BANDIX_API_BASE/api/traffic/usage/ranking"
+readonly BANDIX_TRAFFIC_USAGE_INCREMENTS_API="$BANDIX_API_BASE/api/traffic/usage/increments"
+readonly BANDIX_RATE_LIMIT_WHITELIST_API="$BANDIX_API_BASE/api/traffic/rate_limit/whitelist"
+readonly BANDIX_RATE_LIMIT_WHITELIST_ENABLED_API="$BANDIX_API_BASE/api/traffic/rate_limit/whitelist/enabled"
+readonly BANDIX_RATE_LIMIT_DEFAULT_API="$BANDIX_API_BASE/api/traffic/rate_limit/default"
+
+# 通用函数：创建简单的JSON响应
+make_value() {
+	json_init
+	json_add_string "$1" "$2"
+	json_dump
+	json_cleanup
+}
+
+# 通用函数：创建错误响应
+make_error() {
+	json_init
+	json_add_boolean "success" 0
+	json_add_string "error" "$1"
+	json_dump
+	json_cleanup
+}
+
+# 通用函数：创建成功响应
+make_success() {
+	json_init
+	json_add_boolean "success" 1
+	[ -n "$1" ] && json_add_string "message" "$1"
+	json_dump
+	json_cleanup
+}
+
+# 转义JSON字符串
+escape_json_string() {
+	echo "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\n/\\n/g; s/\r/\\r/g; s/\t/\\t/g'
+}
+
+get_rate_limit_whitelist() {
+	local response=$(curl -s --connect-timeout 2 --max-time 5 -X GET "$BANDIX_RATE_LIMIT_WHITELIST_API" 2>/dev/null)
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	echo "$response"
+}
+
+set_rate_limit_whitelist_enabled() {
+	local enabled_raw="$1"
+	local enabled="false"
+	case "$enabled_raw" in
+		1|true|TRUE|True)
+			enabled="true"
+			;;
+	esac
+
+	local request_data="{\"enabled\": $enabled}"
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X POST -H "Content-Type: application/json" -d "$request_data" "$BANDIX_RATE_LIMIT_WHITELIST_ENABLED_API" 2>/dev/null)
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	echo "$response"
+}
+
+add_rate_limit_whitelist_mac() {
+	local mac="$1"
+	if [ -z "$mac" ]; then
+		make_error "MAC address is required"
+		return
+	fi
+
+	local mac_escaped=$(escape_json_string "$mac")
+	local request_data="{\"mac\": \"$mac_escaped\"}"
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X POST -H "Content-Type: application/json" -d "$request_data" "$BANDIX_RATE_LIMIT_WHITELIST_API" 2>/dev/null)
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	echo "$response"
+}
+
+delete_rate_limit_whitelist_mac() {
+	local mac="$1"
+	if [ -z "$mac" ]; then
+		make_error "MAC address is required"
+		return
+	fi
+
+	local mac_escaped=$(escape_json_string "$mac")
+	local request_data="{\"mac\": \"$mac_escaped\"}"
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X DELETE -H "Content-Type: application/json" -d "$request_data" "$BANDIX_RATE_LIMIT_WHITELIST_API" 2>/dev/null)
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	echo "$response"
+}
+
+set_default_rate_limit() {
+	local wan_rx_rate_limit="$1"
+	local wan_tx_rate_limit="$2"
+
+	if [ -z "$wan_rx_rate_limit" ] || [ -z "$wan_tx_rate_limit" ]; then
+		make_error "Missing parameters"
+		return
+	fi
+
+	local request_data="{
+		\"wan_rx_rate_limit\": $wan_rx_rate_limit,
+		\"wan_tx_rate_limit\": $wan_tx_rate_limit
+	}"
+
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X POST -H "Content-Type: application/json" -d "$request_data" "$BANDIX_RATE_LIMIT_DEFAULT_API" 2>/dev/null)
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	echo "$response"
+}
+
+# 获取设备状态
+get_device_status() {
+	local url="$BANDIX_DEVICES_API"
+	local start_ms="$1"
+	local end_ms="$2"
+
+	local query_params=""
+	if [ -n "$start_ms" ] && [ "$start_ms" != "null" ] && [ "$start_ms" != "undefined" ]; then
+		query_params="${query_params}start_ms=$start_ms&"
+	fi
+	if [ -n "$end_ms" ] && [ "$end_ms" != "null" ] && [ "$end_ms" != "undefined" ]; then
+		query_params="${query_params}end_ms=$end_ms&"
+	fi
+	query_params=$(echo "$query_params" | sed 's/&$//')
+	[ -n "$query_params" ] && url="${url}?${query_params}"
+
+	local api_result=$(curl -s --connect-timeout 2 --max-time 5 "$url" 2>/dev/null)
+	
+	# 检查API调用是否成功
+	if [ $? -ne 0 ] || [ -z "$api_result" ]; then
+		echo '{"devices":[]}'
+		return
+	fi
+	
+	# 提取 data 部分并返回
+	local data_part=$(echo "$api_result" | jsonfilter -e '$.data' 2>/dev/null)
+	if [ -n "$data_part" ]; then
+		echo "$data_part"
+	else
+		echo '{"devices":[]}'
+	fi
+}
+
+# 获取历史指标（可选MAC）
+get_metrics() {
+    local mac="$1"
+    local url="$BANDIX_METRICS_API"
+    if [ -n "$mac" ]; then
+        # 转义MAC
+        local mac_escaped=$(echo "$mac" | sed 's/\//\\\//g')
+        url="$url?mac=$mac_escaped"
+    fi
+
+    # logger "luci.bandix.metrics: entering mac=$mac url=$url"
+    local api_result=$(curl -s --connect-timeout 1 --max-time 3 "$url" 2>/dev/null)
+    local curl_exit_code=$?
+    # logger "luci.bandix.metrics: curl finished with exit code: $curl_exit_code"
+    
+    if [ $curl_exit_code -ne 0 ] || [ -z "$api_result" ]; then
+        # logger "luci.bandix.metrics: curl failed or empty response, returning empty metrics"
+        # 返回空结果（原始格式）
+        echo '{"retention_seconds":600,"mac":"","metrics":[]}'
+        return
+    fi
+    
+    # 使用 jsonfilter 提取 data 部分（根据文档，这是处理大JSON的推荐方式）
+    local data_part=$(echo "$api_result" | jsonfilter -e '$.data' 2>/dev/null)
+    if [ -n "$data_part" ]; then
+        local data_size=${#data_part}
+        # logger "luci.bandix.metrics: extracted data part using jsonfilter, size: $data_size bytes"
+        echo "$data_part"
+        return
+    else
+        # logger "luci.bandix.metrics: jsonfilter failed to extract data part"
+        echo '{"retention_seconds":600,"mac":"","metrics":[]}'
+    fi
+}
+
+# 设置设备主机名绑定
+set_device_hostname() {
+	local mac="$1"
+	local hostname="$2"
+
+	# logger "luci.bandix: set_device_hostname 参数: mac=$mac hostname=$hostname"
+	
+	# 验证参数
+	if [ -z "$mac" ]; then
+		make_error "MAC address is required"
+		return
+	fi
+	
+	# hostname可以为空，表示删除绑定
+	if [ -z "$hostname" ]; then
+		hostname=""
+	fi
+	
+	# 转义特殊字符
+	local mac_escaped=$(escape_json_string "$mac")
+	local hostname_escaped=$(escape_json_string "$hostname")
+	
+	# 构建请求数据
+	local request_data="{
+		\"mac\": \"$mac\",
+		\"hostname\": \"$hostname\"
+	}"
+	
+	# 记录请求数据（用于调试）
+	# logger "luci.bandix: hostname request_data=$request_data"
+	
+	# 发送请求到bandix API
+	local bindings_api="$BANDIX_API_BASE/api/traffic/bindings"
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X POST -H "Content-Type: application/json" -d "$request_data" "$bindings_api" 2>/dev/null)
+	
+	# logger "luci.bandix: hostname API response=$response"
+	
+	if [ $? -eq 0 ] && [ -n "$response" ]; then
+		# 检查API响应是否包含success状态
+		if echo "$response" | grep -q '"status":\s*"success"'; then
+			make_success "Hostname binding set successfully"
+		else
+			# API返回了响应但不是success状态
+			json_init
+			json_add_boolean "success" 0
+			json_add_string "error" "API returned error response"
+			json_add_string "response" "$response"
+			json_dump
+			json_cleanup
+		fi
+	else
+		make_error "Failed to set hostname binding"
+	fi
+}
+
+# 获取连接监控数据
+get_connection_devices() {
+	# 检查连接监控是否启用
+	local connection_enabled=$(uci get bandix.connections.enabled 2>/dev/null)
+	if [ "$connection_enabled" != "1" ]; then
+		make_error "Connection monitoring is not enabled"
+		return
+	fi
+	
+	# 从 Bandix API 获取连接数据
+	local response=$(curl -s --connect-timeout 2 --max-time 5 -X GET "$BANDIX_CONNECTION_API" 2>/dev/null)
+	
+	# 检查API调用是否成功
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	
+	# 直接返回API结果
+	echo "$response"
+}
+
+# 获取 DNS 查询记录
+get_dns_queries() {
+	# 检查 DNS 监控是否启用
+	local dns_enabled=$(uci get bandix.dns.enabled 2>/dev/null)
+	if [ "$dns_enabled" != "1" ]; then
+		make_error "DNS monitoring is not enabled"
+		return
+	fi
+	
+	# 构建查询参数
+	local query_params=""
+	local domain="$1"
+	local device="$2"
+	local is_query="$3"
+	local dns_server="$4"
+	local query_type="$5"
+	local page="$6"
+	local page_size="$7"
+	
+	[ -n "$domain" ] && query_params="${query_params}domain=$(printf '%s' "$domain" | sed 's/ /%20/g')&"
+	[ -n "$device" ] && query_params="${query_params}device=$(printf '%s' "$device" | sed 's/ /%20/g')&"
+	[ -n "$is_query" ] && query_params="${query_params}is_query=$is_query&"
+	[ -n "$dns_server" ] && query_params="${query_params}dns_server=$(printf '%s' "$dns_server" | sed 's/ /%20/g')&"
+	[ -n "$query_type" ] && query_params="${query_params}query_type=$(printf '%s' "$query_type" | sed 's/ /%20/g')&"
+	[ -n "$page" ] && query_params="${query_params}page=$page&"
+	[ -n "$page_size" ] && query_params="${query_params}page_size=$page_size&"
+	
+	# 移除末尾的 &
+	query_params=$(echo "$query_params" | sed 's/&$//')
+	
+	local url="$BANDIX_DNS_QUERIES_API"
+	[ -n "$query_params" ] && url="${url}?${query_params}"
+	
+	# 从 Bandix API 获取 DNS 查询数据
+	local response=$(curl -s --connect-timeout 2 --max-time 10 -X GET "$url" 2>/dev/null)
+	
+	# 检查API调用是否成功
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	
+	# 直接返回API结果
+	echo "$response"
+}
+
+# 获取 DNS 统计信息
+get_dns_stats() {
+	# 检查 DNS 监控是否启用
+	local dns_enabled=$(uci get bandix.dns.enabled 2>/dev/null)
+	if [ "$dns_enabled" != "1" ]; then
+		make_error "DNS monitoring is not enabled"
+		return
+	fi
+	
+	# 从 Bandix API 获取 DNS 统计数据
+	local response=$(curl -s --connect-timeout 2 --max-time 10 -X GET "$BANDIX_DNS_STATS_API" 2>/dev/null)
+	
+	# 检查API调用是否成功
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	
+	# 直接返回API结果
+	echo "$response"
+}
+
+# 获取设备用量排行
+get_traffic_usage_ranking() {
+	local start_ms="$1"
+	local end_ms="$2"
+	local network_type="$3"
+
+	# 构建查询参数（只添加非空且有效的参数）
+	local query_params=""
+	# 检查 start_ms 是否有效（非空且不是 "null" 或 "undefined"）
+	if [ -n "$start_ms" ] && [ "$start_ms" != "null" ] && [ "$start_ms" != "undefined" ]; then
+		query_params="${query_params}start_ms=$start_ms&"
+	fi
+	# 检查 end_ms 是否有效
+	if [ -n "$end_ms" ] && [ "$end_ms" != "null" ] && [ "$end_ms" != "undefined" ]; then
+		query_params="${query_params}end_ms=$end_ms&"
+	fi
+	# 检查 network_type 是否有效
+	if [ -n "$network_type" ] && [ "$network_type" != "null" ] && [ "$network_type" != "undefined" ]; then
+		query_params="${query_params}network_type=$network_type&"
+	fi
+
+	# 移除末尾的 &
+	query_params=$(echo "$query_params" | sed 's/&$//')
+	
+	local url="$BANDIX_TRAFFIC_USAGE_RANKING_API"
+	[ -n "$query_params" ] && url="${url}?${query_params}"
+	
+	# 从 Bandix API 获取设备用量排行数据
+	local response=$(curl -s --connect-timeout 2 --max-time 10 -X GET "$url" 2>/dev/null)
+	
+	# 检查API调用是否成功
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	
+	# 提取 data 部分并返回
+	local data_part=$(echo "$response" | jsonfilter -e '$.data' 2>/dev/null)
+	if [ -n "$data_part" ]; then
+		echo "$data_part"
+	else
+		# 如果提取失败，返回空结果
+		echo '{"start_ms":0,"end_ms":0,"total_rx_bytes":0,"total_tx_bytes":0,"total_bytes":0,"device_count":0,"rankings":[]}'
+	fi
+}
+
+# 获取时间序列增量数据
+get_traffic_usage_increments() {
+	local start_ms="$1"
+	local end_ms="$2"
+	local aggregation="$3"
+	local mac="$4"
+	local network_type="$5"
+	
+	# 构建查询参数（只添加非空且有效的参数）
+	local query_params=""
+	# 检查 start_ms 是否有效（非空且不是 "null" 或 "undefined"）
+	if [ -n "$start_ms" ] && [ "$start_ms" != "null" ] && [ "$start_ms" != "undefined" ]; then
+		query_params="${query_params}start_ms=$start_ms&"
+	fi
+	# 检查 end_ms 是否有效
+	if [ -n "$end_ms" ] && [ "$end_ms" != "null" ] && [ "$end_ms" != "undefined" ]; then
+		query_params="${query_params}end_ms=$end_ms&"
+	fi
+	# 检查 aggregation 是否有效
+	if [ -n "$aggregation" ] && [ "$aggregation" != "null" ] && [ "$aggregation" != "undefined" ]; then
+		query_params="${query_params}aggregation=$aggregation&"
+	fi
+	# 检查 mac 是否有效
+	if [ -n "$mac" ] && [ "$mac" != "null" ] && [ "$mac" != "undefined" ]; then
+		query_params="${query_params}mac=$(printf '%s' "$mac" | sed 's/ /%20/g')&"
+	fi
+	# 检查 network_type 是否有效
+	if [ -n "$network_type" ] && [ "$network_type" != "null" ] && [ "$network_type" != "undefined" ]; then
+		query_params="${query_params}network_type=$network_type&"
+	fi
+	
+	# 移除末尾的 &
+	query_params=$(echo "$query_params" | sed 's/&$//')
+	
+	local url="$BANDIX_TRAFFIC_USAGE_INCREMENTS_API"
+	[ -n "$query_params" ] && url="${url}?${query_params}"
+	
+	# 从 Bandix API 获取时间序列增量数据
+	local response=$(curl -s --connect-timeout 2 --max-time 10 -X GET "$url" 2>/dev/null)
+	
+	# 检查API调用是否成功
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	
+	# 提取 data 部分并返回
+	local data_part=$(echo "$response" | jsonfilter -e '$.data' 2>/dev/null)
+	if [ -n "$data_part" ]; then
+		echo "$data_part"
+	else
+		# 如果提取失败，返回空结果
+		echo '{"start_ms":0,"end_ms":0,"aggregation":"hourly","mac":"all","increments":[],"total_rx_bytes":0,"total_tx_bytes":0,"total_bytes":0}'
+	fi
+}
+
+# 获取定时限速规则
+get_schedule_limits() {
+	# 从 Bandix API 获取定时限速规则
+	local response=$(curl -s --connect-timeout 2 --max-time 5 -X GET "$BANDIX_SCHEDULE_LIMITS_API" 2>/dev/null)
+	
+	# 检查API调用是否成功
+	if [ $? -ne 0 ] || [ -z "$response" ]; then
+		make_error "Failed to connect to Bandix service"
+		return
+	fi
+	
+	# 直接返回API结果
+	echo "$response"
+}
+
+# 设置定时限速规则
+set_schedule_limit() {
+	local mac="$1"
+	local start_time="$2"
+	local end_time="$3"
+	local days="$4"
+	local wan_tx_rate_limit="$5"
+	local wan_rx_rate_limit="$6"
+	
+	# 验证参数
+	if [ -z "$mac" ]; then
+		make_error "MAC address is required"
+		return
+	fi
+	
+	if [ -z "$start_time" ] || [ -z "$end_time" ] || [ -z "$days" ]; then
+		make_error "Time slot parameters are required"
+		return
+	fi
+	
+	# 转义MAC地址中的特殊字符
+	local mac_escaped=$(escape_json_string "$mac")
+	
+	# 构建请求数据
+	local request_data="{
+		\"mac\": \"$mac\",
+		\"time_slot\": {
+			\"start\": \"$start_time\",
+			\"end\": \"$end_time\",
+			\"days\": $days
+		},
+		\"wan_tx_rate_limit\": $wan_tx_rate_limit,
+		\"wan_rx_rate_limit\": $wan_rx_rate_limit
+	}"
+	
+	# 发送请求到bandix API
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X POST -H "Content-Type: application/json" -d "$request_data" "$BANDIX_SCHEDULE_LIMITS_API" 2>/dev/null)
+	
+	if [ $? -eq 0 ] && [ -n "$response" ]; then
+		# 检查API响应是否包含success状态
+		if echo "$response" | grep -q '"status":\s*"success"'; then
+			make_success "Schedule limit set successfully"
+		else
+			# API返回了响应但不是success状态
+			json_init
+			json_add_boolean "success" 0
+			json_add_string "error" "API returned error response"
+			json_add_string "response" "$response"
+			json_dump
+			json_cleanup
+		fi
+	else
+		make_error "Failed to set schedule limit"
+	fi
+}
+
+# 编辑定时限速规则
+update_schedule_limit() {
+	local id="$1"
+	local mac="$2"
+	local start_time="$3"
+	local end_time="$4"
+	local days="$5"
+	local wan_rx_rate_limit="$6"
+	local wan_tx_rate_limit="$7"
+	
+	if [ -z "$id" ]; then
+		make_error "ID is required"
+		return
+	fi
+	
+	if [ -z "$mac" ]; then
+		make_error "MAC address is required"
+		return
+	fi
+	
+	if [ -z "$start_time" ] || [ -z "$end_time" ] || [ -z "$days" ]; then
+		make_error "Time slot parameters are required"
+		return
+	fi
+	
+	local id_escaped=$(escape_json_string "$id")
+	local mac_escaped=$(escape_json_string "$mac")
+	
+	local request_data="{
+		\"id\": \"$id\",
+		\"mac\": \"$mac\",
+		\"time_slot\": {
+			\"start\": \"$start_time\",
+			\"end\": \"$end_time\",
+			\"days\": $days
+		},
+		\"wan_rx_rate_limit\": $wan_rx_rate_limit,
+		\"wan_tx_rate_limit\": $wan_tx_rate_limit
+	}"
+	
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X PUT -H "Content-Type: application/json" -d "$request_data" "$BANDIX_SCHEDULE_LIMITS_API" 2>/dev/null)
+	
+	if [ $? -eq 0 ] && [ -n "$response" ]; then
+		if echo "$response" | grep -q '"status":\s*"success"'; then
+			make_success "Schedule limit updated successfully"
+		else
+			json_init
+			json_add_boolean "success" 0
+			json_add_string "error" "API returned error response"
+			json_add_string "response" "$response"
+			json_dump
+			json_cleanup
+		fi
+	else
+		make_error "Failed to update schedule limit"
+	fi
+}
+
+# 删除定时限速规则
+delete_schedule_limit() {
+	local id="$1"
+	
+	if [ -z "$id" ]; then
+		make_error "ID is required"
+		return
+	fi
+	
+	local id_escaped=$(escape_json_string "$id")
+	local request_data="{\"id\": \"$id\"}"
+	
+	local response=$(curl -s --connect-timeout 3 --max-time 10 -X DELETE -H "Content-Type: application/json" -d "$request_data" "$BANDIX_SCHEDULE_LIMITS_API" 2>/dev/null)
+	
+	if [ $? -eq 0 ] && [ -n "$response" ]; then
+		if echo "$response" | grep -q '"status":\s*"success"'; then
+			make_success "Schedule limit deleted successfully"
+		else
+			json_init
+			json_add_boolean "success" 0
+			json_add_string "error" "API returned error response"
+			json_add_string "response" "$response"
+			json_dump
+			json_cleanup
+		fi
+	else
+		make_error "Failed to delete schedule limit"
+	fi
+}
+
+# 清空数据
+clear_data() {
+	local data_dir=$(uci get bandix.general.data_dir 2>/dev/null || echo "/usr/share/bandix")
+	local metrics_dir="$data_dir/metrics"
+	
+	# 检查目录是否存在
+	if [ ! -d "$metrics_dir" ]; then
+		make_error "Metrics directory does not exist"
+		return
+	fi
+	
+	# 删除 metrics 目录下的所有文件
+	rm -rf "$metrics_dir"/* 2>/dev/null
+	
+	if [ $? -eq 0 ]; then
+		make_success "Data cleared successfully"
+	else
+		make_error "Failed to clear data"
+	fi
+}
+
+# 重启服务
+restart_service() {
+	# 执行服务重启
+	/etc/init.d/bandix restart >/dev/null 2>&1
+	
+	if [ $? -eq 0 ]; then
+		make_success "Service restarted successfully"
+	else
+		make_error "Failed to restart service"
+	fi
+}
+
+# 获取版本信息
+get_version() {
+	json_init
+	
+	# 检测包管理器类型
+	local pkg_manager=$(get_package_manager)
+	
+	# 获取 luci-app-bandix 版本
+	local luci_version=""
+	
+	if [ "$pkg_manager" = "opkg" ]; then
+		# opkg 方式
+		if [ -f "/usr/lib/opkg/info/luci-app-bandix.control" ]; then
+			luci_version=$(grep "^Version:" /usr/lib/opkg/info/luci-app-bandix.control 2>/dev/null | cut -d' ' -f2)
+		fi
+		# 如果无法从 control 文件获取，尝试从 opkg 命令获取
+		if [ -z "$luci_version" ]; then
+			luci_version=$(opkg list-installed luci-app-bandix 2>/dev/null | awk '{print $NF}')
+		fi
+	elif [ "$pkg_manager" = "apk" ]; then
+		# apk 方式
+		# apk 的 control 文件路径可能不同，先尝试常见路径
+		if [ -f "/lib/apk/db/installed" ]; then
+			luci_version=$(grep "^luci-app-bandix-" /usr/lib/apk/db/installed 2>/dev/null | head -n 1 | sed -n 's/^luci-app-bandix-\(.*\)$/\1/p')
+		fi
+		# 如果无法从 installed 文件获取，尝试从 apk info 命令获取
+		if [ -z "$luci_version" ]; then
+			luci_version=$(apk list --installed --manifest luci-app-bandix 2>/dev/null | awk '{print $NF}')
+		fi
+	fi
+	
+	# 如果还是无法获取，使用默认值
+	if [ -z "$luci_version" ]; then
+		luci_version="Unknown"
+	fi
+	
+	# 获取 bandix 版本
+	local bandix_version=""
+	
+	if [ "$pkg_manager" = "opkg" ]; then
+		# opkg 方式
+		if [ -f "/usr/lib/opkg/info/bandix.control" ]; then
+			bandix_version=$(grep "^Version:" /usr/lib/opkg/info/bandix.control 2>/dev/null | cut -d' ' -f2)
+		fi
+		# 如果无法从 control 文件获取，尝试从 opkg 命令获取
+		if [ -z "$bandix_version" ]; then
+			bandix_version=$(opkg list-installed bandix 2>/dev/null | awk '{print $NF}')
+		fi
+	elif [ "$pkg_manager" = "apk" ]; then
+		# apk 方式
+		# apk 的 control 文件路径可能不同，先尝试常见路径
+		if [ -f "/usr/lib/apk/db/installed" ]; then
+			bandix_version=$(grep "^bandix-" /usr/lib/apk/db/installed 2>/dev/null | head -n 1 | sed -n 's/^bandix-\(.*\)$/\1/p')
+		fi
+		# 如果无法从 installed 文件获取，尝试从 apk info 命令获取
+		if [ -z "$bandix_version" ]; then
+			bandix_version=$(apk list --installed --manifest bandix 2>/dev/null | awk '{print $NF}')
+		fi
+	fi
+	
+	# 如果还是无法获取，尝试从 bandix API 获取（如果服务运行中）
+	if [ -z "$bandix_version" ]; then
+		local api_result=$(curl -s --connect-timeout 2 --max-time 5 "$BANDIX_API_BASE/api/version" 2>/dev/null)
+		if [ $? -eq 0 ] && [ -n "$api_result" ]; then
+			bandix_version=$(echo "$api_result" | jsonfilter -e '$.version' 2>/dev/null)
+			[ -z "$bandix_version" ] && bandix_version=$(echo "$api_result" | jsonfilter -e '$.data.version' 2>/dev/null)
+		fi
+	fi
+	# 如果还是无法获取，使用默认值
+	if [ -z "$bandix_version" ]; then
+		bandix_version="Unknown"
+	fi
+	
+	json_add_string "luci_app_version" "$luci_version"
+	json_add_string "bandix_version" "$bandix_version"
+	json_dump
+	json_cleanup
+}
+
+compare_versions() {
+	local ver1="$1"
+	local ver2="$2"
+	
+	if [ "$ver1" = "$ver2" ]; then
+		return 1
+	fi
+	
+	local sorted=$(printf '%s\n%s\n' "$ver1" "$ver2" | sort -V | head -n1)
+	if [ "$sorted" = "$ver1" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+# 检测包管理器类型
+get_package_manager() {
+	command -v apk >/dev/null && echo "apk" || echo "opkg"
+}
+
+# 获取系统架构
+get_system_arch() {
+	# 优先从 /etc/os-release 获取 OPENWRT_ARCH
+	if [ -f "/etc/os-release" ]; then
+		local arch=$(grep "^OPENWRT_ARCH=" /etc/os-release 2>/dev/null | cut -d'=' -f2 | tr -d '"')
+		if [ -n "$arch" ]; then
+			echo "$arch"
+			return
+		fi
+	fi
+
+	# 最后尝试从 uname 获取
+	uname -m 2>/dev/null
+}
+
+# 检查更新
+check_update() {
+	json_init
+	
+	# 检测包管理器类型
+	local pkg_manager=$(get_package_manager)
+	
+	# 获取当前版本
+	local current_luci_version=""
+	if [ "$pkg_manager" = "opkg" ]; then
+		if [ -f "/usr/lib/opkg/info/luci-app-bandix.control" ]; then
+			current_luci_version=$(grep "^Version:" /usr/lib/opkg/info/luci-app-bandix.control 2>/dev/null | cut -d' ' -f2)
+		fi
+		if [ -z "$current_luci_version" ]; then
+			current_luci_version=$(opkg list-installed luci-app-bandix 2>/dev/null | awk '{print $NF}')
+		fi
+	elif [ "$pkg_manager" = "apk" ]; then
+		if [ -f "/lib/apk/db/installed" ]; then
+			current_luci_version=$(grep "^luci-app-bandix-" /lib/apk/db/installed 2>/dev/null | head -n 1 | sed -n 's/^luci-app-bandix-\(.*\)$/\1/p')
+		fi
+		if [ -z "$current_luci_version" ]; then
+			current_luci_version=$(apk info luci-app-bandix 2>/dev/null | grep "^luci-app-bandix-" | head -n 1 | sed -n 's/^luci-app-bandix-\(.*\) .*/\1/p')
+		fi
+	fi
+	
+	local current_bandix_version=""
+	if [ "$pkg_manager" = "opkg" ]; then
+		if [ -f "/usr/lib/opkg/info/bandix.control" ]; then
+			current_bandix_version=$(grep "^Version:" /usr/lib/opkg/info/bandix.control 2>/dev/null | cut -d' ' -f2)
+		fi
+		if [ -z "$current_bandix_version" ]; then
+			current_bandix_version=$(opkg list-installed bandix 2>/dev/null | awk '{print $NF}')
+		fi
+	elif [ "$pkg_manager" = "apk" ]; then
+		if [ -f "/lib/apk/db/installed" ]; then
+			current_bandix_version=$(grep "^bandix-" /lib/apk/db/installed 2>/dev/null | grep -v "^luci-app-bandix-" | head -n 1 | sed -n 's/^bandix-\(.*\)$/\1/p')
+		fi
+		if [ -z "$current_bandix_version" ]; then
+			current_bandix_version=$(apk info bandix 2>/dev/null | grep "^bandix-" | head -n 1 | sed -n 's/^bandix-\(.*\) .*/\1/p')
+		fi
+	fi
+	
+	# 检查 luci-app-bandix 更新
+	local luci_latest_version=""
+	local luci_has_update="0"
+	local luci_update_url=""
+	local luci_release_body=""
+	local luci_download_url=""
+	
+	local luci_api_result=$(curl -s --connect-timeout 10 --max-time 30 "https://api.github.com/repos/timsaya/luci-app-bandix/releases/latest" 2>/dev/null)
+	if [ $? -eq 0 ] && [ -n "$luci_api_result" ]; then
+		luci_latest_version=$(echo "$luci_api_result" | jsonfilter -e '$.tag_name' 2>/dev/null)
+		# 去掉 v 前缀
+		luci_latest_version=${luci_latest_version#v}
+		luci_update_url=$(echo "$luci_api_result" | jsonfilter -e '$.html_url' 2>/dev/null)
+		luci_release_body=$(echo "$luci_api_result" | jsonfilter -e '$.body' 2>/dev/null)
+		
+		# 获取架构信息和包管理器类型
+		local arch=$(get_system_arch)
+		local pkg_manager=$(get_package_manager)
+		
+		# 根据包管理器类型确定优先的文件扩展名
+		local preferred_ext=""
+		if [ "$pkg_manager" = "opkg" ]; then
+			preferred_ext="ipk"
+		elif [ "$pkg_manager" = "apk" ]; then
+			preferred_ext="apk"
+		fi
+		
+		# 查找对应架构的 ipk/apk 文件
+		# 只查找匹配包管理器格式的包，找不到就报错
+		# 使用循环遍历 assets 数组，直到找不到元素为止
+		local i=0
+		local asset_count=0
+		
+		# 先统计 assets 数量
+		while true; do
+			local asset_name=$(echo "$luci_api_result" | jsonfilter -e "$.assets[$i].name" 2>/dev/null)
+			if [ -z "$asset_name" ]; then
+				break
+			fi
+			asset_count=$((asset_count + 1))
+			i=$((i + 1))
+		done
+		
+		# 查找匹配包管理器格式的 _all 包
+		if [ -n "$preferred_ext" ] && [ "$asset_count" -gt 0 ]; then
+			i=0
+			while true; do
+				local asset_name=$(echo "$luci_api_result" | jsonfilter -e "$.assets[$i].name" 2>/dev/null)
+				if [ -z "$asset_name" ]; then
+					break
+				fi
+				# 匹配 _all 格式，且必须是优先格式
+				if echo "$asset_name" | grep -qE "(luci-app-bandix.*_all|luci-app-bandix-.*-all)\.${preferred_ext}$"; then
+					luci_download_url=$(echo "$luci_api_result" | jsonfilter -e "$.assets[$i].browser_download_url" 2>/dev/null)
+					break
+				fi
+				i=$((i + 1))
+			done
+		fi
+		
+		# 如果没找到 _all，尝试找包含当前架构的（只匹配包管理器格式）
+		# 例如：luci-app-bandix_0.10.0-r1_aarch64_cortex-a53.ipk
+		if [ -z "$luci_download_url" ] && [ -n "$arch" ] && [ -n "$preferred_ext" ] && [ "$asset_count" -gt 0 ]; then
+			i=0
+			while true; do
+				local asset_name=$(echo "$luci_api_result" | jsonfilter -e "$.assets[$i].name" 2>/dev/null)
+				if [ -z "$asset_name" ]; then
+					break
+				fi
+				# 匹配格式：*_架构.优先扩展名
+				# 例如：文件名包含 "_aarch64_cortex-a53." 且以 .ipk 或 .apk 结尾
+				# 同时排除 i18n 包（只匹配主包）
+				if echo "$asset_name" | grep -qE "^luci-app-bandix[^-]" && \
+				   echo "$asset_name" | grep -qE "\.${preferred_ext}$" && \
+				   echo "$asset_name" | grep -q "_${arch}\."; then
+					luci_download_url=$(echo "$luci_api_result" | jsonfilter -e "$.assets[$i].browser_download_url" 2>/dev/null)
+					break
+				fi
+				i=$((i + 1))
+			done
+		fi
+		
+		if [ -n "$current_luci_version" ] && [ -n "$luci_latest_version" ]; then
+			if compare_versions "$current_luci_version" "$luci_latest_version"; then
+				luci_has_update="1"
+			fi
+		fi
+	fi
+	
+	# 检查 bandix 更新
+	local bandix_latest_version=""
+	local bandix_has_update="0"
+	local bandix_update_url=""
+	local bandix_release_body=""
+	local bandix_download_url=""
+	
+	local bandix_api_result=$(curl -s --connect-timeout 10 --max-time 30 "https://api.github.com/repos/timsaya/openwrt-bandix/releases/latest" 2>/dev/null)
+	if [ $? -eq 0 ] && [ -n "$bandix_api_result" ]; then
+		bandix_latest_version=$(echo "$bandix_api_result" | jsonfilter -e '$.tag_name' 2>/dev/null)
+		# 去掉 v 前缀
+		bandix_latest_version=${bandix_latest_version#v}
+		bandix_update_url=$(echo "$bandix_api_result" | jsonfilter -e '$.html_url' 2>/dev/null)
+		bandix_release_body=$(echo "$bandix_api_result" | jsonfilter -e '$.body' 2>/dev/null)
+		
+		# 获取架构信息和包管理器类型
+		local arch=$(get_system_arch)
+		local pkg_manager=$(get_package_manager)
+		
+		# 根据包管理器类型确定优先的文件扩展名
+		local preferred_ext=""
+		if [ "$pkg_manager" = "opkg" ]; then
+			preferred_ext="ipk"
+		elif [ "$pkg_manager" = "apk" ]; then
+			preferred_ext="apk"
+		fi
+		
+		# 查找对应架构的 ipk/apk 文件
+		# bandix 包格式：bandix-版本-r修订号_架构.apk 或 bandix-版本-r修订号_架构.ipk
+		# 或者：bandix_版本-r修订号_架构.apk 或 bandix_版本-r修订号_架构.ipk
+		# 例如：bandix-0.10.2-r1_aarch64_cortex-a53.apk 或 bandix_0.10.2-r1_aarch64_cortex-a53.apk
+		local bandix_asset_count=0
+		
+		# 先统计 assets 数量
+		if [ -n "$arch" ]; then
+			local i=0
+			while true; do
+				local asset_name=$(echo "$bandix_api_result" | jsonfilter -e "$.assets[$i].name" 2>/dev/null)
+				if [ -z "$asset_name" ]; then
+					break
+				fi
+				bandix_asset_count=$((bandix_asset_count + 1))
+				i=$((i + 1))
+			done
+			
+			# 只查找匹配包管理器格式的架构特定包
+			# 如果找不到匹配格式的包，就不设置 download_url，后续会报错
+			if [ -n "$preferred_ext" ] && [ "$bandix_asset_count" -gt 0 ]; then
+				i=0
+				while true; do
+					local asset_name=$(echo "$bandix_api_result" | jsonfilter -e "$.assets[$i].name" 2>/dev/null)
+					if [ -z "$asset_name" ]; then
+						break
+					fi
+					# 匹配格式：bandix-*_架构.优先扩展名 或 bandix_*_架构.优先扩展名
+					# 例如：bandix-0.10.2-r1_aarch64_cortex-a53.ipk 或 bandix_0.10.2-r1_aarch64_cortex-a53.ipk
+					if echo "$asset_name" | grep -qE "^(bandix-|bandix_)" && \
+					   echo "$asset_name" | grep -qE "\.${preferred_ext}$" && \
+					   echo "$asset_name" | grep -q "_${arch}\."; then
+						bandix_download_url=$(echo "$bandix_api_result" | jsonfilter -e "$.assets[$i].browser_download_url" 2>/dev/null)
+						break
+					fi
+					i=$((i + 1))
+				done
+			fi
+		fi
+		
+		if [ -n "$current_bandix_version" ] && [ -n "$bandix_latest_version" ]; then
+			if compare_versions "$current_bandix_version" "$bandix_latest_version"; then
+				bandix_has_update="1"
+			fi
+		fi
+	fi
+	
+	json_add_string "current_luci_version" "$current_luci_version"
+	json_add_string "current_bandix_version" "$current_bandix_version"
+	json_add_string "latest_luci_version" "$luci_latest_version"
+	json_add_string "latest_bandix_version" "$bandix_latest_version"
+	# 使用字符串 "1" 或 "0" 表示布尔值，在 JavaScript 中可以转换为布尔值
+	json_add_string "luci_has_update" "$luci_has_update"
+	json_add_string "bandix_has_update" "$bandix_has_update"
+	json_add_string "luci_update_url" "$luci_update_url"
+	json_add_string "bandix_update_url" "$bandix_update_url"
+	json_add_string "luci_release_body" "$luci_release_body"
+	json_add_string "bandix_release_body" "$bandix_release_body"
+	# 检查是否找到了下载链接，如果没找到则添加错误信息
+	local luci_error=""
+	local bandix_error=""
+	
+	if [ -z "$luci_download_url" ] && [ "$luci_has_update" = "1" ]; then
+		local pkg_manager=$(get_package_manager)
+		local preferred_ext=""
+		if [ "$pkg_manager" = "opkg" ]; then
+			preferred_ext="ipk"
+		elif [ "$pkg_manager" = "apk" ]; then
+			preferred_ext="apk"
+		fi
+		if [ -n "$preferred_ext" ]; then
+			luci_error="No ${preferred_ext} package found for luci-app-bandix"
+		else
+			luci_error="Unknown package manager, cannot determine package format"
+		fi
+	fi
+	
+	if [ -z "$bandix_download_url" ] && [ "$bandix_has_update" = "1" ]; then
+		local pkg_manager=$(get_package_manager)
+		local preferred_ext=""
+		if [ "$pkg_manager" = "opkg" ]; then
+			preferred_ext="ipk"
+		elif [ "$pkg_manager" = "apk" ]; then
+			preferred_ext="apk"
+		fi
+		if [ -n "$preferred_ext" ]; then
+			bandix_error="No ${preferred_ext} package found for bandix"
+		else
+			bandix_error="Unknown package manager, cannot determine package format"
+		fi
+	fi
+	
+	json_add_string "luci_download_url" "$luci_download_url"
+	json_add_string "bandix_download_url" "$bandix_download_url"
+	json_add_string "luci_error" "$luci_error"
+	json_add_string "bandix_error" "$bandix_error"
+	# 添加调试信息：架构、包管理器和资产数量
+	local detected_arch=$(get_system_arch)
+	local detected_pkg_manager=$(get_package_manager)
+	json_add_string "detected_arch" "$detected_arch"
+	json_add_string "detected_pkg_manager" "$detected_pkg_manager"
+	json_add_int "luci_asset_count" "$asset_count"
+	json_add_int "bandix_asset_count" "$bandix_asset_count"
+	json_dump
+	json_cleanup
+}
+
+# 下载并安装更新
+install_update() {
+	local package_type="$1"  # "luci" 或 "bandix"
+	local download_url="$2"
+	
+	if [ -z "$package_type" ] || [ -z "$download_url" ]; then
+		make_error "Missing parameters"
+		return
+	fi
+	
+	json_init
+	
+	# 步骤1: 下载文件到 /tmp
+	local filename=$(basename "$download_url")
+	local filepath="/tmp/$filename"
+	
+	json_add_string "step" "downloading"
+	json_add_string "filepath" "$filepath"
+	
+	# 使用 wget 下载文件
+	wget -q --timeout=10 -O "$filepath" "$download_url" 2>&1
+	local download_exit_code=$?
+	
+	if [ $download_exit_code -ne 0 ] || [ ! -f "$filepath" ]; then
+		rm -f "$filepath"
+		json_add_boolean "success" 0
+		json_add_string "error" "Failed to download package"
+		json_add_string "step" "download_failed"
+		json_dump
+		json_cleanup
+		return
+	fi
+	
+	# 步骤2: 安装包
+	json_add_string "step" "installing"
+	local install_result=""
+	local install_exit_code=1
+	
+	if command -v opkg >/dev/null 2>&1; then
+		install_result=$(opkg install "$filepath" 2>&1)
+		install_exit_code=$?
+	elif command -v apk >/dev/null 2>&1; then
+		install_result=$(apk add --allow-untrusted "$filepath" 2>&1)
+		install_exit_code=$?
+	else
+		rm -f "$filepath"
+		json_add_boolean "success" 0
+		json_add_string "error" "No package manager found (opkg or apk)"
+		json_add_string "step" "install_failed"
+		json_dump
+		json_cleanup
+		return
+	fi
+	
+	# 清理下载的文件
+	rm -f "$filepath"
+	
+	if [ $install_exit_code -ne 0 ]; then
+		json_add_boolean "success" 0
+		json_add_string "error" "Failed to install package"
+		json_add_string "output" "$install_result"
+		json_add_string "step" "install_failed"
+		json_dump
+		json_cleanup
+		return
+	fi
+	
+	# 返回成功结果
+	json_add_boolean "success" 1
+	json_add_string "message" "Package installed successfully"
+	json_add_string "output" "$install_result"
+	json_add_string "step" "completed"
+	json_dump
+	json_cleanup
+}
+
+case "$1" in
+	list)
+		json_init
+		json_add_object "getStatus"
+		json_add_int "start_ms"
+		json_add_int "end_ms"
+		json_close_object
+		
+		json_add_object "getMetrics"
+		json_add_string "mac"
+		json_close_object
+
+		json_add_object "setHostname"
+		json_add_string "mac"
+		json_add_string "hostname"
+		json_close_object
+		
+		json_add_object "getConnection"
+		json_close_object
+		
+		json_add_object "getDnsQueries"
+		json_add_string "domain"
+		json_add_string "device"
+		json_add_string "is_query"
+		json_add_string "dns_server"
+		json_add_string "query_type"
+		json_add_int "page"
+		json_add_int "page_size"
+		json_close_object
+		
+	json_add_object "getDnsStats"
+	json_close_object
+		
+		json_add_object "getTrafficUsageRanking"
+		json_add_int "start_ms"
+		json_add_int "end_ms"
+		json_add_string "network_type"
+		json_close_object
+		
+	json_add_object "getTrafficUsageIncrements"
+	json_add_int "start_ms"
+	json_add_int "end_ms"
+	json_add_string "aggregation"
+	json_add_string "mac"
+	json_add_string "network_type"
+	json_close_object
+		
+	json_add_object "getScheduleLimits"
+	json_close_object
+		
+		json_add_object "setScheduleLimit"
+		json_add_string "mac"
+		json_add_string "start_time"
+		json_add_string "end_time"
+		json_add_string "days"
+		json_add_int "wan_rx_rate_limit"
+		json_add_int "wan_tx_rate_limit"
+		json_close_object
+		
+	json_add_object "updateScheduleLimit"
+	json_add_string "id"
+	json_add_string "mac"
+	json_add_string "start_time"
+	json_add_string "end_time"
+	json_add_string "days"
+	json_add_int "wan_rx_rate_limit"
+	json_add_int "wan_tx_rate_limit"
+	json_close_object
+
+	json_add_object "deleteScheduleLimit"
+	json_add_string "id"
+	json_close_object
+	
+	json_add_object "clearData"
+	json_close_object
+	
+	json_add_object "restartService"
+	json_close_object
+	
+	json_add_object "getVersion"
+	json_close_object
+	
+	json_add_object "getSystemArch"
+	json_close_object
+	
+	json_add_object "checkUpdate"
+	json_close_object
+	
+	json_add_object "installUpdate"
+	json_add_string "package_type"
+	json_add_string "download_url"
+	json_close_object
+
+	json_add_object "getRateLimitWhitelist"
+	json_close_object
+
+	json_add_object "setRateLimitWhitelistEnabled"
+	json_add_string "enabled"
+	json_close_object
+
+	json_add_object "addRateLimitWhitelist"
+	json_add_string "mac"
+	json_close_object
+
+	json_add_object "deleteRateLimitWhitelist"
+	json_add_string "mac"
+	json_close_object
+
+	json_add_object "setDefaultRateLimit"
+	json_add_int "wan_rx_rate_limit"
+	json_add_int "wan_tx_rate_limit"
+	json_close_object
+	
+	json_dump
+	json_cleanup
+	;;
+	call)
+		case "$2" in
+			getStatus)
+				start_ms=""
+				end_ms=""
+				input=""
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					start_ms="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$start_ms" ] && start_ms="$(echo "$input" | jsonfilter -e '$.start_ms' 2>/dev/null)"
+					end_ms="$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)"
+					[ -z "$end_ms" ] && end_ms="$(echo "$input" | jsonfilter -e '$.end_ms' 2>/dev/null)"
+				else
+					[ -n "$3" ] && start_ms="$3"
+					[ -n "$4" ] && end_ms="$4"
+				fi
+				get_device_status "$start_ms" "$end_ms"
+				;;
+			getMetrics)
+				# logger "luci.bandix: getMetrics called"
+				# 读取参数：优先 STDIN（带超时，避免阻塞），其次位置参数（$3）
+				# 很奇怪收到的是 received input: {"mac":"70:e2:84:2b:9f:42","ubus_rpc_session":"4b0c5dcd9baf9963e4f13647fa71228a"}
+				mac=""
+				input=""
+				# 尝试读取一行 STDIN，1 秒超时以避免在无输入场景下阻塞
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					# logger "luci.bandix: received input: $input"
+					# 支持数组或对象两种风格
+					mac="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$mac" ] && mac="$(echo "$input" | jsonfilter -e '$.mac' 2>/dev/null)"
+				else
+					# 某些环境不会通过 STDIN 传参，改为读取位置参数
+					[ -n "$3" ] && mac="$3"
+					# logger "luci.bandix: received argv mac: $mac"
+				fi
+				get_metrics "$mac"
+				;;
+			setHostname)
+				# logger "luci.bandix: setHostname called"
+				
+				# 从 stdin 读取 JSON 参数
+				read input
+				# logger "luci.bandix: received input: $input"
+				
+				if [ -n "$input" ]; then
+					# 尝试解析数组格式的 JSON 参数 (LuCI RPC 通常使用数组格式)
+					# 参数格式: ["mac", "hostname"]
+					mac=$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)
+					hostname=$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)
+					
+					# 如果数组格式解析失败，尝试对象格式
+					if [ -z "$mac" ]; then
+						mac=$(echo "$input" | jsonfilter -e '$.mac' 2>/dev/null)
+						hostname=$(echo "$input" | jsonfilter -e '$.hostname' 2>/dev/null)
+					fi
+					
+					# logger "luci.bandix: parsed - mac=$mac hostname=$hostname"
+					
+					# 验证参数（hostname可以为空）
+					if [ -n "$mac" ]; then
+						# 调用主机名设置函数
+						set_device_hostname "$mac" "$hostname"
+					else
+						# logger "luci.bandix: setHostname MAC参数缺失"
+						make_error "Missing MAC address parameter"
+					fi
+				else
+					# logger "luci.bandix: setHostname 没有接收到输入"
+					make_error "No input received"
+				fi
+				;;
+			getConnection)
+				# logger "luci.bandix: getConnection called"
+				get_connection_devices
+				;;
+			getDnsQueries)
+				# logger "luci.bandix: getDnsQueries called"
+				# 从 stdin 读取 JSON 参数
+				read input
+				
+				if [ -n "$input" ]; then
+					# 解析参数
+					domain=$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)
+					[ -z "$domain" ] && domain=$(echo "$input" | jsonfilter -e '$.domain' 2>/dev/null)
+					
+					device=$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)
+					[ -z "$device" ] && device=$(echo "$input" | jsonfilter -e '$.device' 2>/dev/null)
+					
+					is_query=$(echo "$input" | jsonfilter -e '$[2]' 2>/dev/null)
+					[ -z "$is_query" ] && is_query=$(echo "$input" | jsonfilter -e '$.is_query' 2>/dev/null)
+					
+					dns_server=$(echo "$input" | jsonfilter -e '$[3]' 2>/dev/null)
+					[ -z "$dns_server" ] && dns_server=$(echo "$input" | jsonfilter -e '$.dns_server' 2>/dev/null)
+					
+					query_type=$(echo "$input" | jsonfilter -e '$[4]' 2>/dev/null)
+					[ -z "$query_type" ] && query_type=$(echo "$input" | jsonfilter -e '$.query_type' 2>/dev/null)
+					
+					page=$(echo "$input" | jsonfilter -e '$[5]' 2>/dev/null)
+					[ -z "$page" ] && page=$(echo "$input" | jsonfilter -e '$.page' 2>/dev/null)
+					
+					page_size=$(echo "$input" | jsonfilter -e '$[6]' 2>/dev/null)
+					[ -z "$page_size" ] && page_size=$(echo "$input" | jsonfilter -e '$.page_size' 2>/dev/null)
+					
+					get_dns_queries "$domain" "$device" "$is_query" "$dns_server" "$query_type" "$page" "$page_size"
+				else
+					get_dns_queries "" "" "" "" "" "" ""
+				fi
+				;;
+			getDnsStats)
+				# logger "luci.bandix: getDnsStats called"
+				get_dns_stats
+				;;
+			getTrafficUsageRanking)
+				start_ms=""
+				end_ms=""
+				network_type=""
+				input=""
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					start_ms="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$start_ms" ] && start_ms="$(echo "$input" | jsonfilter -e '$.start_ms' 2>/dev/null)"
+					end_ms="$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)"
+					[ -z "$end_ms" ] && end_ms="$(echo "$input" | jsonfilter -e '$.end_ms' 2>/dev/null)"
+					network_type="$(echo "$input" | jsonfilter -e '$[2]' 2>/dev/null)"
+					[ -z "$network_type" ] && network_type="$(echo "$input" | jsonfilter -e '$.network_type' 2>/dev/null)"
+				else
+					[ -n "$3" ] && start_ms="$3"
+					[ -n "$4" ] && end_ms="$4"
+					[ -n "$5" ] && network_type="$5"
+				fi
+				get_traffic_usage_ranking "$start_ms" "$end_ms" "$network_type"
+				;;
+			getTrafficUsageIncrements)
+				start_ms=""
+				end_ms=""
+				aggregation=""
+				mac=""
+				network_type=""
+				input=""
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					start_ms="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$start_ms" ] && start_ms="$(echo "$input" | jsonfilter -e '$.start_ms' 2>/dev/null)"
+					end_ms="$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)"
+					[ -z "$end_ms" ] && end_ms="$(echo "$input" | jsonfilter -e '$.end_ms' 2>/dev/null)"
+					aggregation="$(echo "$input" | jsonfilter -e '$[2]' 2>/dev/null)"
+					[ -z "$aggregation" ] && aggregation="$(echo "$input" | jsonfilter -e '$.aggregation' 2>/dev/null)"
+					mac="$(echo "$input" | jsonfilter -e '$[3]' 2>/dev/null)"
+					[ -z "$mac" ] && mac="$(echo "$input" | jsonfilter -e '$.mac' 2>/dev/null)"
+					network_type="$(echo "$input" | jsonfilter -e '$[4]' 2>/dev/null)"
+					[ -z "$network_type" ] && network_type="$(echo "$input" | jsonfilter -e '$.network_type' 2>/dev/null)"
+				else
+					[ -n "$3" ] && start_ms="$3"
+					[ -n "$4" ] && end_ms="$4"
+					[ -n "$5" ] && aggregation="$5"
+					[ -n "$6" ] && mac="$6"
+					[ -n "$7" ] && network_type="$7"
+				fi
+				get_traffic_usage_increments "$start_ms" "$end_ms" "$aggregation" "$mac" "$network_type"
+				;;
+			getScheduleLimits)
+				# logger "luci.bandix: getScheduleLimits called"
+				get_schedule_limits
+				;;
+			setScheduleLimit)
+				# logger "luci.bandix: setScheduleLimit called"
+				
+				# 从 stdin 读取 JSON 参数
+				read input
+				# logger "luci.bandix: received input: $input"
+				
+				if [ -n "$input" ]; then
+					# 尝试解析数组格式的 JSON 参数 (LuCI RPC 通常使用数组格式)
+					# 参数格式: ["mac", "start_time", "end_time", "days", wan_tx_rate_limit, wan_rx_rate_limit]
+					mac=$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)
+					start_time=$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)
+					end_time=$(echo "$input" | jsonfilter -e '$[2]' 2>/dev/null)
+					# days 可能是 JSON 数组字符串，需要特殊处理
+					days=$(echo "$input" | jsonfilter -e '$[3]' 2>/dev/null)
+					# 如果提取失败，尝试作为字符串提取
+					if [ -z "$days" ]; then
+						days=$(echo "$input" | jsonfilter -e '$[3]' -s 2>/dev/null)
+					fi
+					wan_tx_rate_limit=$(echo "$input" | jsonfilter -e '$[4]' 2>/dev/null)
+					wan_rx_rate_limit=$(echo "$input" | jsonfilter -e '$[5]' 2>/dev/null)
+					
+					# 如果数组格式解析失败，尝试对象格式
+					if [ -z "$mac" ]; then
+						mac=$(echo "$input" | jsonfilter -e '$.mac' 2>/dev/null)
+						start_time=$(echo "$input" | jsonfilter -e '$.start_time' 2>/dev/null)
+						end_time=$(echo "$input" | jsonfilter -e '$.end_time' 2>/dev/null)
+						# days 可能是 JSON 数组字符串
+						days=$(echo "$input" | jsonfilter -e '$.days' 2>/dev/null)
+						# 如果提取失败，尝试提取为 JSON 数组
+						if [ -z "$days" ]; then
+							days=$(echo "$input" | jsonfilter -e '$.days' -s 2>/dev/null)
+						fi
+						wan_tx_rate_limit=$(echo "$input" | jsonfilter -e '$.wan_tx_rate_limit' 2>/dev/null)
+						wan_rx_rate_limit=$(echo "$input" | jsonfilter -e '$.wan_rx_rate_limit' 2>/dev/null)
+					fi
+					
+					# 如果 days 还不是有效的 JSON 数组格式，尝试从原始输入中提取
+					if [ -z "$days" ] || ! echo "$days" | grep -q '^\['; then
+						# 尝试直接提取 days 字段的值
+						days=$(echo "$input" | sed -n 's/.*"days"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p' 2>/dev/null)
+					fi
+					
+					# logger "luci.bandix: parsed - mac=$mac start=$start_time end=$end_time days=$days tx=$wan_tx_rate_limit rx=$wan_rx_rate_limit"
+					
+					# 验证参数
+					if [ -n "$mac" ] && [ -n "$start_time" ] && [ -n "$end_time" ] && [ -n "$days" ] && [ -n "$wan_tx_rate_limit" ] && [ -n "$wan_rx_rate_limit" ]; then
+						# 调用定时限速设置函数
+						set_schedule_limit "$mac" "$start_time" "$end_time" "$days" "$wan_tx_rate_limit" "$wan_rx_rate_limit"
+					else
+						# logger "luci.bandix: setScheduleLimit 参数缺失或无效"
+						make_error "Missing or invalid parameters"
+					fi
+				else
+					# logger "luci.bandix: setScheduleLimit 没有接收到输入"
+					make_error "No input received"
+				fi
+				;;
+		updateScheduleLimit)
+			read input
+			
+			if [ -n "$input" ]; then
+				id=$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)
+				mac=$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)
+				start_time=$(echo "$input" | jsonfilter -e '$[2]' 2>/dev/null)
+				end_time=$(echo "$input" | jsonfilter -e '$[3]' 2>/dev/null)
+				days=$(echo "$input" | jsonfilter -e '$[4]' 2>/dev/null)
+				if [ -z "$days" ]; then
+					days=$(echo "$input" | jsonfilter -e '$[4]' -s 2>/dev/null)
+				fi
+				wan_rx_rate_limit=$(echo "$input" | jsonfilter -e '$[5]' 2>/dev/null)
+				wan_tx_rate_limit=$(echo "$input" | jsonfilter -e '$[6]' 2>/dev/null)
+				
+				if [ -z "$id" ]; then
+					id=$(echo "$input" | jsonfilter -e '$.id' 2>/dev/null)
+					mac=$(echo "$input" | jsonfilter -e '$.mac' 2>/dev/null)
+					start_time=$(echo "$input" | jsonfilter -e '$.start_time' 2>/dev/null)
+					end_time=$(echo "$input" | jsonfilter -e '$.end_time' 2>/dev/null)
+					days=$(echo "$input" | jsonfilter -e '$.days' 2>/dev/null)
+					if [ -z "$days" ]; then
+						days=$(echo "$input" | jsonfilter -e '$.days' -s 2>/dev/null)
+					fi
+					wan_rx_rate_limit=$(echo "$input" | jsonfilter -e '$.wan_rx_rate_limit' 2>/dev/null)
+					wan_tx_rate_limit=$(echo "$input" | jsonfilter -e '$.wan_tx_rate_limit' 2>/dev/null)
+				fi
+				
+				if [ -z "$days" ] || ! echo "$days" | grep -q '^\['; then
+					days=$(echo "$input" | sed -n 's/.*"days"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p' 2>/dev/null)
+				fi
+				
+				if [ -n "$id" ] && [ -n "$mac" ] && [ -n "$start_time" ] && [ -n "$end_time" ] && [ -n "$days" ] && [ -n "$wan_rx_rate_limit" ] && [ -n "$wan_tx_rate_limit" ]; then
+					update_schedule_limit "$id" "$mac" "$start_time" "$end_time" "$days" "$wan_rx_rate_limit" "$wan_tx_rate_limit"
+				else
+					make_error "Missing or invalid parameters"
+				fi
+			else
+				make_error "No input received"
+			fi
+			;;
+		deleteScheduleLimit)
+			read input
+			
+			if [ -n "$input" ]; then
+				id=$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)
+				[ -z "$id" ] && id=$(echo "$input" | jsonfilter -e '$.id' 2>/dev/null)
+				
+				if [ -n "$id" ]; then
+					delete_schedule_limit "$id"
+				else
+					make_error "Missing id parameter"
+				fi
+			else
+				make_error "No input received"
+			fi
+			;;
+			clearData)
+				# logger "luci.bandix: clearData called"
+				clear_data
+				;;
+			restartService)
+				# logger "luci.bandix: restartService called"
+				restart_service
+				;;
+			getVersion)
+				# logger "luci.bandix: getVersion called"
+				get_version
+				;;
+			getSystemArch)
+				# logger "luci.bandix: getSystemArch called"
+				local arch=$(get_system_arch)
+				json_init
+				json_add_string "arch" "$arch"
+				json_dump
+				json_cleanup
+				;;
+			checkUpdate)
+				# logger "luci.bandix: checkUpdate called"
+				check_update
+				;;
+			installUpdate)
+				# logger "luci.bandix: installUpdate called"
+				# 从 stdin 读取 JSON 参数
+				read input
+				
+				if [ -n "$input" ]; then
+					# 解析参数
+					package_type=$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)
+					[ -z "$package_type" ] && package_type=$(echo "$input" | jsonfilter -e '$.package_type' 2>/dev/null)
+					
+					download_url=$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)
+					[ -z "$download_url" ] && download_url=$(echo "$input" | jsonfilter -e '$.download_url' 2>/dev/null)
+					
+					if [ -n "$package_type" ] && [ -n "$download_url" ]; then
+						install_update "$package_type" "$download_url"
+					else
+						make_error "Missing package_type or download_url parameter"
+					fi
+				else
+					make_error "No input received"
+				fi
+				;;
+			getRateLimitWhitelist)
+				get_rate_limit_whitelist
+				;;
+			setRateLimitWhitelistEnabled)
+				enabled=""
+				input=""
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					enabled="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$enabled" ] && enabled="$(echo "$input" | jsonfilter -e '$.enabled' 2>/dev/null)"
+				else
+					[ -n "$3" ] && enabled="$3"
+				fi
+				set_rate_limit_whitelist_enabled "$enabled"
+				;;
+			addRateLimitWhitelist)
+				mac=""
+				input=""
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					mac="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$mac" ] && mac="$(echo "$input" | jsonfilter -e '$.mac' 2>/dev/null)"
+				else
+					[ -n "$3" ] && mac="$3"
+				fi
+				add_rate_limit_whitelist_mac "$mac"
+				;;
+			deleteRateLimitWhitelist)
+				mac=""
+				input=""
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					mac="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$mac" ] && mac="$(echo "$input" | jsonfilter -e '$.mac' 2>/dev/null)"
+				else
+					[ -n "$3" ] && mac="$3"
+				fi
+				delete_rate_limit_whitelist_mac "$mac"
+				;;
+			setDefaultRateLimit)
+				wan_rx_rate_limit=""
+				wan_tx_rate_limit=""
+				input=""
+				if read -t 1 -r input; then
+					:
+				fi
+				if [ -n "$input" ]; then
+					wan_rx_rate_limit="$(echo "$input" | jsonfilter -e '$[0]' 2>/dev/null)"
+					[ -z "$wan_rx_rate_limit" ] && wan_rx_rate_limit="$(echo "$input" | jsonfilter -e '$.wan_rx_rate_limit' 2>/dev/null)"
+					wan_tx_rate_limit="$(echo "$input" | jsonfilter -e '$[1]' 2>/dev/null)"
+					[ -z "$wan_tx_rate_limit" ] && wan_tx_rate_limit="$(echo "$input" | jsonfilter -e '$.wan_tx_rate_limit' 2>/dev/null)"
+				else
+					[ -n "$3" ] && wan_rx_rate_limit="$3"
+					[ -n "$4" ] && wan_tx_rate_limit="$4"
+				fi
+				set_default_rate_limit "$wan_rx_rate_limit" "$wan_tx_rate_limit"
+				;;
+		esac
+		;;
+esac

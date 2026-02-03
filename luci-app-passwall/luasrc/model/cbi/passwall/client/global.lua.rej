@@ -1,0 +1,10 @@
+--- luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
++++ luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
+@@ -431,6 +431,7 @@ for k, v in pairs(nodes_table) do
+     end
+ end
+ 
++m:append(Template(appname .. "/global/status_bottom"))
+ m:append(Template(appname .. "/global/footer"))
+ 
+ return m

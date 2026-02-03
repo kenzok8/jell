@@ -1,12 +1,18 @@
 local m, s = ...
 
-local api = require "luci.passwall.api"
-
 if not api.is_finded("ss-local") and not api.is_finded("ss-redir") then
 	return
 end
 
-local type_name = "SS"
+type_name = "SS"
+
+-- [[ Shadowsocks Libev ]]
+
+s.fields["type"]:value(type_name, "Shadowsocks Libev")
+
+if s.val["type"] ~= type_name then
+	return
+end
 
 local option_prefix = "ss_"
 
@@ -20,10 +26,6 @@ local ss_encrypt_method_list = {
 	"aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305",
 	"xchacha20-ietf-poly1305"
 }
-
--- [[ Shadowsocks Libev ]]
-
-s.fields["type"]:value(type_name, translate("Shadowsocks Libev"))
 
 o = s:option(ListValue, _n("del_protocol")) --始终隐藏，用于删除 protocol
 o:depends({ [_n("__hide")] = "1" })

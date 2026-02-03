@@ -1,0 +1,23 @@
+--- luci-app-passwall2/Makefile
++++ luci-app-passwall2/Makefile
+@@ -111,7 +123,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server
+ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client
+ 	bool "Include Shadowsocks Rust Client"
+ 	depends on aarch64||arm||i386||mips||mipsel||x86_64
+-	select PACKAGE_shadowsocks-rust-sslocal
+ 	default y if aarch64
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
+@@ -131,12 +140,10 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
+ 	bool "Include Simple-Obfs (Shadowsocks Plugin)"
+-	select PACKAGE_simple-obfs
+ 	default y
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
+ 	bool "Include Sing-Box"
+-	select PACKAGE_sing-box
+ 	default y if aarch64||arm||i386||x86_64
+ 
+ config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client

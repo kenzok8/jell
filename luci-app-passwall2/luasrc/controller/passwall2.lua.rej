@@ -1,0 +1,10 @@
+--- luci-app-passwall2/luasrc/controller/passwall2.lua
++++ luci-app-passwall2/luasrc/controller/passwall2.lua
+@@ -74,6 +74,7 @@ function index()
+ 	entry({"admin", "services", appname, "clear_all_nodes"}, call("clear_all_nodes")).leaf = true
+ 	entry({"admin", "services", appname, "delete_select_nodes"}, call("delete_select_nodes")).leaf = true
+ 	entry({"admin", "services", appname, "update_rules"}, call("update_rules")).leaf = true
++	entry({"admin", "services", appname, "ip"}, call('check_ip')).leaf = true
+ 
+ 	--[[Components update]]
+ 	local coms = require "luci.passwall2.com"

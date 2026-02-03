@@ -21,6 +21,8 @@ LOG_FILE = "/tmp/log/" .. appname .. ".log"
 TMP_PATH = "/tmp/etc/" .. appname
 TMP_IFACE_PATH = TMP_PATH .. "/iface"
 
+NEW_PORT = nil
+
 function log(...)
 	local result = os.date("%Y-%m-%d %H:%M:%S: ") .. table.concat({...}, " ")
 	local f, err = io.open(LOG_FILE, "a")
@@ -36,72 +38,6 @@ end
 
 function is_old_uci()
 	return sys.call("grep -E 'require[ \t]*\"uci\"' /usr/lib/lua/luci/model/uci.lua >/dev/null 2>&1") == 0
-end
-
-function set_apply_on_parse(map)
-	if not map then
-		return
-	end
-	if is_js_luci() then
-		map.apply_on_parse = false
-		map.on_after_apply = function(self)
-			showMsg_Redirect(self.redirect, 3000)
-		end
-		map.render = function(self, ...)
-			getmetatable(self).__index.render(self, ...) -- 保持原渲染流程
-			optimize_cbi_ui()
-		end
-	end
-end
-
-function showMsg_Redirect(redirectUrl, delay)
-	local message = "PassWall " .. i18n.translate("Settings have been successfully saved and applied!")
-	luci.http.write([[
-		<script type="text/javascript">
-			document.addEventListener('DOMContentLoaded', function() {
-				// 创建遮罩层
-				var overlay = document.createElement('div');
-				overlay.style.position = 'fixed';
-				overlay.style.top = '0';
-				overlay.style.left = '0';
-				overlay.style.width = '100%';
-				overlay.style.height = '100%';
-				overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-				overlay.style.zIndex = '9999';
-				// 创建提示条
-				var messageDiv = document.createElement('div');
-				messageDiv.style.position = 'fixed';
-				messageDiv.style.top = '0';
-				messageDiv.style.left = '0';
-				messageDiv.style.width = '100%';
-				messageDiv.style.background = '#4caf50';
-				messageDiv.style.color = '#fff';
-				messageDiv.style.textAlign = 'center';
-				messageDiv.style.padding = '10px';
-				messageDiv.style.zIndex = '10000';
-				messageDiv.textContent = ']] .. message .. [[';
-				// 将遮罩层和提示条添加到页面
-				document.body.appendChild(overlay);
-				document.body.appendChild(messageDiv);
-				// 重定向或隐藏提示条和遮罩层
-				var redirectUrl = ']] .. (redirectUrl or "") .. [[';
-				var delay = ]] .. (delay or 3000) .. [[;
-				setTimeout(function() {
-					if (redirectUrl) {
-						window.location.href = redirectUrl;
-					} else {
-						if (messageDiv && messageDiv.parentNode) {
-							messageDiv.parentNode.removeChild(messageDiv);
-						}
-						if (overlay && overlay.parentNode) {
-							overlay.parentNode.removeChild(overlay);
-						}
-						window.location.href = window.location.href;
-					}
-				}, delay);
-			});
-		</script>
-	]])
 end
 
 function uci_save(cursor, config, commit, apply)
@@ -151,13 +87,23 @@ function sh_uci_commit(config)
 end
 
 function set_cache_var(key, val)
-	sys.call(string.format('/usr/share/passwall/app.sh set_cache_var %s "%s"', key, val))
+	sys.call(string.format('. /usr/share/passwall/utils.sh ; set_cache_var %s "%s"', key, val))
 end
 
 function get_cache_var(key)
-	local val = sys.exec(string.format('echo -n $(/usr/share/passwall/app.sh get_cache_var %s)', key))
+	local val = sys.exec(string.format('. /usr/share/passwall/utils.sh ; echo -n $(get_cache_var %s)', key))
 	if val == "" then val = nil end
 	return val
+end
+
+function get_new_port()
+	local cmd_format = ". /usr/share/passwall/utils.sh ; echo -n $(get_new_port %s tcp,udp)"
+	local set_port = 0
+	if NEW_PORT and tonumber(NEW_PORT) then
+		set_port = tonumber(NEW_PORT) + 1
+	end
+	NEW_PORT = tonumber(sys.exec(string.format(cmd_format, set_port == 0 and "auto" or set_port)))
+	return NEW_PORT
 end
 
 function exec_call(cmd)
@@ -289,9 +235,9 @@ function url(...)
 end
 
 function trim(s)
-	local len = #s
-	local i, j = 1, len
-	while i <= len and s:byte(i) <= 32 do i = i + 1 end
+	if type(s) ~= "string" then return "" end
+	local i, j = 1, #s
+	while i <= j and s:byte(i) <= 32 do i = i + 1 end
 	while j >= i and s:byte(j) <= 32 do j = j - 1 end
 	if i > j then return "" end
 	return s:sub(i, j)
@@ -421,7 +367,7 @@ function is_ipv6(val)
 end
 
 function is_local_ip(ip)
-	ip = tostring(ip or ""):lower()
+	ip = trim(ip):lower()
 	ip = ip:gsub("^[%w%d]+://", "")   -- 去掉协议头
 		:gsub("/.*$", "")          -- 去掉路径
 		:gsub("^%[", ""):gsub("%]$", "") -- 去掉IPv6方括号
@@ -511,11 +457,9 @@ function get_valid_nodes()
 	uci:foreach(appname, "nodes", function(e)
 		e.id = e[".name"]
 		if e.type and e.remarks then
-			if (e.type == "sing-box" or e.type == "Xray") and e.protocol and
-			   (e.protocol == "_balancing" or e.protocol == "_shunt" or e.protocol == "_iface" or e.protocol == "_urltest") then
-				local type = e.type
-				if type == "sing-box" then type = "Sing-Box" end
-				e["remark"] = "%s：[%s] " % {type .. " " .. i18n.translatef(e.protocol), e.remarks}
+			if e.type == "sing-box" then e.type = "Sing-Box" end
+			if e.protocol and (e.protocol == "_balancing" or e.protocol == "_shunt" or e.protocol == "_iface" or e.protocol == "_urltest") then
+				e["remark"] = trim("%s：[%s]" % {e.type .. " " .. i18n.translatef(e.protocol), e.remarks})
 				e["node_type"] = "special"
 				if not e.group or e.group == "" then
 					default_nodes[#default_nodes + 1] = e
@@ -527,8 +471,7 @@ function get_valid_nodes()
 			if port and e.address then
 				local address = e.address
 				if is_ip(address) or datatypes.hostname(address) then
-					local type = e.type
-					if (type == "sing-box" or type == "Xray") and e.protocol then
+					if (e.type == "Sing-Box" or e.type == "Xray") and e.protocol then
 						local protocol = e.protocol
 						if protocol == "vmess" then
 							protocol = "VMess"
@@ -551,14 +494,13 @@ function get_valid_nodes()
 						else
 							protocol = protocol:gsub("^%l",string.upper)
 						end
-						if type == "sing-box" then type = "Sing-Box" end
-						type = type .. " " .. protocol
+						e.type = e.type .. " " .. protocol
 					end
 					if is_ipv6(address) then address = get_ipv6_full(address) end
-					e["remark"] = "%s：[%s]" % {type, e.remarks}
+					e["remark"] = trim("%s：[%s]" % {e.type, e.remarks})
 					if show_node_info == "1" then
 						port = port:gsub(":", "-")
-						e["remark"] = "%s：[%s] %s:%s" % {type, e.remarks, address, port}
+						e["remark"] = trim("%s：[%s] %s:%s" % {e.type, e.remarks, address, port})
 					end
 					e.node_type = "normal"
 					if not e.group or e.group == "" then
@@ -578,12 +520,12 @@ end
 function get_node_remarks(n)
 	local remarks = ""
 	if n then
-		if (n.type == "sing-box" or n.type == "Xray") and n.protocol and
-		   (n.protocol == "_balancing" or n.protocol == "_shunt" or n.protocol == "_iface" or n.protocol == "_urltest") then
-			remarks = "%s：[%s] " % {n.type .. " " .. i18n.translatef(n.protocol), n.remarks}
+		if n.type == "sing-box" then n.type = "Sing-Box" end
+		if n.protocol and (n.protocol == "_balancing" or n.protocol == "_shunt" or n.protocol == "_iface" or n.protocol == "_urltest") then
+			remarks = trim("%s：[%s]" % {n.type .. " " .. i18n.translatef(n.protocol), n.remarks})
 		else
 			local type2 = n.type
-			if (n.type == "sing-box" or n.type == "Xray") and n.protocol then
+			if (n.type == "Sing-Box" or n.type == "Xray") and n.protocol then
 				local protocol = n.protocol
 				if protocol == "vmess" then
 					protocol = "VMess"
@@ -606,10 +548,9 @@ function get_node_remarks(n)
 				else
 					protocol = protocol:gsub("^%l",string.upper)
 				end
-				if type2 == "sing-box" then type2 = "Sing-Box" end
 				type2 = type2 .. " " .. protocol
 			end
-			remarks = "%s：[%s]" % {type2, n.remarks}
+			remarks = trim("%s：[%s]" % {type2, n.remarks})
 		end
 	end
 	return remarks
@@ -1225,11 +1166,11 @@ function get_version()
 	if not version or #version == 0 then
 		version = sys.exec("apk list luci-app-passwall 2>/dev/null | awk '/installed/ {print $1}' | cut -d'-' -f4-")
 	end
-	return (version or ""):gsub("\n", "")
+	return (version or ""):gsub("\n", ""):match("^([^-]+)")
 end
 
 function to_check_self()
-	local url = "https://raw.githubusercontent.com/xiaorouji/openwrt-passwall/main/luci-app-passwall/Makefile"
+	local url = "https://raw.githubusercontent.com/Openwrt-Passwall/openwrt-passwall/main/luci-app-passwall/Makefile"
 	local tmp_file = "/tmp/passwall_makefile"
 	local return_code, result = curl_auto(url, tmp_file, curl_args)
 	result = return_code == 0
@@ -1414,26 +1355,44 @@ function format_go_time(input)
 	return result
 end
 
-function optimize_cbi_ui()
-	luci.http.write([[
-		<script type="text/javascript">
-			//修正上移、下移按钮名称
-			document.querySelectorAll("input.btn.cbi-button.cbi-button-up").forEach(function(btn) {
-				btn.value = "]] .. i18n.translate("Move up") .. [[";
-			});
-			document.querySelectorAll("input.btn.cbi-button.cbi-button-down").forEach(function(btn) {
-				btn.value = "]] .. i18n.translate("Move down") .. [[";
-			});
-			//删除控件和说明之间的多余换行
-			document.querySelectorAll("div.cbi-value-description").forEach(function(descDiv) {
-				var prev = descDiv.previousSibling;
-				while (prev && prev.nodeType === Node.TEXT_NODE && prev.textContent.trim() === "") {
-					prev = prev.previousSibling;
-				}
-				if (prev && prev.nodeType === Node.ELEMENT_NODE && prev.tagName === "BR") {
-					prev.remove();
-				}
-			});
-		</script>
-	]])
+function set_apply_on_parse(map)
+	if not map then return end
+	if is_js_luci() then
+		apply_redirect(map)
+		local old = map.on_after_save
+		map.on_after_save = function(self)
+			if old then old(self) end
+			map:set("@global[0]", "timestamp", os.time())
+		end
+		-- 优化页面
+		local cbi = require "luci.cbi"
+		map:append(cbi.Template(appname .. "/cbi/optimize_cbi_ui"))
+	end
+end
+
+function apply_redirect(m)
+	local tmp_uci_file = "/etc/config/" .. appname .. "_redirect"
+	if m.redirect and m.redirect ~= "" then
+		if fs.access(tmp_uci_file) then
+			local redirect
+			for line in io.lines(tmp_uci_file) do
+				redirect = line:match("option%s+url%s+['\"]([^'\"]+)['\"]")
+				if redirect and redirect ~= "" then break end
+			end
+			if redirect and redirect ~= "" then
+				sys.call("/bin/rm -f " .. tmp_uci_file)
+				luci.http.redirect(redirect)
+			end
+		else
+			fs.writefile(tmp_uci_file, "config redirect\n")
+		end
+		m.on_after_save = function(self)
+			local redirect = self.redirect
+			if redirect and redirect ~= "" then
+				uci:set(appname .. "_redirect", "@redirect[0]", "url", redirect)
+			end
+		end
+	else
+		sys.call("/bin/rm -f " .. tmp_uci_file)
+	end
 end

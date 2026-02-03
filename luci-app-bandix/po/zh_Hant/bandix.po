@@ -1,0 +1,1137 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Bandix Traffic Monitor"
+msgstr "Bandix 流量監控"
+
+msgid "Loading data..."
+msgstr "正在載入數据..."
+
+msgid "Unable to fetch data"
+msgstr "無法取得數据"
+
+msgid "Unable to fetch history data"
+msgstr "無法取得歷史數据"
+
+msgid "Hostname"
+msgstr "主機名"
+
+msgid "IP Address"
+msgstr "IP位址"
+
+msgid "MAC Address"
+msgstr "MAC位址"
+
+msgid "Download Speed"
+msgstr "下載速度"
+
+msgid "Upload Speed"
+msgstr "上傳速度"
+
+msgid "Total Download"
+msgstr "總下載量"
+
+msgid "Total Upload"
+msgstr "總上傳量"
+
+msgid "Download Limit"
+msgstr "下載限速"
+
+msgid "Upload Limit"
+msgstr "上傳限速"
+
+msgid "Interface Language"
+msgstr "介面語言"
+
+msgid "Select the display language for Bandix Traffic Monitor"
+msgstr "選擇 Bandix 流量監控的顯示语言"
+
+msgid "Device Info"
+msgstr "設備資訊"
+
+msgid "Device List"
+msgstr "設備清單"
+
+msgid "LAN Traffic"
+msgstr "LAN 流量"
+
+msgid "WAN Traffic"
+msgstr "WAN 流量"
+
+msgid "Network Type"
+msgstr "網路類型"
+
+msgid "Rate Limit"
+msgstr "限速設定"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Online Devices"
+msgstr "線上設備"
+
+msgid "WAN Only"
+msgstr "仅限WAN 流量"
+
+msgid "Settings"
+msgstr "設定"
+
+msgid "Device Settings"
+msgstr "設備設定"
+
+msgid "Rate Limits"
+msgstr "限速設定"
+
+msgid "Remove Rate Limit"
+msgstr "取消限速"
+
+msgid "Save"
+msgstr "儲存"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Set Rate Limit"
+msgstr "設定限速"
+
+msgid "Device"
+msgstr "設備"
+
+msgid "Set Hostname"
+msgstr "設定主機名"
+
+msgid "Please enter hostname"
+msgstr "請輸入主機名"
+
+msgid "Hostname set successfully"
+msgstr "主機名設定成功"
+
+msgid "Failed to set hostname"
+msgstr "主機名設定失敗"
+
+msgid "Unlimited"
+msgstr "無限制"
+
+msgid "Settings saved successfully"
+msgstr "設定成功"
+
+msgid "Failed to save settings"
+msgstr "設定失敗"
+
+msgid "Please enter a valid speed value"
+msgstr "請輸入有效的速度值"
+
+msgid "Speed value must be greater than 0"
+msgstr "速度值必須大於0"
+
+msgid "Saving..."
+msgstr "儲存中..."
+
+msgid "Rate limiting only applies to WAN traffic."
+msgstr "限速功能僅對 WAN 流量生效。某些 LAN 內部流量可能因硬件交換加速未被監控。"
+
+msgid "Tip: Enter 0 for unlimited"
+msgstr "提示：输入 0 表示無限制"
+
+msgid "Traffic History"
+msgstr "歷史流量趨勢"
+
+msgid "Realtime Traffic Trends"
+msgstr "即時流量趨勢圖"
+
+msgid "Select Device"
+msgstr "選擇設備"
+
+msgid "All Devices"
+msgstr "所有設備"
+
+msgid "Time Range"
+msgstr "時間範圍"
+
+msgid "Last 5 minutes"
+msgstr "最近5分鐘"
+
+msgid "Last 30 minutes"
+msgstr "最近30分鐘"
+
+msgid "Last 2 hours"
+msgstr "最近2小時"
+
+msgid "Type"
+msgstr "類型"
+
+msgid "Total"
+msgstr "總流量"
+
+msgid "LAN"
+msgstr "LAN 流量"
+
+msgid "WAN"
+msgstr "WAN 流量"
+
+msgid "Refresh"
+msgstr "重新整理"
+
+msgid "Upload Rate"
+msgstr "上傳速率"
+
+msgid "Download Rate"
+msgstr "下載速率"
+
+msgid "Last"
+msgstr "最近"
+
+msgid "second"
+msgstr "秒"
+
+msgid "minute"
+msgstr "分鐘"
+
+msgid "hour"
+msgstr "小時"
+
+msgid "day"
+msgstr "天"
+
+msgid "week"
+msgstr "周"
+
+msgid "Other Rates"
+msgstr "其他速率"
+
+msgid "Cumulative"
+msgstr "累計流量"
+
+msgid "Total Uploaded"
+msgstr "總上傳"
+
+msgid "Total Downloaded"
+msgstr "總下載"
+
+msgid "LAN Uploaded"
+msgstr "LAN 已上傳"
+
+msgid "LAN Downloaded"
+msgstr "LAN 已下載"
+
+msgid "WAN Uploaded"
+msgstr "WAN 已上傳"
+
+msgid "WAN Downloaded"
+msgstr "WAN 已下載"
+
+msgid "Total Upload"
+msgstr "總上傳速率"
+
+msgid "Total Download"
+msgstr "總下載速率"
+
+msgid "LAN Upload"
+msgstr "LAN 上傳速率"
+
+msgid "LAN Download"
+msgstr "LAN 下載速率"
+
+msgid "WAN Upload"
+msgstr "WAN 上傳速率"
+
+msgid "WAN Download"
+msgstr "WAN 下載速率"
+
+msgid "Never Online"
+msgstr "從未上線"
+
+msgid "Just Now"
+msgstr "剛剛"
+
+msgid "min ago"
+msgstr "分鐘前"
+
+msgid "h ago"
+msgstr "小時前"
+
+msgid "days ago"
+msgstr "天前"
+
+msgid "months ago"
+msgstr "个月前"
+
+msgid "years ago"
+msgstr "年前"
+
+msgid "Last Online"
+msgstr "最後上線"
+
+msgid "Zoom"
+msgstr "縮放"
+
+msgid "Sort By"
+msgstr "排序方式"
+
+msgid "Online Status"
+msgstr "線上狀態"
+
+msgid "Total Traffic"
+msgstr "總流量"
+
+msgid "Ascending"
+msgstr "升序"
+
+msgid "Descending"
+msgstr "降序"
+
+msgid "Sort by Speed"
+msgstr "依速度排序"
+
+msgid "Sort by Traffic"
+msgstr "依用量排序"
+
+msgid "Simple Mode"
+msgstr "簡易模式"
+
+msgid "Detailed Mode"
+msgstr "詳細模式"
+
+msgid "Bandix DNS Monitor"
+msgstr "Bandix DNS 監控"
+
+msgid "DNS Monitor"
+msgstr "DNS 監控"
+
+msgid "DNS Query Records"
+msgstr "DNS 查詢記錄"
+
+msgid "DNS Statistics"
+msgstr "DNS 統計資訊"
+
+msgid "DNS Monitoring Disabled"
+msgstr "DNS監控未啟用"
+
+msgid "Please enable DNS monitoring in settings"
+msgstr "请在設定中啟用DNS監控功能"
+
+msgid "Go to Settings"
+msgstr "前往設定"
+
+msgid "No Data"
+msgstr "無資料"
+
+msgid "Time"
+msgstr "時間"
+
+msgid "Domain"
+msgstr "網域"
+
+msgid "Query Type"
+msgstr "查詢類型"
+
+msgid "Response Code"
+msgstr "回應碼"
+
+msgid "Response Time"
+msgstr "回應時間"
+
+msgid "Source IP"
+msgstr "來源IP"
+
+msgid "Destination IP"
+msgstr "目標IP"
+
+msgid "Response IPs"
+msgstr "回應IP"
+
+msgid "Response Result"
+msgstr "回應結果"
+
+msgid "DNS Server"
+msgstr "DNS伺服器"
+
+msgid "Query"
+msgstr "查詢"
+
+msgid "Response"
+msgstr "回應"
+
+msgid "Filter"
+msgstr "篩選"
+
+msgid "Domain Filter"
+msgstr "網域篩選"
+
+msgid "Device Filter"
+msgstr "設備篩選"
+
+msgid "DNS Server Filter"
+msgstr "DNS伺服器篩選"
+
+msgid "Type Filter"
+msgstr "類型篩選"
+
+msgid "All"
+msgstr "全部"
+
+msgid "Period"
+msgstr "週期"
+
+msgid "Display Mode"
+msgstr "顯示模式"
+
+msgid "This Year"
+msgstr "本年"
+
+msgid "Week"
+msgstr "本週"
+
+msgid "Month"
+msgstr "本月"
+
+msgid "Year"
+msgstr "本年"
+
+msgid "Queries Only"
+msgstr "仅查詢"
+
+msgid "Responses Only"
+msgstr "仅回應"
+
+msgid "Search"
+msgstr "搜尋"
+
+msgid "Search Domain"
+msgstr "搜尋網域"
+
+msgid "Search Device"
+msgstr "搜尋設備"
+
+msgid "Search DNS Server"
+msgstr "搜尋DNS伺服器"
+
+msgid "Clear"
+msgstr "清除"
+
+msgid "Previous"
+msgstr "上一頁"
+
+msgid "Next"
+msgstr "下一頁"
+
+msgid "Page"
+msgstr "第"
+
+msgid "of"
+msgstr "頁，共"
+
+msgid "Total"
+msgstr "全部"
+
+msgid "records"
+msgstr "筆記錄"
+
+msgid "Per Page"
+msgstr "每頁顯示"
+
+msgid ""
+msgstr "筆"
+
+msgid "Total Queries"
+msgstr "總查詢數"
+
+msgid "Total Responses"
+msgstr "總回應數"
+
+msgid "Queries with Response"
+msgstr "有回應查詢"
+
+msgid "Queries without Response"
+msgstr "無回應查詢"
+
+msgid "Avg Response Time"
+msgstr "平均回應時間"
+
+msgid "Min Response Time"
+msgstr "最快回應時間"
+
+msgid "Max Response Time"
+msgstr "最慢回應時間"
+
+msgid "Success Rate"
+msgstr "成功率"
+
+msgid "Success"
+msgstr "成功"
+
+msgid "Failure"
+msgstr "失敗"
+
+msgid "Top Domains"
+msgstr "最常查詢網域"
+
+msgid "Top Query Types"
+msgstr "最常用查詢類型"
+
+msgid "Top Devices"
+msgstr "最活躍設備"
+
+msgid "Top DNS Servers"
+msgstr "最常用DNS伺服器"
+
+msgid "Unique Devices"
+msgstr "唯一設備數"
+
+msgid "ms"
+msgstr "毫秒"
+
+msgid "minutes"
+msgstr "分鐘"
+
+msgid "Unknown Device"
+msgstr "未知設備"
+
+msgid "Domain not found"
+msgstr "網域未找到"
+
+msgid "Server error"
+msgstr "伺服器錯誤"
+
+msgid "Format error"
+msgstr "格式錯誤"
+
+msgid "Refused"
+msgstr "拒絕"
+
+msgid "Other"
+msgstr "其他"
+
+msgid "Does not include DoH and DoT"
+msgstr "不包含 DoH 和 DoT"
+
+msgid "Latest Response Time"
+msgstr "最新回應時間"
+
+msgid "Response Code Distribution"
+msgstr "回應碼分布"
+
+msgid "Response Time Percentiles"
+msgstr "回應時間百分位"
+
+msgid "P50"
+msgstr "P50"
+
+msgid "P90"
+msgstr "P90"
+
+msgid "P95"
+msgstr "P95"
+
+msgid "P99"
+msgstr "P99"
+
+msgid "Bandix Connection Monitor"
+msgstr "Bandix 連線監控"
+
+msgid "Connection Monitor"
+msgstr "連線監控"
+
+msgid "Device Connection Statistics"
+msgstr "設備連線統計"
+
+msgid "Global Connection Statistics"
+msgstr "全域連線統計"
+
+msgid "Active TCP"
+msgstr "活躍TCP"
+
+msgid "Active UDP"
+msgstr "活躍UDP"
+
+msgid "Closed TCP"
+msgstr "已關閉TCP"
+
+msgid "Total Connections"
+msgstr "總連線數"
+
+msgid "Last Updated"
+msgstr "最後更新"
+
+msgid "TCP Connections"
+msgstr "TCP連線數"
+
+msgid "UDP Connections"
+msgstr "UDP連線數"
+
+msgid "Established TCP"
+msgstr "已建立TCP"
+
+msgid "TIME_WAIT TCP"
+msgstr "TIME_WAIT TCP"
+
+msgid "CLOSE_WAIT TCP"
+msgstr "CLOSE_WAIT TCP"
+
+msgid "Total Devices"
+msgstr "設備總數"
+
+msgid "Connection Monitor Disabled"
+msgstr "連線監控未啟用"
+
+msgid "Please enable connection monitoring in settings"
+msgstr "请在設定中啟用連線監控功能"
+
+msgid "List only shows LAN device connections, data may differ from total connections."
+msgstr "清單只顯示區域網路設備連線，數据可能和總連線數不一致。"
+
+msgid "TCP Status Details"
+msgstr "TCP 狀態詳情"
+
+msgid "Basic Settings"
+msgstr "基本設定"
+
+msgid "Traffic Monitor Settings"
+msgstr "流量監控設定"
+
+msgid "Connection Monitor Settings"
+msgstr "連線監控設定"
+
+msgid "DNS Monitor Settings"
+msgstr "DNS監控設定"
+
+msgid "Bandix Basic Configuration"
+msgstr "Bandix 基本配置"
+
+msgid "Configure basic parameters for Bandix service"
+msgstr "配置 Bandix 服務的基本参數"
+
+msgid "Bandix Traffic Monitor Configuration"
+msgstr "Bandix 流量監控配置"
+
+msgid "Configure traffic monitoring related parameters"
+msgstr "配置流量監控相關参數"
+
+msgid "Bandix Connection Monitor Configuration"
+msgstr "Bandix 連線監控配置"
+
+msgid "Configure connection monitoring related parameters"
+msgstr "配置連線監控相關参數"
+
+msgid "Bandix DNS Monitor Configuration"
+msgstr "Bandix DNS監控配置"
+
+msgid "Configure DNS monitoring related parameters"
+msgstr "配置DNS監控相關参數"
+
+msgid "Enable"
+msgstr "啟用"
+
+msgid "Enable Bandix Traffic Monitor Service"
+msgstr "啟用 Bandix 流量監控服務"
+
+msgid "Enable Traffic Monitoring"
+msgstr "啟用流量監控"
+
+msgid "Enable Connection Monitoring"
+msgstr "啟用連線監控"
+
+msgid "Enable DNS Monitoring"
+msgstr "啟用DNS監控"
+
+msgid "Simplified Chinese"
+msgstr "简体中文"
+
+msgid "Traditional Chinese"
+msgstr "繁体中文"
+
+msgid "Port"
+msgstr "連接埠"
+
+msgid "Port for Bandix service to listen on"
+msgstr "Bandix 服務監聽的連接埠"
+
+msgid "Monitor Interface"
+msgstr "監控網卡"
+
+msgid "Select the LAN network interface to monitor"
+msgstr "選擇要監控的LAN網路介面"
+
+msgid "Speed Units"
+msgstr "网速單位"
+
+msgid "Select the speed display unit format"
+msgstr "選擇网速顯示的單位格式"
+
+msgid "Bytes Units (B/s, KB/s, MB/s)"
+msgstr "位元組單位 (B/s, KB/s, MB/s)"
+
+msgid "Bits Units (bps, Kbps, Mbps)"
+msgstr "位元單位 (bps, Kbps, Mbps)"
+
+msgid "Interface Theme"
+msgstr "界面主題"
+
+msgid "Select the display theme for Bandix Traffic Monitor"
+msgstr "選擇 Bandix 流量監控的顯示主題"
+
+msgid "Follow System"
+msgstr "跟隨系統"
+
+msgid "Light Mode"
+msgstr "明亮模式"
+
+msgid "Dark Mode"
+msgstr "暗黑模式"
+
+msgid "Feedback"
+msgstr "意見回饋"
+
+msgid "Log Level"
+msgstr "日誌層級"
+
+msgid "Set the log level for Bandix service"
+msgstr "設定 Bandix 服務的日誌層級"
+
+msgid "Offline Timeout"
+msgstr "離線超时時間"
+
+msgid "Set the timeout for device offline detection (seconds). Devices inactive for longer than this time will be marked as offline"
+msgstr "設定設備離線判斷的超时時間（秒）。超過此時間未活動的設備将被標記为離線"
+
+msgid "Realtime Traffic Period"
+msgstr "即時流量週期"
+
+msgid "10 minutes interval uses about 60 KB per device"
+msgstr "10分鐘歷史週期，每个設備佔用 60KB"
+
+msgid "Data Flush Interval"
+msgstr "數据 flush 間隔"
+
+msgid "Set the interval for flushing data to disk"
+msgstr "設定數据寫入磁碟的時間間隔"
+
+msgid "1 minute"
+msgstr "1 分鐘"
+
+msgid "5 minutes"
+msgstr "5 分鐘"
+
+msgid "10 minutes"
+msgstr "10 分鐘"
+
+msgid "15 minutes"
+msgstr "15 分鐘"
+
+msgid "20 minutes"
+msgstr "20 分鐘"
+
+msgid "25 minutes"
+msgstr "25 分鐘"
+
+msgid "30 minutes"
+msgstr "30 分鐘"
+
+msgid "1 hour"
+msgstr "1 小時"
+
+msgid "2 hours"
+msgstr "2 小時"
+
+msgid "12 hours"
+msgstr "12 小時"
+
+msgid "24 hours"
+msgstr "24 小時"
+
+msgid "Data Directory"
+msgstr "數据目录"
+
+msgid "If you change the directory, please manually add it to the backup directory"
+msgstr "如果更改了目錄，請手動添加到備份目錄"
+
+msgid "Bandix data storage directory"
+msgstr "Bandix 數据儲存目錄"
+
+msgid "Enable Bandix connection monitoring"
+msgstr "啟用 Bandix 連線監控功能"
+
+msgid "Enable Bandix DNS monitoring"
+msgstr "啟用 Bandix DNS監控功能"
+
+msgid "DNS Max Records"
+msgstr "DNS最大记录數"
+
+msgid "Set the maximum number of DNS query records to keep. Older records will be deleted when this limit is exceeded"
+msgstr "設定DNS查詢記錄的最大儲存數量，超過此數量将刪除最舊的记录"
+
+msgid "Persist History Data"
+msgstr "持久化歷史數据"
+
+msgid "Enable data persistence functionality, data will only be persisted to disk when this option is enabled"
+msgstr "啟用數据持久化功能，只有啟用此选项后才會持久化到磁碟"
+
+msgid "Does not occupy storage space, stored only in memory"
+msgstr "不佔用存儲空間，僅存儲在內存中"
+
+msgid "Query & Response"
+msgstr "查詢與響應"
+
+msgid "Queries"
+msgstr "查詢"
+
+msgid "Responses"
+msgstr "響應"
+
+msgid "Average Response Time"
+msgstr "平均響應時間"
+
+msgid "Show More"
+msgstr "顯示更多"
+
+msgid "Show Less"
+msgstr "顯示更少"
+
+msgid "Add Schedule Rule"
+msgstr "新增定時限速規則"
+
+msgid "Add Rule"
+msgstr "新增規則"
+
+msgid "Set rate limit rules for different time periods"
+msgstr "為不同時間段設定限速規則"
+
+msgid "Time Slot"
+msgstr "時間段"
+
+msgid "Days of Week"
+msgstr "星期"
+
+msgid "Mon"
+msgstr "週一"
+
+msgid "Tue"
+msgstr "週二"
+
+msgid "Wed"
+msgstr "週三"
+
+msgid "Thu"
+msgstr "週四"
+
+msgid "Fri"
+msgstr "週五"
+
+msgid "Sat"
+msgstr "週六"
+
+msgid "Sun"
+msgstr "週日"
+
+msgid "Adding..."
+msgstr "新增中..."
+
+msgid "Failed to add schedule rule: "
+msgstr "新增定時限速規則失敗："
+
+msgid "Please set time slot"
+msgstr "請設定時間段"
+
+msgid "Please select at least one day"
+msgstr "請至少選擇一天"
+
+msgid "No scheduled rules yet, click \"Add Rule\" to start setting"
+msgstr "還沒有定時限速規則，點擊"新增規則"開始設定"
+
+msgid "Loading..."
+msgstr "載入中..."
+
+msgid "No schedule rules"
+msgstr "沒有定時限速規則"
+
+msgid "Failed to load schedule rules"
+msgstr "載入定時限速規則失敗"
+
+msgid "Delete Schedule Rule"
+msgstr "刪除定時限速規則"
+
+msgid "Are you sure you want to delete this schedule rule?"
+msgstr "確定要刪除這個定時限速規則嗎？"
+
+msgid "Failed to delete schedule rule"
+msgstr "刪除定時限速規則失敗"
+
+msgid "Confirm"
+msgstr "確認"
+
+msgid "Close"
+msgstr "關閉"
+
+msgid "rule"
+msgstr "規則"
+
+msgid "rules"
+msgstr "規則"
+
+msgid "more"
+msgstr "更多"
+
+msgid "No active rule"
+msgstr "無生效規則"
+
+msgid "Schedule Rules"
+msgstr "定時限速規則"
+
+msgid "Upload Statistics"
+msgstr "上傳統計"
+
+msgid "Download Statistics"
+msgstr "下載統計"
+
+msgid "Cumulative Traffic"
+msgstr "累計流量"
+
+msgid "Daily"
+msgstr "每日"
+
+msgid "Weekly"
+msgstr "每週"
+
+msgid "Monthly"
+msgstr "每月"
+
+msgid "Statistics"
+msgstr "統計"
+
+msgid "Average"
+msgstr "平均值"
+
+msgid "Maximum"
+msgstr "最大值"
+
+msgid "Minimum"
+msgstr "最小值"
+
+msgid "WAN Upload"
+msgstr "WAN 上傳"
+
+msgid "WAN Download"
+msgstr "WAN 下載"
+
+msgid "WAN Uploaded"
+msgstr "WAN 上傳量"
+
+msgid "WAN Downloaded"
+msgstr "WAN 下載量"
+
+msgid "Clear Traffic Data"
+msgstr "刪除流量數據"
+
+msgid "Are you sure you want to clear all traffic data? This action cannot be undone."
+msgstr "確定要清除所有流量數據嗎？此操作無法撤銷。"
+
+msgid "Failed to clear traffic data: "
+msgstr "清除流量數據失敗："
+
+msgid "Restart Service"
+msgstr "重啟服務"
+
+msgid "Restart Bandix Service"
+msgstr "重啟 Bandix 服務"
+
+msgid "Are you sure you want to restart the Bandix service?"
+msgstr "確定要重啟 Bandix 服務嗎？"
+
+msgid "Failed to restart service: "
+msgstr "重啟服務失敗："
+
+msgid "Realtime"
+msgstr "即時"
+
+msgid "Last 24 Hours"
+msgstr "最近24小時"
+
+msgid "Last 7 Days"
+msgstr "最近7天"
+
+msgid "Last 30 Days"
+msgstr "最近30天"
+
+msgid "Last 10 Minutes"
+msgstr "最近10分鐘"
+
+msgid "Last 15 Minutes"
+msgstr "最近15分鐘"
+
+msgid "Last 30 Minutes"
+msgstr "最近30分鐘"
+
+msgid "Last 1 Hour"
+msgstr "最近1小時"
+
+msgid "Starting installation..."
+msgstr "開始安裝..."
+
+msgid "Page will refresh in 3 seconds."
+msgstr "頁面將在3秒後重新整理。"
+
+msgid "Installation failed"
+msgstr "安裝失敗"
+
+msgid "Installation failed at step: "
+msgstr "安裝在步驟失敗："
+
+msgid "Details: "
+msgstr "詳細資訊："
+
+msgid "Installation failed: "
+msgstr "安裝失敗："
+
+msgid "Unknown error"
+msgstr "未知錯誤"
+
+msgid "Service restarted successfully."
+msgstr "服務重啟成功。"
+
+msgid "Service restart may have failed. Please check manually."
+msgstr "服務重啟可能失敗，請手動檢查。"
+
+msgid "Please restart the service."
+msgstr "請重啟服務。"
+
+msgid "LuCI App updated successfully!"
+msgstr "LuCI 應用更新成功！"
+
+msgid "Bandix updated successfully!"
+msgstr "Bandix 更新成功！"
+
+msgid "LuCI App has update: "
+msgstr "LuCI 應用有更新："
+
+msgid "Bandix has update: "
+msgstr "Bandix 有更新："
+
+msgid "LuCI App is up to date: "
+msgstr "LuCI 應用已是最新版本："
+
+msgid "Bandix is up to date: "
+msgstr "Bandix 已是最新版本："
+
+msgid "Updates Available"
+msgstr "有可用更新"
+
+msgid "No Updates Available"
+msgstr "無可用更新"
+
+msgid "Detected Architecture"
+msgstr "檢測到的架構"
+
+msgid "Package Manager"
+msgstr "套件管理器"
+
+msgid "LuCI Assets"
+msgstr "LuCI 資源"
+
+msgid "Bandix Assets"
+msgstr "Bandix 資源"
+
+msgid "Failed to check for updates"
+msgstr "檢查更新失敗"
+
+msgid "Failed to check for updates: "
+msgstr "檢查更新失敗："
+
+msgid "Checking..."
+msgstr "檢查中..."
+
+msgid "Check for Updates"
+msgstr "檢查更新"
+
+msgid "Installing..."
+msgstr "安裝中..."
+
+msgid "Download and Install"
+msgstr "下載並安裝"
+
+msgid "Manual Download"
+msgstr "手動下載"
+
+msgid "Close"
+msgstr "關閉"
+
+msgid "Starting installation... The page will refresh automatically in 5 seconds."
+msgstr "開始安裝... 頁面將在5秒後自動重新整理。"
+
+msgid "Please clear your browser cache manually after updating."
+msgstr "更新後請手動清空瀏覽器快取。"
+
+msgid "Traffic Statistics"
+msgstr "流量統計"
+
+msgid "Traffic Statistics"
+msgstr "流量統計"
+
+msgid "Device Usage Ranking"
+msgstr "設備用量排行"
+
+msgid "Start Date"
+msgstr "開始日期"
+
+msgid "End Date"
+msgstr "結束日期"
+
+msgid "Reset"
+msgstr "重置"
+
+msgid "Today"
+msgstr "今天"
+
+msgid "This Week"
+msgstr "本週"
+
+msgid "Last Week"
+msgstr "上週"
+
+msgid "This Month"
+msgstr "本月"
+
+msgid "Last Month"
+msgstr "上月"
+
+msgid "Last 90 Days"
+msgstr "最近90天"
+
+msgid "Last Year"
+msgstr "最近一年"
+
+msgid "Traffic Timeline"
+msgstr "流量時間線"
+
+msgid "Aggregation:"
+msgstr "聚合方式："
+
+msgid "Hourly"
+msgstr "按小時"
+
+msgid "Device:"
+msgstr "設備："
+
+msgid "Traffic Push URL"
+msgstr "流量推送URL"
+
+msgid "Push traffic data to a remote HTTP endpoint (POST JSON). Leave empty to disable."
+msgstr "將流量數據推送至遠程HTTP端點（POST JSON）。留空則禁用。"
+
+msgid "Device Event Push URL"
+msgstr "設備事件推送URL"
+
+msgid "Push device online/offline events to a remote HTTP endpoint (POST JSON on state change). Leave empty to disable."
+msgstr "將設備上下線事件推送至遠程HTTP端點（狀態變化時POST JSON）。留空則禁用。"
+
+msgid "Additional Subnets"
+msgstr "額外子網"
+
+msgid "Additional local subnets (comma-separated CIDR notation, e.g. '192.168.2.0/24,10.0.0.0/8'). Leave empty to use only interface subnet."
+msgstr "額外的本地子網（用逗號分隔的CIDR表示法，例如'192.168.2.0/24,10.0.0.0/8'）。留空則只使用接口子網。"
+
+msgid "No devices"
+msgstr "無設備"
+
+msgid "LAN Traffic is viewed from the entire subnet perspective, so upload and download are always equal, forming a closed loop. Additionally, due to the presence of dedicated hardware switching chips, LAN traffic between 2 devices (e.g., PC - NAS) within the local network may not be monitorable."
+msgstr "LAN 流量是從整個子網視角來看，所以上傳和下載總是相等，是一個閉環。另外，由於專用硬體交換晶片的存在，區域網路中 2 終端（比如 PC - NAS）之間的 LAN 流量可能無法監控。"

@@ -1,0 +1,71 @@
+{
+	"luci-app-bandix": {
+		"description": "Grant access to bandix traffic monitoring",
+		"read": {
+			"ubus": {
+				"luci.bandix": [
+					"getStatus",
+					"getMetrics",
+					"getMetricsDay",
+					"getMetricsWeek",
+					"getMetricsMonth",
+					"getConnection",
+					"setHostname",
+					"getDnsQueries",
+					"getDnsStats",
+					"getScheduleLimits",
+					"setScheduleLimit",
+					"deleteScheduleLimit",
+					"clearData",
+					"restartService",
+					"getVersion",
+					"getSystemArch",
+					"checkUpdate",
+					"installUpdate",
+					"getTrafficUsageRanking",
+					"getTrafficUsageIncrements",
+					"getRateLimitWhitelist"
+				]
+			},
+			"uci": [
+				"bandix"
+			]
+		},
+		"write": {
+			"ubus": {
+				"luci.bandix": [
+					"getStatus",
+					"getMetrics",
+					"getMetricsDay",
+					"getMetricsWeek",
+					"getMetricsMonth",
+					"getConnection",
+					"setHostname",
+					"getDnsQueries",
+					"getDnsStats",
+					"getScheduleLimits",
+					"setScheduleLimit",
+					"deleteScheduleLimit",
+					"clearData",
+					"restartService",
+					"getVersion",
+					"getSystemArch",
+					"checkUpdate",
+					"installUpdate",
+					"getTrafficUsageRanking",
+					"getTrafficUsageIncrements",
+					"getRateLimitWhitelist",
+					"getRateLimitWhitelistEnabled",
+					"setRateLimitWhitelistEnabled",
+					"addRateLimitWhitelist",
+					"deleteRateLimitWhitelist",
+					"setDefaultRateLimit",
+					"updateScheduleLimit"
+				]
+			},
+			"uci": [
+				"bandix"
+			]
+		}
+	}
+}

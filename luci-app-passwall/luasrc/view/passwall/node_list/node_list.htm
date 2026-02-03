@@ -26,10 +26,6 @@ table td, .table .td {
 	box-shadow: darkgrey 10px 10px 30px 5px;
 }
 
-._now_use {
-	color: red !important;
-}
-
 ._now_use_bg {
 	background: #5e72e445 !important;
 }
@@ -72,7 +68,6 @@ table td, .table .td {
 	padding: 0 !important;
 	line-height: inherit;
 	user-select: none;
-	color: #00000070;
 	align-self: stretch;
 }
 
@@ -215,8 +210,7 @@ table td, .table .td {
 	//<![CDATA[
 	let auto_detection_time = "<%=api.uci_get_type("global_other", "auto_detection_time", "0")%>"
 	let show_node_info = "<%=api.uci_get_type("global_other", "show_node_info", "0")%>"
-
-	var node_list = [];
+	var ajaxList = [];
 
 	var ajax = {
 		post: function(url, data, fn_success, timeout, fn_timeout) {
@@ -247,6 +241,7 @@ table td, .table .td {
 					fn_success(xhr, json);
 				}
 			};
+			ajaxList.push(xhr);
 			xhr.send(code);
 		},
 		encode: function(obj) {
@@ -269,17 +264,30 @@ table td, .table .td {
 		}
 	}
 
-	function to_add_node() {
+	function ajaxAbortAll() {
+		ajaxList.forEach(xhr => xhr.abort());
+		ajaxList = [];
+	}
+
+	function to_add_node(protocol) {
+		ajaxAbortAll();
 		const dom = document.getElementsByClassName("cbi-tab")[0];
 		const current_group = dom.getAttribute("group_name")
-		window.location.href='<%=api.url("add_node")%>?redirect=1&group=' + current_group;
+		window.location.href = '<%=api.url("add_node")%>?redirect=1&group=' + current_group;
+	}
+
+	function to_edit_node(cbi_id) {
+		ajaxAbortAll();
+		location.href='<%=api.url("node_config")%>/' + cbi_id;
 	}
 
 	function copy_node(cbi_id) {
+		ajaxAbortAll();
 		window.location.href = '<%=api.url("copy_node")%>' + "?section=" + cbi_id;
 	}
 
 	function del_node(cbi_id) {
+		ajaxAbortAll();
 		window.location.href = '<%=api.url("delete_select_nodes")%>' + "?redirect=1&ids=" + cbi_id;
 	}
 
@@ -394,6 +402,7 @@ table td, .table .td {
 								box.remove();
 							}
 							*/
+							ajaxAbortAll();
 							window.location.href = '<%=api.url("node_list")%>';
 						}
 						else {
@@ -410,6 +419,7 @@ table td, .table .td {
 
 	function set_node(protocol) {
 		if (confirm('<%:Are you sure set to%> ' + protocol.toUpperCase() + '<%:the server?%>')==true){
+			ajaxAbortAll();
 			window.location.href = '<%=api.url("set_node")%>?protocol=' + protocol + '&section=' + section;
 		}
 	}
@@ -495,9 +505,9 @@ table td, .table .td {
 						dom.classList.add("_now_use_bg");
 						//var v = "<a style='color: red'>当前TCP节点：</a>" + document.getElementById("cbid.passwall." + id + ".remarks").value;
 						//document.getElementById("cbi-passwall-" + id + "-remarks").innerHTML = v;
-						var dom_remarks = document.getElementById("cbi-passwall-" + id + "-remarks");
+						var dom_remarks = dom.querySelector("td.pw-remark");
 						if (dom_remarks) {
-							dom_remarks.classList.add("_now_use");
+							dom_remarks.style.color = 'red';
 						}
 					}
 				}
@@ -511,9 +521,9 @@ table td, .table .td {
 							dom.title = '<%=api.i18n.translatef("Currently using %s node", "UDP")%>';
 						}
 						dom.classList.add("_now_use_bg");
-						var dom_remarks = document.getElementById("cbi-passwall-" + id + "-remarks");
+						var dom_remarks = dom.querySelector("td.pw-remark");
 						if (dom_remarks) {
-							dom_remarks.classList.add("_now_use");
+							dom_remarks.style.color = 'red';
 						}
 					}
 				}
@@ -757,6 +767,12 @@ table td, .table .td {
 			}
 		}
 	}
+
+	function escape_html(s) {
+		return s.replace(/[&<>"']/g, c => ({
+			"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+		}[c]));
+	}
 </script>
 
 <script type="text/template" id="nodes-table-template">
@@ -798,7 +814,7 @@ table td, .table .td {
 				<input class="btn cbi-button cbi-button-edit" type="button" value="<%:To Top%>" onclick="row_top(this, '{{group}}')" title="<%:To Top%>"/>
 				<input class="btn cbi-button cbi-button-apply" type="button" value="<%:Use%>" id="apply_{{id}}" onclick="open_set_node_div('{{id}}')"/>
 				<input class="btn cbi-button cbi-button-add" type="button" value="<%:Copy%>" onclick="copy_node('{{id}}')"/>
-				<input class="btn cbi-button cbi-button-edit" type="button" value="<%:Edit%>" onclick="location.href='<%=api.url("node_config")%>/{{id}}'" alt="<%:Edit%>" title="<%:Edit%>">
+				<input class="btn cbi-button cbi-button-edit" type="button" value="<%:Edit%>" onclick="to_edit_node('{{id}}')" alt="<%:Edit%>" title="<%:Edit%>">
 				<input class="btn cbi-button cbi-button-remove" type="button" value="<%:Delete%>" onclick="del_node('{{id}}')" alt="<%:Delete%>" title="<%:Delete%>">
 				<span class="drag-handle center" title="<%:Drag to reorder%>">⠿</span>
 			</div>
@@ -843,7 +859,9 @@ table td, .table .td {
 			} else if (protocol == "ssh") {
 				p = "SSH";
 			} else {
-				p = protocol.charAt(0).toUpperCase() + protocol.slice(1);
+				if (protocol && protocol.length > 1) {
+					p = protocol.charAt(0).toUpperCase() + protocol.slice(1);
+				}
 			}
 			if (type == "sing-box") {
 				type = "Sing-Box";
@@ -910,7 +928,7 @@ table td, .table .td {
 						} else {
 							innerHTML = innerHTML.split("{{tcping}}").join('<span class="tcping_value" cbiid="{{id}}">---</span>');
 						}
-						innerHTML = innerHTML.split("{{url_test}}").join('<span class="ping"><a href="javascript:void(0)" onclick="javascript:urltest_node(\'{{id}}\', this)"><%:Test%></a></span>');
+						innerHTML = innerHTML.split("{{url_test}}").join('<span class="ping"><a href="javascript:void(0)" onclick="javascript:urltest_node(\'{{id}}\', this)" title="<%:TLS handshake test, latency for reference only%>"><%:Test%></a></span>');
 						innerHTML = innerHTML.split("{{id}}").join(o[".name"]);
 						innerHTML = innerHTML.split("{{group}}").join(o["group"] || "");
 						let node_remarks = get_remarks_name(o);
@@ -940,7 +958,7 @@ table td, .table .td {
 
 				tab_ul_li_html +=
 					'<li group_name="' + group + '" id="tab.passwall.nodes.' + group + '" class="cbi-tab">' +
-						'<a onclick="this.blur(); return cbi_t_switch(\'passwall.nodes\', \'' + group + '\')" href="<%=REQUEST_URI%>?tab.passwall.nodes=' + group + '">' + group_name + " | " + "<font style='color: red'>" + group_nodes[group].length + '</font></a>' +
+						'<a onclick="this.blur(); return cbi_t_switch(\'passwall.nodes\', \'' + group + '\')" href="<%=REQUEST_URI%>?tab.passwall.nodes=' + group + '">' + escape_html(group_name) + " | " + "<font style='color: red'>" + group_nodes[group].length + '</font></a>' +
 					'</li>'
 				tab_content_html +=
 					'<div class="cbi-tabcontainer" id="container.passwall.nodes.' + group + '" style="display: none;">' +

@@ -120,8 +120,7 @@ o = s:option(ListValue, _n("flow"), translate("flow"))
 o.default = ""
 o:value("", translate("Disable"))
 o:value("xtls-rprx-vision")
-o:depends({ [_n("protocol")] = "vless", [_n("tls")] = true, [_n("transport")] = "raw" })
-o:depends({ [_n("protocol")] = "vless", [_n("tls")] = true, [_n("transport")] = "xhttp" })
+o:depends({ [_n("protocol")] = "vless" })
 
 o = s:option(Flag, _n("tls"), translate("TLS"))
 o.default = 0
@@ -244,7 +243,7 @@ end
 
 o = s:option(Flag, _n("ech"), translate("ECH"))
 o.default = "0"
-o:depends({ [_n("tls")] = true, [_n("flow")] = "", [_n("reality")] = false })
+o:depends({ [_n("tls")] = true, [_n("reality")] = false })
 
 o = s:option(TextValue, _n("ech_key"), translate("ECH Key"))
 o.default = ""
