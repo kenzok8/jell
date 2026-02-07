@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-openclash
-PKG_VERSION:=0.47.052
-PKG_RELEASE:=131
+PKG_VERSION:=0.47.055
+PKG_RELEASE:=132
 PKG_MAINTAINER:=vernesong <https://github.com/vernesong/OpenClash>
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
@@ -138,7 +138,6 @@ define Package/$(PKG_NAME)/postrm
 	rm -rf /tmp/openclash.log >/dev/null 2>&1
 	rm -rf /tmp/openclash_start.log >/dev/null 2>&1
 	rm -rf /tmp/openclash_last_version >/dev/null 2>&1
-	rm -rf /tmp/openclash_config.tmp >/dev/null 2>&1
 	rm -rf /tmp/openclash.change >/dev/null 2>&1
 	rm -rf /tmp/Proxy_Group >/dev/null 2>&1
 	rm -rf /tmp/rules_name >/dev/null 2>&1
