@@ -1,12 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sms-tool
-PKG_RELEASE:=14
+PKG_RELEASE:=15
 
 PKG_SOURCE_URL:=https://github.com/obsy/sms_tool
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_DATE:=2021-08-24
-PKG_SOURCE_VERSION:=abac7009804b4fc41eeb72dd3db6c2b12ac7cbd5
+PKG_SOURCE_VERSION:=94899dc987d3a63bd04f8b8e25f6296381d76790
 
 include $(INCLUDE_DIR)/package.mk
 
