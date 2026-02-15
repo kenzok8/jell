@@ -3166,6 +3166,7 @@ body {
     background: var(--bg-container) !important;
     transition: transform 0.3s ease !important;
     border: none !important;
+    color: var(--text-primary) !important;
 }
 
 .card:hover {
@@ -3735,6 +3736,24 @@ list-group:hover {
     min-width: 100px;
 }
 
+.rename-select {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: var(--border-strong);
+}
+
+.form-select {
+    background-color: var(--card-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23000' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") !important;
+    padding-right: 2rem;
+    border: var(--border-strong);
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") !important;
+}
+
 .simple-editor {
     width: 100%;
     height: 100%;
@@ -3999,6 +4018,15 @@ list-group:hover {
     text-align: center;
     margin-right: 12px;
     display: inline-block;
+}
+
+.table-transparent {
+    --bs-table-bg: transparent !important;
+    background-color: transparent !important;
+}
+
+.table>:not(caption)>*>* {
+    color: var(--text-primary) !important;
 }
 </style>
 <div class="main-container">
@@ -4841,6 +4869,11 @@ list-group:hover {
             <span data-translate="rename">Rename</span>
             <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.7;">F2</span>
         </div>
+        <div class="menu-item" id="fileBatchRenameItem" onclick="showBatchRenameDialog()">
+            <i class="fas fa-i-cursor me-2" style="color:#9C27B0;"></i>
+            <span data-translate="batch_rename">Batch Rename</span>
+            <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.7;">Ctrl+B</span>
+        </div>
         <div class="menu-item" id="fileDeleteItem" onclick="contextMenuDelete()">
             <i class="fas fa-trash me-2" style="color:#E53935;"></i>
             <span data-translate="delete">Delete</span>
@@ -5525,6 +5558,78 @@ list-group:hover {
                     <i class="fas fa-times me-1"></i>
                     <span data-translate="close">Close</span>
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="batchRenameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-i-cursor me-2"></i><span data-translate="batch_rename">Batch Rename</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-folder-open me-2"></i>
+                                <span data-translate="selected_files">Selected Files</span>
+                            </div>
+                            <span class="badge bg-primary" id="selectedFilesCount">0</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <div id="batchRenameFileList" class="list-group list-group-flush" style="max-height:150px; overflow-y:auto;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="renamePattern" class="form-label" data-translate="rename_pattern">Rename Pattern:</label>
+                        <input type="text" class="form-control  mb-2" id="renamePattern" placeholder="Prefix_{n}_Suffix" value="File_{n}">
+                        <small class="text-muted" data-translate="pattern_hint">Use {n} for number, {name} for original name, {ext} for extension</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="startNumber" class="form-label" data-translate="start_number">Start Number:</label>
+                        <input type="number" class="form-control" id="startNumber" value="1" min="1" max="9999">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="numberPadding" class="form-label" data-translate="number_padding">Number Padding:</label>
+                        <select class="form-select" id="numberPadding">
+                            <option value="1">1</option>
+                            <option value="2" selected>2 (01, 02...)</option>
+                            <option value="3">3 (001, 002...)</option>
+                            <option value="4">4 (0001, 0002...)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="keepOriginalName" checked>
+                        <label class="form-check-label" for="keepOriginalName" data-translate="keep_original_name">Keep original name part (use {name} in pattern)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="removeSpecialChars" checked>
+                        <label class="form-check-label" for="removeSpecialChars" data-translate="remove_special_chars">Remove special characters (#, spaces, emoji) from names</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-header fw-bold">
+                            <i class="fas fa-eye me-2"></i>
+                            <span data-translate="preview">Preview</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <div id="batchRenamePreview" class="list-group list-group-flush" style="max-height:200px; overflow-y:auto;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i><span data-translate="cancel">Cancel</span></button>
+                <button type="button" class="btn btn-primary" onclick="executeBatchRename()"><i class="fas fa-check me-1"></i><span data-translate="rename">Rename</span></button>
             </div>
         </div>
     </div>
@@ -7390,6 +7495,7 @@ function handleRightClick(event) {
         showMenuItem('fileCopyItem');
         showMenuItem('fileCopyPathItem');
         showMenuItem('fileRenameItem');
+        document.getElementById('fileBatchRenameItem').style.display = 'flex';
         showMenuItem('fileDeleteItem');
         showMenuItem('fileChmodItem');
         showMenuItem('filePropertiesItem');
@@ -7447,6 +7553,7 @@ function handleRightClick(event) {
         showMenuItem('emptyUploadItem');
         showMenuItem('emptyRefreshItem');
         showMenuItem('emptySelectAllItem');
+        document.getElementById('fileBatchRenameItem').style.display = 'none';
     }
     
     updatePasteMenuState();
@@ -8079,7 +8186,7 @@ function hideAllContextMenuItems() {
         'fileDeleteItem', 'fileChmodItem', 'filePropertiesItem', 'fileTerminalItem',
         'emptyNewFolderItem', 'emptyNewFileItem', 'emptyUploadItem',
         'emptyRefreshItem', 'emptySelectAllItem', 'fileCopyPathItem',
-        'globalPasteItem',
+        'globalPasteItem', 'fileBatchRenameItem',
         'archiveMenuItem',
         'fileInstallItem', 'fileHashItem'
     ];
@@ -12712,6 +12819,226 @@ document.getElementById('installModal').addEventListener('hidden.bs.modal', func
     document.getElementById('installProgress').style.width = '0%';
     document.getElementById('installProgressText').textContent = '0%';
 });
+
+let batchRenameFiles = [];
+
+function showBatchRenameDialog() {
+    if (selectedFiles.size === 0) {
+        showLogMessage(translations['select_files_to_rename'] || 'Please select files to rename', 'warning');
+        return;
+    }
+    
+    batchRenameFiles = Array.from(selectedFiles).map(path => {
+        const fileItem = document.querySelector(`.file-item[data-path="${path}"]`);
+        const name = path.split('/').pop();
+        const isDir = fileItem ? fileItem.getAttribute('data-is-dir') === 'true' : false;
+        const ext = name.includes('.') ? name.split('.').pop() : '';
+        const nameWithoutExt = name.includes('.') ? name.substring(0, name.lastIndexOf('.')) : name;
+        
+        return {
+            path: path,
+            name: name,
+            nameWithoutExt: nameWithoutExt,
+            ext: ext,
+            isDir: isDir,
+            dir: path.substring(0, path.lastIndexOf('/')) || '/'
+        };
+    });
+    
+    batchRenameFiles.sort((a, b) => a.name.localeCompare(b.name));
+    
+    updateBatchRenameFileList();
+    
+    document.getElementById('renamePattern').removeEventListener('input', generateBatchRenamePreview);
+    document.getElementById('startNumber').removeEventListener('input', generateBatchRenamePreview);
+    document.getElementById('numberPadding').removeEventListener('change', generateBatchRenamePreview);
+    document.getElementById('keepOriginalName').removeEventListener('change', generateBatchRenamePreview);
+    document.getElementById('removeSpecialChars').removeEventListener('change', generateBatchRenamePreview);
+    
+    document.getElementById('renamePattern').addEventListener('input', generateBatchRenamePreview);
+    document.getElementById('startNumber').addEventListener('input', generateBatchRenamePreview);
+    document.getElementById('numberPadding').addEventListener('change', generateBatchRenamePreview);
+    document.getElementById('keepOriginalName').addEventListener('change', generateBatchRenamePreview);
+    document.getElementById('removeSpecialChars').addEventListener('change', generateBatchRenamePreview);
+    
+    generateBatchRenamePreview();
+    
+    hideFileContextMenu();
+    
+    const modal = new bootstrap.Modal(document.getElementById('batchRenameModal'));
+    modal.show();
+}
+
+function updateBatchRenameFileList() {
+    const listContainer = document.getElementById('batchRenameFileList');
+    if (!listContainer) return;
+    
+    let html = '';
+    batchRenameFiles.forEach((file, index) => {
+        const icon = file.isDir ? 'fa-folder' : 'fa-file';
+        const color = file.isDir ? '#FFA726' : '#2196F3';
+        html += `
+        <div class="px-2 py-1 d-flex align-items-center" style="border-bottom: var(--border-strong);">
+            <span class="badge bg-secondary me-2" style="min-width: 30px;">${index + 1}</span>
+            <i class="fas ${icon} me-2" style="color: ${color};"></i>
+            <span style="word-break: break-all;" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
+        </div>`;
+    });
+    listContainer.innerHTML = html;
+    
+    const countBadge = document.getElementById('selectedFilesCount');
+    if (countBadge) {
+        countBadge.textContent = batchRenameFiles.length;
+    }
+}
+
+function removeSpecialCharsFromName(name) {
+    const emojiRegex = /[\u{1F600}-\u{1F64F}|\u{1F300}-\u{1F5FF}|\u{1F680}-\u{1F6FF}|\u{1F700}-\u{1F77F}|\u{1F780}-\u{1F7FF}|\u{1F800}-\u{1F8FF}|\u{1F900}-\u{1F9FF}|\u{1FA00}-\u{1FA6F}|\u{1FA70}-\u{1FAFF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}|\u{2B00}-\u{2BFF}|\u{2E00}-\u{2E7F}]/gu;
+    name = name.replace(emojiRegex, '');
+    name = name.replace(/[#\s]/g, '_');
+    name = name.replace(/_+/g, '_');
+    name = name.replace(/^_+|_+$/g, '');
+    return name;
+}
+
+function generateBatchRenamePreview() {
+    const pattern = document.getElementById('renamePattern').value;
+    const startNum = parseInt(document.getElementById('startNumber').value) || 1;
+    const padding = parseInt(document.getElementById('numberPadding').value);
+    const keepOriginalName = document.getElementById('keepOriginalName').checked;
+    const removeSpecialChars = document.getElementById('removeSpecialChars').checked;
+    
+    const previewContainer = document.getElementById('batchRenamePreview');
+    if (!previewContainer) return;
+    
+    let html = '<table class="table table-sm table-borderless table-transparent">';
+    html += '<thead><tr><th>#</th><th>' + (translations['original_name'] || 'Original') + '</th><th>→</th><th>' + (translations['new_name'] || 'New') + '</th></tr></thead><tbody>';
+    
+    batchRenameFiles.forEach((file, index) => {
+        const num = startNum + index;
+        const paddedNum = num.toString().padStart(padding, '0');
+        
+        let newName = pattern
+            .replace(/{n}/g, paddedNum)
+            .replace(/{name}/g, keepOriginalName ? file.nameWithoutExt : '')
+            .replace(/{ext}/g, file.ext);
+        
+        if (!keepOriginalName) {
+            newName = newName.replace(/{name}/g, '');
+        }
+        
+        if (removeSpecialChars) {
+            newName = removeSpecialCharsFromName(newName);
+        }
+        
+        if (file.ext && !newName.endsWith('.' + file.ext)) {
+            newName = newName + (newName ? '.' : '') + file.ext;
+        }
+        
+        newName = newName.replace(/\.+/g, '.').replace(/^\.|\.$/g, '');
+        
+        if (!newName) {
+            newName = 'file_' + paddedNum + (file.ext ? '.' + file.ext : '');
+        }
+        
+        const icon = file.isDir ? 'fa-folder' : 'fa-file';
+        const color = file.isDir ? '#FFA726' : '#2196F3';
+        
+        html += `<tr>
+            <td><span class="badge bg-secondary">${index + 1}</span></td>
+            <td><i class="fas ${icon} me-1" style="color: ${color};"></i> ${escapeHtml(file.name)}</td>
+            <td><i class="fas fa-arrow-right text-success"></i></td>
+            <td><i class="fas ${icon} me-1" style="color: ${color};"></i> ${escapeHtml(newName)}</td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    previewContainer.innerHTML = html;
+}
+
+async function executeBatchRename() {
+    const pattern = document.getElementById('renamePattern').value;
+    const startNum = parseInt(document.getElementById('startNumber').value) || 1;
+    const padding = parseInt(document.getElementById('numberPadding').value);
+    const keepOriginalName = document.getElementById('keepOriginalName').checked;
+    const removeSpecialChars = document.getElementById('removeSpecialChars').checked;
+    
+    if (!pattern) {
+        showLogMessage(translations['enter_rename_pattern'] || 'Please enter rename pattern', 'warning');
+        return;
+    }
+    
+    bootstrap.Modal.getInstance(document.getElementById('batchRenameModal')).hide();
+    
+    showLogMessage(translations['renaming_files'] || 'Renaming files...', 'info');
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    for (let i = 0; i < batchRenameFiles.length; i++) {
+        const file = batchRenameFiles[i];
+        const num = startNum + i;
+        const paddedNum = num.toString().padStart(padding, '0');
+        
+        let newName = pattern
+            .replace(/{n}/g, paddedNum)
+            .replace(/{name}/g, keepOriginalName ? file.nameWithoutExt : '')
+            .replace(/{ext}/g, file.ext);
+        
+        if (!keepOriginalName) {
+            newName = newName.replace(/{name}/g, '');
+        }
+        
+        if (removeSpecialChars) {
+            newName = removeSpecialCharsFromName(newName);
+        }
+        
+        if (file.ext && !newName.endsWith('.' + file.ext)) {
+            newName = newName + (newName ? '.' : '') + file.ext;
+        }
+        
+        newName = newName.replace(/\.+/g, '.').replace(/^\.|\.$/g, '');
+        
+        if (!newName) {
+            newName = 'file_' + paddedNum + (file.ext ? '.' + file.ext : '');
+        }
+        
+        if (newName === file.name) {
+            successCount++;
+            continue;
+        }
+        
+        try {
+            const response = await fetch(`?action=rename_item&old=${encodeURIComponent(file.path)}&new=${encodeURIComponent(newName)}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                successCount++;
+            } else {
+                errorCount++;
+            }
+        } catch (error) {
+            errorCount++;
+        }
+    }
+    
+    selectedFiles.clear();
+    updateSelectionInfo();
+    
+    refreshFiles();
+    
+    let message = '';
+    if (successCount > 0) {
+        message = (translations['rename_success_count'] || 'Successfully renamed {count} file(s)').replace('{count}', successCount);
+        showLogMessage(message, 'success');
+        speakMessage(message, 'success');
+    }
+    
+    if (errorCount > 0) {
+        message = (translations['rename_failed_count'] || 'Failed to rename {count} file(s)').replace('{count}', errorCount);
+        showLogMessage(message, 'error');
+    }
+}
 
 window.addEventListener('beforeunload', function(e) {
     const unsavedTabs = editorTabs.filter(tab => tab.modified);
