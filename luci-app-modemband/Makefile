@@ -1,5 +1,5 @@
 #
-# Copyright 2022-2025 Rafał Wabik - IceG - From eko.one.pl forum
+# Copyright 2022-2026 Rafał Wabik - IceG - From eko.one.pl forum
 # 
 # MIT License
 #
