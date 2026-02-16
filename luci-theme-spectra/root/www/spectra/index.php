@@ -1163,6 +1163,54 @@ if (isset($_GET['action'])) {
         exit;
     }
 
+    if ($action === 'full_scan') {
+        header('Content-Type: application/json');
+    
+        $media = ['music' => [], 'video' => [], 'image' => []];
+        $files = scanDirectory($ROOT_DIR, 20);
+    
+        foreach ($files as $file) {
+            $ext = $file['ext'];
+            foreach ($TYPE_EXT as $type => $exts) {
+                if (in_array($ext, $exts)) {
+                    $media[$type][] = $file;
+                    break;
+                }
+            }
+        }
+    
+        foreach ($media as &$files) {
+            usort($files, function($a, $b) {
+                return $b['mtime'] - $a['mtime'];
+            });
+        }
+    
+        $cacheFile = './lib/media_cache.json';
+        file_put_contents($cacheFile, json_encode($media));
+    
+        echo json_encode(['success' => true]);
+        exit;
+    }
+
+    if ($action === 'clear_cache') {
+        header('Content-Type: application/json');
+    
+        $cacheFile = './lib/media_cache.json';
+        $success = false;
+    
+        if (file_exists($cacheFile)) {
+            $success = unlink($cacheFile);
+        } else {
+            $success = true;
+        }
+    
+        echo json_encode([
+            'success' => $success,
+            'message' => $success ? 'Cache cleared' : 'Failed to clear cache'
+        ]);
+        exit;
+    }
+
     if ($action === 'archive_action') {
         header('Content-Type: application/json');
     
@@ -2182,7 +2230,7 @@ function getDiskInfo($path = '/') {
     ];
 }
 
-function scanDirectory($path, $maxDepth = 5) {
+function scanDirectory($path, $maxDepth = 5, $fast = false) {
     global $EXCLUDE_DIRS;
     $files = [];
     $seenFiles = [];
@@ -2206,12 +2254,9 @@ function scanDirectory($path, $maxDepth = 5) {
             RecursiveIteratorIterator::CATCH_GET_CHILD
         );
         
+        $iterator->setMaxDepth($maxDepth);
+        
         foreach ($iterator as $file) {
-            if ($iterator->getDepth() > $maxDepth) {
-                $iterator->next();
-                continue;
-            }
-            
             if ($file->isFile() && $file->isReadable()) {
                 $filePath = $file->getPathname();
                 $realPath = realpath($filePath);
@@ -2238,18 +2283,36 @@ function scanDirectory($path, $maxDepth = 5) {
                 
                 $seenFiles[$fileKey] = true;
                 
-                $files[] = [
-                    'path' => $realPath,
-                    'name' => $file->getFilename(),
-                    'size' => $file->getSize(),
-                    'mtime' => $file->getMTime(),
-                    'ext' => strtolower($file->getExtension()),
-                    'safe_path' => htmlspecialchars($realPath, ENT_QUOTES, 'UTF-8'),
-                    'safe_name' => htmlspecialchars($file->getFilename(), ENT_QUOTES, 'UTF-8')
-                ];
+                if ($fast) {
+                    $ext = strtolower($file->getExtension());
+                    $files[] = [
+                        'path' => $realPath,
+                        'name' => $fileName,
+                        'size' => $fileSize,
+                        'mtime' => $file->getMTime(),
+                        'ext' => $ext,
+                        'safe_path' => htmlspecialchars($realPath, ENT_QUOTES, 'UTF-8'),
+                        'safe_name' => htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8')
+                    ];
+                } else {
+                    $files[] = [
+                        'path' => $realPath,
+                        'name' => $fileName,
+                        'size' => $fileSize,
+                        'mtime' => $file->getMTime(),
+                        'ext' => strtolower($file->getExtension()),
+                        'safe_path' => htmlspecialchars($realPath, ENT_QUOTES, 'UTF-8'),
+                        'safe_name' => htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8')
+                    ];
+                }
+            }
+            
+            if (count($files) % 100 == 0) {
+                gc_collect_cycles();
             }
         }
     } catch (Exception $e) {
+        error_log("Scan error: " . $e->getMessage());
     }
     
     return $files;
@@ -2267,22 +2330,13 @@ function getVideoThumbnail($videoPath) {
 }
 
 $media = ['music' => [], 'video' => [], 'image' => []];
-$files = scanDirectory($ROOT_DIR);
 
-foreach ($files as $file) {
-    $ext = $file['ext'];
-    foreach ($TYPE_EXT as $type => $exts) {
-        if (in_array($ext, $exts)) {
-            $media[$type][] = $file;
-            break;
-        }
+$cacheFile = './lib/media_cache.json';
+if (file_exists($cacheFile)) {
+    $cached = json_decode(file_get_contents($cacheFile), true);
+    if ($cached) {
+        $media = $cached;
     }
-}
-
-foreach ($media as &$files) {
-    usort($files, function($a, $b) {
-        return $b['mtime'] - $a['mtime'];
-    });
 }
 
 $diskInfo = getDiskInfo('/');
@@ -4149,6 +4203,82 @@ list-group:hover {
 .table>:not(caption)>*>* {
     color: var(--text-primary) !important;
 }
+
+.file-item.playing {
+    background-color: rgba(76, 175, 80, 0.2) !important;
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5) !important;
+    transform: translateY(-2px);
+    position: relative;
+    z-index: 10;
+}
+
+.file-item.playing::after {
+    content: '▶';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: #4CAF50;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 1.5s infinite;
+}
+
+.media-item.playing {
+    background-color: rgba(76, 175, 80, 0.2) !important;
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5) !important;
+    transform: translateY(-2px);
+    position: relative;
+    z-index: 10;
+}
+
+.media-item.playing::after {
+    content: '▶';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: #4CAF50;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 1.5s infinite;
+}
+
+.file-item.playing .file-icon i,
+.media-item.playing .media-thumb i {
+    color: #4CAF50 !important;
+    filter: drop-shadow(0 0 5px #4CAF50);
+}
+
+.file-item.playing .file-name,
+.media-item.playing .media-name {
+    color: #4CAF50 !important;
+    font-weight: bold;
+}
+
+.file-item.playing .file-size,
+.media-item.playing .media-meta {
+    color: #4CAF50 !important;
+    opacity: 0.9;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0.7; transform: scale(1); }
+}
 </style>
 <div class="main-container">
     <div class="content-area" id="contentArea">
@@ -4184,6 +4314,14 @@ list-group:hover {
             </div>
             
             <div class="actions">
+                <button id="scanButton" class="btn btn-info" onclick="performFullScan()" data-translate-tooltip="full_scan_tooltip">
+                    <i class="fas fa-search"></i>
+                    <span data-translate="full_scan">Full Scan</span>
+                </button>
+                <button id="clearCacheButton" class="btn btn-warning" onclick="clearMediaCache()">
+                    <i class="fas fa-trash"></i>
+                    <span data-translate="clear_cache">Clear Cache</span>
+                </button>
                 <button id="autoNextToggle" class="btn btn-primary" onclick="toggleAutoNext()">
                     <i class="fas fa-toggle-off"></i>
                     <span data-translate="auto_play">Auto Play</span>
@@ -4644,9 +4782,6 @@ list-group:hover {
                                      <i class="fas fa-video"></i>
                                  </div>
                              </video>
-                             <div class="video-overlay" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px;">
-                                 <i class="fas fa-play text-white" style="font-size: 12px;"></i>
-                             </div>
                          </div>
                             <div class="media-info">
                                 <div class="media-name" title="<?= htmlspecialchars($item['safe_name'], ENT_QUOTES, 'UTF-8') ?>">
@@ -5896,6 +6031,10 @@ function showSection(sectionId) {
     } else {
         stopSystemMonitoring();
     }
+
+    setTimeout(() => {
+        restorePlayingHighlight();
+    }, 300);
 }
      
 let playMediaTimeout = null;
@@ -5922,6 +6061,12 @@ function actuallyPlayMedia(filePath) {
         clearInterval(imageSwitchTimer);
         imageSwitchTimer = null;
     }
+    if (fileImageSwitchTimer) {
+        clearInterval(fileImageSwitchTimer);
+        fileImageSwitchTimer = null;
+    }
+    
+    clearAllHighlights();
     
     audioPlayer.style.display = 'none';
     videoPlayer.style.display = 'none';
@@ -5953,14 +6098,25 @@ function actuallyPlayMedia(filePath) {
             playError.style.display = 'block';
             playerArea.classList.add('active');
             currentMedia = { type: null, src: null, path: null, ext: null, wasPlaying: false };
+            clearAllHighlights();
         };
     }
+    
+    const currentSection = document.querySelector('.grid-section:not([style*="display: none"])')?.id || '';
+    const isFileManager = currentSection === 'filesSection';
+    
+    highlightCurrentPlayingFile(filePath, isFileManager);
     
     if (musicExts.includes(fileExt)) {
         audioPlayer.onerror = handleMediaError(audioPlayer, translations['audio'] || 'Audio');
         audioPlayer.onended = function() {
+            clearAllHighlights();
             if (autoNextEnabled) {
-                playNextMedia();
+                if (isFileManager) {
+                    playNextFileMedia();
+                } else {
+                    playNextMedia();
+                }
             }
         };
         audioPlayer.src = previewUrl;
@@ -5970,15 +6126,26 @@ function actuallyPlayMedia(filePath) {
         audioPlayer.play().catch(e => {
             audioPlayer.style.display = 'none';
             playError.style.display = 'block';
+            clearAllHighlights();
         });
         currentMedia = { type: 'audio', src: previewUrl, path: filePath, ext: fileExt, wasPlaying: false };
-        updateCurrentMediaList('music', filePath);
+        
+        if (isFileManager) {
+            updateFileMediaList(filePath);
+        } else {
+            updateCurrentMediaList('music', filePath);
+        }
     } 
     else if (videoExts.includes(fileExt)) {
         videoPlayer.onerror = handleMediaError(videoPlayer, translations['video'] || 'Video');
         videoPlayer.onended = function() {
+            clearAllHighlights();
             if (autoNextEnabled) {
-                playNextMedia();
+                if (isFileManager) {
+                    playNextFileMedia();
+                } else {
+                    playNextMedia();
+                }
             }
         };
         videoPlayer.src = previewUrl;
@@ -5988,28 +6155,121 @@ function actuallyPlayMedia(filePath) {
         videoPlayer.play().catch(e => {
             videoPlayer.style.display = 'none';
             playError.style.display = 'block';
+            clearAllHighlights();
         });
         currentMedia = { type: 'video', src: previewUrl, path: filePath, ext: fileExt, wasPlaying: false };
-        updateCurrentMediaList('video', filePath);
+        
+        if (isFileManager) {
+            updateFileMediaList(filePath);
+        } else {
+            updateCurrentMediaList('video', filePath);
+        }
     } 
     else if (imageExts.includes(fileExt)) {
         imageViewer.onerror = handleMediaError(imageViewer, translations['image'] || 'Image');
         imageViewer.src = previewUrl;
         imageViewer.style.display = 'block';
         currentMedia = { type: 'image', src: previewUrl, path: filePath, ext: fileExt, wasPlaying: false };
-        updateCurrentMediaList('image', filePath);
+        
+        if (isFileManager) {
+            updateFileMediaList(filePath);
+        } else {
+            updateCurrentMediaList('image', filePath);
+        }
         
         if (autoNextEnabled) {
-            startImageAutoSwitch();
+            if (isFileManager) {
+                startFileImageAutoSwitch();
+            } else {
+                startImageAutoSwitch();
+            }
         }
     } else {
         playError.style.display = 'block';
         playerArea.classList.add('active');
+        clearAllHighlights();
     }
     
     playerArea.classList.add('active');
     setPlayerTitle(fileName);    
     saveToRecent(filePath);
+}
+
+function clearAllHighlights() {
+    document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.remove('playing');
+        item.style.backgroundColor = '';
+        item.style.borderColor = '';
+        item.style.boxShadow = '';
+        item.style.transform = '';
+    });
+    
+    document.querySelectorAll('.media-item').forEach(item => {
+        item.classList.remove('playing');
+        item.style.backgroundColor = '';
+        item.style.borderColor = '';
+        item.style.boxShadow = '';
+        item.style.transform = '';
+    });
+}
+
+function highlightCurrentPlayingFile(filePath, isFileManager) {
+    clearAllHighlights();
+    
+    if (isFileManager) {
+        const fileItem = document.querySelector(`.file-item[data-path="${filePath}"]`);
+        if (fileItem) {
+            fileItem.classList.add('playing');
+            fileItem.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+            fileItem.style.borderColor = '#4CAF50';
+            fileItem.style.boxShadow = '0 0 15px rgba(76, 175, 80, 0.5)';
+            fileItem.style.transform = 'translateY(-2px)';
+            fileItem.style.transition = 'all 0.3s ease';
+            fileItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    } else {
+        const mediaItem = document.querySelector(`.media-item[data-src="?preview=1&path=${encodeURIComponent(filePath)}"]`);
+        if (mediaItem) {
+            mediaItem.classList.add('playing');
+            mediaItem.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+            mediaItem.style.borderColor = '#4CAF50';
+            mediaItem.style.boxShadow = '0 0 15px rgba(76, 175, 80, 0.5)';
+            mediaItem.style.transform = 'translateY(-2px)';
+            mediaItem.style.transition = 'all 0.3s ease';
+            mediaItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+}
+
+function restorePlayingHighlight() {
+    if (currentMedia && currentMedia.path) {
+        const currentSection = document.querySelector('.grid-section:not([style*="display: none"])')?.id || '';
+        const isFileManager = currentSection === 'filesSection';
+        
+        if (isFileManager) {
+            const fileExists = currentFileMediaList.includes(currentMedia.path);
+            if (fileExists) {
+                highlightCurrentPlayingFile(currentMedia.path, true);
+            } else {
+                clearAllHighlights();
+            }
+        } else {
+            let mediaExists = false;
+            if (currentSection === 'musicSection' && currentMedia.type === 'audio') {
+                mediaExists = currentMediaList.includes(currentMedia.path);
+            } else if (currentSection === 'videoSection' && currentMedia.type === 'video') {
+                mediaExists = currentMediaList.includes(currentMedia.path);
+            } else if (currentSection === 'imageSection' && currentMedia.type === 'image') {
+                mediaExists = currentMediaList.includes(currentMedia.path);
+            }
+            
+            if (mediaExists) {
+                highlightCurrentPlayingFile(currentMedia.path, false);
+            } else {
+                clearAllHighlights();
+            }
+        }
+    }
 }
 
 function playMedia(filePath) {
@@ -6026,6 +6286,115 @@ function playMedia(filePath) {
     
     lastPlayedPath = filePath;
     actuallyPlayMedia(filePath);
+}
+
+function updateCurrentFileMediaList() {
+    const fileItems = document.querySelectorAll('.file-item');
+    currentFileMediaList = [];
+    
+    const mediaExts = [
+        'mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac',
+        'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm',
+        'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'
+    ];
+    
+    fileItems.forEach(item => {
+        const path = item.getAttribute('data-path');
+        const isDir = item.getAttribute('data-is-dir') === 'true';
+        
+        if (!isDir && path) {
+            const ext = path.split('.').pop().toLowerCase();
+            if (mediaExts.includes(ext)) {
+                currentFileMediaList.push(path);
+            }
+        }
+    });
+}
+
+function updateFileMediaList(filePath) {
+    updateCurrentFileMediaList();
+    currentFileMediaIndex = currentFileMediaList.indexOf(filePath);
+    console.log('File media index:', currentFileMediaIndex, 'Total:', currentFileMediaList.length);
+}
+
+function startFileImageAutoSwitch() {
+    if (fileImageSwitchTimer) {
+        clearInterval(fileImageSwitchTimer);
+    }
+    
+    if (!autoNextEnabled || currentFileMediaList.length < 2) {
+        return;
+    }
+    
+    fileImageSwitchTimer = setInterval(() => {
+        playNextFileMedia();
+    }, 5000);
+}
+
+function playNextFileMedia() {
+    if (!autoNextEnabled) {
+        return;
+    }
+
+    const currentSection = document.querySelector('.grid-section:not([style*="display: none"])')?.id || '';
+    const isFileManager = currentSection === 'filesSection';
+    
+    if (isFileManager) {
+        if (currentFileMediaList.length === 0 || currentFileMediaIndex === -1) {
+            return;
+        }
+        
+        const nextIndex = (currentFileMediaIndex + 1) % currentFileMediaList.length;
+        const nextFilePath = currentFileMediaList[nextIndex];
+        
+        if (nextFilePath) {
+            playMedia(nextFilePath);
+        }
+    } else {
+        if (currentMediaList.length === 0 || currentMediaIndex === -1) {
+            return;
+        }
+        
+        const nextIndex = (currentMediaIndex + 1) % currentMediaList.length;
+        const nextFilePath = currentMediaList[nextIndex];
+        
+        if (nextFilePath) {
+            playMedia(nextFilePath);
+        }
+    }
+}
+
+function playPreviousFileMedia() {
+    if (!autoNextEnabled) {
+        return;
+    }
+
+    const currentSection = document.querySelector('.grid-section:not([style*="display: none"])')?.id || '';
+    const isFileManager = currentSection === 'filesSection';
+    
+    if (isFileManager) {
+        if (currentFileMediaList.length === 0 || currentFileMediaIndex === -1) {
+            return;
+        }
+        
+        const prevIndex = (currentFileMediaIndex - 1 + currentFileMediaList.length) % currentFileMediaList.length;
+        const prevFilePath = currentFileMediaList[prevIndex];
+        
+        if (prevFilePath) {
+            playMedia(prevFilePath);
+        }
+    } else {
+        if (currentMediaList.length === 0 || currentMediaIndex === -1) {
+            return;
+        }
+        
+        const prevIndex = (currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length;
+        const prevFilePath = currentMediaList[prevIndex];
+        
+        if (prevFilePath) {
+            playMedia(prevFilePath);
+        }
+    }
 }
 
 function setPlayerTitle(fileName) {
@@ -6145,13 +6514,28 @@ function toggleAutoNext() {
         (translations['auto_play_enabled'] || 'Auto play enabled') : 
         (translations['auto_play_disabled'] || 'Auto play disabled'));
     
+    const currentSection = document.querySelector('.grid-section:not([style*="display: none"])')?.id || '';
+    const isFileManager = currentSection === 'filesSection';
+    
     if (currentMedia.type === 'image') {
-        if (autoNextEnabled && currentMediaList.length > 1) {
-            startImageAutoSwitch();
+        if (autoNextEnabled) {
+            if (isFileManager) {
+                if (currentFileMediaList.length > 1) {
+                    startFileImageAutoSwitch();
+                }
+            } else {
+                if (currentMediaList.length > 1) {
+                    startImageAutoSwitch();
+                }
+            }
         } else {
             if (imageSwitchTimer) {
                 clearInterval(imageSwitchTimer);
                 imageSwitchTimer = null;
+            }
+            if (fileImageSwitchTimer) {
+                clearInterval(fileImageSwitchTimer);
+                fileImageSwitchTimer = null;
             }
         }
     }
@@ -6238,6 +6622,12 @@ function closePlayer() {
         clearInterval(imageSwitchTimer);
         imageSwitchTimer = null;
     }
+    if (fileImageSwitchTimer) {
+        clearInterval(fileImageSwitchTimer);
+        fileImageSwitchTimer = null;
+    }
+    
+    clearAllHighlights();
     
     audioPlayer.pause();
     videoPlayer.pause();
@@ -6296,6 +6686,72 @@ function toggleFullscreenPlayer() {
 function refreshMedia() {
     updateRecentList();
     window.location.reload();
+}
+
+function performFullScan() {
+    const scanBtn = document.getElementById('scanButton');
+    const originalText = scanBtn.innerHTML;
+    
+    showConfirmation(
+        translations['confirm_full_scan'] || 'This will scan the entire file system. This may take a while. Continue?',
+        async () => {
+            scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (translations['scanning'] || 'Scanning...');
+            scanBtn.disabled = true;
+            
+            try {
+                const response = await fetch('?action=full_scan');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showLogMessage(translations['scan_complete'] || 'Scan complete', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 4000);
+                } else {
+                    showLogMessage(translations['scan_failed'] || 'Scan failed', 'error');
+                    scanBtn.innerHTML = originalText;
+                    scanBtn.disabled = false;
+                }
+            } catch (error) {
+                showLogMessage(translations['scan_error'] || 'Scan error: ' + error.message, 'error');
+                scanBtn.innerHTML = originalText;
+                scanBtn.disabled = false;
+            }
+        }
+    );
+}
+
+function clearMediaCache() {
+    showConfirmation(
+        translations['confirm_clear_cache'] || 'This will clear the media cache. Continue?',
+        async () => {
+            const btn = document.getElementById('clearCacheButton');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (translations['clearing'] || 'Clearing...');
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('?action=clear_cache');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showLogMessage(translations['cache_cleared'] || 'Cache cleared', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    showLogMessage(translations['clear_failed'] || 'Failed to clear cache', 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                showLogMessage(translations['clear_error'] || 'Error: ' + error.message, 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    );
 }
     
 function toggleFullscreen() {
@@ -7304,12 +7760,22 @@ document.addEventListener('keydown', function(event) {
             
         case 'ArrowRight':
             event.preventDefault();
-            playNextMedia();
+            const currentSection = document.querySelector('.grid-section:not([style*="display: none"])')?.id || '';
+            if (currentSection === 'filesSection') {
+                playNextFileMedia();
+            } else {
+                playNextMedia();
+            }
             break;
             
         case 'ArrowLeft':
             event.preventDefault();
-            playPreviousMedia();
+            const currentSectionLeft = document.querySelector('.grid-section:not([style*="display: none"])')?.id || '';
+            if (currentSectionLeft === 'filesSection') {
+                playPreviousFileMedia();
+            } else {
+                playPreviousMedia();
+            }
             break;
             
         case 'KeyA':
@@ -7417,6 +7883,9 @@ let currentPath = '/';
 let selectedFiles = new Set();
 let viewMode = 'grid';
 let fileContextMenuTarget = null;
+let currentFileMediaList = [];
+let currentFileMediaIndex = -1;
+let fileImageSwitchTimer = null;  
 let uploadFilesList = [];
 let currentView = 'files'; 
 let monacoEditor = null;
@@ -7543,7 +8012,9 @@ async function loadFiles(path) {
                 }
             }
         }, 500);
+        updateCurrentFileMediaList();
     }
+    restorePlayingHighlight();
 
     initDragSelect();
 
