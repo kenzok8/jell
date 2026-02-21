@@ -17,6 +17,14 @@ on:
         description: 'ssh'
         required: false
         default: 'true'
+      force_upload:
+        description: 'force upload to B2'
+        required: false
+        default: 'false'
+      upload_mode:
+        description: 'sync or smoke'
+        required: false
+        default: 'smoke'
 
 jobs:
   merge:
@@ -572,7 +580,9 @@ jobs:
         done
 
     - name: update jell
+      id: update
       run: |
+       set +e
        if git status --porcelain | grep .; then
         git add .
         git commit -am "update $(date '+%Y-%m-%d %H:%M:%S')"
@@ -585,10 +595,59 @@ jobs:
         git add .
         git commit -m "update $(date +%Y-%m-%d" "%H:%M:%S)"
         git push -f
+        echo "status=success" >> $GITHUB_OUTPUT
        else
         echo "nothing to commit"
+        echo "status=skipped" >> $GITHUB_OUTPUT
         exit 0
        fi || exit 0
+
+    - name: Upload jell to Backblaze B2
+      if: steps.update.outputs.status == 'success' || github.event.inputs.force_upload == 'true'
+      env:
+        B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
+        B2_APPLICATION_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+        B2_BUCKET: ${{ secrets.B2_BUCKET }}
+        B2_PUBLIC_BASE_URL: ${{ secrets.B2_PUBLIC_BASE_URL }}
+      run: |
+        set -euo pipefail
+        [ -n "$B2_KEY_ID" ] || { echo "Missing B2_KEY_ID"; exit 1; }
+        [ -n "$B2_APPLICATION_KEY" ] || { echo "Missing B2_APPLICATION_KEY"; exit 1; }
+        [ -n "$B2_BUCKET" ] || { echo "Missing B2_BUCKET"; exit 1; }
+
+        curl -fsSL https://rclone.org/install.sh | sudo bash
+        mkdir -p ~/.config/rclone
+        cat > ~/.config/rclone/rclone.conf <<EOF
+        [b2]
+        type = b2
+        account = ${B2_KEY_ID}
+        key = ${B2_APPLICATION_KEY}
+        hard_delete = true
+        EOF
+
+        TS=$(date +%Y%m%d-%H%M%S)
+        SHA=$(git rev-parse --short HEAD)
+        BASE_URL="${B2_PUBLIC_BASE_URL:-https://f000.backblazeb2.com/file/${B2_BUCKET}}"
+
+        if [ "${{ github.event.inputs.upload_mode }}" = "smoke" ]; then
+          echo "jell b2 smoke ${TS}" > b2-smoke.txt
+          rclone copy b2-smoke.txt "b2:${B2_BUCKET}/op/jell/smoke/" --checksum --fast-list
+          echo "Uploaded: ${BASE_URL%/}/op/jell/smoke/b2-smoke.txt"
+        else
+          rclone sync . "b2:${B2_BUCKET}/op/jell/latest/" \
+            --exclude ".git/**" \
+            --exclude ".github/workflows/**" \
+            --checksum \
+            --fast-list \
+            --transfers 8 \
+            --checkers 16
+
+          mkdir -p b2-manifest
+          git rev-parse HEAD > b2-manifest/commit.txt
+          date '+%F %T %z' > b2-manifest/uploaded_at.txt
+          rclone copy b2-manifest "b2:${B2_BUCKET}/op/jell/history/${TS}-${SHA}/" --fast-list
+          echo "Uploaded: ${BASE_URL%/}/op/jell/latest/"
+        fi
 
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@main
