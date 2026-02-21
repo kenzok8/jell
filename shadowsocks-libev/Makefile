@@ -14,12 +14,12 @@ include $(TOPDIR)/rules.mk
 #
 PKG_NAME:=shadowsocks-libev
 PKG_VERSION:=3.3.6
-PKG_RELEASE:=5
+PKG_RELEASE:=6
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/shadowsocks/shadowsocks-libev.git
-PKG_SOURCE_DATE:=2025-1-20
-PKG_SOURCE_VERSION:=c5e8788013a37afe54ea1c2b7c03395cccc663cf
+PKG_SOURCE_DATE:=2026-2-9
+PKG_SOURCE_VERSION:=5c47b80f4ed88975b131459e0a05072cc3fe4507
 PKG_MIRROR_HASH:=skip
 
 PKG_MAINTAINER:=Yousong Zhou <yszhou4tech@gmail.com>
