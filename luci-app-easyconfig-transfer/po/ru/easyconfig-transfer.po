@@ -1,0 +1,495 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-app-easyconfig-transfer\n"
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: ru\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Transfer"
+msgstr "Трафик"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "Пользовательский интерфейс для скриптов easyconfig, оценивающих потребление трафика. Дополнительная информация на форуме %seko.one.pl%s."
+
+msgid "Estimated data usage"
+msgstr "Приблизительное использование данных"
+
+msgid "First Seen"
+msgstr "Первый сеанс"
+
+msgid "Last Seen"
+msgstr "Последний сеанс"
+
+msgid "Downloaded"
+msgstr "Загружено"
+
+msgid "Uploaded"
+msgstr "Отправлено"
+
+msgid "Configuration - Transfer"
+msgstr "Конфигурация - Трафик"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "Панель конфигурации приложения для вычисления статистики трафика."
+
+msgid "Data reading period"
+msgstr "Период считывания данных"
+
+msgid "Data recording period"
+msgstr "Период записи данных"
+
+msgid "Beginning of the billing period"
+msgstr "Начало расчётного периода"
+
+msgid "Warning enabled"
+msgstr "Предупреждение включено"
+
+msgid "Transfer available"
+msgstr "Доступный трафик"
+
+msgid "Warning level"
+msgstr "Уровень предупреждения"
+
+msgid "Warning cycle"
+msgstr "Цикл предупреждений"
+
+msgid "per period"
+msgstr "за период"
+
+msgid "per day"
+msgstr "в день"
+
+msgid "Days until the end of the billing period"
+msgstr "Дней до окончания расчётного периода"
+
+msgid "Estimated remaining transfer"
+msgstr "Приблизительный остаток трафика"
+
+msgid "approximately remains"
+msgstr "осталось приблизительно"
+
+msgid "Summary"
+msgstr "Сводка"
+
+msgid "Today"
+msgstr "Сегодня"
+
+msgid "Yesterday"
+msgstr "Вчера"
+
+msgid "Last 7 days"
+msgstr "Последние 7 дней"
+
+msgid "Last 30 days"
+msgstr "Последние 30 дней"
+
+msgid "Yearly"
+msgstr "Годовые"
+
+msgid "Clients data usage"
+msgstr "Использование данных клиентами"
+
+msgid "Total"
+msgstr "Итого"
+
+msgid "Current billing period"
+msgstr "Текущий расчётный период"
+
+msgid "Expected data usage for the current period"
+msgstr "Ожидаемое использование данных за текущий период"
+
+msgid "Previous billing period"
+msgstr "Предыдущий расчётный период"
+
+msgid "Transfer usage statistics"
+msgstr "Статистика использования трафика"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "Расчёты могут отличаться от показаний оператора"
+
+msgid "Make a copy of Database"
+msgstr "Создать копию базы данных"
+
+msgid "Restore"
+msgstr "Восстановить"
+
+msgid "Make"
+msgstr "Создать"
+
+msgid "a backup"
+msgstr "резервную копию"
+
+msgid "Make a backup"
+msgstr "Создать резервную копию"
+
+msgid "Reset data"
+msgstr "Сбросить данные"
+
+msgid "Main Settings"
+msgstr "Основные настройки"
+
+msgid "Traffic Settings"
+msgstr "Настройки трафика"
+
+msgid "Hide MAC addresses"
+msgstr "Скрыть MAC-адреса"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "Скрыть MAC-адреса без информации о трафике."
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"Выберите, как часто будет создаваться сжатая копия данных. <br />Путь к архиву <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Важно</b> <br />Помните, что "
+"частые операции записи сокращают срок службы памяти."
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+msgstr ""
+"Включить сбор данных о трафике. <br />Данные сохраняются в файл <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>Что следует знать</b> <br />При "
+"включённом flow offloading данные о трафике могут не соответствовать действительности или быть полностью недоступны."
+
+msgid "1 minute"
+msgstr "1 минуту"
+
+msgid "3 minutes"
+msgstr "3 минуты"
+
+msgid "5 minutes"
+msgstr "5 минут"
+
+msgid "10 minutes"
+msgstr "10 минут"
+
+msgid "15 minutes"
+msgstr "15 минут"
+
+msgid "30 minutes"
+msgstr "30 минут"
+
+msgid "1 hour"
+msgstr "1 час"
+
+msgid "3 hours"
+msgstr "3 часа"
+
+msgid "6 hours"
+msgstr "6 часов"
+
+msgid "12 hours"
+msgstr "12 часов"
+
+msgid "24 hours"
+msgstr "24 часа"
+
+msgid "Enter the starting day of the billing period."
+msgstr "Введите начальный день расчётного периода."
+
+msgid "Hide selected data in the table"
+msgstr "Скрыть выбранные данные в таблице"
+
+msgid "Select data that will be hidden."
+msgstr "Выберите данные, которые будут скрыты."
+
+msgid "MAC addresses"
+msgstr "MAC-адреса"
+
+msgid "MAC addresses & Hostnames"
+msgstr "MAC-адреса и имена хостов"
+
+msgid "Show wan in table"
+msgstr "Показать WAN в таблице"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "Установите этот флажок, если хотите, чтобы WAN отображался в таблице."
+
+msgid "Enable data usage progress bar"
+msgstr "Включить индикатор использования данных"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "Отображает использование трафика в виде индикатора выполнения."
+
+msgid "Enter the available transfer during the billing period."
+msgstr "Введите доступный трафик в расчётном периоде."
+
+msgid "Unit of data size"
+msgstr "Единица измерения данных"
+
+msgid "Data Count Cycle"
+msgstr "Цикл подсчёта данных"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "Укажите интервал визуализации/подсчёта данных."
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "Установите этот флажок, если хотите сохранять данные при запланированной перезагрузке устройства."
+
+msgid "Backup at"
+msgstr "Резервное копирование в"
+
+msgid "Restore backup at"
+msgstr "Восстановить резервную копию в"
+
+msgid "Backup Settings"
+msgstr "Настройки резервного копирования"
+
+msgid "Move .json file"
+msgstr "Переместить файл .json"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "Правильный формат времени <code>HH:MM</code>."
+
+msgid "Expected time is in HH:MM format"
+msgstr "Ожидается время в формате HH:MM"
+
+msgid "Enter a numeric value"
+msgstr "Введите числовое значение"
+
+msgid "Add a hostname"
+msgstr "Добавить имя хоста"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "Введите данные в формате <code>MAC-адрес;Имя хоста</code>."
+
+msgid "Transfer details"
+msgstr "Детали трафика"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "Введите MAC-адрес;Имя хоста"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Вы хотите очистить данные статистики трафика?"
+
+msgid "Transfer statistics"
+msgstr "Статистика трафика"
+
+msgid "There are currently no data to show..."
+msgstr "В настоящее время нет данных для отображения..."
+
+msgid "Additional settings"
+msgstr "Дополнительные настройки"
+
+msgid "from"
+msgstr "из"
+
+msgid "out of"
+msgstr "из"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "Вы превысили доступный трафик более чем на"
+
+msgid "Statistics from the current billing period."
+msgstr "Статистика за текущий расчётный период."
+
+msgid "Must be configured"
+msgstr "Необходимо настроить"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "Нажмите «Продолжить», чтобы восстановить резервную копию, или «Отмена», чтобы прервать операцию."
+
+msgid "Restore .json file from archive"
+msgstr "Восстановить файл .json из архива"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "Эта опция позволяет восстановить статистику из архива."
+
+msgid "Restore .json file"
+msgstr "Восстановить файл .json"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "Эта опция позволяет восстановить статистику из файла .json."
+
+msgid "Download .gz archive"
+msgstr "Скачать архив .gz"
+
+msgid "Click to download .gz archive."
+msgstr "Нажмите, чтобы скачать архив .gz."
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "Файл easyconfig_statistics.json.gz не найден."
+
+msgid "Download error"
+msgstr "Ошибка загрузки"
+
+msgid "Download .json file"
+msgstr "Скачать файл .json"
+
+msgid "Click to download .json file."
+msgstr "Нажмите, чтобы скачать файл .json."
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "Загрузка файла easyconfig_statistics.json не удалась. Пожалуйста, попробуйте снова."
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "Ошибка при выполнении easyconfig_statistics.sh"
+
+msgid "Upload .gz archive"
+msgstr "Загрузить архив .gz"
+
+msgid "Upload .json file"
+msgstr "Загрузить файл .json"
+
+msgid "Save .gz file"
+msgstr "Сохранить файл .gz"
+
+msgid "Save .json file"
+msgstr "Сохранить файл .json"
+
+msgid "Copy .json file to external storage"
+msgstr "Скопировать файл .json на внешний носитель"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "Установите этот флажок, если хотите создать копию на внешнем диске."
+
+msgid "Path to .json file"
+msgstr "Путь к файлу .json"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr "Введите путь к каталогу, в котором будет сохранена копия файла .json."
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "Данные в файле easyconfig_statistics.json были сброшены."
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "Файл easyconfig_statistics.json успешно скопирован в"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "Файл easyconfig_statistics.json успешно скопирован в /usr/lib/easyconfig."
+
+msgid "Auto data reset"
+msgstr "Автоматический сброс данных"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "Установите этот флажок, если хотите сбрасывать данные с новым годом."
+
+msgid "Monthly"
+msgstr "Ежемесячные"
+
+msgid "Last 12 months"
+msgstr "Последние 12 месяцев"
+
+msgid "Refreshing data…"
+msgstr "Обновление данных…"
+
+msgid "Current period"
+msgstr "Текущий период"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "Отображение загруженных и отправленных данных. Нажмите «Обновить», чтобы обновить графики."
+
+msgid "Jan"
+msgstr "Янв"
+
+msgid "Feb"
+msgstr "Фев"
+
+msgid "Mar"
+msgstr "Мар"
+
+msgid "Apr"
+msgstr "Апр"
+
+msgid "May"
+msgstr "Май"
+
+msgid "Jun"
+msgstr "Июн"
+
+msgid "Jul"
+msgstr "Июл"
+
+msgid "Aug"
+msgstr "Авг"
+
+msgid "Sep"
+msgstr "Сен"
+
+msgid "Oct"
+msgstr "Окт"
+
+msgid "Nov"
+msgstr "Ноя"
+
+msgid "Dec"
+msgstr "Дек"
+
+msgid "No data available"
+msgstr "Нет доступных данных"
+
+msgid "Percentage"
+msgstr "Процент"
+
+msgid "Legend"
+msgstr "Легенда"
+
+msgid "Select day"
+msgstr "Выбрать день"
+
+msgid "Select month"
+msgstr "Выбрать месяц"
+
+msgid "Select year"
+msgstr "Выбрать год"
+
+msgid "Select period"
+msgstr "Выбрать период"
+
+msgid "Others"
+msgstr "Другие"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(График почасового использования данных за выбранный день)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(График ежедневного использования за выбранный месяц)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(График использования данных по отдельным месяцам)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(График использования данных по каждому месяцу года "
+
+msgid "Refreshing data..."
+msgstr "Обновление данных..."
+
+msgid "Please wait..."
+msgstr "Пожалуйста, подождите..."
+
+msgid "Statistics of data usage by clients."
+msgstr "Статистика использования данных клиентами."
+
+msgid "Clients"
+msgstr "Клиенты"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Вы хотите очистить данные статистики трафика?"
+
+msgid "Statistics data cleared"
+msgstr "Данные статистики очищены"
+
+msgid "No hourly data available for this day"
+msgstr "Почасовые данные за этот день недоступны"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "Хотите отобразить расчётное почасовое распределение на основе суточных итогов? (Это только приближение)"
+
+msgid "Yes, show estimate"
+msgstr "Да, показать оценку"
+
+msgid "Size of .json file"
+msgstr "Размер файла .json"
+
+msgid "Size of .gz file"
+msgstr "Размер файла .gz"
+
+msgid "Client"
+msgstr "Клиент"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Statistics restored from external backup"
+msgstr "Статистика восстановлена из внешней резервной копии"

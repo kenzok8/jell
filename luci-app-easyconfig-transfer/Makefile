@@ -1,5 +1,5 @@
 #
-# Copyright 2024-2025 Rafał Wabik - IceG - From eko.one.pl forum
+# Copyright 2024-2026 Rafał Wabik - IceG - From eko.one.pl forum
 #
 # Licensed to the GNU General Public License v3.0.
 #

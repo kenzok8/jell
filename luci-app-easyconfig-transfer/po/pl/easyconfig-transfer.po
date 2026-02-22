@@ -489,3 +489,6 @@ msgstr "Klient"
 
 msgid "Date"
 msgstr "Data"
+
+msgid "Statistics restored from external backup"
+msgstr "Statystyki przywrócone z zewnętrznej kopii zapasowej"

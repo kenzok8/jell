@@ -1,0 +1,495 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-app-easyconfig-transfer\n"
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: vi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Transfer"
+msgstr "Lưu lượng"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "Giao diện người dùng cho các tập lệnh easyconfig ước tính mức tiêu thụ lưu lượng. Thêm thông tin trên diễn đàn %seko.one.pl%s."
+
+msgid "Estimated data usage"
+msgstr "Ước tính sử dụng dữ liệu"
+
+msgid "First Seen"
+msgstr "Phiên đầu tiên"
+
+msgid "Last Seen"
+msgstr "Phiên cuối cùng"
+
+msgid "Downloaded"
+msgstr "Đã tải xuống"
+
+msgid "Uploaded"
+msgstr "Đã tải lên"
+
+msgid "Configuration - Transfer"
+msgstr "Cấu hình - Lưu lượng"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "Bảng cấu hình của ứng dụng tính toán thống kê lưu lượng."
+
+msgid "Data reading period"
+msgstr "Chu kỳ đọc dữ liệu"
+
+msgid "Data recording period"
+msgstr "Chu kỳ ghi dữ liệu"
+
+msgid "Beginning of the billing period"
+msgstr "Bắt đầu chu kỳ thanh toán"
+
+msgid "Warning enabled"
+msgstr "Đã bật cảnh báo"
+
+msgid "Transfer available"
+msgstr "Lưu lượng khả dụng"
+
+msgid "Warning level"
+msgstr "Mức cảnh báo"
+
+msgid "Warning cycle"
+msgstr "Chu kỳ cảnh báo"
+
+msgid "per period"
+msgstr "mỗi chu kỳ"
+
+msgid "per day"
+msgstr "mỗi ngày"
+
+msgid "Days until the end of the billing period"
+msgstr "Số ngày đến cuối chu kỳ thanh toán"
+
+msgid "Estimated remaining transfer"
+msgstr "Lưu lượng còn lại ước tính"
+
+msgid "approximately remains"
+msgstr "còn lại khoảng"
+
+msgid "Summary"
+msgstr "Tóm tắt"
+
+msgid "Today"
+msgstr "Hôm nay"
+
+msgid "Yesterday"
+msgstr "Hôm qua"
+
+msgid "Last 7 days"
+msgstr "7 ngày qua"
+
+msgid "Last 30 days"
+msgstr "30 ngày qua"
+
+msgid "Yearly"
+msgstr "Hằng năm"
+
+msgid "Clients data usage"
+msgstr "Sử dụng dữ liệu của các thiết bị"
+
+msgid "Total"
+msgstr "Tổng cộng"
+
+msgid "Current billing period"
+msgstr "Chu kỳ thanh toán hiện tại"
+
+msgid "Expected data usage for the current period"
+msgstr "Ước tính sử dụng dữ liệu trong chu kỳ hiện tại"
+
+msgid "Previous billing period"
+msgstr "Chu kỳ thanh toán trước"
+
+msgid "Transfer usage statistics"
+msgstr "Thống kê sử dụng lưu lượng"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "Tính toán có thể khác với số liệu của nhà mạng"
+
+msgid "Make a copy of Database"
+msgstr "Tạo bản sao cơ sở dữ liệu"
+
+msgid "Restore"
+msgstr "Khôi phục"
+
+msgid "Make"
+msgstr "Thực hiện"
+
+msgid "a backup"
+msgstr "bản sao lưu"
+
+msgid "Make a backup"
+msgstr "Tạo bản sao lưu"
+
+msgid "Reset data"
+msgstr "Đặt lại dữ liệu"
+
+msgid "Main Settings"
+msgstr "Cài đặt chính"
+
+msgid "Traffic Settings"
+msgstr "Cài đặt lưu lượng"
+
+msgid "Hide MAC addresses"
+msgstr "Ẩn địa chỉ MAC"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "Ẩn các địa chỉ MAC không có thông tin lưu lượng."
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"Chọn tần suất tạo bản sao nén của dữ liệu. <br />Đường dẫn lưu trữ <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Quan trọng</b> <br />Hãy "
+"nhớ rằng các thao tác ghi thường xuyên sẽ rút ngắn vòng đời của bộ nhớ."
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+msgstr ""
+"Bật thu thập dữ liệu lưu lượng. <br />Dữ liệu được lưu vào tệp <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>Điều bạn cần biết</b> <br />Khi "
+"bật tính năng flow offloading, dữ liệu lưu lượng có thể không chính xác hoặc hoàn toàn không khả dụng."
+
+msgid "1 minute"
+msgstr "1 phút"
+
+msgid "3 minutes"
+msgstr "3 phút"
+
+msgid "5 minutes"
+msgstr "5 phút"
+
+msgid "10 minutes"
+msgstr "10 phút"
+
+msgid "15 minutes"
+msgstr "15 phút"
+
+msgid "30 minutes"
+msgstr "30 phút"
+
+msgid "1 hour"
+msgstr "1 giờ"
+
+msgid "3 hours"
+msgstr "3 giờ"
+
+msgid "6 hours"
+msgstr "6 giờ"
+
+msgid "12 hours"
+msgstr "12 giờ"
+
+msgid "24 hours"
+msgstr "24 giờ"
+
+msgid "Enter the starting day of the billing period."
+msgstr "Nhập ngày bắt đầu của chu kỳ thanh toán."
+
+msgid "Hide selected data in the table"
+msgstr "Ẩn dữ liệu đã chọn trong bảng"
+
+msgid "Select data that will be hidden."
+msgstr "Chọn dữ liệu sẽ được ẩn."
+
+msgid "MAC addresses"
+msgstr "Địa chỉ MAC"
+
+msgid "MAC addresses & Hostnames"
+msgstr "Địa chỉ MAC & Tên máy chủ"
+
+msgid "Show wan in table"
+msgstr "Hiển thị WAN trong bảng"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "Chọn tùy chọn này nếu bạn muốn WAN hiển thị trong bảng."
+
+msgid "Enable data usage progress bar"
+msgstr "Bật thanh tiến trình sử dụng dữ liệu"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "Hiển thị trực quan mức sử dụng lưu lượng dưới dạng thanh tiến trình."
+
+msgid "Enter the available transfer during the billing period."
+msgstr "Nhập lưu lượng khả dụng trong chu kỳ thanh toán."
+
+msgid "Unit of data size"
+msgstr "Đơn vị kích thước dữ liệu"
+
+msgid "Data Count Cycle"
+msgstr "Chu kỳ đếm dữ liệu"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "Chỉ định khoảng thời gian hiển thị/đếm dữ liệu."
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "Chọn tùy chọn này nếu bạn muốn lưu dữ liệu khi khởi động lại thiết bị theo lịch."
+
+msgid "Backup at"
+msgstr "Sao lưu lúc"
+
+msgid "Restore backup at"
+msgstr "Khôi phục bản sao lưu lúc"
+
+msgid "Backup Settings"
+msgstr "Cài đặt sao lưu"
+
+msgid "Move .json file"
+msgstr "Di chuyển tệp .json"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "Định dạng thời gian đúng <code>HH:MM</code>."
+
+msgid "Expected time is in HH:MM format"
+msgstr "Thời gian cần nhập theo định dạng HH:MM"
+
+msgid "Enter a numeric value"
+msgstr "Nhập một giá trị số"
+
+msgid "Add a hostname"
+msgstr "Thêm tên máy chủ"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "Nhập dữ liệu dưới dạng <code>Địa chỉ MAC;Tên máy chủ</code>."
+
+msgid "Transfer details"
+msgstr "Chi tiết lưu lượng"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "Nhập địa chỉ MAC;Tên máy chủ"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Bạn có muốn xóa dữ liệu thống kê lưu lượng không?"
+
+msgid "Transfer statistics"
+msgstr "Thống kê lưu lượng"
+
+msgid "There are currently no data to show..."
+msgstr "Hiện tại không có dữ liệu để hiển thị..."
+
+msgid "Additional settings"
+msgstr "Cài đặt bổ sung"
+
+msgid "from"
+msgstr "từ"
+
+msgid "out of"
+msgstr "trong tổng số"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "Bạn đã vượt quá lưu lượng khả dụng hơn"
+
+msgid "Statistics from the current billing period."
+msgstr "Thống kê từ chu kỳ thanh toán hiện tại."
+
+msgid "Must be configured"
+msgstr "Cần được cấu hình"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "Nhấn Tiếp tục để khôi phục bản sao lưu, hoặc Hủy để dừng thao tác."
+
+msgid "Restore .json file from archive"
+msgstr "Khôi phục tệp .json từ kho lưu trữ"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "Tùy chọn này cho phép người dùng khôi phục thống kê từ kho lưu trữ."
+
+msgid "Restore .json file"
+msgstr "Khôi phục tệp .json"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "Tùy chọn này cho phép người dùng khôi phục thống kê từ tệp .json."
+
+msgid "Download .gz archive"
+msgstr "Tải xuống kho lưu trữ .gz"
+
+msgid "Click to download .gz archive."
+msgstr "Nhấp để tải xuống kho lưu trữ .gz."
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "Không tìm thấy tệp easyconfig_statistics.json.gz."
+
+msgid "Download error"
+msgstr "Lỗi tải xuống"
+
+msgid "Download .json file"
+msgstr "Tải xuống tệp .json"
+
+msgid "Click to download .json file."
+msgstr "Nhấp để tải xuống tệp .json."
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "Tải xuống tệp easyconfig_statistics.json thất bại. Vui lòng thử lại."
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "Lỗi khi thực thi easyconfig_statistics.sh"
+
+msgid "Upload .gz archive"
+msgstr "Tải lên kho lưu trữ .gz"
+
+msgid "Upload .json file"
+msgstr "Tải lên tệp .json"
+
+msgid "Save .gz file"
+msgstr "Lưu tệp .gz"
+
+msgid "Save .json file"
+msgstr "Lưu tệp .json"
+
+msgid "Copy .json file to external storage"
+msgstr "Sao chép tệp .json sang bộ nhớ ngoài"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "Chọn tùy chọn này nếu bạn muốn tạo bản sao trên ổ đĩa ngoài."
+
+msgid "Path to .json file"
+msgstr "Đường dẫn đến tệp .json"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr "Nhập đường dẫn đến thư mục nơi bản sao của tệp .json sẽ được lưu."
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "Dữ liệu trong tệp easyconfig_statistics.json đã được đặt lại."
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "Đã sao chép thành công tệp easyconfig_statistics.json đến"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "Đã sao chép thành công tệp easyconfig_statistics.json đến /usr/lib/easyconfig."
+
+msgid "Auto data reset"
+msgstr "Tự động đặt lại dữ liệu"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "Chọn tùy chọn này nếu bạn muốn đặt lại dữ liệu vào đầu năm mới."
+
+msgid "Monthly"
+msgstr "Hằng tháng"
+
+msgid "Last 12 months"
+msgstr "12 tháng qua"
+
+msgid "Refreshing data…"
+msgstr "Đang làm mới dữ liệu…"
+
+msgid "Current period"
+msgstr "Chu kỳ hiện tại"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "Trình bày dữ liệu đã tải xuống và tải lên. Nhấp vào Làm mới để cập nhật biểu đồ."
+
+msgid "Jan"
+msgstr "Th1"
+
+msgid "Feb"
+msgstr "Th2"
+
+msgid "Mar"
+msgstr "Th3"
+
+msgid "Apr"
+msgstr "Th4"
+
+msgid "May"
+msgstr "Th5"
+
+msgid "Jun"
+msgstr "Th6"
+
+msgid "Jul"
+msgstr "Th7"
+
+msgid "Aug"
+msgstr "Th8"
+
+msgid "Sep"
+msgstr "Th9"
+
+msgid "Oct"
+msgstr "Th10"
+
+msgid "Nov"
+msgstr "Th11"
+
+msgid "Dec"
+msgstr "Th12"
+
+msgid "No data available"
+msgstr "Không có dữ liệu"
+
+msgid "Percentage"
+msgstr "Phần trăm"
+
+msgid "Legend"
+msgstr "Chú giải"
+
+msgid "Select day"
+msgstr "Chọn ngày"
+
+msgid "Select month"
+msgstr "Chọn tháng"
+
+msgid "Select year"
+msgstr "Chọn năm"
+
+msgid "Select period"
+msgstr "Chọn chu kỳ"
+
+msgid "Others"
+msgstr "Khác"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(Biểu đồ sử dụng dữ liệu theo từng giờ cho ngày đã chọn)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(Biểu đồ sử dụng hằng ngày cho tháng đã chọn)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(Biểu đồ sử dụng dữ liệu cho từng tháng)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(Biểu đồ sử dụng dữ liệu cho mỗi tháng trong năm "
+
+msgid "Refreshing data..."
+msgstr "Đang làm mới dữ liệu..."
+
+msgid "Please wait..."
+msgstr "Vui lòng chờ..."
+
+msgid "Statistics of data usage by clients."
+msgstr "Thống kê sử dụng dữ liệu của các thiết bị."
+
+msgid "Clients"
+msgstr "Thiết bị"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Bạn có muốn xóa dữ liệu thống kê lưu lượng không?"
+
+msgid "Statistics data cleared"
+msgstr "Dữ liệu thống kê đã được xóa"
+
+msgid "No hourly data available for this day"
+msgstr "Không có dữ liệu theo giờ cho ngày này"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "Bạn có muốn hiển thị phân phối theo giờ ước tính dựa trên tổng hàng ngày không? (Đây chỉ là xấp xỉ)"
+
+msgid "Yes, show estimate"
+msgstr "Có, hiển thị ước tính"
+
+msgid "Size of .json file"
+msgstr "Kích thước tệp .json"
+
+msgid "Size of .gz file"
+msgstr "Kích thước tệp .gz"
+
+msgid "Client"
+msgstr "Thiết bị"
+
+msgid "Date"
+msgstr "Ngày"
+
+msgid "Statistics restored from external backup"
+msgstr "Thống kê đã được khôi phục từ bản sao lưu bên ngoài"

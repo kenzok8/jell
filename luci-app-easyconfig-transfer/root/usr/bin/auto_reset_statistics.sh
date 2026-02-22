@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# (c) 2025 by Rafał Wabik (IceG) <https://github.com/4IceG>
+# (c) 2025-2026 by Rafał Wabik (IceG) <https://github.com/4IceG>
 #
 # From eko.one.pl forum
 #

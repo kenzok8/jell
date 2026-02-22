@@ -3,7 +3,7 @@
 #
 # (c) 2024 Cezary Jackiewicz <cezary@eko.one.pl>
 #
-# (c) 2024-2025 modified by Rafał Wabik (IceG) <https://github.com/4IceG>
+# (c) 2024-2026 modified by Rafał Wabik (IceG) <https://github.com/4IceG>
 #
 # From eko.one.pl forum
 #
@@ -20,13 +20,43 @@ LOCK=/var/lock/easyconfig_statistics.lock
 
 lock $LOCK
 
-if [ ! -e $DB ]; then
-	if [ -e "$SDB" ]; then
+MBACKUP=$(uci -q get easyconfig_transfer.traffic.external_backup)
+MBACKUPATH=$(uci -q get easyconfig_transfer.traffic.external_path)
+EXTERNAL_JSON="$MBACKUPATH/easyconfig_statistics.json"
+
+if [ ! -e "$DB" ]; then
+	if [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && [ -e "$EXTERNAL_JSON" ] && [ -e "$SDB" ]; then
+		TMP_GZ=/tmp/easyconfig_statistics_gz_tmp.json
+		zcat "$SDB" > "$TMP_GZ" 2>/dev/null
+		if [ -e "$TMP_GZ" ]; then
+			EXT_SIZE=$(wc -c < "$EXTERNAL_JSON")
+			GZ_SIZE=$(wc -c < "$TMP_GZ")
+			if [ "$EXT_SIZE" -gt "$GZ_SIZE" ]; then
+				cp "$EXTERNAL_JSON" "$DB"
+			else
+				cp "$TMP_GZ" "$DB"
+				easyconfig_statistics.uc "init" "init" 0 0 0 "" 0
+			fi
+			rm -f "$TMP_GZ"
+		else
+			cp "$EXTERNAL_JSON" "$DB"
+		fi
+	elif [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && [ -e "$EXTERNAL_JSON" ]; then
+		cp "$EXTERNAL_JSON" "$DB"
+	elif [ -e "$SDB" ]; then
 		zcat "$SDB" > "$DB"
 		easyconfig_statistics.uc "init" "init" 0 0 0 "" 0
 	else
 		mkdir -p $(dirname "$SDB")
 		echo "{}" > "$DB"
+	fi
+else
+	if [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && [ -e "$EXTERNAL_JSON" ]; then
+		EXT_SIZE=$(wc -c < "$EXTERNAL_JSON")
+		DB_SIZE=$(wc -c < "$DB")
+		if [ "$EXT_SIZE" -gt "$DB_SIZE" ]; then
+			cp "$EXTERNAL_JSON" "$DB"
+		fi
 	fi
 fi
 
@@ -77,11 +107,9 @@ if [ $WRITETS -le $NOW ]; then
 	mv "$DB.gz" "$SDB"
 	sync
 fi
-MBACKUP=$(uci -q get easyconfig_transfer.traffic.external_backup)
-MBACKUPATH=$(uci -q get easyconfig_transfer.traffic.external_path)
 if [ "$MBACKUP" = "1" ]; then
-sleep 10
-cp "$DB" "$MBACKUPATH/easyconfig_statistics.json"
+	sleep 10
+	cp "$DB" "$MBACKUPATH/easyconfig_statistics.json"
 fi
 
 lock -u $LOCK

@@ -10,7 +10,7 @@
 'require request';
 
 /*
-	Copyright (c) 2024-2025 Rafał Wabik - IceG - From eko.one.pl forum
+	Copyright (c) 2024-2026 Rafał Wabik - IceG - From eko.one.pl forum
 	
 	Licensed to the GNU General Public License v3.0.
 	
@@ -97,6 +97,45 @@ function updateStatsFileSize() {
 
 function popTimeout(a, message, timeout, severity) {
     ui.addTimeLimitedNotification(a, message, timeout, severity)
+}
+
+function checkAndRestoreExternalBackup() {
+	var sections = uci.sections('easyconfig_transfer');
+	if (!sections || sections.length < 1) return Promise.resolve();
+
+	var mbackup = null;
+	var mbackupath = null;
+	for (var i = 0; i < sections.length; i++) {
+		if (sections[i]['.type'] === 'traffic' || sections[i].external_backup !== undefined) {
+			mbackup = sections[i].external_backup;
+			mbackupath = sections[i].external_path;
+			break;
+		}
+	}
+
+	if (mbackup !== '1' || !mbackupath) return Promise.resolve();
+
+	var externalJson = mbackupath.replace(/\/$/, '') + '/easyconfig_statistics.json';
+
+	return Promise.all([
+		L.resolveDefault(fs.stat('/tmp/easyconfig_statistics.json'), null),
+		L.resolveDefault(fs.stat(externalJson), null)
+	]).then(function(results) {
+		var tmpStat = results[0];
+		var extStat = results[1];
+
+		if (!extStat || extStat.size <= 0) return;
+
+		var tmpSize = (tmpStat && tmpStat.size > 0) ? tmpStat.size : 0;
+
+		if (extStat.size > tmpSize) {
+			return fs.exec_direct('/bin/cp', [externalJson, '/tmp/easyconfig_statistics.json']).then(function() {
+				popTimeout(null, E('p', _('Statistics restored from external backup')), 5000, 'info');
+			});
+		}
+	}).catch(function(e) {
+		console.warn('checkAndRestoreExternalBackup error:', e);
+	});
 }
 
 function drawPieChart(container, data, title) {
@@ -548,10 +587,10 @@ function renderClientTableManual(table, tableKey) {
 /* Data Progress bars */
 function tdata_bar(value, max, byte) {
 	var pg = document.querySelector('#idtraffic_today_progress1'),
-		vn = parseInt(value) || 0,
-		mn = parseInt(max) || 100,
-		fv = byte ? String.format('%1024.2mB', value) : value,
-		fm = byte ? String.format('%1024.2mB', max) : max,
+		vn = Math.round(Number(value)) || 0,
+		mn = Math.round(Number(max)) || 100,
+		fv = byte ? bytesToSize(value) : value,
+		fm = byte ? bytesToSize(max) : max,
 		pc = Math.floor((100 / mn) * vn);
 	if (pc >= 85 && pc <= 95 ) 
 		{ pg.firstElementChild.style.background = 'darkorange'; }
@@ -564,10 +603,10 @@ function tdata_bar(value, max, byte) {
 
 function pdata_bar(value, max, byte) {
 	var pg = document.querySelector('#idtraffic_currentperiod_progress1'),
-		vn = parseInt(value) || 0,
-		mn = parseInt(max) || 100,
-		fv = byte ? String.format('%1024.2mB', value) : value,
-		fm = byte ? String.format('%1024.2mB', max) : max,
+		vn = Math.round(Number(value)) || 0,
+		mn = Math.round(Number(max)) || 100,
+		fv = byte ? bytesToSize(value) : value,
+		fm = byte ? bytesToSize(max) : max,
 		pc = Math.floor((100 / mn) * vn);
 	if (pc >= 85 && pc <= 95 ) 
 		{ pg.firstElementChild.style.background = 'darkorange'; }
@@ -665,7 +704,7 @@ function lastPeriod(d) {
 
 function bytesToSize(bytes) {
 	var sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
-	if (bytes == 0) return '0';
+	if (bytes == 0) return '0 B';
 	var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
 var dm = 0;
 	if (i == 2) {dm = 1;}
@@ -708,8 +747,7 @@ function loadSVG(src) {
 }
 
 function labelBytes(n) {
-	n = (n || 0).toFixed(2);
-	return [ '%1024.2mB'.format(n) ];
+	return [ bytesToSize(n || 0) ];
 }
 
 function clearNode(node) {
@@ -747,8 +785,8 @@ function sumWanTotalsForDates(jsonData, dates) {
 
 function aggregateWanByDates(jsonData, dates) {
 	var wan = jsonData.wan || {};
-	var rx = new Array(dates.length).fill(0);
-	var tx = new Array(dates.length).fill(0);
+	var rx = new Array(dates.length).fill(null);
+	var tx = new Array(dates.length).fill(null);
 
 	for (var ifname in wan) {
 		if (ifname === 'first_seen' || ifname === 'last_seen' || ifname === 'type') continue;
@@ -759,6 +797,8 @@ function aggregateWanByDates(jsonData, dates) {
 			if (st) {
 				var r = (st.rx != null) ? st.rx : (st.total_rx != null ? st.total_rx : 0);
 				var t = (st.tx != null) ? st.tx : (st.total_tx != null ? st.total_tx : 0);
+				if (rx[di] === null) rx[di] = 0;
+				if (tx[di] === null) tx[di] = 0;
 				rx[di] += r || 0;
 				tx[di] += t || 0;
 			}
@@ -1092,6 +1132,8 @@ function drawStaticGraph(svg, rxSeries, txSeries, scaleText, labelsX, jsonData, 
 	var width  = (svg.offsetWidth ? svg.offsetWidth : 800) - 2;
 	var height = 300 - 2;
 
+	if (!svg._graphId) { svg._graphId = 'g' + Math.random().toString(36).slice(2); }
+	document.querySelectorAll('.graph-tooltip[data-svg-id="' + svg._graphId + '"]').forEach(function(el) { el.remove(); });
 	var oldTooltip = tab.querySelector('.graph-tooltip');
 	if (oldTooltip) oldTooltip.remove();
 	var oldOverlay = tab.querySelector('.graph-overlay');
@@ -1100,6 +1142,7 @@ function drawStaticGraph(svg, rxSeries, txSeries, scaleText, labelsX, jsonData, 
 	oldPoints.forEach(function(p) { p.remove(); });
 	var oldPointsContainer = tab.querySelector('.data-points-container');
 	if (oldPointsContainer) oldPointsContainer.remove();
+	if (G) { G.querySelectorAll('circle.data-point-svg, rect.graph-hit-layer').forEach(function(el) { el.remove(); }); }
 	var oldLabelsX = tab.querySelector('.x-axis-labels');
 	if (oldLabelsX) oldLabelsX.remove();
 
@@ -1281,125 +1324,165 @@ function drawStaticGraph(svg, rxSeries, txSeries, scaleText, labelsX, jsonData, 
 		svg.parentNode.insertBefore(labelsContainer, svg.nextSibling);
 	}
 
-	// Tooltip
 	var tooltip = E('div', {
 		'class': 'graph-tooltip',
-		'style': 'position:absolute; display:none; padding:12px 15px; border-radius:6px; font-size:12px; pointer-events:none; z-index:1000; width:280px; box-sizing:border-box;'
+		'data-svg-id': svg._graphId,
+		'style': 'position:fixed; display:none; padding:12px 15px; border-radius:6px; font-size:12px; pointer-events:none; z-index:9999; width:280px; box-sizing:border-box;'
 	});
 	tooltip.style.background = 'color-mix(in srgb, var(--border-color-medium, #666) 100%, transparent 25%)';
 	tooltip.style.color = 'var(--text-color-high, #111)';
 	tooltip.style.border = '1px solid var(--border-color-medium, #666)';
 	tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,.25)';
-	svg.parentNode.style.position = 'relative';
-	svg.parentNode.appendChild(tooltip);
+	document.body.appendChild(tooltip);
 
-	var pointsContainer = E('div', { 
-		'class': 'data-points-container', 
-		'style': 'position:absolute; top:0; left:0; width:100%; height:' + height + 'px; pointer-events:none;' 
-	});
-	svg.parentNode.insertBefore(pointsContainer, svg.nextSibling);
+	var oldCircles = G.querySelectorAll('circle.data-point-svg');
+	oldCircles.forEach(function(c) { c.remove(); });
 
-for (var p = 0; p < points; p++) {
-	var rv2 = rx[p], tv2 = tx[p];
+	var hitLayer = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+	hitLayer.setAttribute('x', '0');
+	hitLayer.setAttribute('y', '0');
+	hitLayer.setAttribute('width', String(width));
+	hitLayer.setAttribute('height', String(height));
+	hitLayer.setAttribute('fill', 'transparent');
+	hitLayer.setAttribute('class', 'graph-hit-layer');
+	hitLayer.style.cursor = 'auto';
+	G.appendChild(hitLayer);
 
-	if (rv2 == null && tv2 == null) continue;
-	if ((rv2 || 0) === 0 && (tv2 || 0) === 0) continue;
+	var svgPoints = [];
 
-	var x = p * step;
-	var yRx = height - Math.floor((rv2 || 0) * data_scale);
-	var yTx = height - Math.floor((tv2 || 0) * data_scale);
+	for (var p = 0; p < points; p++) {
+		var rv2 = rx[p], tv2 = tx[p];
 
-var pointRx = E('div', {
-	'class': 'data-point data-point-rx',
-	'style': 'position:absolute; width:8px; height:8px; background:#4169E1; border:2px solid white; border-radius:50%; left:' + (x - 3) + 'px; top:' + (yRx - 4) + 'px; pointer-events:auto; cursor:pointer; transition:all 0.2s;',
-	'data-index': p, 
-	'data-type': 'rx',
-	'data-x': x
-});
-var pointTx = E('div', {
-	'class': 'data-point data-point-tx',
-	'style': 'position:absolute; width:8px; height:8px; background:#32CD32; border:2px solid white; border-radius:50%; left:' + (x - 3) + 'px; top:' + (yTx - 4) + 'px; pointer-events:auto; cursor:pointer; transition:all 0.2s;',
-	'data-index': p, 
-	'data-type': 'tx',
-	'data-x': x
-});
+		if (rv2 == null && tv2 == null) continue;
+		if ((rv2 || 0) === 0 && (tv2 || 0) === 0) continue;
 
-		[pointRx, pointTx].forEach(function(point){
-			point.addEventListener('mouseenter', function(){
-				var idx = parseInt(this.dataset.index);
-				this.style.width = '12px'; 
-				this.style.height = '12px';
-				this.style.marginLeft = '-2px'; 
-				this.style.marginTop = '-2px';
-				this.style.boxShadow = '0 0 8px rgba(0,0,0,0.5)';
+		var cx = Math.round(p * step);
+		var yRx = height - Math.floor((rv2 || 0) * data_scale);
+		var yTx = height - Math.floor((tv2 || 0) * data_scale);
 
-				var rxVal = rx[idx] || 0;
-				var txVal = tx[idx] || 0;
-				var label = labelsX && labelsX[idx] ? labelsX[idx] : String(idx);
+		var circleRx = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		circleRx.setAttribute('cx', String(cx));
+		circleRx.setAttribute('cy', String(yRx));
+		circleRx.setAttribute('r', '4');
+		circleRx.setAttribute('fill', '#4169E1');
+		circleRx.setAttribute('stroke', 'white');
+		circleRx.setAttribute('stroke-width', '2');
+		circleRx.setAttribute('class', 'data-point-svg data-point-rx-svg');
+		circleRx.style.cursor = 'pointer';
+		circleRx.style.transition = 'r 0.15s';
 
-				var top3 = null;
-				if (chartType === 'yearly' && dates && dates[idx]) {
-					var yearMonth = dates[idx].substring(0, 6);
-					top3 = getTop3ClientsForMonth(jsonData, yearMonth);
-				} else if ((chartType === 'monthly' || chartType === 'today') && dates && dates[idx]) {
-					top3 = getTop3ClientsForDates(jsonData, [dates[idx]]);
-				}
+		var circleTx = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		circleTx.setAttribute('cx', String(cx));
+		circleTx.setAttribute('cy', String(yTx));
+		circleTx.setAttribute('r', '4');
+		circleTx.setAttribute('fill', '#32CD32');
+		circleTx.setAttribute('stroke', 'white');
+		circleTx.setAttribute('stroke-width', '2');
+		circleTx.setAttribute('class', 'data-point-svg data-point-tx-svg');
+		circleTx.style.cursor = 'pointer';
+		circleTx.style.transition = 'r 0.15s';
 
-				var tooltipContent =
-					'<div style="font-weight:bold; margin-bottom:8px; border-bottom:1px solid var(--border-color-low, rgba(0,0,0,0.2)); padding-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + label + '</div>';
+		G.appendChild(circleRx);
+		G.appendChild(circleTx);
 
-				if (top3) {
-					if (top3.uploaded && top3.uploaded.length > 0) {
-						tooltipContent += '<div style="margin-bottom:6px; margin-top:4px;"><strong style="font-size:11px;">▼ Top 3</strong></div>';
-						top3.uploaded.forEach(function(client, iTop){
-							if (client.uploaded > 0) {
-								tooltipContent += '<div style="font-size:10px; margin:2px 0; padding-left:8px; display:flex; justify-content:space-between; gap:8px;">' +
-									'<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + client.name + '">' + (iTop+1) + '. ' + client.name + '</span>' +
-									'<span style="white-space:nowrap;">' + bytesToSize(client.uploaded) + '</span>' +
-								'</div>';
-							}
-						});
+		svgPoints.push({ p: p, cx: cx, yRx: yRx, yTx: yTx, circleRx: circleRx, circleTx: circleTx });
+	}
+
+	function showTooltip(circle, idx) {
+		var rxVal = rx[idx] || 0;
+		var txVal = tx[idx] || 0;
+		var label = labelsX && labelsX[idx] ? labelsX[idx] : String(idx);
+
+		var top3 = null;
+		if (chartType === 'yearly' && dates && dates[idx]) {
+			var yearMonth = dates[idx].substring(0, 6);
+			top3 = getTop3ClientsForMonth(jsonData, yearMonth);
+		} else if ((chartType === 'monthly' || chartType === 'today') && dates && dates[idx]) {
+			top3 = getTop3ClientsForDates(jsonData, [dates[idx]]);
+		}
+
+		var tooltipContent =
+			'<div style="font-weight:bold; margin-bottom:8px; border-bottom:1px solid var(--border-color-low, rgba(0,0,0,0.2)); padding-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + label + '</div>';
+
+		if (top3) {
+			if (top3.uploaded && top3.uploaded.length > 0) {
+				tooltipContent += '<div style="margin-bottom:6px; margin-top:4px;"><strong style="font-size:11px;">▼ Top 3</strong></div>';
+				top3.uploaded.forEach(function(client, iTop){
+					if (client.uploaded > 0) {
+						tooltipContent += '<div style="font-size:10px; margin:2px 0; padding-left:8px; display:flex; justify-content:space-between; gap:8px;">' +
+							'<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + client.name + '">' + (iTop+1) + '. ' + client.name + '</span>' +
+							'<span style="white-space:nowrap;">' + bytesToSize(client.uploaded) + '</span>' +
+						'</div>';
 					}
-					if (top3.downloaded && top3.downloaded.length > 0) {
-						tooltipContent += '<div style="margin-top:6px; margin-bottom:4px;"><strong style="font-size:11px;">▲ Top 3</strong></div>';
-						top3.downloaded.forEach(function(client, iTop){
-							if (client.downloaded > 0) {
-								tooltipContent += '<div style="font-size:10px; margin:2px 0; padding-left:8px; display:flex; justify-content:space-between; gap:8px;">' +
-									'<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + client.name + '">' + (iTop+1) + '. ' + client.name + '</span>' +
-									'<span style="white-space:nowrap;">' + bytesToSize(client.downloaded) + '</span>' +
-								'</div>';
-							}
-						});
+				});
+			}
+			if (top3.downloaded && top3.downloaded.length > 0) {
+				tooltipContent += '<div style="margin-top:6px; margin-bottom:4px;"><strong style="font-size:11px;">▲ Top 3</strong></div>';
+				top3.downloaded.forEach(function(client, iTop){
+					if (client.downloaded > 0) {
+						tooltipContent += '<div style="font-size:10px; margin:2px 0; padding-left:8px; display:flex; justify-content:space-between; gap:8px;">' +
+							'<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + client.name + '">' + (iTop+1) + '. ' + client.name + '</span>' +
+							'<span style="white-space:nowrap;">' + bytesToSize(client.downloaded) + '</span>' +
+						'</div>';
 					}
-					tooltipContent += '<div style="margin-top:8px; margin-bottom:8px; border-top:2px solid var(--border-color-low, rgba(0,0,0,0.2));"></div>';
-				}
+				});
+			}
+			tooltipContent += '<div style="margin-top:8px; margin-bottom:8px; border-top:2px solid var(--border-color-low, rgba(0,0,0,0.2));"></div>';
+		}
 
-				tooltipContent +=
-					'<div style="margin:4px 0; display:flex; justify-content:space-between; gap:10px;"><span>▼ ' + _('Downloaded') + ':</span><strong>' + bytesToSize(rxVal) + '</strong></div>' +
-					'<div style="margin:4px 0; display:flex; justify-content:space-between; gap:10px;"><span>▲ ' + _('Uploaded') + ':</span><strong>' + bytesToSize(txVal) + '</strong></div>' +
-					'<div style="margin:4px 0; padding-top:5px; border-top:1px solid var(--border-color-low, rgba(0,0,0,0.2)); display:flex; justify-content:space-between; gap:10px;"><span>' + _('Total') + ':</span><strong>' + bytesToSize(rxVal + txVal) + '</strong></div>';
+		tooltipContent +=
+			'<div style="margin:4px 0; display:flex; justify-content:space-between; gap:10px;"><span>▼ ' + _('Downloaded') + ':</span><strong>' + bytesToSize(rxVal) + '</strong></div>' +
+			'<div style="margin:4px 0; display:flex; justify-content:space-between; gap:10px;"><span>▲ ' + _('Uploaded') + ':</span><strong>' + bytesToSize(txVal) + '</strong></div>' +
+			'<div style="margin:4px 0; padding-top:5px; border-top:1px solid var(--border-color-low, rgba(0,0,0,0.2)); display:flex; justify-content:space-between; gap:10px;"><span>' + _('Total') + ':</span><strong>' + bytesToSize(rxVal + txVal) + '</strong></div>';
 
-				tooltip.innerHTML = tooltipContent;
-				tooltip.style.display = 'block';
+		tooltip.innerHTML = tooltipContent;
+		tooltip.style.display = 'block';
 
-				var pos = positionTooltip(tooltip, point, svg, idx, points, chartType);
-				tooltip.style.left = pos.left;
-				tooltip.style.top = pos.top;
-				tooltip.style.right = 'auto';
+		var circleRect = circle.getBoundingClientRect();
+		var tooltipW = tooltip.offsetWidth || 280;
+		var tooltipH = tooltip.offsetHeight || 150;
+		var margin = 10;
+		var vw = window.innerWidth;
+		var vh = window.innerHeight;
+
+		var left = circleRect.left + circleRect.width / 2 - tooltipW / 2;
+		var top  = circleRect.top - tooltipH - margin;
+
+		if (top < margin) top = circleRect.bottom + margin;
+		if (left < margin) left = margin;
+		if (left + tooltipW > vw - margin) left = vw - tooltipW - margin;
+		if (top + tooltipH > vh - margin) top = circleRect.top - tooltipH - margin;
+
+		tooltip.style.left = left + 'px';
+		tooltip.style.top  = top  + 'px';
+		tooltip.style.right = 'auto';
+	}
+
+	svgPoints.forEach(function(pt) {
+		[
+			{ circle: pt.circleRx, type: 'rx' },
+			{ circle: pt.circleTx, type: 'tx' }
+		].forEach(function(item) {
+			item.circle.addEventListener('mouseenter', function() {
+				this.setAttribute('r', '6');
+				this.setAttribute('stroke-width', '2.5');
+				showTooltip(this, pt.p);
 			});
-			point.addEventListener('mouseleave', function(){
-				this.style.width = '8px'; 
-				this.style.height = '8px';
-				this.style.marginLeft = '0'; 
-				this.style.marginTop = '0';
-				this.style.boxShadow = 'none';
+			item.circle.addEventListener('mouseleave', function() {
+				this.setAttribute('r', '4');
+				this.setAttribute('stroke-width', '2');
 				tooltip.style.display = 'none';
 			});
 		});
+	});
 
-		pointsContainer.appendChild(pointRx);
-		pointsContainer.appendChild(pointTx);
-	}
+	var tooltipObserver = new MutationObserver(function() {
+		if (!document.body.contains(svg)) {
+			if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
+			tooltipObserver.disconnect();
+		}
+	});
+	tooltipObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 function daysOfCurrentMonthToYesterday() {
@@ -1566,8 +1649,10 @@ function isClientMacKey(k) {
 	return /^[0-9a-f]{2}(?:_[0-9a-f]{2}){5}$/i.test(k);
 }
 
-function getClientsList(jsonData) {
+function getClientsList(jsonData, leases, macs_list) {
 	var clients = [];
+	leases = leases || [];
+	macs_list = macs_list || [];
 	
 	for (var mac in jsonData) {
 		if (!jsonData.hasOwnProperty(mac)) continue;
@@ -1575,13 +1660,23 @@ function getClientsList(jsonData) {
 		
 		var deviceData = jsonData[mac];
 		var modifiedMac = mac.replaceAll("_", ":").toUpperCase();
-		var dhcpname = deviceData.dhcpname || modifiedMac;
+		var dhcpname = deviceData.dhcpname || '';
+		var matchedLease = leases.find(function(l) { return l.macaddr.toUpperCase() === modifiedMac; });
+		var ipAddr = matchedLease ? matchedLease.ipaddr : '';
+		var matchedCustom = macs_list.find(function(entry) { return entry.split(';')[0].toUpperCase() === modifiedMac; });
+		if (matchedCustom) {
+			var customName = matchedCustom.split(';')[1] || '';
+			dhcpname = customName + (ipAddr ? " (" + ipAddr + ")" : "");
+		} else if (ipAddr) {
+			dhcpname = (dhcpname || modifiedMac) + " (" + ipAddr + ")";
+		}
+		var displayName = dhcpname || modifiedMac;
 		
 		clients.push({
 			mac: mac,
 			displayMac: modifiedMac,
-			name: dhcpname,
-			displayName: dhcpname || modifiedMac
+			name: displayName,
+			displayName: displayName
 		});
 	}
 	
@@ -1682,9 +1777,9 @@ function updatePieChart(key, jsonData, dates) {
 	for (var i = 0; i < mac_list.length; i++) macs_list.push(mac_list[i]);
 
 	var wanTotals = sumWanTotalsForDates(jsonData, dates || []);
-	dom.content(pieObj.rxCell, String.format('%1024.2mB', wanTotals.rx || 0));
-	dom.content(pieObj.txCell, String.format('%1024.2mB', wanTotals.tx || 0));
-	dom.content(pieObj.totalCell, String.format('%1024.2mB', (wanTotals.rx||0) + (wanTotals.tx||0)));
+	dom.content(pieObj.rxCell, bytesToSize(wanTotals.rx || 0));
+	dom.content(pieObj.txCell, bytesToSize(wanTotals.tx || 0));
+	dom.content(pieObj.totalCell, bytesToSize((wanTotals.rx||0) + (wanTotals.tx||0)));
 
 	callLuciDHCPLeases().then(function(leaseData) {
 		var leases = Array.isArray(leaseData.dhcp_leases) ? leaseData.dhcp_leases : [];
@@ -1718,17 +1813,14 @@ function updatePieChart(key, jsonData, dates) {
 				var modifiedMac = mac.replaceAll("_", ":").toUpperCase();
 
 				var dhcpname = deviceData.dhcpname || '';
-				if (leases.length > 0 || macs_list.length > 0) {
-					for (var i2 = 0; i2 < Math.max(leases.length, macs_list.length); i2++) {
-						if (i2 < leases.length && leases[i2].macaddr === modifiedMac) {
-							dhcpname += " (" + leases[i2].ipaddr + ')';
-						}
-						if (i2 < macs_list.length && macs_list[i2].split(';')[0] === modifiedMac) {
-							var custom = macs_list[i2].split(';')[1] || '';
-							var ipForCustom = (i2 < leases.length && leases[i2].macaddr === modifiedMac) ? leases[i2].ipaddr : '';
-							dhcpname = custom + (ipForCustom ? " (" + ipForCustom + ")" : "");
-						}
-					}
+				var matchedLease = leases.find(function(l) { return l.macaddr.toUpperCase() === modifiedMac; });
+				var ipAddr = matchedLease ? matchedLease.ipaddr : '';
+				var matchedCustom = macs_list.find(function(entry) { return entry.split(';')[0].toUpperCase() === modifiedMac; });
+				if (matchedCustom) {
+					var customName = matchedCustom.split(';')[1] || '';
+					dhcpname = customName + (ipAddr ? " (" + ipAddr + ")" : "");
+				} else if (ipAddr) {
+					dhcpname = (dhcpname || modifiedMac) + " (" + ipAddr + ")";
 				}
 
 				var label = dhcpname || modifiedMac;
@@ -1851,9 +1943,9 @@ function populateDropdowns(jsonData) {
 				);
 				
 				var totals = getWanTotalsForDate(jsonData, selectedDate);
-				dom.content(graphsByKey.today.rxCell, String.format('%1024.2mB', totals.rx));
-				dom.content(graphsByKey.today.txCell, String.format('%1024.2mB', totals.tx));
-				dom.content(graphsByKey.today.totalCell, String.format('%1024.2mB', totals.rx + totals.tx));
+				dom.content(graphsByKey.today.rxCell, bytesToSize(totals.rx));
+				dom.content(graphsByKey.today.txCell, bytesToSize(totals.tx));
+				dom.content(graphsByKey.today.totalCell, bytesToSize(totals.rx + totals.tx));
 			});
 		});
 	}
@@ -1991,46 +2083,20 @@ function drawMonthlyChart(jsonData, yearMonth) {
 	var now = new Date();
 	var currentYear  = now.getFullYear();
 	var currentMonth = now.getMonth() + 1;
-	var currentDay   = now.getDate();
 
-	var isCurrentMonth = (year === currentYear && month === currentMonth);
 	var daysInMonth = new Date(year, month, 0).getDate();
-	var maxDay = isCurrentMonth ? currentDay : daysInMonth;
 
 	var allDates = [];
-	for (var d = 1; d <= maxDay; d++) {
+	for (var d = 1; d <= daysInMonth; d++) {
 		allDates.push(yearMonth + String(d).padStart(2, '0'));
 	}
 
 	var data = aggregateWanByDates(jsonData, allDates);
 
-	var firstValidIndex = -1;
-	var lastValidIndex = -1;
-	
-	for (var i = 0; i < data.rx.length; i++) {
-		if ((data.rx[i] !== null && data.rx[i] > 0) || 
-		    (data.tx[i] !== null && data.tx[i] > 0)) {
-			if (firstValidIndex === -1) {
-				firstValidIndex = i;
-			}
-			lastValidIndex = i;
-		}
-	}
-
-	var dates, labels;
-	if (firstValidIndex === -1) {
-		dates = [];
-		labels = [];
-		data.rx = [];
-		data.tx = [];
-	} else {
-		dates = allDates.slice(firstValidIndex, lastValidIndex + 1);
-		labels = dates.map(function(d) {
-			return d.substring(6, 8) + '.' + d.substring(4, 6);
-		});
-		data.rx = data.rx.slice(firstValidIndex, lastValidIndex + 1);
-		data.tx = data.tx.slice(firstValidIndex, lastValidIndex + 1);
-	}
+	var dates = allDates;
+	var labels = dates.map(function(d) {
+		return d.substring(6, 8) + '.' + d.substring(4, 6);
+	});
 
 	var scaleText = _('(Daily usage chart for a selected month)');
 
@@ -2048,18 +2114,16 @@ function drawMonthlyChart(jsonData, yearMonth) {
 	function sum(a){ return (a||[]).reduce((s,v)=> s + (v != null ? v : 0), 0); }
 	var rxSum = sum(data.rx);
 	var txSum = sum(data.tx);
-	dom.content(graphsByKey.monthly.rxCell, String.format('%1024.2mB', rxSum));
-	dom.content(graphsByKey.monthly.txCell, String.format('%1024.2mB', txSum));
-	dom.content(graphsByKey.monthly.totalCell, String.format('%1024.2mB', rxSum + txSum));
+	dom.content(graphsByKey.monthly.rxCell, bytesToSize(rxSum));
+	dom.content(graphsByKey.monthly.txCell, bytesToSize(txSum));
+	dom.content(graphsByKey.monthly.totalCell, bytesToSize(rxSum + txSum));
 }
 
 function drawYearlyChart(jsonData, selectedYear) {
 	var now = new Date();
 	var currentYear = now.getFullYear();
-	var currentMonth = now.getMonth() + 1;
 	
 	var year = selectedYear || currentYear;
-	var maxMonth = (year === currentYear) ? currentMonth : 12;
 	
 	var allMonthsRx = [];
 	var allMonthsTx = [];
@@ -2071,7 +2135,7 @@ function drawYearlyChart(jsonData, selectedYear) {
 		_('Jul'), _('Aug'), _('Sep'), _('Oct'), _('Nov'), _('Dec')
 	];
 	
-	for (var m = 1; m <= maxMonth; m++) {
+	for (var m = 1; m <= 12; m++) {
 		var monthStr = year + String(m).padStart(2, '0');
 		var daysInMonth = new Date(year, m, 0).getDate();
 		
@@ -2085,36 +2149,19 @@ function drawYearlyChart(jsonData, selectedYear) {
 		
 		var monthRx = monthData.rx.reduce(function(s, v) { return s + (v || 0); }, 0);
 		var monthTx = monthData.tx.reduce(function(s, v) { return s + (v || 0); }, 0);
+
+		var hasAnyData = monthData.rx.some(function(v) { return v !== null; }) || 
+		                 monthData.tx.some(function(v) { return v !== null; });
 		
-		allMonthsRx.push(monthRx);
-		allMonthsTx.push(monthTx);
+		allMonthsRx.push(hasAnyData ? monthRx : null);
+		allMonthsTx.push(hasAnyData ? monthTx : null);
 		allLabels.push(monthNames[m - 1]);
 	}
 	
-	var firstValidIndex = -1;
-	var lastValidIndex = -1;
-	
-	for (var i = 0; i < allMonthsRx.length; i++) {
-		if (allMonthsRx[i] > 0 || allMonthsTx[i] > 0) {
-			if (firstValidIndex === -1) {
-				firstValidIndex = i;
-			}
-			lastValidIndex = i;
-		}
-	}
-	
-	var rx, tx, labels, firstDates;
-	if (firstValidIndex === -1) {
-		rx = [];
-		tx = [];
-		labels = [];
-		firstDates = [];
-	} else {
-		rx = allMonthsRx.slice(firstValidIndex, lastValidIndex + 1);
-		tx = allMonthsTx.slice(firstValidIndex, lastValidIndex + 1);
-		labels = allLabels.slice(firstValidIndex, lastValidIndex + 1);
-		firstDates = allFirstDates.slice(firstValidIndex, lastValidIndex + 1);
-	}
+	var rx = allMonthsRx;
+	var tx = allMonthsTx;
+	var labels = allLabels;
+	var firstDates = allFirstDates;
 	
 	function sum(a){ 
 		return (a||[]).reduce(function(s,v){ 
@@ -2139,9 +2186,9 @@ function drawYearlyChart(jsonData, selectedYear) {
 	
 	var rxSum = sum(rx);
 	var txSum = sum(tx);
-	dom.content(graphsByKey.yearly.rxCell, String.format('%1024.2mB', rxSum));
-	dom.content(graphsByKey.yearly.txCell, String.format('%1024.2mB', txSum));
-	dom.content(graphsByKey.yearly.totalCell, String.format('%1024.2mB', rxSum + txSum));
+	dom.content(graphsByKey.yearly.rxCell, bytesToSize(rxSum));
+	dom.content(graphsByKey.yearly.txCell, bytesToSize(txSum));
+	dom.content(graphsByKey.yearly.totalCell, bytesToSize(rxSum + txSum));
 }
 
 function refreshGraphsFromFile() {
@@ -2187,9 +2234,9 @@ function refreshGraphsFromFile() {
 		);
 
 		var todayTotals = getWanTotalsForDate(jsonData, todayYMD);
-		dom.content(graphsByKey.today.rxCell, String.format('%1024.2mB', todayTotals.rx));
-		dom.content(graphsByKey.today.txCell, String.format('%1024.2mB', todayTotals.tx));
-		dom.content(graphsByKey.today.totalCell, String.format('%1024.2mB', todayTotals.rx + todayTotals.tx));
+		dom.content(graphsByKey.today.rxCell, bytesToSize(todayTotals.rx));
+		dom.content(graphsByKey.today.txCell, bytesToSize(todayTotals.tx));
+		dom.content(graphsByKey.today.totalCell, bytesToSize(todayTotals.rx + todayTotals.tx));
 
 		var now = new Date();
 		var currentMonth = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0');
@@ -2451,11 +2498,9 @@ function populateClientDropdowns(jsonData) {
 		if (timeRangeDropdown) {
 			timeRangeDropdown.innerHTML = '';
 			
-			// Last 7 days
 			var option1 = E('option', { 'value': 'last7days', 'selected': 'selected' }, _('Last 7 days'));
 			timeRangeDropdown.appendChild(option1);
 			
-			// Today
 			var optionToday = E('option', { 'value': 'today' }, _('Today'));
 			timeRangeDropdown.appendChild(optionToday);
 			
@@ -2471,7 +2516,6 @@ function populateClientDropdowns(jsonData) {
 			var separatorMonth = E('option', { 'disabled': 'disabled', 'value': '' }, '─────────────');
 			timeRangeDropdown.appendChild(separatorMonth);
 			
-			// Current year months
 			var now = new Date();
 			var currentYear = now.getFullYear();
 			var currentMonth = now.getMonth() + 1;
@@ -2482,11 +2526,9 @@ function populateClientDropdowns(jsonData) {
 				timeRangeDropdown.appendChild(monthOption);
 			}
 			
-			// Separator - Years
 			var separatorYear = E('option', { 'disabled': 'disabled', 'value': '' }, '─────────────');
 			timeRangeDropdown.appendChild(separatorYear);
 			
-			// Available years
 			var availableYears = getAvailableYears(jsonData);
 			availableYears.reverse();
 			availableYears.forEach(function(year) {
@@ -2497,11 +2539,24 @@ function populateClientDropdowns(jsonData) {
 		
 		if (clientDropdown) {
 			clientDropdown.innerHTML = '';
-			
-			var clients = getClientsList(jsonData);
-			clients.forEach(function(client) {
-				var option = E('option', { 'value': client.mac }, client.displayName);
-				clientDropdown.appendChild(option);
+			var sections2 = uci.sections('easyconfig_transfer');
+			var mac_list2 = Array.isArray(sections2[1].host_names) ? sections2[1].host_names : [];
+			callLuciDHCPLeases().then(function(leaseData2) {
+				var leases2 = Array.isArray(leaseData2.dhcp_leases) ? leaseData2.dhcp_leases : [];
+				var clients = getClientsList(jsonData, leases2, mac_list2);
+				clientDropdown.innerHTML = '';
+				clients.forEach(function(client) {
+					var option = E('option', { 'value': client.mac }, client.displayName);
+					clientDropdown.appendChild(option);
+				});
+				if (clientDropdown.options.length > 0) {
+					var usageHistoryObj2 = clientTablesByKey['client-usage-history'];
+					if (usageHistoryObj2 && usageHistoryObj2.timeRangeDropdown) {
+						var timeRange2 = usageHistoryObj2.timeRangeDropdown.value || 'last7days';
+						var dates2 = lastDays(7);
+						updateClientUsageHistoryTable(jsonData, clients[0].mac, dates2, 'last7days');
+					}
+				}
 			});
 		}
 		
@@ -2554,10 +2609,6 @@ function populateClientDropdowns(jsonData) {
 		
 		timeRangeDropdown.addEventListener('change', updateUsageHistory);
 		clientDropdown.addEventListener('change', updateUsageHistory);
-		
-		if (clientDropdown.options.length > 0) {
-			updateUsageHistory();
-		}
 	}
 }
 
@@ -2603,17 +2654,14 @@ function updateClientTable(tableKey, jsonData, dates) {
 			var modifiedMac = mac.replaceAll("_", ":").toUpperCase();
 
 			var dhcpname = deviceData.dhcpname || '';
-			if (leases.length > 0 || macs_list.length > 0) {
-				for (var i2 = 0; i2 < Math.max(leases.length, macs_list.length); i2++) {
-					if (i2 < leases.length && leases[i2].macaddr === modifiedMac) {
-						dhcpname += " (" + leases[i2].ipaddr + ')';
-					}
-					if (i2 < macs_list.length && macs_list[i2].split(';')[0] === modifiedMac) {
-						var custom = macs_list[i2].split(';')[1] || '';
-						var ipForCustom = (i2 < leases.length && leases[i2].macaddr === modifiedMac) ? leases[i2].ipaddr : '';
-						dhcpname = custom + (ipForCustom ? " (" + ipForCustom + ")" : "");
-					}
-				}
+			var matchedLease = leases.find(function(l) { return l.macaddr.toUpperCase() === modifiedMac; });
+			var ipAddr = matchedLease ? matchedLease.ipaddr : '';
+			var matchedCustom = macs_list.find(function(entry) { return entry.split(';')[0].toUpperCase() === modifiedMac; });
+			if (matchedCustom) {
+				var customName = matchedCustom.split(';')[1] || '';
+				dhcpname = customName + (ipAddr ? " (" + ipAddr + ")" : "");
+			} else if (ipAddr) {
+				dhcpname = (dhcpname || modifiedMac) + " (" + ipAddr + ")";
 			}
 
 			if ((hideZeros == "1" && (totalTX > 0 || totalRX > 0)) || (hideZeros == "0")) {
@@ -2739,7 +2787,7 @@ function reloadCurrentClientTab(tableKey) {
 						var monthStr = year + String(m).padStart(2, '0');
 						var daysInM = new Date(year, m, 0).getDate();
 						for (var d = 1; d <= daysInM; d++) {
-							yearDates.push(monthStr + String(d).padStart(2, '0'));
+							dates.push(monthStr + String(d).padStart(2, '0'));
 						}
 					}
 					actualTimeRange = 'yearly';
@@ -2821,7 +2869,7 @@ return view.extend({
 		}).catch(function (e) {
 			ui.hideModal();
 			ui.addNotification(null, E('p', _('Error refreshing data: ') + e.message), 'error');
-			console.error('Błąd odświeżania:', e);
+			console.error('Refreshing error:', e);
 		});
 	},
 
@@ -2834,7 +2882,7 @@ return view.extend({
 			fs.exec('sleep 2');
 			fs.remove('/etc/modem/easyconfig_statistics.json');
 			
-			ui.addNotification(null, E('p', _('Statistics data cleared')), 'info');
+			popTimeout(null, E('p', _('Statistics data cleared')), 5000, 'info');
 			
 			setTimeout(function() {
 				window.location.reload();
@@ -2853,7 +2901,7 @@ return view.extend({
 			fs.remove('/etc/modem/easyconfig_statistics.json');
 			fs.exec('sleep 2');
 			fs.exec_direct('/bin/cp', [ '/tmp/easyconfig_statistics.json' , '/etc/modem' ]);
-			ui.addNotification(null, E('p', _('Backup created successfully')), 'info');
+			popTimeout(null, E('p', _('Backup created successfully')), 5000, 'info');
 		}
 
 		if (vN.includes(_('Restore')) == true)
@@ -2865,7 +2913,7 @@ return view.extend({
 			fs.exec_direct('/bin/cp', [ '/etc/modem/easyconfig_statistics.json' , '/tmp' ]);
 			fs.exec('sleep 2');
 			fs.remove('/etc/modem/easyconfig_statistics.json');
-			ui.addNotification(null, E('p', _('Backup restored successfully')), 'info');
+			popTimeout(null, E('p', _('Backup restored successfully')), 5000, 'info');
 			
 			setTimeout(function() {
 				Promise.all([refreshGraphsFromFile(), refreshClientTables()]);
@@ -3148,11 +3196,13 @@ return view.extend({
 		]);
 
 		setTimeout(function () {
-			buildGraphsOnce();
-			refreshGraphsFromFile();
-			updateStatsFileSize();	
-			buildClientTablesOnce();
-			refreshClientTables();
+			checkAndRestoreExternalBackup().then(function() {
+				buildGraphsOnce();
+				refreshGraphsFromFile();
+				updateStatsFileSize();
+				buildClientTablesOnce();
+				refreshClientTables();
+			});
 		}, 100);
 
 		return viewNode;

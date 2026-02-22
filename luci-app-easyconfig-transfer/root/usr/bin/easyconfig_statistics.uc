@@ -4,7 +4,7 @@
 //
 // (c) 2023 Cezary Jackiewicz <cezary@eko.one.pl>
 //
-// (c) 2025 modified by Rafał Wabik (IceG) <https://github.com/4IceG>
+// (c) 2025-2026 modified by Rafał Wabik (IceG) <https://github.com/4IceG>
 //
 // From eko.one.pl forum
 //
@@ -109,18 +109,8 @@ if (!tmp) {
 if (!db[MAC][IFNAME][day].hours)
 	db[MAC][IFNAME][day].hours = {};
 
-if (!db[MAC][IFNAME][day].hours[hour]) {
-	db[MAC][IFNAME][day].hours[hour] = {
-		total_tx: 0,
-		total_rx: 0
-	};
-}
-
 let total_tx = int(db[MAC][IFNAME][day].total_tx);
 let total_rx = int(db[MAC][IFNAME][day].total_rx);
-
-let hour_tx = int(db[MAC][IFNAME][day].hours[hour].total_tx);
-let hour_rx = int(db[MAC][IFNAME][day].hours[hour].total_rx);
 
 let dtx = TX - last_tx;
 if (dtx < 0) dtx = TX;
@@ -136,8 +126,21 @@ if (CONNECTED <= 60) {
 db[MAC][IFNAME][day].total_tx = total_tx + dtx;
 db[MAC][IFNAME][day].total_rx = total_rx + drx;
 
-db[MAC][IFNAME][day].hours[hour].total_tx = hour_tx + dtx;
-db[MAC][IFNAME][day].hours[hour].total_rx = hour_rx + drx;
+// Dodaj statystyki godzinowe tylko jeśli był jakiś ruch danych
+if (dtx > 0 || drx > 0) {
+	if (!db[MAC][IFNAME][day].hours[hour]) {
+		db[MAC][IFNAME][day].hours[hour] = {
+			total_tx: 0,
+			total_rx: 0
+		};
+	}
+
+	let hour_tx = int(db[MAC][IFNAME][day].hours[hour].total_tx);
+	let hour_rx = int(db[MAC][IFNAME][day].hours[hour].total_rx);
+
+	db[MAC][IFNAME][day].hours[hour].total_tx = hour_tx + dtx;
+	db[MAC][IFNAME][day].hours[hour].total_rx = hour_rx + drx;
+}
 
 db[MAC][IFNAME].last_tx = TX;
 db[MAC][IFNAME].last_rx = RX;

@@ -1,0 +1,495 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-app-easyconfig-transfer\n"
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: zh_TW\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Transfer"
+msgstr "流量"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "用於估算流量消耗的 easyconfig 腳本使用者介面。更多資訊請參閱 %seko.one.pl 論壇%s。"
+
+msgid "Estimated data usage"
+msgstr "預估資料使用量"
+
+msgid "First Seen"
+msgstr "首次連線"
+
+msgid "Last Seen"
+msgstr "最後連線"
+
+msgid "Downloaded"
+msgstr "已下載"
+
+msgid "Uploaded"
+msgstr "已上傳"
+
+msgid "Configuration - Transfer"
+msgstr "設定 - 流量"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "用於計算流量統計的應用程式設定面板。"
+
+msgid "Data reading period"
+msgstr "資料讀取週期"
+
+msgid "Data recording period"
+msgstr "資料記錄週期"
+
+msgid "Beginning of the billing period"
+msgstr "計費週期開始"
+
+msgid "Warning enabled"
+msgstr "已啟用警告"
+
+msgid "Transfer available"
+msgstr "可用流量"
+
+msgid "Warning level"
+msgstr "警告等級"
+
+msgid "Warning cycle"
+msgstr "警告週期"
+
+msgid "per period"
+msgstr "每個週期"
+
+msgid "per day"
+msgstr "每天"
+
+msgid "Days until the end of the billing period"
+msgstr "距計費週期結束的天數"
+
+msgid "Estimated remaining transfer"
+msgstr "預估剩餘流量"
+
+msgid "approximately remains"
+msgstr "大約剩餘"
+
+msgid "Summary"
+msgstr "摘要"
+
+msgid "Today"
+msgstr "今天"
+
+msgid "Yesterday"
+msgstr "昨天"
+
+msgid "Last 7 days"
+msgstr "最近 7 天"
+
+msgid "Last 30 days"
+msgstr "最近 30 天"
+
+msgid "Yearly"
+msgstr "年度"
+
+msgid "Clients data usage"
+msgstr "用戶端資料使用量"
+
+msgid "Total"
+msgstr "總計"
+
+msgid "Current billing period"
+msgstr "目前計費週期"
+
+msgid "Expected data usage for the current period"
+msgstr "目前週期的預期資料使用量"
+
+msgid "Previous billing period"
+msgstr "上一個計費週期"
+
+msgid "Transfer usage statistics"
+msgstr "流量使用統計"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "計算結果可能與電信業者數據有所不同"
+
+msgid "Make a copy of Database"
+msgstr "建立資料庫副本"
+
+msgid "Restore"
+msgstr "還原"
+
+msgid "Make"
+msgstr "建立"
+
+msgid "a backup"
+msgstr "備份"
+
+msgid "Make a backup"
+msgstr "建立備份"
+
+msgid "Reset data"
+msgstr "重設資料"
+
+msgid "Main Settings"
+msgstr "主要設定"
+
+msgid "Traffic Settings"
+msgstr "流量設定"
+
+msgid "Hide MAC addresses"
+msgstr "隱藏 MAC 位址"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "隱藏沒有流量資訊的 MAC 位址。"
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"選擇建立資料壓縮副本的頻率。<br />封存路徑 <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>。<br /><br /><b>重要</b> <br />請記住，"
+"頻繁的寫入操作會縮短記憶體的使用壽命。"
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+msgstr ""
+"啟用流量資料收集。<br />資料儲存至檔案 <code>/tmp/easyconfig_statistics.json</code>。<br /><br /><b>須知</b> <br />啟用"
+"flow offloading 後，流量資料可能與實際情況不符，或完全無法取得。"
+
+msgid "1 minute"
+msgstr "1 分鐘"
+
+msgid "3 minutes"
+msgstr "3 分鐘"
+
+msgid "5 minutes"
+msgstr "5 分鐘"
+
+msgid "10 minutes"
+msgstr "10 分鐘"
+
+msgid "15 minutes"
+msgstr "15 分鐘"
+
+msgid "30 minutes"
+msgstr "30 分鐘"
+
+msgid "1 hour"
+msgstr "1 小時"
+
+msgid "3 hours"
+msgstr "3 小時"
+
+msgid "6 hours"
+msgstr "6 小時"
+
+msgid "12 hours"
+msgstr "12 小時"
+
+msgid "24 hours"
+msgstr "24 小時"
+
+msgid "Enter the starting day of the billing period."
+msgstr "輸入計費週期的起始日。"
+
+msgid "Hide selected data in the table"
+msgstr "隱藏表格中選取的資料"
+
+msgid "Select data that will be hidden."
+msgstr "選取要隱藏的資料。"
+
+msgid "MAC addresses"
+msgstr "MAC 位址"
+
+msgid "MAC addresses & Hostnames"
+msgstr "MAC 位址與主機名稱"
+
+msgid "Show wan in table"
+msgstr "在表格中顯示 WAN"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "若希望 WAN 在表格中顯示，請勾選此選項。"
+
+msgid "Enable data usage progress bar"
+msgstr "啟用資料使用進度列"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "以進度列形式顯示流量使用情況。"
+
+msgid "Enter the available transfer during the billing period."
+msgstr "輸入計費週期內的可用流量。"
+
+msgid "Unit of data size"
+msgstr "資料大小單位"
+
+msgid "Data Count Cycle"
+msgstr "資料統計週期"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "指定資料視覺化/統計的時間間隔。"
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "若希望在計劃重新啟動裝置時儲存資料，請勾選此選項。"
+
+msgid "Backup at"
+msgstr "備份時間"
+
+msgid "Restore backup at"
+msgstr "還原備份時間"
+
+msgid "Backup Settings"
+msgstr "備份設定"
+
+msgid "Move .json file"
+msgstr "移動 .json 檔案"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "正確的時間格式為 <code>HH:MM</code>。"
+
+msgid "Expected time is in HH:MM format"
+msgstr "預期時間格式為 HH:MM"
+
+msgid "Enter a numeric value"
+msgstr "輸入數值"
+
+msgid "Add a hostname"
+msgstr "新增主機名稱"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "以 <code>MAC 位址;主機名稱</code> 格式輸入資料。"
+
+msgid "Transfer details"
+msgstr "流量詳情"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "輸入 MAC 位址;主機名稱"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "您要清除流量統計資料嗎？"
+
+msgid "Transfer statistics"
+msgstr "流量統計"
+
+msgid "There are currently no data to show..."
+msgstr "目前沒有資料可顯示..."
+
+msgid "Additional settings"
+msgstr "其他設定"
+
+msgid "from"
+msgstr "從"
+
+msgid "out of"
+msgstr "共"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "您已超出可用流量超過"
+
+msgid "Statistics from the current billing period."
+msgstr "目前計費週期的統計資料。"
+
+msgid "Must be configured"
+msgstr "必須設定"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "按「繼續」以還原備份，或按「取消」以中止操作。"
+
+msgid "Restore .json file from archive"
+msgstr "從封存還原 .json 檔案"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "此選項允許使用者從封存還原統計資料。"
+
+msgid "Restore .json file"
+msgstr "還原 .json 檔案"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "此選項允許使用者從 .json 檔案還原統計資料。"
+
+msgid "Download .gz archive"
+msgstr "下載 .gz 封存檔"
+
+msgid "Click to download .gz archive."
+msgstr "點擊下載 .gz 封存檔。"
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "找不到 easyconfig_statistics.json.gz 檔案。"
+
+msgid "Download error"
+msgstr "下載錯誤"
+
+msgid "Download .json file"
+msgstr "下載 .json 檔案"
+
+msgid "Click to download .json file."
+msgstr "點擊下載 .json 檔案。"
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "下載 easyconfig_statistics.json 檔案失敗，請重試。"
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "執行 easyconfig_statistics.sh 時發生錯誤"
+
+msgid "Upload .gz archive"
+msgstr "上傳 .gz 封存檔"
+
+msgid "Upload .json file"
+msgstr "上傳 .json 檔案"
+
+msgid "Save .gz file"
+msgstr "儲存 .gz 檔案"
+
+msgid "Save .json file"
+msgstr "儲存 .json 檔案"
+
+msgid "Copy .json file to external storage"
+msgstr "將 .json 檔案複製到外部儲存裝置"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "若希望在外部磁碟機上建立副本，請勾選此選項。"
+
+msgid "Path to .json file"
+msgstr ".json 檔案路徑"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr "輸入儲存 .json 檔案副本的目錄路徑。"
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "easyconfig_statistics.json 檔案中的資料已重設。"
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "已成功將 easyconfig_statistics.json 檔案複製到"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "已成功將 easyconfig_statistics.json 檔案複製到 /usr/lib/easyconfig。"
+
+msgid "Auto data reset"
+msgstr "自動重設資料"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "若希望在新年時重設資料，請勾選此選項。"
+
+msgid "Monthly"
+msgstr "每月"
+
+msgid "Last 12 months"
+msgstr "最近 12 個月"
+
+msgid "Refreshing data…"
+msgstr "正在重新整理資料…"
+
+msgid "Current period"
+msgstr "目前週期"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "顯示已下載和已上傳的資料。點擊重新整理以更新圖表。"
+
+msgid "Jan"
+msgstr "1月"
+
+msgid "Feb"
+msgstr "2月"
+
+msgid "Mar"
+msgstr "3月"
+
+msgid "Apr"
+msgstr "4月"
+
+msgid "May"
+msgstr "5月"
+
+msgid "Jun"
+msgstr "6月"
+
+msgid "Jul"
+msgstr "7月"
+
+msgid "Aug"
+msgstr "8月"
+
+msgid "Sep"
+msgstr "9月"
+
+msgid "Oct"
+msgstr "10月"
+
+msgid "Nov"
+msgstr "11月"
+
+msgid "Dec"
+msgstr "12月"
+
+msgid "No data available"
+msgstr "無可用資料"
+
+msgid "Percentage"
+msgstr "百分比"
+
+msgid "Legend"
+msgstr "圖例"
+
+msgid "Select day"
+msgstr "選擇日期"
+
+msgid "Select month"
+msgstr "選擇月份"
+
+msgid "Select year"
+msgstr "選擇年份"
+
+msgid "Select period"
+msgstr "選擇週期"
+
+msgid "Others"
+msgstr "其他"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "（所選日期逐小時資料使用圖表）"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "（所選月份每日使用圖表）"
+
+msgid "(Data usage chart for individual months)"
+msgstr "（各月資料使用圖表）"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "（全年每月資料使用圖表 "
+
+msgid "Refreshing data..."
+msgstr "正在重新整理資料..."
+
+msgid "Please wait..."
+msgstr "請稍候..."
+
+msgid "Statistics of data usage by clients."
+msgstr "用戶端資料使用統計。"
+
+msgid "Clients"
+msgstr "用戶端"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "您要清除流量統計資料嗎？"
+
+msgid "Statistics data cleared"
+msgstr "統計資料已清除"
+
+msgid "No hourly data available for this day"
+msgstr "此日期沒有可用的每小時資料"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "您是否希望根據每日總量顯示估計的每小時分佈？（這只是一個近似值）"
+
+msgid "Yes, show estimate"
+msgstr "是，顯示估計值"
+
+msgid "Size of .json file"
+msgstr ".json 檔案大小"
+
+msgid "Size of .gz file"
+msgstr ".gz 檔案大小"
+
+msgid "Client"
+msgstr "用戶端"
+
+msgid "Date"
+msgstr "日期"
+
+msgid "Statistics restored from external backup"
+msgstr "統計資料已從外部備份還原"
