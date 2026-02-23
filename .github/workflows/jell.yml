@@ -384,7 +384,7 @@ jobs:
         git_sparse_clone main "https://github.com/lucikap/Brukamen" luci-app-ua2f
         ) &
         (
-        git_sparse_clone master "https://github.com/coolsnowwolf/packages" multimedia/UnblockNeteaseMusic multimedia/UnblockNeteaseMusic-Go \
+        git_sparse_clone master "https://github.com/coolsnowwolf/packages" multimedia/UnblockNeteaseMusic-Go \
         multimedia/aliyundrive-webdav net/gowebdav net/kismet net/mstpd \
         net/qBittorrent-static net/phtunnel net/headscale net/clouddrive2 net/baidupcs-go net/daemonlogger net/geth net/gnurl \
         net/uugamebooster net/pgyvpn net/ooniprobe net/polipo net/rosy-file-server net/qiyougamebooster \
@@ -410,7 +410,7 @@ jobs:
         git_sparse_clone chawrt/24.10 "https://github.com/liudf0716/luci" applications/luci-app-yt-dlp applications/luci-app-apfree-wifidog applications/luci-app-ss-redir
         git_sparse_clone chawrt/24.10 "https://github.com/liudf0716/packages" net/ss-redir
         ) &
-        git_sparse_clone openwrt-25.12 "https://github.com/immortalwrt/packages" net/n2n net/dae net/frp net/ddns-go net/gost net/brook net/smartdns \
+        git_sparse_clone openwrt-25.12 "https://github.com/immortalwrt/packages" net/n2n net/dae net/frp \
         net/amule net/cdnspeedtest net/minieap net/sysuh3c net/3proxy net/cloudreve \
         net/go-nats net/go-wol net/bitsrunlogin-go net/transfer net/daed net/udp2raw net/msd_lite \
         net/subconverter net/ngrokc net/scutclient net/ua2f net/dufs net/qBittorrent-Enhanced-Edition \
