@@ -1,6 +1,6 @@
 --- a/luci-app-neko/root/etc/uci-defaults/99_neko
 +++ b/luci-app-neko/root/etc/uci-defaults/99_neko
-@@ -9,11 +9,31 @@ tmp_dir="/tmp"
+@@ -9,11 +9,36 @@ tmp_dir="/tmp"
  echo "[ `date +%T` ] - Checking Files..."
  
  files_check() {
@@ -18,7 +18,7 @@
 +        if (!-f $request_filename) {
 +            return 404;
 +        }
-+        fastcgi_pass 127.0.0.1:1026;
++        fastcgi_pass unix:/var/run/php8-fpm.sock;
 +        fastcgi_index index.php;
 +        include fastcgi_params;
 +        fastcgi_param SCRIPT_FILENAME $request_filename;
@@ -26,6 +26,11 @@
 +}
 +EOF
 +        /etc/init.d/nginx restart
++    elif [ -n "$(command -v lighttpd)" ];then
++cat << 'EOF' > /etc/lighttpd/conf.d/81-php.conf
++cgi.assign += ( ".php" => "/usr/bin/php-cgi" )
++EOF
++        /etc/init.d/lighttpd restart
 +    else
 +        uci set uhttpd.main.index_page='index.php'
 +        uci set uhttpd.main.interpreter='.php=/usr/bin/php-cgi'
@@ -43,8 +48,8 @@
  	SUBMENU:=3. Applications
  	TITLE:=LuCI support for mihomo
  	PKGARCH:=all
--	DEPENDS:=+kmod-tun +bash +curl +jq +mihomo
-+	DEPENDS:=+kmod-tun +bash +curl +jq +mihomo +php8-fastcgi
+-	DEPENDS:=+kmod-tun +bash +curl +jq +mihomo +sing-box +php8 +php8-mod-curl
++	DEPENDS:=+kmod-tun +bash +curl +jq +mihomo +sing-box +php8 +php8-mod-curl +php8-cgi +php8-fpm
  endef
  
  define Package/$(PKG_NAME)/description
