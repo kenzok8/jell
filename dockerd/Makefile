@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dockerd
 PKG_VERSION:=29.2.1
-PKG_RELEASE:=143
+PKG_RELEASE:=144
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE
 
@@ -47,7 +47,7 @@ define Package/dockerd
     +kmod-veth \
     +tini \
     +uci-firewall \
-    +fuse-overlayfs +cgroupfs-mount \
+    +fuse-overlayfs \
     +kmod-vxlan +kmod-macvlan +kmod-dummy +kmod-crypto-gcm +kmod-crypto-seqiv +kmod-crypto-ghash +kmod-ipsec +kmod-nf-nathelper +kmod-nf-nathelper-extra +btrfs-progs \
     @!(mips||mips64||mipsel)
   USERID:=docker:docker

@@ -55,5 +55,5 @@ start_service(){
 }
 
 stop_service(){
-	killall -3 $PROG > /dev/null 2>&1
+	kill `pgrep -f $PROG` > /dev/null 2>&1
 }

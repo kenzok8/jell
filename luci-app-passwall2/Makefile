@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-passwall2
 PKG_VERSION:=26.2.14
-PKG_RELEASE:=271
+PKG_RELEASE:=272
 PKG_PO_VERSION:=$(PKG_VERSION)
 
 PKG_CONFIG_DEPENDS:= \
@@ -45,7 +45,7 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-local \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-redir \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server:shadowsocksr-libev-ssr-server \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs-client \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_SingBox:sing-box \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client:tuic-client \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin:v2ray-plugin \
@@ -115,7 +115,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server
 config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client
 	bool "Include Shadowsocks Rust Client"
 	depends on !i386
-	select PACKAGE_shadowsocks-rust-sslocal
 	default y if aarch64||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
@@ -135,12 +134,10 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
 	bool "Include Simple-Obfs (Shadowsocks Plugin)"
-	select PACKAGE_simple-obfs-client
 	default y
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
 	bool "Include Sing-Box"
-	select PACKAGE_sing-box
 	default y if aarch64||arm||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client

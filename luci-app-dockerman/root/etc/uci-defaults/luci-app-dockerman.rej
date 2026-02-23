@@ -1,0 +1,9 @@
+--- luci-app-dockerman/root/etc/uci-defaults/luci-app-dockerman
++++ luci-app-dockerman/root/etc/uci-defaults/luci-app-dockerman
+@@ -4,3 +4,6 @@ uci -q batch <<-EOF >/dev/null
+ 	set uhttpd.main.script_timeout="360"
+ 	commit uhttpd
+ EOF
++
++/etc/init.d/dockerd restart
++

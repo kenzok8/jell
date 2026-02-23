@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-passwall
 PKG_VERSION:=26.2.14
-PKG_RELEASE:=939
+PKG_RELEASE:=940
 PKG_PO_VERSION:=$(PKG_VERSION)
 
 PKG_CONFIG_DEPENDS:= \
@@ -41,6 +41,7 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 	+libuci-lua +lua +luci-compat +luci-lib-jsonc \
 	+microsocks +resolveip +tcping \
 	+ipt2socks \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_Geoview:geoview \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy:naiveproxy \
@@ -52,7 +53,7 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-local \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-redir \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server:shadowsocksr-libev-ssr-server \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs-client \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_SingBox:sing-box \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus:trojan-plus \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client:tuic-client \
@@ -96,7 +97,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Geoview
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy
 	bool "Include Haproxy"
-	default y if aarch64||arm||i386||x86_64
+	default y if aarch64||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria
 	bool "Include Hysteria"
@@ -111,19 +112,15 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Client
 	bool "Include Shadowsocks Libev Client"
-	select PACKAGE_shadowsocks-libev-ss-local
-	select PACKAGE_shadowsocks-libev-ss-redir
 	default y
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server
 	bool "Include Shadowsocks Libev Server"
-	select PACKAGE_shadowsocks-libev-ss-server
 	default y if aarch64||arm||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client
 	bool "Include Shadowsocks Rust Client"
 	depends on !i386
-	select PACKAGE_shadowsocks-rust-sslocal
 	default y if aarch64||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
@@ -149,22 +146,20 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadow_TLS
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
 	bool "Include Simple-Obfs (Shadowsocks Plugin)"
-	select PACKAGE_simple-obfs-client
 	default y
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
 	bool "Include Sing-Box"
 	select PACKAGE_sing-box
-	default y if aarch64||arm||i386||x86_64
+	default y if aarch64||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus
 	bool "Include Trojan-Plus"
-	select PACKAGE_trojan-plus
-	default y
+	default y if aarch64||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client
 	bool "Include tuic-client"
-	depends on aarch64||arm||i386||x86_64
+	depends on aarch64||i386||x86_64
 	select PACKAGE_tuic-client
 	default n
 
@@ -176,7 +171,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin
 	bool "Include V2ray-Plugin (Shadowsocks Plugin)"
-	default y if aarch64||arm||i386||x86_64
+	default y if aarch64||i386||x86_64
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_Xray
 	bool "Include Xray"

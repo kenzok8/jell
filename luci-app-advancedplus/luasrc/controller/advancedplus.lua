@@ -20,8 +20,6 @@ function index()
 	page.acl_depends = { "luci-app-advancedplus" }
 	
 	entry({"admin","system","advancedplus","advancededit"},cbi("advancedplus/advancededit"),_("Advanced Edit"),10).leaf = true
-	entry({"admin","system","advancedplus","advancedset"},cbi("advancedplus/advancedset"),_("Advanced Setting"),20).leaf = true
-	entry({"admin","system","advancedplus","advancedipk"},cbi("advancedplus/advancedipk", {hideapplybtn=true, hidesavebtn=true, hideresetbtn=true}),_("Loading plugins"),30).leaf = true
 	entry({"admin", "system", "advancedplus", "advancedrun"}, call("advanced_run"))
 	entry({"admin", "system", "advancedplus", "check"}, call("act_check"))
 end

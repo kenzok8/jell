@@ -1,0 +1,18 @@
+--- luci-app-dockerman/luasrc/model/cbi/dockerman/newcontainer.lua
++++ luci-app-dockerman/luasrc/model/cbi/dockerman/newcontainer.lua
+@@ -408,7 +408,14 @@ elseif cmd_line and cmd_line:match("^duplicate/[^/]+$") then
+ 		if create_body.HostConfig.PortBindings and type(create_body.HostConfig.PortBindings) == "table" then
+ 			default_config.publish = {}
+ 			for k, v in pairs(create_body.HostConfig.PortBindings) do
+-				table.insert( default_config.publish, v[1].HostPort..":"..k:match("^(%d+)/.+").."/"..k:match("^%d+/(.+)") )
++				local host_ip = ""
++				if v[1].HostIp and v[1].HostIp ~= "" then
++					host_ip = v[1].HostIp .. ":"
++				end
++				local host_port = v[1].HostPort
++				local container_port = k:match("^(%d+)/.+")
++				local protocol = k:match("^%d+/(.+)")
++				table.insert(default_config.publish, host_ip .. host_port .. ":" .. container_port .. "/" .. protocol)
+ 			end
+ 		end
+ 

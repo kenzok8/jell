@@ -1,5 +1,10 @@
 #!/bin/sh
 
+[ "`which nft`" ] && uci -q set passwall.@global_forwarding[0].use_nft=1
+
+grep -q ip-api.com /usr/share/passwall/rules/proxy_host ||
+	sed -i '$a ip-api.com' /usr/share/passwall/rules/proxy_host
+
 if [ -e "/etc/config/ucitrack" ]; then
     uci -q batch <<-EOF
  		delete ucitrack.@passwall[-1]
@@ -47,7 +52,6 @@ chmod +x /usr/share/passwall/*.sh
 [ "$(uci -q get passwall.@global_xray[0].sniffing)" == "1" ] && [ "$(uci -q get passwall.@global_xray[0].route_only)" != "1" ] && uci -q set passwall.@global_xray[0].sniffing_override_dest=1
 uci -q delete passwall.@global_xray[0].sniffing
 uci -q delete passwall.@global_xray[0].route_only
-[ "`which nft`" ] && uci -q set passwall.@global_forwarding[0].use_nft=1
 uci -q commit passwall
 
 sed -i "s#add_from#group#g" /etc/config/passwall 2>/dev/null

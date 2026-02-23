@@ -94,7 +94,6 @@ start_service() {
     [ -f $LOCK ] && exit
     [ "x$(uci -q get advancedplus.@basic[0].uhttpd)" = "x1" ] && uhttpd_service
     touch $LOCK
-    advancedset
     rm -rf /tmp/luci-*
     rm -f $LOCK 2>/dev/null
 }

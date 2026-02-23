@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=qt6base
 PKG_VERSION:=6.10.2
-PKG_RELEASE:=52
+PKG_RELEASE:=53
 
 PKG_SOURCE:=qtbase-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/qt/qtbase/tar.gz/v$(PKG_VERSION)?
@@ -27,6 +27,16 @@ include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/cmake.mk
 
 STRIP:=$(TARGET_CROSS)strip $(call qstrip,$(CONFIG_STRIP_ARGS))
+
+define Host/Prepare
+	$(call Host/Prepare/Default)
+	$(SED) 's/^qt_internal_check_if_path_has_symlinks/# &/' $(HOST_BUILD_DIR)/CMakeLists.txt
+endef
+
+define Build/Prepare
+	$(call Build/Prepare/Default)
+	$(SED) 's/^qt_internal_check_if_path_has_symlinks/# &/' $(PKG_BUILD_DIR)/CMakeLists.txt
+endef
 
 define Package/libQt6/Default
   SECTION:=libs
