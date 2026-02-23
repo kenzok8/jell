@@ -94,6 +94,7 @@ jobs:
         git_clone https://github.com/kiddin9/openwrt-adguardhome && mvdir openwrt-adguardhome
         git_clone https://github.com/kiddin9/luci-app-cloudreve
         git_clone https://github.com/kiddin9/openwrt-clouddrive2 && mvdir openwrt-clouddrive2
+        git_clone https://github.com/kiddin9/openwrt-filebrowser && mvdir openwrt-filebrowser
         ) &
         ( 
         git_clone https://github.com/Lienol/openwrt-package liep
@@ -123,6 +124,8 @@ jobs:
         git_clone https://github.com/sirpdboy/luci-app-cupsd cupsd1 && mv -n cupsd1/{luci-app-cupsd,cups} ./ ; rm -rf cupsd1
         #git_clone https://github.com/QiuSimons/openwrt-mos && mv -n openwrt-mos/{*mosdns,v2ray-geodata} ./ ; rm -rf openwrt-mos
         git_clone https://github.com/sbwml/luci-app-mosdns openwrt-mos && mv -n openwrt-mos/{*mosdns,v2dat} ./; rm -rf openwrt-mos
+        git_clone https://github.com/sbwml/luci-app-mentohust mentohust1 && mvdir mentohust1
+        git_clone https://github.com/sbwml/package_kernel_tcp-brutal
         ) &
         (
         git_clone https://github.com/esirplayground/LingTiGameAcc
@@ -347,6 +350,8 @@ jobs:
         git_clone https://github.com/sirpdboy/luci-app-watchdog watchdog1 && mvdir watchdog1
         git_clone https://github.com/sirpdboy/luci-app-timecontrol timecontrol && mvdir timecontrol
         git clone --depth 1 https://github.com/sirpdboy/luci-theme-kucat openwrt-kucat && mv -n openwrt-kucat/luci-theme-kucat ./ ; rm -rf openwrt-kucat
+        git_clone https://github.com/eamonxg/luci-theme-aurora
+        git_clone https://github.com/yichya/openwrt-hv-tools && mvdir openwrt-hv-tools
         git_clone https://github.com/muink/openwrt-fastfetch
         git_clone https://github.com/linkease/lcdsimple lcdsimple1 && mvdir lcdsimple1
         git_clone https://github.com/Wulnut/luci-app-suselogin
