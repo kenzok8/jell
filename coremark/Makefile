@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=coremark
 PKG_SOURCE_DATE:=2025-05-01
 PKG_SOURCE_VERSION:=1f483d5b8316753a742cbf5590caf5bd0a4e4777
-PKG_RELEASE:=20
+PKG_RELEASE:=21
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_DATE).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/eembc/coremark/tar.gz/$(PKG_SOURCE_VERSION)?
@@ -42,7 +42,7 @@ define Package/coremark/config
 		depends on PACKAGE_coremark
 		default y
 		help
-			This enables additional optimizations using the -O3 compilation flag.
+			This enables additional optmizations using the -O3 compilation flag.
 
 	config COREMARK_ENABLE_MULTITHREADING
 		bool "Enable multithreading support"

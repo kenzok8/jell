@@ -1,0 +1,11 @@
+--- luci-app-watchcat/htdocs/luci-static/resources/view/watchcat.js
++++ luci-app-watchcat/htdocs/luci-static/resources/view/watchcat.js
+@@ -54,7 +57,7 @@ return view.extend({
+ 
+ 		o = s.taboption('general', form.Value, 'pinghosts', _('Host To Check'), _(`IP address or hostname to ping.`));
+ 		o.datatype = 'host';
+-		o.default = '8.8.8.8';
++		o.default = '223.5.5.5';
+ 		o.depends({ mode: "ping_reboot" });
+ 		o.depends({ mode: "restart_iface" });
+ 		o.depends({ mode: "run_script" });

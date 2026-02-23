@@ -8,10 +8,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for ngrokc.
 LUCI_DESCRIPTION:=LuCI Support for ngrokc.
-LUCI_DEPENDS:=+ngrokc
-LUCI_PKGARCH:=all
-
-PKG_NAME:=luci-app-ngrokc
+LUCI_DEPENDS:=+luci-compat +ngrokc
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

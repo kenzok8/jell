@@ -1,0 +1,14 @@
+#!/bin/sh
+
+arch="$(awk -F ': ' '/model name/ {print $2}' "/proc/cpuinfo" | head -n1)"
+
+core="$(grep "core id" "/proc/cpuinfo" | sort -u | wc -l)C $(grep -c "processor" "/proc/cpuinfo")T"
+
+freq="$(awk -F ': ' '/MHz/ {print $2}' "/proc/cpuinfo" | head -n1)MHz"
+
+# Intel
+temp="$(sensors "coretemp-*" 2>"/dev/null" | grep -E "(Package id |Core )" | grep -Eo "\+[0-9.]*°C" | head -n1 | tr -d "+")"
+# AMD
+[ -n "${temp}" ] || temp="$(sensors "k*temp-*" 2>"/dev/null" | awk '/Tdie/ {print $2}' | head -n1 | tr -d "+")"
+
+echo -n "$arch x $core ($freq, ${temp})"

@@ -86,8 +86,9 @@ msgstr ""
 "la parte inferior para configurar más de una acción."
 
 #: applications/luci-app-watchcat/htdocs/luci-static/resources/view/watchcat.js:52
-msgid "Host To Check"
-msgstr "Host para comprobar"
+#, fuzzy
+msgid "Hosts To Check"
+msgstr "Hosts para verificar"
 
 #: applications/luci-app-watchcat/htdocs/luci-static/resources/view/watchcat.js:71
 msgid ""
@@ -110,8 +111,8 @@ msgid "Huge: 1492 bytes"
 msgstr "Enorme: 1492 bytes"
 
 #: applications/luci-app-watchcat/htdocs/luci-static/resources/view/watchcat.js:52
-msgid "IP address or hostname to ping."
-msgstr "Dirección IP o nombre de host para hacer ping."
+msgid "IP addresses or hostnames to ping."
+msgstr "Direcciones IP o nombres de host para hacer ping."
 
 #: applications/luci-app-watchcat/htdocs/luci-static/resources/view/watchcat.js:118
 msgid ""

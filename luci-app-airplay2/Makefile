@@ -7,8 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Luci for Apple Airplay2 Receiver
-LUCI_DEPENDS:=+alsa-utils +shairport-sync-openssl
-LUCI_PKGARCH:=all
+LUCI_DEPENDS:=+luci-compat +alsa-utils +shairport-sync-openssl
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

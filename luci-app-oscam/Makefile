@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI Support for oscam
-LUCI_DEPENDS:= +oscam
+LUCI_DEPENDS:=+luci-compat +oscam
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

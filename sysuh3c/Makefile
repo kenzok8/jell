@@ -1,31 +1,32 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sysuh3c
-PKG_RELEASE:=10
+PKG_VERSION:=1.0
+PKG_RELEASE:=11
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/haswelliris/h3c.git
-PKG_SOURCE_DATE:=2019-03-01
 PKG_SOURCE_VERSION:=8a3e0b5a9a5d989e7d8b2105d09a394c3663e016
-PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=LICENSE
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/sysuh3c
-  SECTION:=net
-  CATEGORY:=Network
-  SUBMENU:=Campus Network
-  TITLE:=H3C client for Sun Yat-sen University
+TARGET_CFLAGS += -ffunction-sections -fdata-sections -fcommon -flto
+TARGET_LDFLAGS += -Wl,--gc-sections,--as-needed
+
+define Package/$(PKG_NAME)
+	SECTION:=net
+	CATEGORY:=Network
+	TITLE:=H3C client
 endef
 
-define Package/sysuh3c/conffiles
-/etc/config/sysuh3c
+define Build/Configure
+	$(call Build/Configure/Default)
 endef
 
-define Package/sysuh3c/install
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/h3c $(1)/usr/sbin/sysuh3c
 	$(INSTALL_DIR) $(1)/etc/config
@@ -33,7 +34,7 @@ define Package/sysuh3c/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/sysuh3c.init $(1)/etc/init.d/sysuh3c
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/sysuh3c.uci $(1)/etc/uci-defaults/99-sysuh3c-migrate
+	$(INSTALL_DATA) ./files/sysuh3c.defaults $(1)/etc/uci-defaults/sysuh3c
 endef
 
-$(eval $(call BuildPackage,sysuh3c))
+$(eval $(call BuildPackage,$(PKG_NAME)))
