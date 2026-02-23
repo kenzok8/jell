@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":dependencyDashboard",
+    "group:all"
+  ],
+  "labels": ["dependencies"],
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  },
+  "schedule": [
+    "before 9am on monday"
+  ],
+  "timezone": "Asia/Shanghai",
+  "packageRules": [
+    {
+      "matchPackageNames": ["pnpm"],
+      "enabled": false
+    },
+    {
+      "groupName": "all dependencies",
+      "matchPackagePatterns": ["*"]
+    }
+  ],
+  "separateMajorMinor": false,
+  "separateMinorPatch": false,
+  "rebaseWhen": "behind-base-branch"
+}

@@ -1,10 +1,17 @@
+# Copyright (C) 2016 Openwrt.org
+#
+# This is free software, licensed under the Apache License, Version 2.0 .
+#
+
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=MentoHUST 802.1X Client for LuCI
+PKG_NAME:=luci-app-mentohust
+
+LUCI_TITLE:=LuCI support for MentoHUST
 LUCI_DEPENDS:=+mentohust
 LUCI_PKGARCH:=all
 
-PKG_NAME:=luci-app-mentohust
+PKG_MAINTAINER:=sbwml <admin@cooluc.com>
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

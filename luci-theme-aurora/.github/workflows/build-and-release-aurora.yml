@@ -1,0 +1,29 @@
+name: LuCI Theme Aurora Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build luci-theme-aurora ${{ matrix.pkg_type }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg_type: [ipk, apk]
+    steps:
+      - uses: eamonxg/build-luci-package@master
+        with:
+          package: luci-theme-aurora
+          pkg_type: ${{ matrix.pkg_type }}
+          prep_script: |
+            ./scripts/feeds update -f base luci
+            ./scripts/feeds install -p luci-base
+          artifact_paths: |
+            bin/packages/$ARCH/base/*luci-theme-aurora*.[ai]pk
+          release_body_path: .dev/docs/changelog/${{ github.ref_name }}.md
