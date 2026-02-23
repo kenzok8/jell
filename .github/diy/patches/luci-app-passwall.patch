@@ -1,23 +1,27 @@
 --- a/luci-app-passwall/root/etc/uci-defaults/luci-passwall
 +++ b/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-@@ -41,6 +41,7 @@ chmod +x /usr/share/passwall/*.sh
- [ "$(uci -q get passwall.@global_xray[0].sniffing)" == "1" ] && [ "$(uci -q get passwall.@global_xray[0].route_only)" != "1" ] && uci -q set passwall.@global_xray[0].sniffing_override_dest=1
- uci -q delete passwall.@global_xray[0].sniffing
- uci -q delete passwall.@global_xray[0].route_only
-+[ "`which nft`" ] && uci -q set passwall.@global_forwarding[0].use_nft=1
- uci -q commit passwall
+@@ -1,5 +1,10 @@
+ #!/bin/sh
  
- rm -f /tmp/luci-indexcache
++[ "`which nft`" ] && uci -q set passwall.@global_forwarding[0].use_nft=1
++
++grep -q ip-api.com /usr/share/passwall/rules/proxy_host ||
++	sed -i '$a ip-api.com' /usr/share/passwall/rules/proxy_host
++
+ if [ -e "/etc/config/ucitrack" ]; then
+     uci -q batch <<-EOF
+  		delete ucitrack.@passwall[-1]
 
 --- a/luci-app-passwall/Makefile
 +++ b/luci-app-passwall/Makefile
-@@ -35,7 +35,29 @@ LUCI_PKGARCH:=all
+@@ -39,7 +39,30 @@ LUCI_PKGARCH:=all
  LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
- 	+chinadns-ng +dns2socks +dns2tcp +dnsmasq-full +ip-full \
+ 	+chinadns-ng +dns2socks +dnsmasq-full +ip-full \
  	+libuci-lua +lua +luci-compat +luci-lib-jsonc \
 -	+microsocks +resolveip +tcping
 +	+microsocks +resolveip +tcping \
 +	+ipt2socks \
++	+PACKAGE_$(PKG_NAME)_INCLUDE_Geoview:geoview \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy:naiveproxy \
@@ -29,7 +33,7 @@
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-local \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-redir \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server:shadowsocksr-libev-ssr-server \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs \
++	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs-client \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_SingBox:sing-box \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus:trojan-plus \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client:tuic-client \
@@ -42,15 +46,17 @@
  
  define Package/$(PKG_NAME)/config
  menu "Configuration"
-@@ -65,7 +87,6 @@ config PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy
+@@ -74,8 +97,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Geoview
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy
  	bool "Include Haproxy"
 -	select PACKAGE_haproxy
- 	default y if aarch64||arm||i386||x86_64
+-	default y if aarch64||arm||i386||x86_64
++	default y if aarch64||i386||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria
-@@ -81,19 +102,15 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy
+ 	bool "Include Hysteria"
+@@ -90,19 +112,15 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_NaiveProxy
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Client
  	bool "Include Shadowsocks Libev Client"
@@ -65,12 +71,12 @@
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client
  	bool "Include Shadowsocks Rust Client"
- 	depends on aarch64||arm||i386||mips||mipsel||x86_64
+ 	depends on !i386
 -	select PACKAGE_shadowsocks-rust-sslocal
- 	default y if aarch64
+ 	default y if aarch64||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
-@@ -104,8 +121,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
+@@ -113,8 +131,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client
  	bool "Include ShadowsocksR Libev Client"
@@ -79,31 +85,39 @@
  	default y
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
-@@ -115,17 +130,15 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server
+@@ -130,22 +146,20 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadow_TLS
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
  	bool "Include Simple-Obfs (Shadowsocks Plugin)"
--	select PACKAGE_simple-obfs
+-	select PACKAGE_simple-obfs-client
  	default y
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
  	bool "Include Sing-Box"
  	select PACKAGE_sing-box
 -	default y if aarch64||arm||i386||x86_64
-+	default n
++	default y if aarch64||i386||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_Plus
  	bool "Include Trojan-Plus"
 -	select PACKAGE_trojan-plus
- 	default y
+-	default y
++	default y if aarch64||i386||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client
-@@ -142,14 +155,11 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata
+ 	bool "Include tuic-client"
+-	depends on aarch64||arm||i386||x86_64
++	depends on aarch64||i386||x86_64
+ 	select PACKAGE_tuic-client
+ 	default n
+ 
+@@ -157,14 +171,11 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geodata
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin
  	bool "Include V2ray-Plugin (Shadowsocks Plugin)"
 -	select PACKAGE_v2ray-plugin
- 	default y if aarch64||arm||i386||x86_64
+-	default y if aarch64||arm||i386||x86_64
++	default y if aarch64||i386||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Xray
  	bool "Include Xray"
@@ -191,12 +205,11 @@ diff --git a/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua b/luc
 index 0c33ccd90f..258da6a551 100644
 --- a/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
 +++ b/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
-@@ -431,6 +431,7 @@ for k, v in pairs(nodes_table) do
-     end
- end
- 
+@@ -953,5 +953,6 @@ footer.api = api
+ footer.global_cfgid = global_cfgid
+ footer.shunt_list = api.jsonc.stringify(shunt_list)
+ m:append(footer)
 +m:append(Template(appname .. "/global/status_bottom"))
- m:append(Template(appname .. "/global/footer"))
  
  return m
 diff --git a/luci-app-passwall/luasrc/view/passwall/global/status_bottom.htm b/luci-app-passwall/luasrc/view/passwall/global/status_bottom.htm
@@ -286,7 +299,7 @@ index 000000000000..a00fff9c79b3
 +
 +function resize() {
 +    wW = window.innerWidth;
-+    let lw = document.querySelector(".main-left").offsetWidth;
++    let lw = document.querySelector(".main-left")?.offsetWidth ?? 5;
 +    let statusBar = document.querySelector(".status-bar");
 +    statusBar.style.width = (wW - lw) + 'px';
 +    let flagElement = statusBar.querySelector(".flag");
@@ -333,25 +346,11 @@ index 000000000000..a00fff9c79b3
 +
 +window.addEventListener('resize', resize);
 +</script>
-diff --git a/luci-app-passwall/root/etc/uci-defaults/luci-passwall b/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-index cc39c00a21..079c9723b3 100755
---- a/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-+++ b/luci-app-passwall/root/etc/uci-defaults/luci-passwall
-@@ -1,5 +1,8 @@
- #!/bin/sh
- 
-+grep -q ip-api.com /usr/share/passwall/rules/proxy_host ||
-+	sed -i '$a ip-api.com' /usr/share/passwall/rules/proxy_host
-+
- uci -q batch <<-EOF >/dev/null
- 	set dhcp.@dnsmasq[0].localuse=1
- 	commit dhcp
 
 --- a/luci-app-passwall/root/usr/share/passwall/0_default_config
 +++ b/luci-app-passwall/root/usr/share/passwall/0_default_config
- 	option use_default_dns 'direct'
-@@ -45,12 +46,12 @@ config global_other
- 	option nodes_ping 'auto_ping tcping'
+@@ -57,13 +57,17 @@ config global_other
+ 	option show_node_info '0'
  
  config global_rules
 -	option auto_update '0'
@@ -361,7 +360,24 @@ index cc39c00a21..079c9723b3 100755
  	option chnroute6_update '1'
  	option gfwlist_update '1'
 -	option geosite_update '0'
+-	option geoip_update '0'
 +	option geosite_update '1'
- 	option geoip_update '0'
- 	list gfwlist_url 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/gfw.txt'
++	option geoip_update '1'
++	option enable_geoview '1'
++	option geo2rule '1'
++	option week_update '7'
++	option time_update '4'
+ 	list gfwlist_url 'https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/gfw.txt'
  	list chnroute_url 'https://ispip.clang.cn/all_cn.txt'
+ 	list chnroute_url 'https://cdn.jsdelivr.net/gh/gaoyifan/china-operator-ip@ip-lists/china.txt'
+@@ -72,8 +76,8 @@ config global_rules
+ 	list chnlist_url 'https://cdn.jsdelivr.net/gh/felixonmars/dnsmasq-china-list/accelerated-domains.china.conf'
+ 	list chnlist_url 'https://cdn.jsdelivr.net/gh/felixonmars/dnsmasq-china-list/apple.china.conf'
+ 	option v2ray_location_asset '/usr/share/v2ray/'
+-	option geoip_url 'https://github.com/Loyalsoldier/geoip/releases/latest/download/geoip.dat'
+-	option geosite_url 'https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat'
++	option geoip_url 'https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat'
++	option geosite_url 'https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat'
+ 
+ config global_app
+ 	option sing_box_file '/usr/bin/sing-box'
