@@ -7,8 +7,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openai
-PKG_VERSION:=2.8.9-96f3ca1
-PKG_RELEASE:=3
+PKG_VERSION:=2.8.6-0ec4cc2
+PKG_RELEASE:=4
 STRIP:=false
 
 ifeq ($(CONFIG_USE_MUSL),y)

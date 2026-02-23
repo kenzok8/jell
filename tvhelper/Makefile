@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tvhelper
-PKG_VERSION:=2.0.5
-PKG_RELEASE:=1
+PKG_VERSION:=1.0
+PKG_RELEASE:=2
 
 PKG_SOURCE:=tv.sh
 PKG_SOURCE_URL:=https://raw.githubusercontent.com/wukongdaily/tvhelper/master/shells/
