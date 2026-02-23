@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=filebrowser
 PKG_VERSION:=2.60.0
-PKG_RELEASE:=87
+PKG_RELEASE:=88
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/filebrowser/filebrowser/tar.gz/v${PKG_VERSION}?
@@ -47,9 +47,9 @@ endef
 define Build/Compile
 	( \
 		pushd "$(PKG_BUILD_DIR)/frontend" ; \
-		npm ci; \
-		npm run lint ; \
-		npm run build ; \
+		npm install -g pnpm ; \
+		pnpm install --frozen-lockfile ; \
+		pnpm run build ; \
 		popd ; \
 		$(call GoPackage/Build/Compile) ; \
 	)
