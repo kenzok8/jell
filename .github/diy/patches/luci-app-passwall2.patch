@@ -1,17 +1,16 @@
 --- a/luci-app-passwall2/root/etc/uci-defaults/luci-passwall2
 +++ b/luci-app-passwall2/root/etc/uci-defaults/luci-passwall2
-@@ -36,6 +36,11 @@ touch /etc/config/passwall2_show >/dev/null 2>&1
- 
- chmod +x /usr/share/passwall2/*.sh
+@@ -1,5 +1,10 @@
+ #!/bin/sh
  
 +[ "`which nft`" ] && {
 +uci -q set passwall2.@global_forwarding[0].use_nft=1
 +uci -q commit passwall2
 +}
 +
- rm -f /tmp/luci-indexcache
- rm -rf /tmp/luci-modulecache/
- killall -HUP rpcd 2>/dev/null
+ if [ -e "/etc/config/ucitrack" ]; then
+     uci -q batch <<-EOF
+  		delete ucitrack.@passwall2[-1]
 
 --- a/luci-app-passwall2/Makefile
 +++ b/luci-app-passwall2/Makefile
@@ -30,7 +29,7 @@
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-local \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Client:shadowsocksr-libev-ssr-redir \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR_Libev_Server:shadowsocksr-libev-ssr-server \
-+	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs \
++	+PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs:simple-obfs-client \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_SingBox:sing-box \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_tuic_client:tuic-client \
 +	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin:v2ray-plugin \
@@ -57,9 +56,9 @@
 @@ -99,7 +111,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev_Server
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client
  	bool "Include Shadowsocks Rust Client"
- 	depends on aarch64||arm||i386||mips||mipsel||x86_64
+ 	depends on !i386
 -	select PACKAGE_shadowsocks-rust-sslocal
- 	default y if aarch64
+ 	default y if aarch64||x86_64
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
 @@ -110,8 +121,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server
@@ -75,7 +74,7 @@
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs
  	bool "Include Simple-Obfs (Shadowsocks Plugin)"
--	select PACKAGE_simple-obfs
+-	select PACKAGE_simple-obfs-client
  	default y
  
  config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox
@@ -95,14 +94,14 @@
 
 --- a/luci-app-passwall2/luasrc/controller/passwall2.lua
 +++ b/luci-app-passwall2/luasrc/controller/passwall2.lua
-@@ -74,6 +74,7 @@ function index()
- 	entry({"admin", "services", appname, "clear_all_nodes"}, call("clear_all_nodes")).leaf = true
- 	entry({"admin", "services", appname, "delete_select_nodes"}, call("delete_select_nodes")).leaf = true
- 	entry({"admin", "services", appname, "update_rules"}, call("update_rules")).leaf = true
+@@ -82,6 +82,7 @@ function index()
+ 	entry({"admin", "services", appname, "subscribe_manual"}, call("subscribe_manual")).leaf = true
+ 	entry({"admin", "services", appname, "subscribe_manual_all"}, call("subscribe_manual_all")).leaf = true
+ 	entry({"admin", "services", appname, "flush_set"}, call("flush_set")).leaf = true
 +	entry({"admin", "services", appname, "ip"}, call('check_ip')).leaf = true
  
  	--[[Components update]]
- 	local coms = require "luci.passwall2.com"
+ 	entry({"admin", "services", appname, "check_passwall2"}, call("app_check")).leaf = true
 @@ -89,6 +90,61 @@ local function http_write_json(content)
  	http.write_json(content or {code = 1})
  end
@@ -168,10 +167,10 @@
 
 --- a/luci-app-passwall2/luasrc/model/cbi/passwall2/client/global.lua
 +++ b/luci-app-passwall2/luasrc/model/cbi/passwall2/client/global.lua
-@@ -411,5 +411,6 @@ for k, v in pairs(nodes_table) do
- end
+@@ -544,5 +544,6 @@ footer.global_cfgid = global_cfgid
+ footer.shunt_list = api.jsonc.stringify(shunt_list)
  
- m:append(Template(appname .. "/global/footer"))
+ m:append(footer)
 +m:append(Template(appname .. "/global/status_bottom"))
  
  return m
@@ -263,7 +262,7 @@ index 000000000000..a00fff9c79b3
 +
 +function resize() {
 +    wW = window.innerWidth;
-+    let lw = document.querySelector(".main-left").offsetWidth;
++    let lw = document.querySelector(".main-left")?.offsetWidth ?? 5;
 +    let statusBar = document.querySelector(".status-bar");
 +    statusBar.style.width = (wW - lw) + 'px';
 +    let flagElement = statusBar.querySelector(".flag");
