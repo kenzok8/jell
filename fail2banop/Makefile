@@ -12,7 +12,7 @@ PKG_ARCH_FAIL2BANOP:=$(ARCH)
 PKG_NAME:=fail2banop
 # use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
 PKG_SOURCE_DATE:=1.0.1
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
 ARCH_HEXCODE=8664
@@ -23,7 +23,7 @@ ARCH_HEXCODE=aa32
 else ifeq ($(ARCH),mipsel)
 ARCH_HEXCODE=1b0c
 endif
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=9c34c802ea35f801932edc27839d498c4e6e9be9
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_SOURCE_DATE).tar.gz
 PKG_SOURCE_URL:=https://github.com/linkease/fail2ban-openwrt/releases/download/v${PKG_SOURCE_DATE}/
 PKG_HASH:=skip

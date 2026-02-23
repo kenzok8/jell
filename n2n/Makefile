@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=n2n
-PKG_VERSION:=3.1.1
-PKG_RELEASE:=499
+PKG_VERSION:=3.0
+PKG_RELEASE:=500
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -14,7 +14,7 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 # These are defaults for compiling without any environmental overrides
 # (eg, the github action calculates the correct overrides for each build)
 PKG_SOURCE_URL:=https://github.com/ntop/n2n
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=66f557af97b9c2ad42537516101fd04df2639ef0
 PKG_MIRROR_HASH:=skip
 
 # Apply overrides from the build environment
@@ -22,10 +22,10 @@ ifdef N2N_PKG_SOURCE_URL
     PKG_SOURCE_URL:=$(N2N_PKG_SOURCE_URL)
 endif
 ifdef N2N_PKG_SOURCE_VERSION
-    PKG_SOURCE_VERSION:=null
+    PKG_SOURCE_VERSION:=66f557af97b9c2ad42537516101fd04df2639ef0
 endif
 ifdef N2N_PKG_VERSION
-    PKG_VERSION:=$(N2N_PKG_VERSION)
+    PKG_VERSION:=3.0
 endif
 
 PKG_MAINTAINER:=Emanuele Faranda <faranda@ntop.org>

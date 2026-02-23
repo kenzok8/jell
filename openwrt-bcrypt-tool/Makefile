@@ -1,12 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bcrypt-tool
-PKG_VERSION:=1.1.6
-PKG_RELEASE:=5
+PKG_VERSION:=1.1.9
+PKG_RELEASE:=6
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/shoenig/bcrypt-tool.git
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=882095ca9e9c838e447f704e5aa6bbb1e181a48d
 PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=GPL-2.0-only

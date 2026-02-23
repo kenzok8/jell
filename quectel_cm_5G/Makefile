@@ -2,11 +2,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=quectel-cm
 PKG_VERSION:=1.6.7
-PKG_RELEASE:=6
+PKG_RELEASE:=7
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/quectel-open-source/Quectel_QConnectManager_Linux
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=170ed7177cc3beb831bc85571aad956492ff7e7e
 PKG_MIRROR_HASH:=skip
 
 include $(INCLUDE_DIR)/package.mk
