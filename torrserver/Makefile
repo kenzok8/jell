@@ -73,7 +73,8 @@ define Package/$(PKG_NAME)/description
   TorrServer is a tool for streaming torrent files.
 endef
 
-GO_HOST:=$(STAGING_DIR_HOSTPKG)/bin/go
+# Use golang from staging dir; fall back to system go if staging path absent
+GO_HOST:=$(shell [ -x "$(STAGING_DIR_HOSTPKG)/bin/go" ] && echo "$(STAGING_DIR_HOSTPKG)/bin/go" || command -v go 2>/dev/null || echo "$(STAGING_DIR_HOSTPKG)/bin/go")
 UPX:=$(STAGING_DIR_HOST)/bin/upx
 UPX_AVAILABLE:=$(shell [ -x "$(UPX)" ] && echo yes || echo no)
 TARGET_CC:=$(TARGET_CROSS)gcc
@@ -103,7 +104,7 @@ endef
 define Build/Compile
 	# Build Application WEB Interface
 	cd $(PKG_BUILD_DIR) && \
-	export PATH=$(STAGING_DIR_HOSTPKG)/bin:$$PATH && \
+	export PATH=$(STAGING_DIR_HOSTPKG)/bin:$(STAGING_DIR_HOST)/bin:$$PATH && \
 	NODE_OPTIONS=--openssl-legacy-provider \
 	$(GO_HOST) run gen_web.go
 
