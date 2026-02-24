@@ -5,12 +5,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=daed
-PKG_VERSION:=dae-node-parser-v1.20.0
+PKG_VERSION:=1.24.0
 PKG_RELEASE:=81
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/daeuniverse/daed.git
-PKG_SOURCE_VERSION:=e839ad81510c1514e1eb7def28c5f144ea045e6d
+PKG_SOURCE_VERSION:=980a8e54a0f0fe7bf9e277da60fc2d4d82564e37
 PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=AGPL-3.0-only MIT
