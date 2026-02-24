@@ -1,10 +1,5 @@
 #!/bin/sh
 
-[ "`which nft`" ] && {
-uci -q set passwall2.@global_forwarding[0].use_nft=1
-uci -q commit passwall2
-}
-
 if [ -e "/etc/config/ucitrack" ]; then
     uci -q batch <<-EOF
  		delete ucitrack.@passwall2[-1]

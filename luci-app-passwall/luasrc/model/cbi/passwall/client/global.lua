@@ -833,6 +833,5 @@ footer.api = api
 footer.global_cfgid = global_cfgid
 footer.shunt_list = api.jsonc.stringify(shunt_list)
 m:append(footer)
-m:append(Template(appname .. "/global/status_bottom"))
 
 return m

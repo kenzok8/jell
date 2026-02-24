@@ -57,17 +57,13 @@ config global_other
 	option show_node_info '0'
 
 config global_rules
-	option auto_update '1'
+	option auto_update '0'
 	option chnlist_update '1'
 	option chnroute_update '1'
 	option chnroute6_update '1'
 	option gfwlist_update '1'
-	option geosite_update '1'
-	option geoip_update '1'
-	option enable_geoview '1'
-	option geo2rule '1'
-	option week_update '7'
-	option time_update '4'
+	option geosite_update '0'
+	option geoip_update '0'
 	list gfwlist_url 'https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/gfw.txt'
 	list chnroute_url 'https://ispip.clang.cn/all_cn.txt'
 	list chnroute_url 'https://cdn.jsdelivr.net/gh/gaoyifan/china-operator-ip@ip-lists/china.txt'
@@ -76,8 +72,8 @@ config global_rules
 	list chnlist_url 'https://cdn.jsdelivr.net/gh/felixonmars/dnsmasq-china-list/accelerated-domains.china.conf'
 	list chnlist_url 'https://cdn.jsdelivr.net/gh/felixonmars/dnsmasq-china-list/apple.china.conf'
 	option v2ray_location_asset '/usr/share/v2ray/'
-	option geoip_url 'https://cdn.jsdelivr.net/gh/Loyalsoldier/geoip@release/geoip.dat'
-	option geosite_url 'https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat'
+	option geoip_url 'https://github.com/Loyalsoldier/geoip/releases/latest/download/geoip.dat'
+	option geosite_url 'https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat'
 
 config global_app
 	option geoview_file '/usr/bin/geoview'

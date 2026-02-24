@@ -93,7 +93,6 @@ function index()
 	entry({"admin", "services", appname, "subscribe_manual"}, call("subscribe_manual")).leaf = true
 	entry({"admin", "services", appname, "subscribe_manual_all"}, call("subscribe_manual_all")).leaf = true
 	entry({"admin", "services", appname, "flush_set"}, call("flush_set")).leaf = true
-	entry({"admin", "services", appname, "ip"}, call('check_ip')).leaf = true
 
 	--[[Components update]]
 	entry({"admin", "services", appname, "check_passwall2"}, call("app_check")).leaf = true
@@ -125,61 +124,6 @@ end
 local function http_write_json_error(data)
 	http.prepare_content("application/json")
 	http.write(jsonStringify({code = 0, data = data}))
-end
-
-function check_site(host, port)
-    local nixio = require "nixio"
-    local socket = nixio.socket("inet", "stream")
-    socket:setopt("socket", "rcvtimeo", 2)
-    socket:setopt("socket", "sndtimeo", 2)
-    local ret = socket:connect(host, port)
-    socket:close()
-    return ret
-end
-
-function get_ip_geo_info()
-    local result = luci.sys.exec('curl --retry 3 -m 10 -LfsA "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36" http://ip-api.com/json/')
-    local json = require "luci.jsonc"
-    local info = json.parse(result)
-    
-    return {
-        flag = string.lower(info.countryCode) or "un",
-        country = get_country_name(info.countryCode) or "Unknown",
-        ip = info.query,
-        isp = info.isp
-    }
-end
-
-function get_country_name(countryCode)
-    local country_names = {
-        US = "美国", CN = "中国", JP = "日本", GB = "英国", DE = "德国",
-        FR = "法国", BR = "巴西", IT = "意大利", RU = "俄罗斯", CA = "加拿大",
-        KR = "韩国", ES = "西班牙", AU = "澳大利亚", MX = "墨西哥", ID = "印度尼西亚",
-        NL = "荷兰", TR = "土耳其", CH = "瑞士", SA = "沙特阿拉伯", SE = "瑞典",
-        PL = "波兰", BE = "比利时", AR = "阿根廷", NO = "挪威", AT = "奥地利",
-        TW = "台湾", ZA = "南非", TH = "泰国", DK = "丹麦", MY = "马来西亚",
-        PH = "菲律宾", SG = "新加坡", IE = "爱尔兰", HK = "香港", FI = "芬兰",
-        CL = "智利", PT = "葡萄牙", GR = "希腊", IL = "以色列", NZ = "新西兰",
-        CZ = "捷克", RO = "罗马尼亚", VN = "越南", UA = "乌克兰", HU = "匈牙利",
-        AE = "阿联酋", CO = "哥伦比亚", IN = "印度", EG = "埃及", PE = "秘鲁", TW = "台湾"
-    }
-    return country_names[countryCode]
-end
-
-function check_ip()
-    local e = {}
-    local port = 80
-    local geo_info = get_ip_geo_info(ip)
-    e.ip = geo_info.ip
-    e.flag = geo_info.flag
-    e.country = geo_info.country
-    e.isp = geo_info.isp
-    e.baidu = check_site('www.baidu.com', port)
-    e.taobao = check_site('www.taobao.com', port)
-    e.google = check_site('www.google.com', port)
-    e.youtube = check_site('www.youtube.com', port)
-    luci.http.prepare_content('application/json')
-    luci.http.write_json(e)
 end
 
 function reset_config()
