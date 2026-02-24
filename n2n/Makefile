@@ -120,15 +120,12 @@ define Package/$(PKG_NAME)-tools/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/n2n-benchmark \
 		$(PKG_BUILD_DIR)/tools/n2n-decode \
 		$(PKG_BUILD_DIR)/tools/n2n-keygen \
-		$(PKG_BUILD_DIR)/tools/n2n-portfwd \
-		$(PKG_BUILD_DIR)/tools/n2n-route \
 		$(1)/usr/bin/
 endef
 
 define Package/$(PKG_NAME)-tests/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/tests-auth \
-		$(PKG_BUILD_DIR)/tools/tests-compress \
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/tests-compress \
 		$(PKG_BUILD_DIR)/tools/tests-elliptic \
 		$(PKG_BUILD_DIR)/tools/tests-hashing \
 		$(PKG_BUILD_DIR)/tools/tests-transform \
