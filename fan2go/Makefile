@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=fan2go
-PKG_VERSION:=0.12.0
-PKG_RELEASE:=4
+PKG_VERSION:=0.13.0
+PKG_RELEASE:=5
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/markusressel/fan2go/tar.gz/$(PKG_VERSION)?
