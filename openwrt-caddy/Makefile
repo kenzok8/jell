@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=caddy
 PKG_VERSION:=2.11.1
-PKG_RELEASE:=151
+PKG_RELEASE:=153
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/caddyserver/caddy.git

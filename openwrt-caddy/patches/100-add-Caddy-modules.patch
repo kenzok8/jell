@@ -1,87 +1,59 @@
---- a/cmd/caddy/main.go
-+++ b/cmd/caddy/main.go
+diff -rNu a/cmd/caddy/main.go b/cmd/caddy/main.go
+--- a/cmd/caddy/main.go	2026-01-31 03:24:59.000000000 +0800
++++ b/cmd/caddy/main.go	2026-01-31 13:14:17.536684835 +0800
 @@ -35,6 +35,8 @@
  
-
  	// plug in Caddy modules here
-
  	_ "github.com/caddyserver/caddy/v2/modules/standard"
-
 +	_ "github.com/mholt/caddy-webdav"
-
 +	_ "github.com/aksdb/caddy-cgi/v2"
-
  )
-
  
-
  func main() {
-
---- a/go.mod
-+++ b/go.mod
-@@ -7,6 +7,7 @@
+diff -rNu a/go.mod b/go.mod
+--- a/go.mod	2026-01-31 03:24:59.000000000 +0800
++++ b/go.mod	2026-01-31 13:18:07.050593326 +0800
+@@ -1,12 +1,13 @@
+ module github.com/caddyserver/caddy/v2
+ 
+-go 1.25
++go 1.25.6
+ 
+ require (
+ 	github.com/BurntSushi/toml v1.6.0
  	github.com/DeRuina/timberjack v1.3.9
-
  	github.com/KimMachineGun/automemlimit v0.7.5
-
  	github.com/Masterminds/sprig/v3 v3.3.0
-
 +	github.com/aksdb/caddy-cgi/v2 v2.2.7
-
- 	github.com/alecthomas/chroma/v2 v2.23.1
-
+ 	github.com/alecthomas/chroma/v2 v2.21.1
  	github.com/aryann/difflib v0.0.0-20210328193216-ff5ff6dc229b
-
- 	github.com/caddyserver/certmagic v0.25.2
-
+ 	github.com/caddyserver/certmagic v0.25.1
 @@ -19,6 +20,7 @@
- 	github.com/klauspost/compress v1.18.4
-
+ 	github.com/klauspost/compress v1.18.2
  	github.com/klauspost/cpuid/v2 v2.3.0
-
- 	github.com/mholt/acmez/v3 v3.1.6
-
+ 	github.com/mholt/acmez/v3 v3.1.4
 +	github.com/mholt/caddy-webdav v0.0.0-20260127042217-fa2f366b0d75
-
  	github.com/prometheus/client_golang v1.23.2
-
  	github.com/quic-go/quic-go v0.59.0
-
- 	github.com/smallstep/certificates v0.30.0-rc2.0.20260211214201-20608299c29c
-
---- a/go.sum
-+++ b/go.sum
-@@ -40,6 +40,8 @@
+ 	github.com/smallstep/certificates v0.29.0
+diff -rNu a/go.sum b/go.sum
+--- a/go.sum	2026-01-31 03:24:59.000000000 +0800
++++ b/go.sum	2026-01-31 13:18:07.050593326 +0800
+@@ -36,6 +36,8 @@
  github.com/Masterminds/sprig/v3 v3.3.0/go.mod h1:Zy1iXRYNqNLUolqCpL4uhk6SHUMAOSCzdgBfDb35Lz0=
-
  github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
-
  github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-
 +github.com/aksdb/caddy-cgi/v2 v2.2.7 h1:YcZAdAF87d/xKOnJg9mKzGzKx9vlzqvuU6uYEUAoqs8=
-
 +github.com/aksdb/caddy-cgi/v2 v2.2.7/go.mod h1:F0u6fLBR03/DBqZElxMvqQ6UMnR28os96TPiwX2drzE=
-
  github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
-
  github.com/alecthomas/assert/v2 v2.11.0/go.mod h1:Bze95FyfUr7x34QZrjL+XP+0qgp/zg8yS+TtBj1WA3k=
-
  github.com/alecthomas/chroma/v2 v2.2.0/go.mod h1:vf4zrexSH54oEjJ7EdB65tGNHmH3pGZmVkgTP5RHvAs=
-
-@@ -242,6 +244,8 @@
+@@ -234,6 +236,8 @@
  github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d/go.mod h1:01TrycV0kFyexm33Z7vhZRXopbI8J3TDReVlkTgMUxE=
-
- github.com/mholt/acmez/v3 v3.1.6 h1:eGVQNObP0pBN4sxqrXeg7MYqTOWyoiYpQqITVWlrevk=
-
- github.com/mholt/acmez/v3 v3.1.6/go.mod h1:5nTPosTGosLxF3+LU4ygbgMRFDhbAVpqMI4+a4aHLBY=
-
+ github.com/mholt/acmez/v3 v3.1.4 h1:DyzZe/RnAzT3rpZj/2Ii5xZpiEvvYk3cQEN/RmqxwFQ=
+ github.com/mholt/acmez/v3 v3.1.4/go.mod h1:L1wOU06KKvq7tswuMDwKdcHeKpFFgkppZy/y0DFxagQ=
 +github.com/mholt/caddy-webdav v0.0.0-20260127042217-fa2f366b0d75 h1:PXPTUbQD59ErghFla/V4czJeRdwURX1VicmMtLsiw/E=
-
-+github.com/mholt/caddy-webdav v0.0.0-20260127042217-fa2f366b0d75/go.mod h1:Btj3NBe2qQGXsg1T8QDqfovMACGLUBH1tFqFJBH52cA=
-
- github.com/miekg/dns v1.1.72 h1:vhmr+TF2A3tuoGNkLDFK9zi36F2LS+hKTRW0Uf8kbzI=
-
- github.com/miekg/dns v1.1.72/go.mod h1:+EuEPhdHOsfk6Wk5TT2CzssZdqkmFhf8r+aVyDEToIs=
-
++github.com/mholt/caddy-webdav v0.0.0-20260127042217-fa2f366b0d75/go.mod h1:Btj3NBe2qQGXsg1T8QDqfovMACGLUBH1tFqFJBF52cA=
+ github.com/miekg/dns v1.1.69 h1:Kb7Y/1Jo+SG+a2GtfoFUfDkG//csdRPwRLkCsxDG9Sc=
+ github.com/miekg/dns v1.1.69/go.mod h1:7OyjD9nEba5OkqQ/hB4fy3PIoxafSZJtducccIelz3g=
  github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
-

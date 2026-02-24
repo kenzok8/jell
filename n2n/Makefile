@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=n2n
 PKG_VERSION:=3.0
-PKG_RELEASE:=500
+PKG_RELEASE:=502
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -120,12 +120,15 @@ define Package/$(PKG_NAME)-tools/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/n2n-benchmark \
 		$(PKG_BUILD_DIR)/tools/n2n-decode \
 		$(PKG_BUILD_DIR)/tools/n2n-keygen \
+		$(PKG_BUILD_DIR)/tools/n2n-portfwd \
+		$(PKG_BUILD_DIR)/tools/n2n-route \
 		$(1)/usr/bin/
 endef
 
 define Package/$(PKG_NAME)-tests/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/tests-compress \
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/tests-auth \
+		$(PKG_BUILD_DIR)/tools/tests-compress \
 		$(PKG_BUILD_DIR)/tools/tests-elliptic \
 		$(PKG_BUILD_DIR)/tools/tests-hashing \
 		$(PKG_BUILD_DIR)/tools/tests-transform \
