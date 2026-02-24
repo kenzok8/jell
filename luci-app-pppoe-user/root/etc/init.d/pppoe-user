@@ -70,5 +70,5 @@ start() {
 }
 
 stop() {
-    kill -q `pidof pppoe-user | sed "s/$$//g"`
+    killall -q pppoe-user
 }

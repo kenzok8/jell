@@ -12,6 +12,6 @@ boot() {
 }
 
 stop() {
-  kill `pidof rtorrent | sed "s/$$//g"`
+  killall -3 rtorrent
 }
 
