@@ -26,7 +26,7 @@ CONFIG_KERNEL_DEBUG_INFO_BTF=y
 
 
 ## Releases
-You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/packages/) \
+You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/releases/) \
 And LuCI can be found here [luci-app-einat][]
 
 ## Additional Features

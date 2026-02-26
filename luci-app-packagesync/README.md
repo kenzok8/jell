@@ -4,7 +4,7 @@ Used to build a local openwrt mirror feeds source on the router
 
 ### How to install
 
-1. Goto ~~[releases](https://github.com/muink/luci-app-packagesync/tree/releases)~~ [here](https://fantastic-packages.github.io/packages/)
+1. Goto ~~[releases](https://github.com/muink/luci-app-packagesync/tree/releases)~~ [here](https://fantastic-packages.github.io/releases/)
 2. Download the latest version of ipk
 3. Login router and goto **System --> Software**
 4. Upload and install ipk

@@ -5,7 +5,7 @@
 This project is the software package of [stuntman] running on OpenWrt
 
 ## Releases
-You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/packages/)
+You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/releases/)
 
 ## Build
 

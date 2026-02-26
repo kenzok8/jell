@@ -8,7 +8,7 @@ This project is the software package of [rgmac][] running on OpenWrt/LEDE
 `bash`, `curl`, `coreutils-cksum`, `getopt`
 
 ## Releases
-You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/packages/)
+You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/releases/)
 
 ### Usage
 See [Source project][]
@@ -35,7 +35,7 @@ See [Source project][]
    ```
 
 ## Releases
-You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/packages/)
+You can find the prebuilt-ipks [here](https://fantastic-packages.github.io/releases/)
 
 ## License
 MIT License
