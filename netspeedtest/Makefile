@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netspeedtest
 PKG_VERSION:=1
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -32,12 +32,8 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(CP) ./files/netspeedtest.config $(1)/etc/config/netspeedtest
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) $(CURDIR)/files/netspeedtest.init $(1)/etc/init.d/netspeedtest
 	$(INSTALL_DIR) $(1)/usr/lib/netspeedtest
 	$(INSTALL_BIN) $(CURDIR)/files/speedtest.lib $(1)/usr/lib/netspeedtest/speedtest
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) $(CURDIR)/files/99_netspeedtest.defaults $(1)/etc/uci-defaults/99_netspeedtest
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
