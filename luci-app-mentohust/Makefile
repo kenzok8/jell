@@ -6,8 +6,6 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-mentohust
-PKG_VERSION:=1.0.2
-PKG_RELEASE:=11
 
 LUCI_TITLE:=LuCI support for MentoHUST
 LUCI_DEPENDS:=+mentohust
