@@ -12,7 +12,7 @@ PKG_ARCH_ISTOREENHANCE:=$(ARCH)
 PKG_NAME:=istoreenhance
 # use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
 PKG_SOURCE_DATE:=0.6.6
-PKG_RELEASE:=31
+PKG_RELEASE:=32
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
 ARCH_HEXCODE=8664
@@ -25,7 +25,7 @@ ARCH_HEXCODE=1b0c
 endif
 PKG_SOURCE_VERSION:=$(ARCH_HEXCODE)
 PKG_SOURCE:=iStoreEnhance-binary-$(PKG_SOURCE_DATE).tar.gz
-PKG_SOURCE_URL:=http://dl.istoreos.com/binary/iStoreEnhance/
+PKG_SOURCE_URL:=http://dl.istoreos.com/binary/kspeeder/
 PKG_HASH:=skip
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/iStoreEnhance-binary-$(PKG_SOURCE_DATE)
