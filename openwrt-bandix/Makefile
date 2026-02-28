@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bandix
 PKG_VERSION:=0.12.5
-PKG_RELEASE:=37
+PKG_RELEASE:=38
 
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=timsaya
@@ -69,7 +69,7 @@ define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=Bandix - Network traffic monitoring tool
-	DEPENDS:=+zoneinfo-all +conntrack
+	DEPENDS:=+zoneinfo-core +conntrack
 endef
 
 define Package/$(PKG_NAME)/description
