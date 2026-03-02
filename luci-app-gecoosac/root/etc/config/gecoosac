@@ -1,8 +1,0 @@
-config gecoosac 'config'
-	option enabled '0'
-	option port '60650'
-	option isonlyoneprot '1'
-	option upload_dir '/tmp/gecoosac/upload/'
-	option db_dir '/etc/gecoosac/'
-	option log '0'
-
