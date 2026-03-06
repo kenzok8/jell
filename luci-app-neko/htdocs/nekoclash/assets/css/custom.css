@@ -1,0 +1,8 @@
+[data-bs-theme=light] .navtop {
+    background: #fff;
+    box-shadow: 0 0 2rem 0 rgba(33,37,41,.1);
+}
+
+[data-bs-theme=dark] .navtop {
+    background: #222E3C;
+}
