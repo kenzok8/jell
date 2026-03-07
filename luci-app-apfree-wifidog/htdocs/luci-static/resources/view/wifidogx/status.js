@@ -99,6 +99,8 @@ return view.extend({
                 [_('Uptime'), uptime],
                 [_('Internet Connected'), data.is_internet_connected ? _('Yes') : _('No')],
                 [_('Auth Server Connected'), data.is_auth_server_connected ? _('Yes') : _('No')],
+                [_('MQTT Connected'), data.is_mqtt_connected ? _('Yes') : _('No')],
+                [_('WebSocket Connected'), data.is_websocket_connected ? _('Yes') : _('No')],
                 [_('Auth Server Mode'), authModeText]
             ];
 

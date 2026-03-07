@@ -654,6 +654,12 @@ msgstr "互联网连接"
 msgid "Auth Server Connected"
 msgstr "认证服务器连接"
 
+msgid "MQTT Connected"
+msgstr "MQTT 连接"
+
+msgid "WebSocket Connected"
+msgstr "WebSocket 连接"
+
 msgid "Auth Server Mode"
 msgstr "认证服务器模式"
 
@@ -791,3 +797,234 @@ msgstr "实时下载速度"
 
 msgid "Real-time Upload Speed"
 msgstr "实时上传速度"
+
+msgid "AP Device ID"
+msgstr "AP设备ID"
+
+msgid "AP Device ID must be exactly 21 characters long"
+msgstr "AP设备ID必须是21个字符长"
+
+msgid "AP Device ID must contain only uppercase letters and digits"
+msgstr "AP设备ID只能包含大写字母和数字"
+
+msgid "AP MAC Address"
+msgstr "AP MAC地址"
+
+msgid "Auto Fill"
+msgstr "自动填充"
+
+msgid "Auto Fill All Fields"
+msgstr "自动填充所有字段"
+
+msgid "Auto fill completed successfully! All fields have been filled."
+msgstr "自动填充成功！所有字段已填写。"
+
+msgid "Auto fill failed. No fields could be filled. Please check your network connection and try again."
+msgstr "自动填充失败。无法填写任何字段。请检查您的网络连接并重试。"
+
+msgid "Auto fill partially completed."
+msgstr "自动填充部分完成。"
+
+msgid "Automatically fill AP MAC address, Device ID, Location ID, Longitude, and Latitude"
+msgstr "自动填充 AP MAC地址、设备ID、位置ID、经度和纬度"
+
+msgid "Device ID: "
+msgstr "设备ID: "
+
+msgid "First 6 digits must be valid administrative division code (GB/T 2260)"
+msgstr "前6位必须是有效的行政区划代码 (GB/T 2260)"
+
+msgid "Generating Device ID..."
+msgstr "生成设备ID..."
+
+msgid "Generating Location ID..."
+msgstr "生成位置ID..."
+
+msgid "Getting WAN MAC address..."
+msgstr "正在获取 WAN MAC 地址..."
+
+msgid "Getting device information and location data, please wait..."
+msgstr "正在获取设备信息和位置数据，请稍候..."
+
+msgid "Getting location coordinates..."
+msgstr "正在获取位置坐标..."
+
+msgid "Last 12 characters must be a valid MAC address in uppercase hexadecimal format (e.g., 00E04C3B7D2F)"
+msgstr "最后12个字符必须是大写十六进制格式的有效MAC地址（例如：00E04C3B7D2F）"
+
+msgid "Last 5 digits must be sequence number (00000-99999)"
+msgstr "最后5位必须是序列号 (00000-99999)"
+
+msgid "Latitude must be a valid number"
+msgstr "纬度必须是一个有效的数字"
+
+msgid "Latitude must be between -90.000000 and 90.000000"
+msgstr "纬度必须在 -90.000000 到 90.000000 之间"
+
+msgid "Latitude must be in format ±XXX.XXXXXX (3 integer digits + 6 decimal digits, e.g., 39.900000 or -33.000000). Suggested format: "
+msgstr "纬度格式必须为 ±XXX.XXXXXX（3位整数 + 6位小数，例如：39.900000 或 -33.000000）。建议格式："
+
+msgid "Latitude: "
+msgstr "纬度: "
+
+msgid "Location ID"
+msgstr "位置ID"
+
+msgid "Location ID is required"
+msgstr "必须填写位置ID"
+
+msgid "Location ID must be exactly 14 digits long"
+msgstr "位置ID必须是14位数字"
+
+msgid "Location ID must contain only digits (0-9)"
+msgstr "位置ID只能包含数字 (0-9)"
+
+msgid "Location ID: "
+msgstr "位置ID: "
+
+msgid "Longitude must be a valid number"
+msgstr "经度必须是一个有效的数字"
+
+msgid "Longitude must be between -180.000000 and 180.000000"
+msgstr "经度必须在 -180.000000 到 180.000000 之间"
+
+msgid "Longitude must be in format ±XXX.XXXXXX (3 integer digits + 6 decimal digits, e.g., 123.230000 or -133.000000). Suggested format: "
+msgstr "经度格式必须为 ±XXX.XXXXXX（3位整数 + 6位小数，例如：123.230000 或 -133.000000）。建议格式："
+
+msgid "Longitude: "
+msgstr "经度: "
+
+msgid "MAC Address: "
+msgstr "MAC地址: "
+
+msgid "MAC address must be exactly 17 characters long"
+msgstr "MAC地址必须是17个字符长"
+
+msgid "MAC address must be in format XX-XX-XX-XX-XX-XX (uppercase hexadecimal separated by hyphens)"
+msgstr "MAC地址格式必须为 XX-XX-XX-XX-XX-XX（大写十六进制，由连字符分隔）"
+
+msgid "MAC address should match the MAC address part (last 12 characters) in AP Device ID"
+msgstr "MAC地址应与 AP设备ID 中的 MAC地址部分（最后12个字符）匹配"
+
+msgid "MQTT Connection Mode"
+msgstr "MQTT连接模式"
+
+msgid "MQTT Secure Connection Mode"
+msgstr "MQTT安全连接模式"
+
+msgid "MQTT Hostname"
+msgstr "MQTT主机名"
+
+msgid "Mobile AP Latitude"
+msgstr "移动AP纬度"
+
+msgid "Mobile AP Longitude"
+msgstr "移动AP经度"
+
+msgid "Persistent Connection Mode"
+msgstr "持久连接模式"
+
+msgid "RPC failed, trying direct method..."
+msgstr "RPC失败，正在尝试直接方法..."
+
+msgid "RPC failed, trying fallback..."
+msgstr "RPC失败，正在尝试备用方法..."
+
+msgid "Service type code (7-9 digits) must be \"100\" for commercial internet service locations, \"2XX\" for non-commercial locations, or \"3XX\" for WiFi wireless collection terminals"
+msgstr "服务类型代码（第7-9位）必须是：商业上网场所为\"100\"，非商业场所为\"2XX\"，或WiFi无线采集终端为\"3XX\""
+
+msgid "The MAC address of the AP device. Must be 17 characters in format XX-XX-XX-XX-XX-XX (uppercase, separated by hyphens)."
+msgstr "AP设备的MAC地址。必须为17个字符，格式为 XX-XX-XX-XX-XX-XX（大写，由连字符分隔）。"
+
+msgid "The hostname of the mqtt."
+msgstr "MQTT的主机名。"
+
+msgid "The latitude coordinate using format: ±XXX.XXXXXX (3 integer digits + 6 decimal digits). Positive for North, negative for South."
+msgstr "纬度坐标，使用格式：±XXX.XXXXXX（3位整数 + 6位小数）。北纬为正，南纬为负。"
+
+msgid "The longitude coordinate using format: ±XXX.XXXXXX (3 integer digits + 6 decimal digits). Positive for East, negative for West."
+msgstr "经度坐标，使用格式：±XXX.XXXXXX（3位整数 + 6位小数）。东经为正，西经为负。"
+
+msgid "The mode of the authentication server."
+msgstr "认证服务器的模式。"
+
+msgid "The persistent connection mode of the device to auth server."
+msgstr "设备到认证服务器的持久连接模式。"
+
+msgid "The trusted wildcard domains of the gateway"
+msgstr "网关信任的通配符域名"
+
+msgid "The unique identifier of the AP device. Must be 21 characters: 9-character vendor code + 12-character MAC address (uppercase)."
+msgstr "AP设备的唯一标识符。必须是21个字符：9位厂商代码 + 12位MAC地址（大写）。"
+
+msgid "The unique identifier of the internet service location."
+msgstr "上网服务场所的唯一标识符。"
+
+msgid "WebSocket Connection Mode"
+msgstr "WebSocket连接模式"
+
+msgid "WebSocket Secure Connection Mode"
+msgstr "WebSocket加密连接模式"
+
+msgid "fields filled successfully."
+msgstr "个字段已填充。"
+
+msgid "✓ Device ID generated: "
+msgstr "✓ 设备ID已生成: "
+
+msgid "✓ Location ID generated: "
+msgstr "✓ 位置ID已生成: "
+
+msgid "✓ Location obtained (fallback): "
+msgstr "✓ 已获取位置（备用方法）: "
+
+msgid "✓ Location obtained: "
+msgstr "✓ 已获取位置: "
+
+msgid "✓ WAN MAC address obtained (fallback): "
+msgstr "✓ 已获取 WAN MAC 地址（备用方法）: "
+
+msgid "✓ WAN MAC address obtained: "
+msgstr "✓ 已获取 WAN MAC 地址: "
+
+msgid "✗ Cannot generate Device ID due to MAC error"
+msgstr "✗ 由于 MAC 错误，无法生成设备 ID"
+
+msgid "✗ Cannot generate Device ID without MAC address"
+msgstr "✗ 没有 MAC 地址，无法生成设备 ID"
+
+msgid "✗ Error getting WAN MAC address: "
+msgstr "✗ 获取 WAN MAC 地址错误: "
+
+msgid "✗ Error getting location: "
+msgstr "✗ 获取位置错误: "
+
+msgid "✗ Failed to get WAN MAC address: "
+msgstr "✗ 获取 WAN MAC 地址失败: "
+
+msgid "✗ Failed to get location data"
+msgstr "✗ 获取位置数据失败"
+
+msgid "✗ Failed to get location: "
+msgstr "✗ 获取位置失败: "
+
+msgid "✗ Failed to parse location data"
+msgstr "✗ 解析位置数据失败"
+
+msgid "✗ No valid coordinates found"
+msgstr "✗ 未找到有效的坐标"
+
+msgid "✗ RPC call failed, trying fallback..."
+msgstr "✗ RPC 调用失败，正在尝试备用方法..."
+
+msgid " (interface: "
+msgstr " (接口: "
+
+msgid ")"
+msgstr ")"
+
+msgid "Unknown error"
+msgstr "未知错误"
+
+msgid "Unknown"
+msgstr "未知"
