@@ -26,6 +26,8 @@ start_service() {
 	local traffic_event_url
 	local traffic_additional_subnets
 	local traffic_exclude_iface_device
+	local traffic_neighbor_flush_enable
+	local traffic_neighbor_flush_interval
 	local connections_enabled
 	local dns_enabled
 	local dns_max_records
@@ -46,6 +48,8 @@ start_service() {
 	config_get traffic_event_url 'traffic' 'traffic_event_url'
 	config_get traffic_additional_subnets 'traffic' 'traffic_additional_subnets'
 	config_get_bool traffic_exclude_iface_device 'traffic' 'traffic_exclude_iface_device' '0'
+	config_get_bool traffic_neighbor_flush_enable 'traffic' 'traffic_neighbor_flush_enable' '0'
+	config_get traffic_neighbor_flush_interval 'traffic' 'traffic_neighbor_flush_interval' '600'
 	config_get_bool connections_enabled 'connections' 'enabled'
 	config_get_bool dns_enabled 'dns' 'enabled'
 	config_get dns_max_records 'dns' 'dns_max_records'
@@ -88,6 +92,12 @@ start_service() {
 	fi
 	if [ "$traffic_exclude_iface_device" -eq 1 ]; then
 		args="$args --traffic-exclude-iface-device"
+	fi
+	if [ "$traffic_neighbor_flush_enable" -eq 1 ]; then
+		args="$args --traffic-neighbor-flush-enable"
+	fi
+	if [ -n "$traffic_neighbor_flush_interval" ]; then
+		args="$args --traffic-neighbor-flush-interval $traffic_neighbor_flush_interval"
 	fi
 	
 	# 添加连接统计监控参数
