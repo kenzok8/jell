@@ -14,7 +14,7 @@ include $(TOPDIR)/rules.mk
 #
 PKG_NAME:=shadowsocks-libev
 PKG_VERSION:=3.3.6
-PKG_RELEASE:=11
+PKG_RELEASE:=12
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/shadowsocks/shadowsocks-libev.git
@@ -37,7 +37,8 @@ include $(INCLUDE_DIR)/cmake.mk
 CMAKE_OPTIONS += \
 	-DWITH_STATIC=OFF \
 	-DWITH_EMBEDDED_SRC=ON \
-	-DWITH_DOC=OFF \
+	-DWITH_DOC_MAN=OFF \
+	-DWITH_DOC_HTML=OFF \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DBUILD_TESTING=OFF \
 	-DENABLE_CONNMARKTOS=OFF \

@@ -1,4 +1,6 @@
 #
+# Copyright (C) 2015-2016 OpenWrt.org
+#
 # This is free software, licensed under the GNU General Public License v3.
 #
 
@@ -7,14 +9,15 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_FASTNET:=$(ARCH)
 
 PKG_NAME:=fastnet
-PKG_VERSION:=0.7.5
-PKG_RELEASE:=3
+# use PKG_SOURCE_DATE instead of PKG_VERSION for compatible
+PKG_SOURCE_DATE:=0.7.2
+PKG_RELEASE:=4
 
-PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
+PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_SOURCE_DATE).tar.gz
 PKG_SOURCE_URL:=http://dl.istoreos.com/binary/fastnet/
 PKG_HASH:=skip
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-binary-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-binary-$(PKG_SOURCE_DATE)
 
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
@@ -27,6 +30,7 @@ define Package/$(PKG_NAME)
 	SUBMENU:=Web Servers/Proxies
 	TITLE:=FastNet - network test Web UI
 	DEPENDS:=@(arm||x86_64||aarch64)
+	PKGARCH:=all
 endef
 
 define Package/$(PKG_NAME)/description
@@ -53,7 +57,7 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/config $(1)/etc/init.d $(1)/etc/uci-defaults
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fastnet.$(PKG_ARCH_FASTNET) $(1)/usr/sbin/FastNet
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fastnet.$(PKG_ARCH_FASTNET) $(1)/usr/sbin/fastnet
 	$(INSTALL_CONF) ./files/fastnet.config $(1)/etc/config/fastnet
 	$(INSTALL_BIN) ./files/fastnet.init $(1)/etc/init.d/fastnet
 	$(INSTALL_BIN) ./files/fastnet.uci-default $(1)/etc/uci-defaults/fastnet
