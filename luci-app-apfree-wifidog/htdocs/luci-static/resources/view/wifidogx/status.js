@@ -143,24 +143,35 @@ return view.extend({
                 clientTable.appendChild(E('tr', { 'class': 'tr table-titles' }, [
                     E('th', { 'class': 'th' }, _('IP Address')),
                     E('th', { 'class': 'th' }, _('MAC Address')),
-                    E('th', { 'class': 'th' }, _('Status')),
+                    E('th', { 'class': 'th' }, _('Name')),
                     E('th', { 'class': 'th' }, _('Online Time')),
                     E('th', { 'class': 'th' }, _('Connection Type')),
-                    E('th', { 'class': 'th' }, _('Gateway ID'))
+                    E('th', { 'class': 'th' }, _('Gateway ID')),
+                    E('th', { 'class': 'th' }, _('Download Rate')),
+                    E('th', { 'class': 'th' }, _('Upload Rate'))
                 ]));
 
                 data.clients.forEach(function(client) {
-                    var statusText = client.status === 1 ? _('Online') : _('Offline');
                     var onlineTime = formatOnlineTime(client.online_time || 0);
                     var connectionType = client.wired ? _('Wired') : _('Wireless');
                     
+                    // compute combined v4+v6 rates if present
+                    var dl_rate = 0;
+                    var ul_rate = 0;
+                    if (client.traffic) {
+                        dl_rate = (client.traffic.incoming_rate || 0) + (client.traffic.incoming_rate_v6 || 0);
+                        ul_rate = (client.traffic.outgoing_rate || 0) + (client.traffic.outgoing_rate_v6 || 0);
+                    }
+
                     clientTable.appendChild(E('tr', { 'class': 'tr' }, [
                         E('td', { 'class': 'td' }, client.ip || '-'),
                         E('td', { 'class': 'td' }, client.mac || '-'),
-                        E('td', { 'class': 'td' }, statusText),
+                        E('td', { 'class': 'td' }, client.name || '-'),
                         E('td', { 'class': 'td' }, onlineTime),
                         E('td', { 'class': 'td' }, connectionType),
-                        E('td', { 'class': 'td' }, client.gw_id || '-')
+                        E('td', { 'class': 'td' }, client.gw_id || '-'),
+                        E('td', { 'class': 'td' }, formatRate(dl_rate)),
+                        E('td', { 'class': 'td' }, formatRate(ul_rate))
                     ]));
                 });
 
@@ -230,6 +241,19 @@ return view.extend({
             if (secs > 0 || parts.length === 0) parts.push(secs + _('s'));
             
             return parts.join(' ');
+        }
+
+        // Helper to format byte-per-second rates into human readable strings
+        function formatRate(bps) {
+            if (!bps || bps === 0) return '-';
+            var units = ['B/s','KB/s','MB/s','GB/s'];
+            var idx = 0;
+            var value = bps;
+            while (value >= 1024 && idx < units.length - 1) {
+                value = value / 1024;
+                idx++;
+            }
+            return value.toFixed(value < 10 ? 2 : (value < 100 ? 1 : 0)) + ' ' + units[idx];
         }
 
         // Helper function to get auth mode text
