@@ -123,7 +123,7 @@ jobs:
         git_clone https://github.com/LGA1150/openwrt-sysuh3c && mvdir openwrt-sysuh3c
         git_clone https://github.com/sirpdboy/luci-app-cupsd cupsd1 && mv -n cupsd1/{luci-app-cupsd,cups} ./ ; rm -rf cupsd1
         #git_clone https://github.com/QiuSimons/openwrt-mos && mv -n openwrt-mos/{*mosdns,v2ray-geodata} ./ ; rm -rf openwrt-mos
-        git_clone https://github.com/sbwml/luci-app-mosdns openwrt-mos && mv -n openwrt-mos/{*mosdns,v2dat} ./; rm -rf openwrt-mos
+        git_clone https://github.com/sbwml/luci-app-mosdns openwrt-mos && mv -n openwrt-mos/*mosdns ./; rm -rf openwrt-mos
         git_clone https://github.com/sbwml/luci-app-mentohust mentohust1 && mvdir mentohust1
         git_clone https://github.com/sbwml/package_kernel_tcp-brutal
         ) &
