@@ -12,13 +12,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ssocks
 PKG_VERSION:=0.0.15
-PKG_RELEASE:=10
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/ssocks/tar.gz/
-PKG_SOURCE_VERSION:=bf94763295e3a789b4da5373fe1a5565146e5ecb
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_HASH:=skip
+PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/ssocks/tar.gz/$(PKG_VERSION)?
+PKG_HASH:=1ec5709d88cd708859c90baba84b9ccdc757a9b345ad73dc48fd6b1d338a7247
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
