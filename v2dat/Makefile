@@ -8,11 +8,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=v2dat
 PKG_VERSION:=0.1.1
-PKG_RELEASE:=1
+PKG_RELEASE:=19
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/v2dat/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=8c5ca5ffec48034527de09281ed4cb7fb6004fc693e09baf7d874549ad7e49c0
+PKG_HASH:=skip
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_LICENSE:=GPL-3.0

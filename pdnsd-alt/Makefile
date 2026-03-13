@@ -6,11 +6,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pdnsd
 PKG_VERSION:=1.3.0
-PKG_RELEASE:=1
+PKG_RELEASE:=16
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/pdnsd/tar.gz/$(PKG_VERSION)?
-PKG_HASH:=fe093c548ff575f387921fb5c3c5c2c57f5c6a81ae9377a0f9de5bcffb40fcef
+PKG_HASH:=skip
 
 PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
