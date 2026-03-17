@@ -1,0 +1,10 @@
+--- a/Conf.cpp
++++ b/Conf.cpp
+@@ -23,6 +23,7 @@
+ #include <cstdlib>
+ #include <cstring>
+ #include <cctype>
++#include <cstdint>
+ 
+ const int BUFFER_SIZE = 500;
+ 
