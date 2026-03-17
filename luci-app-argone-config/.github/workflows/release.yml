@@ -1,0 +1,54 @@
+name: Release IPK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attach IPK (e.g. v0.9)'
+        required: true
+
+jobs:
+  build:
+    name: Build IPK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare package directory
+        run: |
+          mkdir -p bin/luci-app-argone-config
+          for d in luasrc htdocs po root; do
+            [ -d "./$d" ] && cp -rf "./$d" "./bin/luci-app-argone-config/"
+          done
+          cp Makefile ./bin/luci-app-argone-config/
+
+      - name: Build with OpenWrt SDK
+        run: |
+          docker pull openwrt/sdk
+          docker run --rm -u root \
+            -v "$(pwd)/bin:/home/build/openwrt/bin" \
+            -v "${{ github.workspace }}/.github/workflows:/home/build/workflows" \
+            openwrt/sdk \
+            /bin/sh /home/build/workflows/build.sh
+
+      - name: Upload IPK to Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ inputs.tag || github.ref_name }}
+          artifacts: "bin/packages/x86_64/base/*argone-config*.ipk"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: bin/logs.tar.xz
+          if-no-files-found: ignore
