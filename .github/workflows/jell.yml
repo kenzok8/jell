@@ -466,6 +466,13 @@ jobs:
       run: |
         find ".github/diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || true
 
+- name: Verify dapnet-gateway patch
+      run: |
+        if [ -f dapnet-gateway/src/Conf.cpp ]; then
+          grep -q "#include <cstdint>" dapnet-gateway/src/Conf.cpp || { echo "dapnet-gateway patch missing"; exit 1; }
+        fi
+
+
     - name: Modify
       run: |
         shopt -s extglob
