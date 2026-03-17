@@ -21,4 +21,10 @@
 
 #### 特色:
 
-+ 该仓库插件适配18.06、23.05的luci
++ 该仓库插件适配18.06、2*.的最新luci
+
+##### 安装:
+
+```sh
+sed -i '$a src-git jell https://github.com/kenzok8/jell' feeds.conf.default && ./scripts/feeds update -a && ./scripts/feeds install -a
+```
