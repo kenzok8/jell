@@ -554,6 +554,10 @@ jobs:
           -e 's/^PKG_SOURCE_URL:=.*/PKG_SOURCE_URL:=https:\/\/codeload.github.com\/kenzok8\/ucl\/tar.gz\/v$(PKG_VERSION)?/' \
           -e 's/^  URL:=.*/  URL:=https:\/\/github.com\/kenzok8\/ucl/' \
           ucl/Makefile
+        [ -f lean/ucl/Makefile ] && sed -i \
+          -e 's/^PKG_SOURCE_URL:=.*/PKG_SOURCE_URL:=https:\/\/codeload.github.com\/kenzok8\/ucl\/tar.gz\/v$(PKG_VERSION)?/' \
+          -e 's/^  URL:=.*/  URL:=https:\/\/github.com\/kenzok8\/ucl/' \
+          lean/ucl/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
         sed -i "s/default n/default y/" dockerd/Config.in
