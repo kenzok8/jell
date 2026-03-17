@@ -550,6 +550,10 @@ jobs:
         sed -i 's/+rclone\( \|$\)/+rclone +fuse-utils\1/g' luci-app-rclone/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argon/' luci-app-argon-config/Makefile
         sed -i 's/\(+luci-compat\)/\1 +luci-theme-argone/' luci-app-argone-config/Makefile
+        [ -f ucl/Makefile ] && sed -i \
+          -e 's/^PKG_SOURCE_URL:=.*/PKG_SOURCE_URL:=https:\/\/codeload.github.com\/kenzok8\/ucl\/tar.gz\/v$(PKG_VERSION)?/' \
+          -e 's/^  URL:=.*/  URL:=https:\/\/github.com\/kenzok8\/ucl/' \
+          ucl/Makefile
         sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
         sed -i '/boot()/,+2d' ddns-scripts/files/etc/init.d/ddns
         sed -i "s/default n/default y/" dockerd/Config.in
@@ -607,4 +611,3 @@ jobs:
       with:
         retain_days: 1
         keep_minimum_runs: 3
-
