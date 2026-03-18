@@ -1,15 +1,4 @@
 {
-	"luci-app-oaf": {
-		"description": "Grant UCI access for luci-app-oaf",
-		"read": {
-			"uci": [ "appfilter" ]
-		},
-		"write": {
-			"uci": [ "appfilter" ]
-		}
-	}
-}
-{
     "luci-app-oaf": {
         "description": "Grant access to OpenAppFilter configuration",
         "read": {

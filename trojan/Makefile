@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=trojan
 PKG_VERSION:=1.16.9
-PKG_RELEASE:=14
+PKG_RELEASE:=15
 
 PKG_SOURCE:=Trojan-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/trojan/tar.gz/v$(PKG_VERSION)?
@@ -54,7 +54,7 @@ define Package/trojan
   CATEGORY:=Network
   SUBMENU:=Web Servers/Proxies
   TITLE:=An unidentifiable mechanism that helps you bypass GFW
-  URL:=https://github.com/trojan-gfw/trojan
+  URL:=https://github.com/kenzok8/trojan
   DEPENDS:= \
     +libpthread +libstdcpp +libopenssl \
     +boost +boost-system +boost-program_options +boost-date_time

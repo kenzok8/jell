@@ -6,11 +6,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=redsocks2
-PKG_VERSION:=0.71
-PKG_RELEASE:=19
+PKG_VERSION:=0.73
+PKG_RELEASE:=20
 
 PKG_SOURCE:=redsocks-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/semigodking/redsocks/tar.gz/release-$(PKG_VERSION)?
+PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/redsocks/tar.gz/release-$(PKG_VERSION)?
 PKG_HASH:=skip
 PKG_BUILD_DIR:=$(BUILD_DIR)/redsocks-release-$(PKG_VERSION)
 
@@ -27,7 +27,7 @@ define Package/redsocks2
   CATEGORY:=Network
   SUBMENU:=Web Servers/Proxies
   TITLE:=Redirect TCP connection to proxy server
-  URL:=https://github.com/semigodking/redsocks
+  URL:=https://github.com/kenzok8/redsocks
   DEPENDS:=+libevent2 +libopenssl
 endef
 

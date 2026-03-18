@@ -12,7 +12,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ssocks
 PKG_VERSION:=0.0.16
-PKG_RELEASE:=13
+PKG_RELEASE:=14
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/ssocks/tar.gz/$(PKG_VERSION)?
@@ -31,7 +31,7 @@ define Package/ssocks/template
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=sSocks
-	URL:=https://github.com/kenzok8/ssocks
+  URL:=https://github.com/kenzok8/ssocks
 	DEPENDS:=+libopenssl
 endef
 

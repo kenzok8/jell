@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=trojan-go
 PKG_VERSION:=0.10.13
-PKG_RELEASE:=17
+PKG_RELEASE:=18
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/trojan-go/tar.gz/v$(PKG_VERSION)?
@@ -37,7 +37,7 @@ define Package/trojan-go
   SUBMENU:=Web Servers/Proxies
   TITLE:=A Trojan proxy written in Go
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
-  URL:=https://p4gefau1t.github.io/trojan-go/
+  URL:=https://github.com/kenzok8/trojan-go
 endef
 
 define Package/trojan-go/description
