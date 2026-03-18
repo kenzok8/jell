@@ -1,0 +1,13 @@
+--- a/src/nft_ext_fullcone.c
++++ b/src/nft_ext_fullcone.c
+@@ -219,9 +219,9 @@ static void nft_fullcone_set_regs(const struct nft_expr *expr, const struct nft_
+ 	range->flags = priv->flags;
+ 	if (priv->sreg_proto_min) {
+ 		range->min_proto.all = (__force __be16)
+-		    nft_reg_load16(&regs->data[priv->sreg_proto_min]);
++		    nft_reg_load16((u32 *)&regs->data[priv->sreg_proto_min]);
+ 		range->max_proto.all = (__force __be16)
+-		    nft_reg_load16(&regs->data[priv->sreg_proto_max]);
++		    nft_reg_load16((u32 *)&regs->data[priv->sreg_proto_max]);
+ 	}
+ }
