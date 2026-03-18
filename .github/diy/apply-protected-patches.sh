@@ -22,6 +22,14 @@ if [ -f "$PATCH_DIR/dapnet-gateway-002-fix-gcc13-cstdint.patch" ]; then
   echo "✓ Restored dapnet-gateway/patches/002-fix-gcc13-cstdint.patch"
 fi
 
+# fullconenat-nft: fix const qualifier build error on older kernels (e.g. 5.4.x)
+if [ -f "$PATCH_DIR/fullconenat-nft-001-fix-const-nft-reg-load16.patch" ]; then
+  TARGET_DIR="fullconenat-nft/patches"
+  mkdir -p "$TARGET_DIR"
+  cp "$PATCH_DIR/fullconenat-nft-001-fix-const-nft-reg-load16.patch" "$TARGET_DIR/001-fix-const-nft-reg-load16.patch"
+  echo "✓ Restored fullconenat-nft/patches/001-fix-const-nft-reg-load16.patch"
+fi
+
 # Add more protected patches here as needed
 # Example:
 # if [ -f "$PATCH_DIR/foo-bar-001.patch" ]; then
