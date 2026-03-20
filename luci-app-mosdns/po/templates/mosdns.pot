@@ -776,3 +776,19 @@ msgstr ""
 #: htdocs/luci-static/resources/view/mosdns/update.js:75
 msgid "Check And Update"
 msgstr ""
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:14
+msgid "Basic Setting"
+msgstr ""
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:22
+msgid "Rules"
+msgstr ""
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:30
+msgid "Geodata Update"
+msgstr ""
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:38
+msgid "Logs"
+msgstr ""

@@ -794,3 +794,19 @@ msgstr "数据库更新"
 #: htdocs/luci-static/resources/view/mosdns/update.js:75
 msgid "Check And Update"
 msgstr "检查并更新"
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:14
+msgid "Basic Setting"
+msgstr "基本设置"
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:22
+msgid "Rules"
+msgstr "规则列表"
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:30
+msgid "Geodata Update"
+msgstr "更新数据库"
+
+#: root/usr/share/luci/menu.d/luci-app-mosdns.json:38
+msgid "Logs"
+msgstr "日志"
