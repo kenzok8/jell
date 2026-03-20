@@ -453,7 +453,7 @@ msgstr ""
 #: htdocs/luci-static/resources/view/mosdns/basic.js:371
 msgid ""
 "Match the parsing result with the Cloudflare IP ranges, and when there is a "
-"successful match, \t\t\t\tuse the 'Custom IP' as the parsing result "
+"successful match, use the 'Custom IP' as the parsing result "
 "(experimental feature)"
 msgstr ""
 
@@ -494,7 +494,7 @@ msgstr ""
 #: htdocs/luci-static/resources/view/mosdns/basic.js:434
 msgid ""
 "This is the content of the file '/etc/mosdns/config_custom.yaml' from which "
-"your MosDNS configuration will be generated. \t\t\tOnly accepts "
+"your MosDNS configuration will be generated. Only accepts "
 "configuration content in yaml format."
 msgstr ""
 

@@ -47,9 +47,20 @@ function get_logfile_path_internal() {
 	if (configfile === '/var/etc/mosdns.json' || !configfile) {
 		return uci_cursor.get('mosdns', 'config', 'log_file');
 	} else {
+		let content = readfile(configfile);
+		if (content) {
+			let m = match(content, /file:\s*([^\r\n]+)/);
+			if (m && m[1]) {
+				let log_path = m[1];
+				log_path = replace(log_path, /^\s+|\s+$/g, '');
+				log_path = replace(log_path, /^["']|["']$/g, '');
+				if (log_path != "") {
+					return log_path;
+				}
+			}
+		}
 		return '/var/log/mosdns.log';
 	}
-	return null;
 }
 
 const methods = {
