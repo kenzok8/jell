@@ -11,6 +11,7 @@ CRON_FILE=/etc/crontabs/root
 DUMP_FILE=/etc/mosdns/cache.dump
 DUMP_FILE_DEFAULT=/usr/share/mosdns/cache.dump
 MOSDNS_SCRIPT=/usr/share/mosdns/mosdns.uc
+REDIRECT_LOCK_FILE=/etc/mosdns/redirect.lock
 
 get_config() {
 	config_get enabled $1 enabled 0
@@ -694,15 +695,15 @@ service_triggers() {
 	procd_add_reload_trigger "mosdns"
 }
 
-restore_setting() {
-	rm -f /etc/mosdns/redirect.lock
-	sed -i "/list server/d" /etc/config/dhcp
-	uci set dhcp.@dnsmasq[0].noresolv='0'
-	uci del dhcp.@dnsmasq[0].cachesize
-	uci commit dhcp
-}
+dhcp_setting() {
+	[ ! -f "$REDIRECT_LOCK_FILE" ] && {
+		printf "rebind_protection=$(uci -q get dhcp.@dnsmasq[0].rebind_protection)\n"
+		printf "rebind_localhost=$(uci -q get dhcp.@dnsmasq[0].rebind_localhost)\n"
+		printf "noresolv=$(uci -q get dhcp.@dnsmasq[0].noresolv)\n"
+		printf "resolvfile=$(uci -q get dhcp.@dnsmasq[0].resolvfile)\n"
+		printf "cachesize=$(uci -q get dhcp.@dnsmasq[0].cachesize)\n"
+	} > $REDIRECT_LOCK_FILE
 
-redirect_setting() {
 	if [ "${CONF}" = "/var/etc/mosdns.json" ]; then
 		sed -i "/list server/d" /etc/config/dhcp
 		uci add_list dhcp.@dnsmasq[0].server="127.0.0.1#$listen_port"
@@ -718,7 +719,33 @@ redirect_setting() {
 		uci set dhcp.@dnsmasq[0].cachesize='0'
 		uci commit dhcp
 	fi
-	touch /etc/mosdns/redirect.lock
+}
+
+uci_set_or_del() {
+	local key="$1"
+	local val="$2"
+
+	if [ -n "$val" ]; then
+		uci set "$key=$val"
+	else
+		uci del "$key"
+	fi
+}
+
+restore_dhcp_setting() {
+	if [ -f "$REDIRECT_LOCK_FILE" ]; then
+		sed -i "/list server/d" /etc/config/dhcp
+		source "$REDIRECT_LOCK_FILE"
+
+		uci_set_or_del dhcp.@dnsmasq[0].rebind_protection "$rebind_protection"
+		uci_set_or_del dhcp.@dnsmasq[0].resolvfile "$resolvfile"
+		uci_set_or_del dhcp.@dnsmasq[0].rebind_localhost "$rebind_localhost"
+		uci_set_or_del dhcp.@dnsmasq[0].noresolv "$noresolv"
+		uci_set_or_del dhcp.@dnsmasq[0].cachesize "$cachesize"
+
+		uci commit dhcp
+		rm -f "$REDIRECT_LOCK_FILE"
+	fi
 }
 
 reload_dnsmasq() {
@@ -764,8 +791,8 @@ start_service() {
 	procd_set_param respawn
 	procd_close_instance mosdns
 
-	[ "$redirect" -ne 1 ] && [ -f "/etc/mosdns/redirect.lock" ] && restore_setting
-	[ "$redirect" -eq 1 ] && redirect_setting
+	[ "$redirect" -ne 1 ] && restore_dhcp_setting
+	[ "$redirect" -eq 1 ] && dhcp_setting
 	reload_dnsmasq
 
 	# dns hijack
@@ -804,7 +831,7 @@ start_service() {
 stop_service() {
 	config_load "mosdns"
 	config_foreach get_config "mosdns"
-	[ "$enabled" -eq "0" ] && [ -f "/etc/mosdns/redirect.lock" ] && restore_setting
+	[ "$enabled" -eq "0" ] && restore_dhcp_setting
 	! nft --check list table inet mosdns > "/dev/null" 2>&1 || \
 		nft delete table inet mosdns
 	reload_dnsmasq

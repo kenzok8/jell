@@ -185,44 +185,76 @@ function update_geodat() {
 	if (tmp_res.code !== 0) exit(1);
 	let tmpdir = tmp_res.stdout;
 
+	exec_sys(`mkdir -p "${v2dat_dir}"`);
+
+	let geoip_updated = false;
 	let geoip_url = mirror + "https://github.com/Loyalsoldier/geoip/releases/latest/download/" + geoip_type + ".dat";
-	print(`Downloading ${geoip_url}\n`);
-	if (exec_sys(`curl --connect-timeout 5 -m 120 --ipv4 -kfSLo "${tmpdir}/geoip.dat" "${geoip_url}"`).code !== 0) {
-		exec_sys(`rm -rf "${tmpdir}"`); exit(1);
-	}
 
 	print(`Downloading ${geoip_url}.sha256sum\n`);
 	if (exec_sys(`curl --connect-timeout 5 -m 20 --ipv4 -kfSLo "${tmpdir}/geoip.dat.sha256sum" "${geoip_url}.sha256sum"`).code !== 0) {
 		exec_sys(`rm -rf "${tmpdir}"`); exit(1);
 	}
 
-	let sum_local = split(exec_sys(`sha256sum "${tmpdir}/geoip.dat"`).stdout, /[ \t\n]+/)[0];
-	let sum_remote = split(exec_sys(`cat "${tmpdir}/geoip.dat.sha256sum"`).stdout, /[ \t\n]+/)[0];
-	if (sum_local !== sum_remote) {
-		print("\x1b[1;31mgeoip.dat checksum error\n");
-		exec_sys(`rm -rf "${tmpdir}"`); exit(1);
+	let geoip_sum_remote = split(exec_sys(`cat "${tmpdir}/geoip.dat.sha256sum"`).stdout, /[ \t\n]+/)[0];
+	let geoip_sum_local = "";
+	if (stat(`${v2dat_dir}/geoip.dat`)) {
+		geoip_sum_local = split(exec_sys(`sha256sum "${v2dat_dir}/geoip.dat"`).stdout, /[ \t\n]+/)[0];
 	}
 
-	let geosite_url = mirror + "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat";
-	print(`Downloading ${geosite_url}\n`);
-	if (exec_sys(`curl --connect-timeout 5 -m 120 --ipv4 -kfSLo "${tmpdir}/geosite.dat" "${geosite_url}"`).code !== 0) {
-		exec_sys(`rm -rf "${tmpdir}"`); exit(1);
+	if (geoip_sum_local === geoip_sum_remote) {
+		print("geoip.dat is up to date.\n");
+	} else {
+		print(`Downloading ${geoip_url}\n`);
+		if (exec_sys(`curl --connect-timeout 5 -m 120 --ipv4 -kfSLo "${tmpdir}/geoip.dat" "${geoip_url}"`).code !== 0) {
+			exec_sys(`rm -rf "${tmpdir}"`); exit(1);
+		}
+
+		let sum_downloaded = split(exec_sys(`sha256sum "${tmpdir}/geoip.dat"`).stdout, /[ \t\n]+/)[0];
+		if (sum_downloaded !== geoip_sum_remote) {
+			print("\x1b[1;31mgeoip.dat checksum error\n");
+			exec_sys(`rm -rf "${tmpdir}"`); exit(1);
+		}
+		geoip_updated = true;
 	}
+
+	let geosite_updated = false;
+	let geosite_url = mirror + "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat";
 
 	print(`Downloading ${geosite_url}.sha256sum\n`);
 	if (exec_sys(`curl --connect-timeout 5 -m 20 --ipv4 -kfSLo "${tmpdir}/geosite.dat.sha256sum" "${geosite_url}.sha256sum"`).code !== 0) {
 		exec_sys(`rm -rf "${tmpdir}"`); exit(1);
 	}
 
-	sum_local = split(exec_sys(`sha256sum "${tmpdir}/geosite.dat"`).stdout, /[ \t\n]+/)[0];
-	sum_remote = split(exec_sys(`cat "${tmpdir}/geosite.dat.sha256sum"`).stdout, /[ \t\n]+/)[0];
-	if (sum_local !== sum_remote) {
-		print("\x1b[1;31mgeosite.dat checksum error\n");
-		exec_sys(`rm -rf "${tmpdir}"`); exit(1);
+	let geosite_sum_remote = split(exec_sys(`cat "${tmpdir}/geosite.dat.sha256sum"`).stdout, /[ \t\n]+/)[0];
+	let geosite_sum_local = "";
+	if (stat(`${v2dat_dir}/geosite.dat`)) {
+		geosite_sum_local = split(exec_sys(`sha256sum "${v2dat_dir}/geosite.dat"`).stdout, /[ \t\n]+/)[0];
 	}
 
-	exec_sys(`rm -rf "${tmpdir}"/*.sha256sum`);
-	exec_sys(`cp -a "${tmpdir}"/* "${v2dat_dir}/"`);
+	if (geosite_sum_local === geosite_sum_remote) {
+		print("geosite.dat is up to date.\n");
+	} else {
+		print(`Downloading ${geosite_url}\n`);
+		if (exec_sys(`curl --connect-timeout 5 -m 120 --ipv4 -kfSLo "${tmpdir}/geosite.dat" "${geosite_url}"`).code !== 0) {
+			exec_sys(`rm -rf "${tmpdir}"`); exit(1);
+		}
+
+		let sum_downloaded = split(exec_sys(`sha256sum "${tmpdir}/geosite.dat"`).stdout, /[ \t\n]+/)[0];
+		if (sum_downloaded !== geosite_sum_remote) {
+			print("\x1b[1;31mgeosite.dat checksum error\n");
+			exec_sys(`rm -rf "${tmpdir}"`); exit(1);
+		}
+		geosite_updated = true;
+	}
+
+	if (geoip_updated) {
+		exec_sys(`cp -a "${tmpdir}/geoip.dat" "${v2dat_dir}/"`);
+	}
+
+	if (geosite_updated) {
+		exec_sys(`cp -a "${tmpdir}/geosite.dat" "${v2dat_dir}/"`);
+	}
+
 	exec_sys(`rm -rf "${tmpdir}"`);
 }
 
