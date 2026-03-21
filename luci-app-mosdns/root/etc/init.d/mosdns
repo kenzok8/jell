@@ -749,7 +749,7 @@ restore_dhcp_setting() {
 }
 
 reload_dnsmasq() {
-	/etc/init.d/dnsmasq reload
+	[ "$(/etc/init.d/dnsmasq status)" = "running" ] && /etc/init.d/dnsmasq reload
 }
 
 reload_service() {
