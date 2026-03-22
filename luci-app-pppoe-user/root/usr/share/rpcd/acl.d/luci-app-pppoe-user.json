@@ -1,11 +1,20 @@
 {
-	"luci-app-pppoe-user": {
-		"description": "Grant UCI access for luci-app-pppoe-user",
-		"read": {
-			"uci": [ "pppoe-user" ]
-		},
-		"write": {
-			"uci": [ "pppoe-user" ]
-		}
-	}
+    "luci-app-pppoe-user": {
+        "description": "Grant access to pppoe-user",
+        "read": {
+            "uci": [ "pppoe-user" ],
+            "file": {
+                "/var/etc/pppoe-user/session/*.json": [ "read" ],
+                "/var/pppoe-user/log/interface.log": [ "read" ],
+                "/proc/net/dev": [ "read" ]
+            }
+        },
+        "write": {
+            "uci": [ "pppoe-user" ],
+            "exec": {
+                "/bin/kill": [ "arg1" ],
+                "/usr/bin/unlink": [ "arg1" ] 
+            }
+        }
+    }
 }
