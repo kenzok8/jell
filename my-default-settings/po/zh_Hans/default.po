@@ -201,3 +201,9 @@ msgstr "网口信息"
 
 msgid "Force redirect all local DNS queries to DNSMasq, a.k.a. DNS Hijacking."
 msgstr "强制将所有本地 DNS 查询重定向到 DNSMasq，即 DNS 劫持。"
+
+msgid "Auto Share"
+msgstr "自动共享"
+
+msgid "Auto share local disk which connected"
+msgstr "自动匿名共享路由器所连接的硬盘"

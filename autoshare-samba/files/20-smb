@@ -1,12 +1,5 @@
 #!/bin/sh
 
-#
-#  D-Team Technology Co.,Ltd. ShenZhen
-#  作者:Vic
-#
-# 警告:对着屏幕的哥们,我们允许你使用此脚本，但不允许你抹去作者的信息,请保留这段话。
-#
-
 . /lib/functions.sh
 . /lib/functions/service.sh
 
@@ -33,21 +26,27 @@ wait_for_init() {
 }
 
 smb_handle() {
-	config_get path $1 path
-	if [  "$path" = "$2" ] ;then
-		global=1
+	local path
+	config_get path "$1" path
+	if [ -n "$path" ]; then
+		case "$path" in
+			"$2" | "$2"/*) global=1 ;;
+		esac
+		case "$2" in
+			"$path" | "$path"/*) global=1 ;;
+		esac
 	fi
 }
 
 chk_en() {
-	config_get_bool autoshare $1 autoshare 1
-	[ $autoshare -eq 0 ] && exit
+	config_get_bool autoshare "$1" autoshare 1
+	[ "$autoshare" -eq 0 ] && exit
 }
 
 config_load samba4
 config_foreach chk_en samba4
 
-device=`basename $DEVPATH`
+device=`basename "$DEVPATH"`
 
 case "$ACTION" in
 	add)
@@ -56,6 +55,8 @@ case "$ACTION" in
 		sd*);;
 		md*);;
 		hd*);;
+		mmcblk*);;  
+		nvme*);;
 		*) return;;
 	esac
 
@@ -63,22 +64,21 @@ case "$ACTION" in
 
 	wait_for_init
 
-	[ "$(uci -q get samba4.@samba[0].autoshare)" == "1" ] && {
-		/etc/init.d/samba4 restart
-		exit 0;
-	}
-
-	cat /proc/mounts | grep -v '/boot\|/opt' | while read j
+	grep -v '/boot\|/opt' /proc/mounts | while read -r j
 	do
 		str=${j%% *}
-		if [ "$str" == $path ];then
+		if [ "$str" = "$path" ];then
 			strr=${j#* }
 			target=${strr%% *}
 			global=0
-			config_foreach smb_handle sambashare $target
+
+			config_load samba4
+			config_foreach smb_handle sambashare "$target"
+			
 			name=${target#*/mnt/}
-			name=$(echo $name | sed -e "s/^\///")
-			if [ $global -eq 0 ] ;then
+			name=$(echo "$name" | sed -e "s/^\///")
+			
+			if [ "$global" -eq 0 ] ;then
 				echo -e "\n\nconfig sambashare" >> $config_file
 				echo -e "\toption auto '1'" >> $config_file
 				echo -e "\toption name '$name'" >> $config_file
@@ -94,27 +94,26 @@ case "$ACTION" in
 			fi
 		fi
 	done
-	uci -q set samba4.@samba[0].autoshare='1'
-	uci commit samba4
 	;;
 
 	remove)
 		i=0
 		while true
 		do
-			dev=`uci get samba4.@sambashare[$i].device`
-			[ $? -ne 0 ] && break
+			if ! uci -q get samba4.@sambashare[$i] >/dev/null; then
+				break
+			fi
 
-			[ "$dev" = "$device" ] && {
-				auto=`uci get samba4.@sambashare[$i].auto`
-				[ $auto = "1" ] && {
-					mount_dir=`uci get samba4.@sambashare[$i].name`
+			dev=$(uci -q get samba4.@sambashare[$i].device)
+			if [ "$dev" = "$device" ]; then
+				auto=$(uci -q get samba4.@sambashare[$i].auto)
+				if [ "$auto" = "1" ]; then
 					uci delete samba4.@sambashare[$i]
-					uci commit
+					uci commit samba4
 					/etc/init.d/samba4 reload
 					return
-				}
-			}
+				fi
+			fi
 			let i+=1
 		done
 	;;

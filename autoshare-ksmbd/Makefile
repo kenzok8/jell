@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=autoshare-ksmbd
 PKG_VERSION:=1
-PKG_RELEASE:=5
+PKG_RELEASE:=6
 PKG_ARCH:=all
 
 include $(INCLUDE_DIR)/package.mk
