@@ -8,8 +8,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
-PKG_VERSION:=miniupnpc_2_3_3
-PKG_RELEASE:=20
+PKG_VERSION:=miniupnpd_2_3_10
+PKG_RELEASE:=21
 
 PKG_SOURCE_URL:=https://github.com/miniupnp/miniupnp/releases/download/miniupnpd_$(subst .,_,$(PKG_VERSION))
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
