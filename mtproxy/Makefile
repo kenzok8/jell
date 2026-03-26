@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mtproxy
-PKG_VERSION:=3.1.0
-PKG_RELEASE:=14
+PKG_VERSION:=3.4.0
+PKG_RELEASE:=15
 
 PKG_MAINTAINER:=Kosntantine Shevlakov <shevlakov@132lan.ru>
 PKG_LICENSE:=GPLv2
@@ -10,7 +10,7 @@ PKG_LICENSE_FILES:=LICENSE
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/GetPageSpeed/MTProxy.git
-PKG_SOURCE_VERSION:=46fc0c70592bcb9faeab4272cec7c85ee8aaeafc
+PKG_SOURCE_VERSION:=dbd89354dc8ef9f9c624afb9686fd3a0bc93f26b
 
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
