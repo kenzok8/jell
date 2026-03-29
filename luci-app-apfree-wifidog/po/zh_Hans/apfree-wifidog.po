@@ -1035,3 +1035,61 @@ msgstr "未知错误"
 
 msgid "Unknown"
 msgstr "未知"
+
+msgid "Long Connection Profile"
+msgstr "长连接配置"
+
+msgid "Select which long connection configuration to use. This option is always available regardless of authentication mode."
+msgstr "选择使用的长连接配置。该选项在所有认证模式下都可用。"
+
+msgid "Please create a long connection profile first"
+msgstr "请先创建一个长连接配置"
+
+msgid "Persistent Connection Profiles"
+msgstr "持久连接配置"
+
+msgid "Create one or more long connection profiles for cloud authentication and OpenClaw intelligent control channels."
+msgstr "创建长连接配置用于云认证和OpenClaw（龙虾）智能管控通道"
+
+msgid "Connection Mode"
+msgstr "连接模式"
+
+msgid "The type of persistent connection to the remote management server."
+msgstr "到远程管理服务器的持久连接类型。"
+
+msgid "WebSocket (ws://)"
+msgstr "WebSocket (ws://)"
+
+msgid "WebSocket Secure (wss://)"
+msgstr "WebSocket加密 (wss://)"
+
+msgid "MQTT Secure"
+msgstr "MQTT安全"
+
+msgid "The hostname or IP address of the WebSocket server."
+msgstr "WebSocket服务器的主机名或IP地址。"
+
+msgid "The port of the WebSocket server."
+msgstr "WebSocket服务器的端口。"
+
+msgid "WebSocket Path"
+msgstr "WebSocket路径"
+
+msgid "The URI path for the WebSocket connection."
+msgstr "WebSocket连接的URI路径。"
+
+msgid "MQTT Hostname"
+msgstr "MQTT主机名"
+
+msgid "The hostname or IP address of the MQTT broker."
+msgstr "MQTT代理的主机名或IP地址。"
+
+msgid "The port of the MQTT broker."
+msgstr "MQTT代理的端口。"
+
+msgid "The username for MQTT authentication."
+msgstr "MQTT认证的用户名。"
+
+msgid "The password for MQTT authentication."
+msgstr "MQTT认证的密码。"
+

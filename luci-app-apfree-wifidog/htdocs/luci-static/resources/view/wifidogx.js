@@ -279,6 +279,7 @@ return view.extend({
 		s.anonymous = true;
 
 		s.tab('basic', _('Basic Settings'));
+		s.tab('longconn', _('Long Connection Settings'));
 		s.tab('auth', _('Auth Server Settings'));
 		s.tab('gateway', _('Gateway Settings'));
 		s.tab('advanced', _('Advanced Settings'));
@@ -322,6 +323,28 @@ return view.extend({
 			return this.super('load', [section_id]);
 		};
 
+		o = s.taboption('basic', form.ListValue, 'selected_long_conn', _('Long Connection Profile'),
+			_('Select which long connection configuration to use. This option is always available regardless of authentication mode.'));
+		o.rmempty = true;
+		o.optional = true;
+		o.load = function (section_id) {
+			this.keylist = [];
+			this.vallist = [];
+
+			var sections = uci.sections('wifidogx', 'longconn');
+			if (sections.length == 0) {
+				this.value('', _('Please create a long connection profile first'));
+			} else {
+				sections.forEach(L.bind(function (section) {
+					var name = section['.name'];
+					var mode = section.long_conn_mode || _('Unknown');
+					this.value(name, '%s (%s)'.format(name, mode));
+				}, this));
+			}
+
+			return this.super('load', [section_id]);
+		};
+
 		o = s.taboption('basic', widgets.NetworkSelect, 'external_interface', _('External Interface'),
 			_('The external interface of the device, if bypass mode, do not choose.'));
 		o.rmempty = true;
@@ -333,8 +356,6 @@ return view.extend({
 		o.rmempty = false;
 		o.datatype = 'string';
 		o.optional = false;
-		o.depends('auth_server_mode', 'cloud');
-		o.depends('auth_server_mode', 'bypass');
 
 		o = s.taboption('basic', form.Value, 'local_portal', _('Local Portal'),
 			_('The local portal url.'));
@@ -478,84 +499,6 @@ return view.extend({
 		o.optional = false;
 		o.default = '/wifidog/';
 
-
-		o = ss.option(form.ListValue, 'long_conn_mode', _('Persistent Connection Mode'),
-			_('The persistent connection mode of the device to auth server.'));
-		o.value('ws', _('WebSocket Connection Mode'));
-		o.value('wss', _('WebSocket Secure Connection Mode'));
-		o.value('mqtt', _('MQTT Connection Mode'));
-		o.value('mqtts', _('MQTT Secure Connection Mode'))
-		o.rmempty = false;
-		o.defaulValue = 'wss';
-		o.optional = false;
-		o.modalonly = true;
-
-
-		o = ss.option(form.Value, 'ws_server_hostname', _('WebSocket Hostname'),
-			_('The hostname of the websocket, if the field is left empty, automatically use the same hostname as the auth server.'));
-		o.datatype = 'or(host,ip4addr)';
-		o.rmempty = true;
-		o.optional = true;
-		o.depends('long_conn_mode', 'ws');
-		o.depends('long_conn_mode', 'wss');
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'ws_server_port', _('WebSocket Port'),
-			_('The port of the websocket, if the field is left empty, automatically use the same port as the auth server.'));
-		o.datatype = 'port';
-		o.rmempty = true;
-		o.optional = true;
-		o.default = '443';
-		o.depends('long_conn_mode', 'wss');
-		o.depends('long_conn_mode', 'ws');
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'ws_server_path', _('WebSocket URI path'),
-			_('The URI path of the websocket.'));
-		o.datatype = 'string';
-		o.rmempty = true;
-		o.optional = true;
-		o.default = '/ws/wifidogx';
-		o.depends('long_conn_mode', 'ws');
-		o.depends('long_conn_mode', 'wss');
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'mqtt_server_hostname', _('MQTT Hostname'),
-			_('The hostname of the mqtt.'));
-		o.datatype = 'or(host,ip4addr)';
-		o.rmempty = true;
-		o.optional = true;
-		o.depends('long_conn_mode', 'mqtt');
-		o.depends('long_conn_mode', 'mqtts');
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'mqtt_server_port', _('MQTT Port'),
-			_('The port of the mqtt.'));
-		o.datatype = 'port';
-		o.rmempty = false;
-		o.optional = false;
-		o.depends('long_conn_mode', 'mqtt');
-		o.depends('long_conn_mode', 'mqtts');
-		o.default = 1883;
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'mqtt_username', _('MQTT Username'),
-			_('The username of the mqtt.'));
-		o.datatype = 'string';
-		o.rmempty = true;
-		o.optional = true;
-		o.depends('long_conn_mode', 'mqtt');
-		o.depends('long_conn_mode', 'mqtts');
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'mqtt_password', _('MQTT Password'),
-			_('The password of the mqtt.'));
-		o.datatype = 'string';
-		o.rmempty = true;
-		o.optional = true;
-		o.depends('long_conn_mode', 'mqtt');
-		o.depends('long_conn_mode', 'mqtts');
-		o.modalonly = true;
 
 		// QoS settings
 		o = s.taboption('qos', form.Flag, 'enable_qos', _('Enable Global QoS'),
@@ -984,6 +927,87 @@ return view.extend({
 
 			return true;
 		};
+
+		// Long Connection Settings (长连接配置)
+		o = s.taboption('longconn', form.SectionValue, '_longconn', form.GridSection, 'longconn',
+			_('Persistent Connection Profiles'),
+			_('Create one or more long connection profiles for cloud authentication and OpenClaw intelligent control channels.'));
+		ss = o.subsection;
+		ss.addremove = true;
+		ss.nodescriptions = true;
+
+		o = ss.option(form.ListValue, 'long_conn_mode', _('Connection Mode'),
+			_('The type of persistent connection to the remote management server.'));
+		o.value('ws', _('WebSocket (ws://)'));
+		o.value('wss', _('WebSocket Secure (wss://)'));
+		o.value('mqtt', _('MQTT'));
+		o.value('mqtts', _('MQTT Secure'));
+		o.default = 'ws';
+		o.rmempty = false;
+
+		o = ss.option(form.Value, 'ws_server_hostname', _('WebSocket Hostname'),
+			_('The hostname or IP address of the WebSocket server.'));
+		o.datatype = 'or(host,ip4addr)';
+		o.rmempty = true;
+		o.depends('long_conn_mode', 'ws');
+		o.depends('long_conn_mode', 'wss');
+		o.placeholder = 'ws.example.com';
+		o.modalonly = true;
+
+		o = ss.option(form.Value, 'ws_server_port', _('WebSocket Port'),
+			_('The port of the WebSocket server.'));
+		o.datatype = 'port';
+		o.rmempty = true;
+		o.default = '443';
+		o.depends('long_conn_mode', 'ws');
+		o.depends('long_conn_mode', 'wss');
+		o.modalonly = true;
+
+		o = ss.option(form.Value, 'ws_server_path', _('WebSocket Path'),
+			_('The URI path for the WebSocket connection.'));
+		o.datatype = 'string';
+		o.rmempty = true;
+		o.default = '/ws/wifidogx';
+		o.depends('long_conn_mode', 'ws');
+		o.depends('long_conn_mode', 'wss');
+		o.modalonly = true;
+
+		o = ss.option(form.Value, 'mqtt_server_hostname', _('MQTT Hostname'),
+			_('The hostname or IP address of the MQTT broker.'));
+		o.datatype = 'or(host,ip4addr)';
+		o.rmempty = true;
+		o.depends('long_conn_mode', 'mqtt');
+		o.depends('long_conn_mode', 'mqtts');
+		o.placeholder = 'mqtt.example.com';
+		o.modalonly = true;
+
+		o = ss.option(form.Value, 'mqtt_server_port', _('MQTT Port'),
+			_('The port of the MQTT broker.'));
+		o.datatype = 'port';
+		o.rmempty = true;
+		o.default = '1883';
+		o.depends('long_conn_mode', 'mqtt');
+		o.depends('long_conn_mode', 'mqtts');
+		o.modalonly = true;
+
+		o = ss.option(form.Value, 'mqtt_username', _('MQTT Username'),
+			_('The username for MQTT authentication.'));
+		o.datatype = 'string';
+		o.rmempty = true;
+		o.optional = true;
+		o.depends('long_conn_mode', 'mqtt');
+		o.depends('long_conn_mode', 'mqtts');
+		o.modalonly = true;
+
+		o = ss.option(form.Value, 'mqtt_password', _('MQTT Password'),
+			_('The password for MQTT authentication.'));
+		o.datatype = 'string';
+		o.rmempty = true;
+		o.optional = true;
+		o.password = true;
+		o.depends('long_conn_mode', 'mqtt');
+		o.depends('long_conn_mode', 'mqtts');
+		o.modalonly = true;
 
 		// rule settings
 		o = s.taboption('rule', form.DynamicList, 'trusted_wildcard_domains', _('Trusted Wildcard Domains'),
