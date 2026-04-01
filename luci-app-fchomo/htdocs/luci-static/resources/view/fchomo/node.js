@@ -405,14 +405,17 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.taboption('field_general', form.ListValue, 'sudoku_table_type', _('Obfuscate type'));
-		so.value('prefer_ascii', _('Obfuscated as ASCII data stream'));
-		so.value('prefer_entropy', _('Obfuscated as low-entropy data stream'));
+		so.value('prefer_ascii', _('Obfuscated as %s').format(_('ASCII data stream')));
+		so.value('prefer_entropy', _('Obfuscated as %s').format(_('Low-entropy data stream')));
+		so.value('up_ascii_down_entropy', _('UP: %s; DOWN: %s').format(_('ASCII data stream'), _('Low-entropy data stream')));
+		so.value('up_entropy_down_ascii', _('UP: %s; DOWN: %s').format(_('Low-entropy data stream'), _('ASCII data stream')));
 		so.depends('type', 'sudoku');
 		so.modalonly = true;
 
-		so = ss.taboption('field_general', form.DynamicList, 'sudoku_custom_tables', _('Custom byte layout'));
+		so = ss.taboption('field_general', form.DynamicList, 'sudoku_custom_tables', _('Custom byte layout'),
+			_('Only applies to the %s.').format(_('Low-entropy data stream')));
 		so.validate = hm.validateSudokuCustomTable;
-		so.depends('sudoku_table_type', 'prefer_entropy');
+		so.depends({sudoku_table_type: /^(prefer_entropy|up_ascii_down_entropy|up_entropy_down_ascii)$/});
 		so.modalonly = true;
 
 		so = ss.taboption('field_general', form.Value, 'sudoku_padding_min', _('Minimum padding rate'));
@@ -1194,6 +1197,13 @@ return view.extend({
 
 		so = ss.taboption('field_transport', form.Value, 'transport_grpc_user_agent', _('gRPC User-Agent'));
 		so.placeholder = 'grpc-go/1.36.0';
+		so.depends({transport_enabled: '1', transport_type: 'grpc'});
+		so.modalonly = true;
+
+		so = ss.taboption('field_transport', form.Value, 'transport_grpc_ping_interval', _('gRPC ping interval'),
+			_('In seconds.'));
+		so.datatype = 'uinteger';
+		so.placeholder = '0';
 		so.depends({transport_enabled: '1', transport_type: 'grpc'});
 		so.modalonly = true;
 
