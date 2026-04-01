@@ -11,6 +11,6 @@ LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-v2ray-server
 
-include $(TOPDIR)/feeds/luci/luci.mk
+include ../../luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
