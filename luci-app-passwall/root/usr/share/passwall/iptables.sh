@@ -173,13 +173,13 @@ REDIRECT() {
 			s="${mark} -j TPROXY --on-port $1"
 		}
 	}
-	fi
 	echo "$s"
 }
 
 get_jump_ipt() {
 	case "$1" in
 	direct)
+		local s=""
 		local mark="-m mark ! --mark ${FWMARK}"
 		s="${mark} -j RETURN"
 		echo $s
