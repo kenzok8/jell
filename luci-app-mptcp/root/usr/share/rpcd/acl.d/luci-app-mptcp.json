@@ -10,7 +10,16 @@
 	    },
 	    "ubus": {
 		"file": [ "list", "exec" ],
-		"system": [ "board" ]
+		"system": [ "board" ],
+		"network.interface": [ "dump" ],
+		"luci.mptcp": [
+		    "multipath_bandwidth",
+		    "interface_bandwidth",
+		    "mptcp_fullmesh",
+		    "mptcp_monitor",
+		    "mptcp_connections",
+		    "mptcp_check_trace"
+		]
 	    }
 	},
 	"write": {

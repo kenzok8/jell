@@ -1,0 +1,245 @@
+#!/usr/bin/env lua
+
+-- Copyright 2018-2023 Ycarus (Yannick Chabanois) <ycarus@zugaina.org>
+-- Licensed to the public under the Apache License 2.0.
+--
+-- rpcd script exposing MPTCP bandwidth and diagnostic data as UBUS/RPC methods,
+-- replacing the legacy Lua HTTP controller handlers.
+
+local jsonc = require "luci.jsonc"
+local uci   = require "luci.model.uci".cursor()
+
+-- -------------------------------------------------------------------------
+-- Helpers
+-- -------------------------------------------------------------------------
+
+local function get_device(interface)
+	if not interface or interface == "" then return "" end
+	local dump = require("luci.util").ubus("network.interface." .. interface, "status", {})
+	if dump and dump["l3_device"] then
+		return dump["l3_device"]
+	end
+	return ""
+end
+
+local function exec_output(cmd)
+	local lines = {}
+	local f = io.popen(cmd)
+	if f then
+		for line in f:lines() do
+			lines[#lines + 1] = line
+		end
+		f:close()
+	end
+	return table.concat(lines, "\n")
+end
+
+-- Returns an array of [ts, rx_bytes, rx_pkts, tx_bytes, tx_pkts] rows from luci-bwc.
+-- luci-bwc outputs one "[ ts, rx, rxp, tx, txp ]," entry per line (no outer brackets).
+-- The trailing comma is determined by file position, not by whether the next entry is
+-- non-zero: when the circular buffer is partially filled the last valid row still gets
+-- a trailing comma.  Strip it before wrapping with "[...]" to produce valid JSON.
+local function bwc_rows(dev)
+	local f = io.popen(string.format("luci-bwc -i %q 2>/dev/null", dev))
+	if not f then return {} end
+	local output = f:read("*all")
+	f:close()
+	if not output or output:match("^%s*$") then return {} end
+	output = output:gsub(",%s*$", "")
+	local ok, rows = pcall(jsonc.parse, "[" .. output .. "]")
+	if ok and type(rows) == "table" then return rows end
+	return {}
+end
+
+-- -------------------------------------------------------------------------
+-- RPC methods
+-- -------------------------------------------------------------------------
+
+local methods = {
+
+	-- Returns per-interface bandwidth arrays plus a "total" entry.
+	-- Each value is an array of [ts, rx_bytes, rx_pkts, tx_bytes, tx_pkts].
+	multipath_bandwidth = {
+		call = function()
+			local result     = {}
+			local iface_rows = {}  -- interface -> rows (only non-empty)
+
+			uci:foreach("network", "interface", function(s)
+				local intname   = s[".name"]
+				local dev       = get_device(intname)
+				if dev == "" then dev = s["device"] or s["ifname"] or "" end
+
+				local multipath = s["multipath"] or ""
+				if dev ~= "lo" and dev ~= "" then
+					if multipath == "" then
+						multipath = uci:get("openmptcprouter", intname, "multipath") or ""
+					end
+					if multipath == "" then multipath = "off" end
+
+					if multipath == "on"  or multipath == "master" or
+					   multipath == "backup" or multipath == "handover" then
+						local rows = bwc_rows(dev)
+						result[intname] = rows
+						if #rows > 0 then
+							iface_rows[intname] = rows
+						end
+					end
+				end
+			end)
+
+			-- Build a correctly aligned cumulative total using last-known-value
+			-- interpolation.  The old approach summed raw cumulative counters at
+			-- each timestamp, but different interfaces record data at different
+			-- (interleaved) timestamps.  When consecutive total entries came from
+			-- different interfaces, rate = (total[i] - total[i-1]) / dt could be
+			-- negative or zero even under real traffic.
+			--
+			-- Fix: for every timestamp in the union of all interface timestamps,
+			-- use the latest known cumulative bytes from EACH interface (carry the
+			-- last seen value forward).  This keeps the total monotonically
+			-- increasing so JS rate computation stays correct.
+			local ts_set = {}
+			local all_ts = {}
+			for _, rows in pairs(iface_rows) do
+				for _, row in ipairs(rows) do
+					local ts = row[1]
+					if not ts_set[ts] then
+						ts_set[ts] = true
+						all_ts[#all_ts + 1] = ts
+					end
+				end
+			end
+			table.sort(all_ts)
+
+			-- One forward-scan pointer per interface
+			local iface_ptrs = {}
+			for itf, rows in pairs(iface_rows) do
+				iface_ptrs[itf] = { idx = 1, rows = rows }
+			end
+
+			local iface_last = {}   -- latest row seen so far per interface
+			local total_rows = {}
+			for _, ts in ipairs(all_ts) do
+				-- Advance each pointer up to (and including) this timestamp
+				for itf, ptr in pairs(iface_ptrs) do
+					while ptr.idx <= #ptr.rows and ptr.rows[ptr.idx][1] <= ts do
+						iface_last[itf] = ptr.rows[ptr.idx]
+						ptr.idx = ptr.idx + 1
+					end
+				end
+				-- Sum latest known cumulative bytes from every interface
+				local total = { ts, 0, 0, 0, 0 }
+				for _, last_row in pairs(iface_last) do
+					for j = 2, 5 do
+						total[j] = total[j] + (last_row[j] or 0)
+					end
+				end
+				total_rows[#total_rows + 1] = total
+			end
+
+			result["total"] = total_rows
+			return result
+		end
+	},
+
+	-- Returns bandwidth rows for a single device as { data: [...] }.
+	interface_bandwidth = {
+		args = { iface = "" },
+		call = function(args)
+			return { data = bwc_rows(args.iface or "") }
+		end
+	},
+
+	-- Runs "multipath -f" and returns its output.
+	mptcp_fullmesh = {
+		call = function()
+			return { output = exec_output("multipath -f 2>/dev/null") }
+		end
+	},
+
+	-- Runs "multipath -m" and returns its output.
+	mptcp_monitor = {
+		call = function()
+			return { output = exec_output("multipath -m 2>/dev/null") }
+		end
+	},
+
+	-- Runs "multipath -c" and returns its output.
+	mptcp_connections = {
+		call = function()
+			return { output = exec_output("multipath -c 2>/dev/null") }
+		end
+	},
+
+	-- Runs tracebox against the configured VPN server via the given interface.
+	mptcp_check_trace = {
+		args = { iface = "" },
+		call = function(args)
+			local iface     = args.iface or ""
+			local interface = get_device(iface)
+			local server    = uci:get("shadowsocks-libev", "sss0", "server") or ""
+			if server == "" then return { output = "" } end
+			local cmd
+			if interface == "" then
+				cmd = "tracebox -s /usr/share/tracebox/omr-mptcp-trace.lua " .. server
+			else
+				cmd = "tracebox -s /usr/share/tracebox/omr-mptcp-trace.lua -i " .. interface .. " " .. server
+			end
+			return { output = exec_output(cmd) }
+		end
+	},
+}
+
+-- -------------------------------------------------------------------------
+-- rpcd dispatch (same boilerplate used by all rpcd Lua scripts in this repo)
+-- -------------------------------------------------------------------------
+
+local function parseInput()
+	local parse = jsonc.new()
+	local done, err
+	while true do
+		local chunk = io.read(4096)
+		if not chunk then break end
+		if not done and not err then
+			done, err = parse:parse(chunk)
+		end
+	end
+	if not done then
+		print(jsonc.stringify({ error = err or "Incomplete input" }))
+		os.exit(1)
+	end
+	return parse:get()
+end
+
+local function validateArgs(func, uargs)
+	local method = methods[func]
+	if not method then
+		print(jsonc.stringify({ error = "Method not found" }))
+		os.exit(1)
+	end
+	if type(uargs) ~= "table" then
+		print(jsonc.stringify({ error = "Invalid arguments" }))
+		os.exit(1)
+	end
+	uargs.ubus_rpc_session = nil
+	local margs = method.args or {}
+	for k, v in pairs(uargs) do
+		if margs[k] == nil or (v ~= nil and type(v) ~= type(margs[k])) then
+			print(jsonc.stringify({ error = "Invalid arguments" }))
+			os.exit(1)
+		end
+	end
+	return method
+end
+
+if arg[1] == "list" then
+	local rv = {}
+	for name, method in pairs(methods) do rv[name] = method.args or {} end
+	print((jsonc.stringify(rv):gsub(":%[%]", ":{}")))
+elseif arg[1] == "call" then
+	local args   = parseInput()
+	local method = validateArgs(arg[2], args)
+	local result, code = method.call(args)
+	print((jsonc.stringify(result):gsub("^%[%]$", "{}")))
+	os.exit(code or 0)
+end
