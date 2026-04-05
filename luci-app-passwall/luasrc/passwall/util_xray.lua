@@ -791,9 +791,22 @@ function gen_config(var)
 		local balancers = {}
 		local rules = {}
 		if node then
+			if node.protocol ~= "_shunt" then
+				-- create shunt logic
+				local tmp_node = {
+					remarks = node.remarks,
+					type = "Xray",
+					protocol = "_shunt",
+					default_node = node[".name"],
+				}
+				tmp_node.fakedns = remote_dns_fake
+				tmp_node.default_fakedns = remote_dns_fake
+				node = tmp_node
+			end
+
 			if server_host and server_port then
-				node.address = server_host
-				node.port = server_port
+				default_node_address = server_host
+				default_node_port = server_port
 			end
 		end
 		if local_socks_port then
@@ -1047,14 +1060,25 @@ function gen_config(var)
 				else
 					local preproxy_node = get_node_by_id(node.preproxy_node)
 					if preproxy_node then
-						local preproxy_outbound = gen_outbound(node[".name"], preproxy_node)
+						local preproxy_outbound, exist
+						if preproxy_node.protocol == "_balancing" then
+							local balancer_tag, loopback_outbound = gen_balancer(preproxy_node)
+							if loopback_outbound then
+								preproxy_outbound = loopback_outbound
+								exist = true
+							end
+						else
+							preproxy_outbound = gen_outbound(node[".name"], preproxy_node)
+						end
 						if preproxy_outbound then
 							outbound.tag = preproxy_outbound.tag .. " -> " .. outbound.tag
 							outbound.proxySettings = {
 								tag = preproxy_outbound.tag,
 								transportLayer = true
 							}
-							last_insert_outbound = preproxy_outbound
+							if not exist then
+								last_insert_outbound = preproxy_outbound
+							end
 							default_outTag = outbound.tag
 						end
 					end
@@ -1064,17 +1088,17 @@ function gen_config(var)
 				local to_node = get_node_by_id(node.to_node)
 				if to_node then
 					-- Landing Node not support use special node.
-					if to_node.protocol:find("^_") then
+					if to_node.protocol and to_node.protocol:find("^_") then
 						to_node = nil
 					end
 				end
 				if to_node then
 					local to_outbound
 					if to_node.type ~= "Xray" then
-						local tag = to_node[".name"]
+						local in_tag = "inbound_" .. to_node[".name"] .. "_" .. tostring(outbound.tag)
 						local new_port = api.get_new_port()
 						table.insert(inbounds, {
-							tag = tag,
+							tag = in_tag,
 							listen = "127.0.0.1",
 							port = new_port,
 							protocol = "dokodemo-door",
@@ -1086,11 +1110,11 @@ function gen_config(var)
 						to_node.address = "127.0.0.1"
 						to_node.port = new_port
 						table.insert(rules, 1, {
-							inboundTag = {tag},
+							inboundTag = {in_tag},
 							outboundTag = outbound.tag
 						})
-						to_outbound = gen_outbound(node[".name"], to_node, tag, {
-							tag = tag,
+						to_outbound = gen_outbound(node[".name"], to_node, to_node[".name"], {
+							tag = to_node[".name"],
 							run_socks_instance = not no_run
 						})
 					else
@@ -1129,6 +1153,12 @@ function gen_config(var)
 					proxy_table.chain_proxy = nil
 					proxy_table.preproxy_node = nil
 					proxy_table.to_node = nil
+				end
+				if tag == "default" then
+					if default_node_address and default_node_port then
+						node.address = default_node_address
+						node.port = default_node_port
+					end
 				end
 				local outbound, has_add_outbound
 				for _, _outbound in ipairs(outbounds) do
@@ -1340,25 +1370,6 @@ function gen_config(var)
 				balancers = #balancers > 0 and balancers or nil,
 				rules = rules
 			}
-		else
-			COMMON.default_outbound_tag = gen_outbound_get_tag(flag, node, nil, {
-				fragment = xray_settings.fragment == "1" or nil,
-				noise = xray_settings.noise == "1" or nil,
-				run_socks_instance = not no_run
-			})
-			if COMMON.default_outbound_tag then
-				routing = {
-					domainStrategy = "AsIs",
-					domainMatcher = "hybrid",
-					balancers = #balancers > 0 and balancers or nil,
-					rules = rules
-				}
-				table.insert(routing.rules, {
-					ruleTag = "default",
-					network = "tcp,udp",
-					outboundTag = COMMON.default_outbound_tag
-				})
-			end
 		end
 
 		if tcp_redir_port or udp_redir_port then
@@ -1734,14 +1745,10 @@ function gen_config(var)
 		else
 			table.insert(outbounds, blackhole_outbound)
 		end
-
 		for index, value in ipairs(config.outbounds) do
-			local s = value.settings
-			if not value["_flag_proxy_tag"] and value["_id"] and s and not no_run and
-			((s.vnext and s.vnext[1] and s.vnext[1].address and s.vnext[1].port) or 
-			(s.servers and s.servers[1] and s.servers[1].address and s.servers[1].port) or
-			(s.peers and s.peers[1] and s.peers[1].endpoint) or
-			(s.address and s.port)) then
+			local pt = value.protocol
+			local exclude = { blackhole=1, dns=1, freedom=1, loopback=1 }
+			if not value["_flag_proxy_tag"] and value["_id"] and pt and not exclude[pt] and not no_run then
 				sys.call(string.format("echo '%s' >> %s", value["_id"], api.TMP_PATH .. "/direct_node_list"))
 			end
 			for k, v in pairs(config.outbounds[index]) do
