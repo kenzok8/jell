@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netdata
 PKG_VERSION:=2.9.0
-PKG_RELEASE:=24
+PKG_RELEASE:=25
 
 PKG_MAINTAINER:=Josef Schlehofer <pepe.schlehofer@gmail.com>, Daniel Engberg <daniel.engberg.lists@pyret.net>
 PKG_LICENSE:=GPL-3.0-or-later
@@ -35,7 +35,7 @@ include $(INCLUDE_DIR)/nls.mk
 define Package/netdata
   SECTION:=admin
   CATEGORY:=Administration
-  DEPENDS:=+zlib +libuuid +libuv +libmnl +liblz4 +libjson-c +libyaml +libopenssl +libcurl +protobuf +libzstd +libpcre2
+  DEPENDS:=+zlib +libuuid +libuv +libmnl +liblz4 +libjson-c +libyaml +libopenssl +libcurl +protobuf +libzstd
   TITLE:=Real-time performance monitoring tool
   URL:=https://www.netdata.cloud/
   PROVIDES:=netdata-ssl
