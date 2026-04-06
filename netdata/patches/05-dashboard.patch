@@ -1,0 +1,17 @@
+--- a/packaging/cmake/Modules/NetdataDashboard.cmake
++++ b/packaging/cmake/Modules/NetdataDashboard.cmake
+@@ -32,13 +32,8 @@ function(bundle_dashboard)
+   message(STATUS "Preparing local agent dashboard code")
+ 
+   message(STATUS "  Fetching ${DASHBOARD_URL}")
+-  file(DOWNLOAD
+-       "${DASHBOARD_URL}"
+-       "${CMAKE_BINARY_DIR}/dashboard.tar.gz"
+-       TIMEOUT 180
+-       STATUS fetch_status)
+ 
+-  list(GET fetch_status 0 result)
++  set(result 0)
+ 
+   if(result)
+     message(FATAL_ERROR "Failed to fetch dashboard code")
