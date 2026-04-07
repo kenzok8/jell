@@ -908,7 +908,7 @@ function gen_config_server(node)
 			outbound = require("luci.passwall.util_sing-box").gen_outbound(nil, outbound_node_t, "outbound")
 		end
 		if outbound then
-			route.final = "outbound"
+			route.final = outbound.tag
 			table.insert(outbounds, 1, outbound)
 		end
 	end
@@ -919,6 +919,12 @@ function gen_config_server(node)
 			level = node.loglevel or "info",
 			timestamp = true,
 			--output = logfile,
+		},
+		dns = {
+			servers = {{
+				type = "local",
+				tag = "direct"
+			}}
 		},
 		inbounds = { inbound },
 		outbounds = outbounds,

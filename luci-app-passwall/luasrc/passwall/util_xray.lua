@@ -712,6 +712,14 @@ function gen_config_server(node)
 		end
 	end
 
+	for index, value in ipairs(config.outbounds) do
+		for k, v in pairs(config.outbounds[index]) do
+			if k and k:find("_") == 1 then
+				config.outbounds[index][k] = nil
+			end
+		end
+	end
+
 	return config
 end
 
