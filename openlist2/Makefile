@@ -8,8 +8,8 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openlist2
 PKG_VERSION:=4.2.0
-PKG_WEB_VERSION:=4.1.10
-PKG_RELEASE:=11
+PKG_WEB_VERSION:=4.2.0
+PKG_RELEASE:=12
 
 PKG_SOURCE:=openlist-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/OpenListTeam/OpenList/tar.gz/v$(PKG_VERSION)?
