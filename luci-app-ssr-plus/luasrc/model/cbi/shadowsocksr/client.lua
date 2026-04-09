@@ -295,4 +295,3 @@ end
 
 m:section(SimpleSection).template = "shadowsocksr/status_bottom"
 return m
-
