@@ -1,5 +1,5 @@
 #!/bin/sh /etc/rc.common
-# Copyright (C) 2018 Ycarus (Yannick Chabanois) <ycarus@zugaina.org>
+# Copyright (C) 2018-2026 Ycarus (Yannick Chabanois) <ycarus@zugaina.org>
 # Released under GPL 3. See LICENSE for the full terms.
 
 START=50
@@ -41,10 +41,10 @@ global_multipath_settings() {
 	# Global MPTCP configuration
 	if [ -f /proc/sys/net/mptcp/mptcp_enabled ]; then
 		sysctl -qew net.mptcp.mptcp_enabled="$multipath_status"
-		if [ -z "$(grep net.mptcp.mptcp_enabled /etc/sysctl.d/zzz_openmptcprouter.conf)" ]; then
-			echo "net.mptcp.mptcp_enabled=${multipath_status}" >> /etc/sysctl.d/zzz_openmptcprouter.conf
-		else
+		if grep -q net.mptcp.mptcp_enabled /etc/sysctl.d/zzz_openmptcprouter.conf; then
 			sed -i "s:^net.mptcp.mptcp_enabled=[0-1]*:net.mptcp.mptcp_enabled=${multipath_status}:" /etc/sysctl.d/zzz_openmptcprouter.conf
+		else
+			echo "net.mptcp.mptcp_enabled=${multipath_status}" >> /etc/sysctl.d/zzz_openmptcprouter.conf
 		fi
 		[ -z "$mptcp_path_manager" ] || sysctl -qew net.mptcp.mptcp_path_manager="$mptcp_path_manager"
 		[ -z "$mptcp_scheduler" ] || sysctl -qew net.mptcp.mptcp_scheduler="$mptcp_scheduler"
@@ -59,10 +59,10 @@ global_multipath_settings() {
 		[ -z "$mptcp_version" ] || sysctl -qew net.mptcp.mptcp_version="$mptcp_version"
 	elif [ -f /proc/sys/net/mptcp/enabled ]; then
 		sysctl -qew net.mptcp.enabled="$multipath_status"
-		if [ -z "$(grep net.mptcp.enabled /etc/sysctl.d/zzz_openmptcprouter.conf)" ]; then
-			echo "net.mptcp.enabled=${multipath_status}" >> /etc/sysctl.d/zzz_openmptcprouter.conf
-		else
+		if grep -q net.mptcp.enabled /etc/sysctl.d/zzz_openmptcprouter.conf; then
 			sed -i "s:^net.mptcp.enabled=[0-1]*:net.mptcp.enabled=${multipath_status}:" /etc/sysctl.d/zzz_openmptcprouter.conf
+		else
+			echo "net.mptcp.enabled=${multipath_status}" >> /etc/sysctl.d/zzz_openmptcprouter.conf
 		fi
 		ip mptcp limits set add_addr_accepted $mptcp_add_addr_accepted subflows $mptcp_subflows >/dev/null 2>&1
 		#[ -z "$mptcp_debug" ] || sysctl -qew net.mptcp.mptcp_debug="$mptcp_debug"
@@ -70,15 +70,16 @@ global_multipath_settings() {
 		[ -z "$mptcp_checksum" ] || sysctl -qew net.mptcp.checksum_enabled="$mptcp_checksum"
 		[ -z "$mptcp_stale_loss_cnt" ] || sysctl -qew net.mptcp.stale_loss_cnt="$mptcp_stale_loss_cnt"
 		[ -z "$mptcp_pm_type" ] || sysctl -qew net.mptcp.pm_type="$mptcp_pm_type"
-		[ -z "$mptcp_allow_join_initial_addr_port" ] || sysctl -qew net.mptcp.allow_join_initial_addr_port="$mptcp_allow_initial_addr_port"
+		[ -z "$mptcp_allow_join_initial_addr_port" ] || sysctl -qew net.mptcp.allow_join_initial_addr_port="$mptcp_allow_join_initial_addr_port"
 		[ -z "$mptcp_close_timeout" ] || sysctl -qew net.mptcp.close_timeout="$mptcp_close_timeout"
 		[ -z "$mptcp_syn_retrans_before_tcp_fallback" ] || sysctl -qew net.mptcp.syn_retrans_before_tcp_fallback="$mptcp_syn_retrans_before_tcp_fallback"
 		[ -z "$mptcp_blackhole_timeout" ] || sysctl -qew net.mptcp.blackhole_timeout="$mptcp_blackhole_timeout"
 		if [ -n "$mptcp_scheduler" ] && [ -d /usr/share/bpf/scheduler ]; then
-			for scheduler in $(ls -1 /usr/share/bpf/scheduler/*.o); do
-				bpftool struct_ops register $scheduler >/dev/null 2>&1
+			for scheduler in /usr/share/bpf/scheduler/*.o; do
+				[ -f "$scheduler" ] && bpftool struct_ops register "$scheduler" >/dev/null 2>&1
 			done
-			sysctl -qew net.mptcp.scheduler="$(echo $mptcp_scheduler | sed -e 's/mptcp_//' -e 's/.o//')" >/dev/null 2>&1
+			local sched="${mptcp_scheduler#mptcp_}"; sched="${sched%.o}"
+			sysctl -qew net.mptcp.scheduler="$sched" >/dev/null 2>&1
 		fi
 	fi
 	[ -z "$congestion" ] || sysctl -qew net.ipv4.tcp_congestion_control="$congestion"
@@ -88,44 +89,52 @@ interface_macaddr_count() {
 	local intf="$1"
 	local dmacaddr="$2"
 	config_get macaddr "$intf" macaddr
-	[ "$macaddr" = "$dmacaddr" ] && [ -z "$(echo $intf | grep '\.')" ] && nbmac=$((nbmac+1))
+	[ "$macaddr" = "$dmacaddr" ] && [ "${intf%.*}" = "$intf" ] && nbmac=$((nbmac+1))
 }
 
 interface_max_metric() {
 	local config="$1"
-	if [ "$1" != "omrvpn" ] && [ "$1" != "omr6in4" ] && [ "$1" != "lan" ] && [ "$1" != "loopback" ]; then
-		config_get metric "$config" ip4table
-		if [ "$metric" -gt "$count" ] && [ "$metric" -lt "1000" ]; then
-			count=$metric
-		fi
-	elif [ "$1" = "omrvpn" ]; then
-		uci -q batch <<-EOF >/dev/null
-			set network.${config}.metric=1500
-			set network.${config}.ip4table=1500
-			set network.${config}.ip6table=61500
-			commit network
-			set openmptcprouter.${config}.metric=1500
-			commit openmptcprouter
-		EOF
-	elif [ "$1" = "omr6in4" ]; then
-		uci -q batch <<-EOF >/dev/null
-			set network.${config}.metric=1201
-			set network.${config}.ip4table=1201
-			set network.${config}.ip6table=61201
-			commit network
-			set openmptcprouter.${config}.metric=1201
-			commit openmptcprouter
-		EOF
-	elif [ "$1" = "lan" ]; then
-		sed -i 's:50 lan:9999 lan:g' /etc/iproute2/rt_tables
-	fi
+	case "$1" in
+		omrvpn)
+			uci -q batch <<-EOF >/dev/null
+				set network.${config}.metric=1500
+				set network.${config}.ip4table=1500
+				set network.${config}.ip6table=61500
+				commit network
+				set openmptcprouter.${config}.metric=1500
+				commit openmptcprouter
+			EOF
+			;;
+		omr6in4)
+			uci -q batch <<-EOF >/dev/null
+				set network.${config}.metric=1201
+				set network.${config}.ip4table=1201
+				set network.${config}.ip6table=61201
+				commit network
+				set openmptcprouter.${config}.metric=1201
+				commit openmptcprouter
+			EOF
+			;;
+		lan)
+			sed -i 's:50 lan:9999 lan:g' /etc/iproute2/rt_tables
+			;;
+		loopback)
+			;;
+		*)
+			config_get metric "$config" ip4table
+			if [ "$metric" -gt "$count" ] && [ "$metric" -lt "1000" ]; then
+				count=$metric
+			fi
+			;;
+	esac
 }
 
 interface_multipath_settings() {
 	local mode iface proto metric ip4table
 	local config="$1"
 	local intf="$2"
-	local enabled
+	local enabled uci_route
+	uci_route=$(uci -q get openmptcprouter.settings.uci_route)
 
 	network_get_device iface $config
 	[ -z "$iface" ] && network_get_physdev iface $config
@@ -135,7 +144,7 @@ interface_multipath_settings() {
 
 	config_get enabled "$config" auto "1"
 	config_get txqueuelen "$config" txqueuelen
-	[ -n "$(echo $iface | grep '@')" ] && iface=$(ifstatus "$config" | jsonfilter -q -e '@["device"]')
+	case "$iface" in *@*) iface=$(ifstatus "$config" | jsonfilter -q -e '@["device"]') ;; esac
 	if [ "$(uci -q get openmptcprouter.${config}.metric)" = "" ] || [ "$(uci -q get openmptcprouter.${config}.metric)" = "1" ]; then
 		count=$((count+1))
 		metric=$count
@@ -164,21 +173,12 @@ interface_multipath_settings() {
 	ip4table=$metric
 	ip6table=6$metric
 	[ -n "$iface" ] && {
-		gro=$(uci -q get network.${config}.gro)
-		[ "$gro" = "1" ] && ethtool -K $iface gro on >/dev/null 2>&1
-		[ "$gro" = "0" ] && ethtool -K $iface gro off >/dev/null 2>&1
-		gso=$(uci -q get network.${config}.gso)
-		[ "$gso" = "1" ] && ethtool -K $iface gso on >/dev/null 2>&1
-		[ "$gso" = "0" ] && ethtool -K $iface gso off >/dev/null 2>&1
-		lro=$(uci -q get network.${config}.lro)
-		[ "$lro" = "1" ] && ethtool -K $iface lro on >/dev/null 2>&1
-		[ "$lro" = "0" ] && ethtool -K $iface lro off >/dev/null 2>&1
-		ufo=$(uci -q get network.${config}.ufo)
-		[ "$ufo" = "1" ] && ethtool -K $iface ufo on >/dev/null 2>&1
-		[ "$ufo" = "0" ] && ethtool -K $iface ufo off >/dev/null 2>&1
-		tso=$(uci -q get network.${config}.tso)
-		[ "$tso" = "1" ] && ethtool -K $iface tso on >/dev/null 2>&1
-		[ "$tso" = "0" ] && ethtool -K $iface tso off >/dev/null 2>&1
+		local offload val
+		for offload in gro gso lro ufo tso; do
+			val=$(uci -q get network.${config}.${offload})
+			[ "$val" = "1" ] && ethtool -K $iface $offload on >/dev/null 2>&1
+			[ "$val" = "0" ] && ethtool -K $iface $offload off >/dev/null 2>&1
+		done
 	}
 	[ "$mode" = "" ] && {
 		mode="$(uci -q get openmptcprouter.${config}.multipath)"
@@ -199,7 +199,7 @@ interface_multipath_settings() {
 		[ -z "$mptcpmintf" ] && mptcpmintf="$config"
 		uci -q set network.${config}.defaultroute=0
 		uci -q set network.${config}.peerdns=0
-		uci -q delete network.${config}.dns=0
+		uci -q delete network.${config}.dns
 		echo '' > /etc/resolv.conf >/dev/null 2>&1
 	}
 	[ "$mode" = "master" ] && {
@@ -233,9 +233,9 @@ interface_multipath_settings() {
 	#[ "$config" = "omrvpn" ] && return 0
 	[ "$config" = "omrvpn" ] && mode="off"
 	#[ -n "$(ifconfig | grep $iface)" ] || return 0
-	[ -n "$(ip link show dev $iface)" ] || return 0
-	[ "$(echo $iface | grep _dev)" != "" ] && return 0
-	[ "$(echo $iface | grep '^if')" != "" ] && return 0
+	ip link show dev "$iface" >/dev/null 2>&1 || return 0
+	case "$iface" in *_dev*) return 0 ;; esac
+	case "$iface" in if*) return 0 ;; esac
 	[ "$iface" = "lo" ] && return 0
 	status=`ifstatus $config | jsonfilter -q -e "@.up" | tr -d "\n"`
 	[ "$status" = "false" ] && return 0
@@ -293,7 +293,7 @@ interface_multipath_settings() {
 		[ -n "$ipaddr" ] && [ -n "$netmask" ] && netmask=`ipcalc.sh $ipaddr/$netmask | sed -n '/PREFIX=/{;s/.*=//;s/ .*//;p;}'`
 		[ -n "$ipaddr" ] && [ -n "$netmask" ] && network=`ipcalc.sh $ipaddr/$netmask | sed -n '/NETWORK=/{;s/.*=//;s/ .*//;p;}'`
 	fi
-	if [ "$(uci -q get openmptcprouter.settings.uci_route)" = "1" ]; then
+	if [ "$uci_route" = "1" ]; then
 		uci -q batch <<-EOF >/dev/null
 			delete network.${config}_rule
 			delete network.${config}_route
@@ -301,12 +301,12 @@ interface_multipath_settings() {
 			commit network
 		EOF
 	else
-		[ -n "$(ip rule list | grep $id)" ] && ip rule del table $ip4table > /dev/null 2>&1
+		ip rule show | grep -q " $id " && ip rule del table $ip4table > /dev/null 2>&1
 		ip route flush $id > /dev/null 2>&1
 	fi
 
 	if [ -n "$gateway" ] && [ -n "$network" ]; then
-		if [ "$(uci -q get openmptcprouter.settings.uci_route)" = "1" ]; then
+		if [ "$uci_route" = "1" ]; then
 			uci -q batch <<-EOF >/dev/null
 				delete network.${config}_rule
 				set network.${config}_rule=rule
@@ -360,7 +360,7 @@ interface_multipath_settings() {
 		fi
 	fi
 	if [ -z "$gateway" ] && [ -n "$network" ]; then
-		if [ "$(uci -q get openmptcprouter.settings.uci_route)" = "1" ]; then
+		if [ "$uci_route" = "1" ]; then
 			uci -q batch <<-EOF >/dev/null
 				delete network.${config}_rule
 				set network.${config}_rule=rule
@@ -424,11 +424,11 @@ interface_multipath_settings() {
 			#fi
 			gateway6=$(echo $gateway6 | cut -d/ -f1 | tr -d "\n")
 			netmask6=$(ubus call network.interface.$config status | jsonfilter -q -l 1 -e '@["ipv6-prefix"][0].mask' | tr -d "\n")
-			network6=$(ubus call network.interface.$config status | jsonfilter -q -l 1 -e '@[".ipv6-prefix"][0].address' | tr -d "\n")
+			network6=$(ubus call network.interface.$config status | jsonfilter -q -l 1 -e '@["ipv6-prefix"][0].address' | tr -d "\n")
 			[ -z "$netmask6" ] && [ -n "$ip6addr" ] && netmask6=$(ip -6 addr show dev $iface | grep $ip6addr | awk '/inet6/ {print $2; exit}' | cut -d/ -f2 | tr -d "\n")
 			[ -z "$network6" ] && [ -n "$ip6addr" ] && [ -n "$netmask6" ] && network6=`/usr/sbin/ipcalc -n ${ip6addr}/${netmask6} | sed -n '/NETWORK=/{;s/.*=//;s/ .*//;p;}'`
 		fi
-		if [ "$(uci -q get openmptcprouter.settings.uci_route)" = "1" ]; then
+		if [ "$uci_route" = "1" ]; then
 			uci -q batch <<-EOF >/dev/null
 				delete network.${config}_rule6
 				delete network.${config}_route6
@@ -436,12 +436,12 @@ interface_multipath_settings() {
 				commit network
 			EOF
 		else
-			[ -n "$(ip -6 rule list | grep 6$id)" ] && ip -6 rule del table $ip6table > /dev/null 2>&1
+			ip -6 rule show | grep -q " 6$id " && ip -6 rule del table $ip6table > /dev/null 2>&1
 			ip -6 route flush 6$id > /dev/null 2>&1
 		fi
 		if [ -n "$gateway6" ] && [ -n "$network6" ]; then
 			#echo "gateway6: $gateway6 - network6: $network6 -> ok"
-			if [ "$(uci -q get openmptcprouter.settings.uci_route)" = "1" ]; then
+			if [ "$uci_route" = "1" ]; then
 				uci -q batch <<-EOF >/dev/null
 					delete network.${config}_rule6
 					set network.${config}_rule6=rule6
@@ -466,7 +466,7 @@ interface_multipath_settings() {
 				EOF
 			else
 				[ -n "$ip6addr" ] && ip -6 rule add from $ip6addr table $ip6table pref 0 >/dev/null 2>&1
-				[ -z "$(ip rule show pref 0 table $ip6table oif $iface)" ] && ip rule add oif $iface table $ip6table pref 0
+				[ -z "$(ip -6 rule show pref 0 table $ip6table oif $iface)" ] && ip -6 rule add oif $iface table $ip6table pref 0
 				ip -6 route replace $network6/$netmask6 dev $iface scope link metric 6$id $initcwrwnd >/dev/null 2>&1
 				ip -6 route replace $network6/$netmask6 dev $iface scope link table $ip6table $initcwrwnd >/dev/null 2>&1
 				ip -6 route replace $gateway6 dev $iface table $ip6table $initcwrwnd >/dev/null 2>&1
@@ -516,17 +516,16 @@ load_interfaces() {
 }
 
 set_multipath() {
-	ls -1 /sys/class/net/ | while read iface; do
-		exist=0
-		for ifacemptcp in $mptcpintf; do
-			if [ "$iface" = "$ifacemptcp" ]; then
-				exist=1
-			fi
-		done
-		[ "$exist" = "0" ] && [ -z "$(multipath $iface | grep deactivated)" ] && [ "$iface" != "bonding_master" ] && [ -n "$(multipath $iface)" ] && {
-			logger -t "MPTCP" "Disabling MPTCP on interface $iface not found in enabled multipath list"
-			multipath $iface off >/dev/null 2>&1
-		}
+	local iface mp
+	for iface in /sys/class/net/*; do
+		iface="${iface##*/}"
+		case " $mptcpintf " in *" $iface "*) continue ;; esac
+		mp=$(multipath "$iface" 2>/dev/null)
+		[ "$iface" = "bonding_master" ] && continue
+		[ -z "$mp" ] && continue
+		case "$mp" in *deactivated*) continue ;; esac
+		logger -t "MPTCP" "Disabling MPTCP on interface $iface not found in enabled multipath list"
+		multipath "$iface" off >/dev/null 2>&1
 	done
 }
 
@@ -550,10 +549,10 @@ add_route() {
 	config_get type "$1" type
 	[ -n "$type" ] && routeset="$routeset type $type"
 	config_get table "$1" table
-	[ -n "$table" ] && routeset="table $table"
+	[ -n "$table" ] && routeset="$routeset table $table"
 	config_get interface "$1" interface
 	iface=$(ifstatus "$interface" | jsonfilter -q -e '@["l3_device"]')
-	[ -n "$(echo $iface | grep '@')" ] && iface=$(ifstatus "$interface" | jsonfilter -q -e '@["device"]')
+	case "$iface" in *@*) iface=$(ifstatus "$interface" | jsonfilter -q -e '@["device"]') ;; esac
 	[ -n "$iface" ] && routeset="$routeset dev $iface"
 	logger -t "MPTCP" "Add route $routeset"
 	[ -n "$routeset" ] && {
@@ -575,10 +574,10 @@ add_route6() {
 	config_get type "$1" type
 	[ -n "$type" ] && routeset="$routeset type $type"
 	config_get table "$1" table
-	[ -n "$table" ] && routeset="table $table"
+	[ -n "$table" ] && routeset="$routeset table $table"
 	config_get interface "$1" interface
 	iface=$(ifstatus "$interface" | jsonfilter -q -e '@["l3_device"]')
-	[ -n "$(echo $iface | grep '@')" ] && iface=$(ifstatus "$interface" | jsonfilter -q -e '@["device"]')
+	case "$iface" in *@*) iface=$(ifstatus "$interface" | jsonfilter -q -e '@["device"]') ;; esac
 	[ -n "$iface" ] && routeset="$routeset dev $iface"
 	logger -t "MPTCP" "Add IPv6 route $routeset"
 	[ -n "$routeset" ] && {
@@ -599,13 +598,18 @@ start_service() {
 	#[ -n "$intf" ] && multipath "${intf}" off >/dev/null 2>&1
 	[ -z "$intf" ] && global_multipath_settings
 
-	[ -n "$(ubus call system board | jsonfilter -e '@.board_name' | grep '3-model-b')" ] && [ "$(ip link show eth0 | grep UP)" = "" ] && {
-		# RPI 3 workaround no network at boot
-		ethtool eth0 > /dev/null 2>&1
-		ethtool -s eth0 autoneg off > /dev/null 2>&1
-		ip link set eth0 up > /dev/null 2>&1
-		ethtool -s eth0 autoneg on > /dev/null 2>&1
-	}
+	local board_name
+	board_name=$(ubus call system board | jsonfilter -e '@.board_name')
+
+	case "$board_name" in *3-model-b*)
+		[ "$(ip link show eth0 | grep UP)" = "" ] && {
+			# RPI 3 workaround no network at boot
+			ethtool eth0 > /dev/null 2>&1
+			ethtool -s eth0 autoneg off > /dev/null 2>&1
+			ip link set eth0 up > /dev/null 2>&1
+			ethtool -s eth0 autoneg on > /dev/null 2>&1
+		}
+	;; esac
 
 	mptcpintf=""
 	mptcpmintf=""
@@ -637,7 +641,7 @@ start_service() {
 		# If no master is defined, one interface is defined as master
 		if [ "$master" = "" ] && [ -z "$intf" ]; then
 			intfmaster="$mptcpmintf"
-			[ "$intfmaster" != "" ] && [ "$(uci -q show network | grep \"multipath='master'\")" ] && {
+			[ "$intfmaster" != "" ] && [ -z "$(uci -q show network | grep \"multipath='master'\")" ] && {
 				logger -t "MPTCP" "No master multipath defined, setting it to $intfmaster"
 				uci -q set network.${intfmaster}.multipath="master"
 				uci -q set openmptcprouter.${intfmaster}.multipath="master"
@@ -646,13 +650,15 @@ start_service() {
 	fi
 	[ -n "$(uci -q changes network)" ] && uci -q commit network
 	[ -n "$(uci -q changes openmptcprouter)" ] && uci -q commit openmptcprouter
-	[ -n "$(ubus call system board | jsonfilter -e '@.board_name' | grep raspberry)" ] && [ -z "$(ubus call system board | jsonfilter -e '@.board_name' | grep '4-model-b')" ] && [ -z "$(ubus call system board | jsonfilter -e '@.board_name' | grep '5')" ] && {
-		ethtool --offload eth0 rx off tx off > /dev/null 2>&1
-	}
-	[ -n "$(ubus call system board | jsonfilter -e '@.board_name' | grep -i r2s)" ] && {
+	case "$board_name" in
+		*raspberry*) case "$board_name" in *4-model-b*|*5*) ;; *)
+			ethtool --offload eth0 rx off tx off > /dev/null 2>&1
+		;; esac ;;
+	esac
+	case "$board_name" in *[Rr]2[Ss]*)
 		ethtool -K eth0 rx off tx off > /dev/null 2>&1
 		ethtool -K eth1 rx off tx off > /dev/null 2>&1
-	}
+	;; esac
 }
 
 reload_service() {

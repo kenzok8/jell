@@ -65,7 +65,7 @@ case $1 in
         fi
         if [ -f /proc/sys/net/mptcp/mptcp_checksum ]; then
             echo Use checksum: `cat /proc/sys/net/mptcp/mptcp_checksum`
-        else
+        elif [ -f /proc/sys/net/mptcp/checksum_enabled ]; then
             echo Use checksum: `cat /proc/sys/net/mptcp/checksum_enabled`
         fi
         if [ -f /proc/sys/net/mptcp/mptcp_scheduler ]; then
@@ -98,7 +98,12 @@ case $1 in
 			echo "jsonfilter or jq are required"
 			exit 1
 		fi
-		[ -n "$IP" ] && [ -n "$endpoint" ] && ID=$(echo "${endpoint}" show | grep "$IP " | awk '{print $3}')
+        if [ -n "$IP" ] && [ -n "$endpoint" ]; then
+            for i in $IP; do
+                ID=$(echo "${endpoint}" | grep -F "$i " | awk '{print $3}')
+                [ -n "$ID" ] && break
+            done
+        fi
 	fi
 	if [ -n "$ID" ]; then
 		echo "OK"
@@ -159,18 +164,18 @@ else
 	endpoint="$(ip mptcp endpoint show)"
 	if [ -n "$TYPE" ]; then
 		# Remove not needed if* interfaces in MPTCP
-		[ -n "$endpoint" ] && oldintfs=$(echo "${endpoint}" | grep "dev if" | awk '{ print $3 }')
-		[ -n "$oldintfs" ] && {
-			for oldintf in $oldintfs; do
-				ip mptcp endpoint delete id $oldintf >/dev/null 2>&1
+		[ -n "$endpoint" ] && oldids=$(echo "${endpoint}" | grep "dev if" | awk '{ print $3 }')
+		[ -n "$oldids" ] && {
+			for oldid in $oldids; do
+				ip mptcp endpoint delete id $oldid >/dev/null 2>&1
 			done
 			endpoint="$(ip mptcp endpoint show)"
 		}
 	fi
 	if [ -n "$endpoint" ]; then
-		ID=$(echo "${endpoint}" | sort | grep "dev $DEVICE " | awk '{print $3}')
-		IFF=$(echo "${endpoint}" | sort | grep -m 1 -E "dev $DEVICE " | awk '{print $4; exit}')
-		IFF2=$(echo "${endpoint}" | sort | grep -m 1 -E "dev $DEVICE " | awk '{print $5; exit}')
+        ID=$(echo "${endpoint}" | sort | grep -F "dev $DEVICE " | awk '{print $3}')
+        IFF=$(echo "${endpoint}" | sort | grep -F -m 1 "dev $DEVICE " | awk '{print $4; exit}')
+        IFF2=$(echo "${endpoint}" | sort | grep -F -m 1 "dev $DEVICE " | awk '{print $5; exit}')
 	fi
 	if [ -n "$TYPE" ]; then
 		#IP=$(ip a show $DEVICE | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
@@ -182,7 +187,12 @@ else
 			echo "jsonfilter or jq are required"
 			exit 1
 		fi
-		[ -z "$ID" ] && [ -n "$IP" ] && [ -n "$endpoint" ] && ID=$(echo "${endpoint}" show | grep "$IP " | awk '{print $3}')
+        if [ -z "$ID" ] && [ -n "$IP" ] && [ -n "$endpoint" ]; then
+            for i in $IP; do
+                ID=$(echo "${endpoint}" | grep -F "$i " | awk '{print $3}')
+                [ -n "$ID" ] && break
+            done
+        fi
 		[ -n "$endpoint" ] && RMID=$(echo "${endpoint}" | grep '::ffff' | awk '{ print $3 }')
 		[ -n "$RMID" ] && ip mptcp endpoint delete id $RMID >/dev/null 2>&1
 	fi
@@ -195,6 +205,10 @@ else
                         }
                         exit 0;;
                 "on")
+                        [ -z "$IP" ] && {
+                            echo "No global IP found on $DEVICE"
+                            exit 1
+                        }
                         [ -n "$ID" ] && {
                             for i in $ID; do
                                 ip mptcp endpoint delete id $i >/dev/null 2>&1
@@ -205,6 +219,10 @@ else
                         done
                         exit 0;;
                 "signal")
+                        [ -z "$IP" ] && {
+                            echo "No global IP found on $DEVICE"
+                            exit 1
+                        }
                         [ -n "$ID" ] && {
                             for i in $ID; do
                                 ip mptcp endpoint delete id $i >/dev/null 2>&1
@@ -216,6 +234,10 @@ else
                         done
                         exit 0;;
                 "backup")
+                        [ -z "$IP" ] && {
+                            echo "No global IP found on $DEVICE"
+                            exit 1
+                        }
                         [ -n "$ID" ] && {
                             for i in $ID; do
                                 ip mptcp endpoint delete id $i >/dev/null 2>&1

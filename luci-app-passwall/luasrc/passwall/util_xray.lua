@@ -7,7 +7,8 @@ local appname = "passwall"
 local fs = api.fs
 
 local GLOBAL = {
-	DNS_SERVER = {}
+	DNS_SERVER = {},
+	DNS_HOSTNAME = {}
 }
 
 local xray_version = api.get_app_version("xray")
@@ -416,6 +417,11 @@ function gen_outbound(flag, node, tag, proxy_table)
 						config_port = _a.port
 					else
 						config_port = 443
+					end
+					if _a.hostname then
+						if api.datatypes.hostname(_a.hostname) then
+							GLOBAL.DNS_HOSTNAME[_a.hostname] = true
+						end
 					end
 				end
 			else
@@ -1753,6 +1759,10 @@ function gen_config(var)
 			dns.hosts = nil
 		end
 
+		-- 自定义节点 DNS
+		if #node_dns > 0 and #dns.servers < 1 then
+			dns.servers = { "localhost" }
+		end
 		for i = #node_dns, 1, -1 do
 			local value = node_dns[i]
 			table.insert(routing.rules, 1, {
@@ -1761,7 +1771,23 @@ function gen_config(var)
 				},
 				outboundTag = value.outboundTag,
 			})
-			table.insert(dns.servers, 1, value.server)
+			table.insert(dns.servers, 2, value.server)
+		end
+		if next(GLOBAL.DNS_HOSTNAME) then
+			local hostname = {}
+			for line, _ in pairs(GLOBAL.DNS_HOSTNAME) do
+				table.insert(hostname, line)
+			end
+			table.insert(dns.servers, 2, {
+				tag = "bootstrap",
+				address = "223.5.5.5",
+				queryStrategy = "UseIPv4",
+				domains = hostname
+			})
+			table.insert(routing.rules, 1, {
+				inboundTag = { "bootstrap" },
+				outboundTag = "direct"
+			})
 		end
 	end
 
