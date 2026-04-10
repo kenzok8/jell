@@ -1,5 +1,23 @@
 --- luci-app-package-manager/htdocs/luci-static/resources/view/package-manager.js
 +++ luci-app-package-manager/htdocs/luci-static/resources/view/package-manager.js
+@@ -248,7 +248,7 @@ function display(pattern)
+ 			var avail = packages.available.pkgs[name],
+ 			    inst  = packages.installed.pkgs[name];
+ 
+-			if (!inst || !inst.installed)
++			if (!inst || !inst.installed || pkg.name.includes('kmod-') || pkg.name.includes('busybox') || pkg.name.includes('base-files'))
+ 				continue;
+ 
+ 			if (!avail || compareVersion(avail.version, pkg.version) <= 0)
+@@ -288,7 +288,7 @@ function display(pattern)
+ 					'data-action': 'install',
+ 					'click': handleInstall
+ 				}, _('Install…'));
+-			else if (inst.installed && inst.version != pkg.version)
++			else if (inst.installed && compareVersion(pkg.version, inst.version) > 0)
+ 				btn = E('div', {
+ 					'class': 'btn cbi-button-positive',
+ 					'data-package': name,
 @@ -1152,6 +1159,42 @@ return view.extend({
  	},
  
