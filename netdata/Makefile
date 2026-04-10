@@ -8,8 +8,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=netdata
-PKG_VERSION:=2.9.0
-PKG_RELEASE:=27
+PKG_VERSION:=2.10.0
+PKG_RELEASE:=28
 
 PKG_MAINTAINER:=Josef Schlehofer <pepe.schlehofer@gmail.com>, Daniel Engberg <daniel.engberg.lists@pyret.net>
 PKG_LICENSE:=GPL-3.0-or-later
@@ -70,6 +70,8 @@ CMAKE_OPTIONS += \
 	-DENABLE_PLUGIN_OTEL=Off \
 	-DENABLE_PLUGIN_OTEL_SIGNAL_VIEWER=Off \
 	-DENABLE_PLUGIN_GO=Off \
+	-DENABLE_PLUGIN_IBM=Off \
+	-DENABLE_PLUGIN_SCRIPTS=Off \
 	-DENABLE_PLUGIN_APPS=Off \
 	-DENABLE_PLUGIN_CGROUP_NETWORK=Off \
 	-DENABLE_PLUGIN_CUPS=Off \
