@@ -143,10 +143,10 @@ diff -Naur a/packaging/cmake/Modules/NetdataAbseil.cmake b/packaging/cmake/Modul
 +endfunction()
 \ No newline at end of file
 diff --git a/packaging/cmake/Modules/NetdataProtobuf.cmake b/packaging/cmake/Modules/NetdataProtobuf.cmake
-index 5375d13970aa3a..42bf42446be025 100644
+index 5375d13970aa3a..d7c32593aa7652 100644
 --- a/packaging/cmake/Modules/NetdataProtobuf.cmake
 +++ b/packaging/cmake/Modules/NetdataProtobuf.cmake
-@@ -24,38 +24,12 @@ function(netdata_bundle_protobuf)
+@@ -24,39 +24,11 @@ function(netdata_bundle_protobuf)
          set(FETCHCONTENT_FULLY_DISCONNECTED Off)
  
          if(NEED_ABSL)
@@ -155,12 +155,13 @@ index 5375d13970aa3a..42bf42446be025 100644
 -                set(BUILD_SHARED_LIBS Off)
 -                set(ABSL_BUILD_TESTING Off)
 -                set(absl_SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/absl-src")
+-                set(absl_repo https://github.com/abseil/abseil-cpp)
 -
 -                message(STATUS "Preparing bundled Abseil (required by bundled Protobuf)")
 -                find_program(PATCH patch REQUIRED)
 -                if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
 -                    FetchContent_Declare(absl
--                            GIT_REPOSITORY https://github.com/abseil/abseil-cpp
+-                            GIT_REPOSITORY ${absl_repo}
 -                            GIT_TAG ${ABSL_TAG}
 -                            SOURCE_DIR ${absl_SOURCE_DIR}
 -                            PATCH_COMMAND ${CMAKE_SOURCE_DIR}/packaging/cmake/patches/apply-patches.sh
@@ -171,7 +172,7 @@ index 5375d13970aa3a..42bf42446be025 100644
 -                    )
 -                else()
 -                    FetchContent_Declare(absl
--                            GIT_REPOSITORY https://github.com/abseil/abseil-cpp
+-                            GIT_REPOSITORY ${absl_repo}
 -                            GIT_TAG ${ABSL_TAG}
 -                            SOURCE_DIR ${absl_SOURCE_DIR}
 -                            PATCH_COMMAND ${CMAKE_SOURCE_DIR}/packaging/cmake/patches/apply-patches.sh
@@ -184,7 +185,6 @@ index 5375d13970aa3a..42bf42446be025 100644
                  endif()
 -                FetchContent_MakeAvailable_NoInstall(absl)
 -                message(STATUS "Finished preparing bundled Abseil")
-+
 +                netdata_bundle_abseil()
 +                set(BUNDLED_ABSEIL PARENT_SCOPE)
          endif()
