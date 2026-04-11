@@ -312,6 +312,82 @@ msgstr "kbit/s"
 msgid "master"
 msgstr "maître"
 
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:326
+msgid "All interfaces"
+msgstr "Toutes les interfaces"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:456
+msgid "All interfaces – combined view"
+msgstr "Toutes les interfaces - vue combinée"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:457
+msgid "All interfaces overlaid, inbound and outbound separately"
+msgstr "Toutes les interfaces superposées, entrant et sortant séparés"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:615
+msgid "Average"
+msgstr "Moyenne"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:611
+msgid "Current"
+msgstr "Actuel"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:693
+msgid "In"
+msgstr "Entrant"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:462
+msgid "Inbound – all interfaces"
+msgstr "Entrant - toutes les interfaces"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:634
+msgid "Inbound traffic"
+msgstr "Trafic entrant"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:394
+msgid "No multipath WAN interface is currently available."
+msgstr "Aucune interface WAN multipath n'est actuellement disponible."
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:700
+msgid "Out"
+msgstr "Sortant"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:468
+msgid "Outbound – all interfaces"
+msgstr "Sortant - toutes les interfaces"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:640
+msgid "Outbound traffic"
+msgstr "Trafic sortant"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:619
+msgid "Peak"
+msgstr "Pointe"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:442
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:570
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:585
+msgid "Total"
+msgstr "Total"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:404
+msgid "Total in"
+msgstr "Total entrant"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:408
+msgid "Total out"
+msgstr "Total sortant"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:540
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:541
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:673
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:674
+msgid "minutes window, 1 second interval"
+msgstr "minutes de fenêtre, intervalle d'une seconde"
+
 #: luci-app-mptcp/luasrc/model/cbi/mptcp.lua:85
 msgid "ndiffports subflows number"
 msgstr "Nombre de sous-flux ndiffports"

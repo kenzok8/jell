@@ -1724,6 +1724,12 @@ function gen_config(var)
 						dns_server.domains = value.domain
 						if value.shunt_rule_name then
 							dns_server.tag = "dns-in-" .. value.shunt_rule_name
+							if value.shunt_rule_name == "logic-vpslist" then
+								dns_server.finalQuery = true
+								dns_server.disableCache = false
+								dns_server.serveStale = true
+								dns_server.serveExpiredTTL = 30
+							end
 						end
 						table.insert(dns.servers, dns_server)
 						table.insert(routing.rules, dns_rule_position, {

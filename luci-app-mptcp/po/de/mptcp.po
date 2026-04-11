@@ -1,10 +1,12 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: luci-app-mptcp\n"
 "PO-Revision-Date: 2020-10-05 12:39+0000\n"
 "Last-Translator: Weblate Admin <contact@openmptcprouter.com>\n"
 "Language-Team: German <http://weblate.openmptcprouter.com/projects/omr/"
 "luciapplicationsmptcp/de/>\n"
 "Language: de\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
@@ -310,6 +312,82 @@ msgstr "kBit/s"
 #: luci-app-mptcp/luasrc/model/cbi/mptcp.lua:111
 msgid "master"
 msgstr "primär"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:326
+msgid "All interfaces"
+msgstr "Alle Schnittstellen"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:456
+msgid "All interfaces – combined view"
+msgstr "Alle Schnittstellen - kombinierte Ansicht"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:457
+msgid "All interfaces overlaid, inbound and outbound separately"
+msgstr "Alle Schnittstellen überlagert, eingehend und ausgehend getrennt"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:615
+msgid "Average"
+msgstr "Durchschnitt"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:611
+msgid "Current"
+msgstr "Aktuell"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:693
+msgid "In"
+msgstr "Eingehend"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:462
+msgid "Inbound – all interfaces"
+msgstr "Eingehend - alle Schnittstellen"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:634
+msgid "Inbound traffic"
+msgstr "Eingehender Verkehr"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:394
+msgid "No multipath WAN interface is currently available."
+msgstr "Derzeit ist keine Multipath-WAN-Schnittstelle verfügbar."
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:700
+msgid "Out"
+msgstr "Ausgehend"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:468
+msgid "Outbound – all interfaces"
+msgstr "Ausgehend - alle Schnittstellen"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:640
+msgid "Outbound traffic"
+msgstr "Ausgehender Verkehr"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:619
+msgid "Peak"
+msgstr "Spitze"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:442
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:570
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:585
+msgid "Total"
+msgstr "Gesamt"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:404
+msgid "Total in"
+msgstr "Gesamt eingehend"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:408
+msgid "Total out"
+msgstr "Gesamt ausgehend"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:540
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:541
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:673
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:674
+msgid "minutes window, 1 second interval"
+msgstr "Minuten Zeitfenster, 1-Sekunden-Intervall"
 
 #: luci-app-mptcp/luasrc/model/cbi/mptcp.lua:85
 msgid "ndiffports subflows number"

@@ -10,194 +10,197 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 4.8.1-dev\n"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:183
 msgid ""
 "Advanced option string to pass to the egress queueing disciplines; no error "
 "checking, use very carefully."
 msgstr ""
+"Stringa di opzioni avanzate da passare alle discipline di coda in uscita; "
+"nessun controllo errori, usare con molta cautela."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:180
 msgid ""
 "Advanced option string to pass to the ingress queueing disciplines; no error "
 "checking, use very carefully."
 msgstr ""
+"Stringa di opzioni avanzate da passare alle discipline di coda in ingresso; "
+"nessun controllo errori, usare con molta cautela."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:72
 msgid "Basic Settings"
-msgstr ""
+msgstr "Impostazioni di base"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:100
 msgid ""
 "Create log file for this SQM instance under /var/run/sqm/${Interface_name}."
 "[start|stop]-sqm.log."
 msgstr ""
+"Crea file di log per questa istanza SQM in /var/run/sqm/${Interface_name}."
+"[start|stop]-sqm.log."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:92
 msgid ""
 "Download speed (kbit/s) (ingress) set to 0 to selectively disable ingress "
 "shaping:"
 msgstr ""
+"Velocita di download (kbit/s) (ingress) impostata a 0 per disabilitare "
+"selettivamente lo shaping in ingresso:"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:58
 msgid "Enable SQM"
-msgstr ""
+msgstr "Abilita SQM"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:78
 msgid "Enable this SQM instance."
-msgstr ""
+msgstr "Abilita questa istanza SQM."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:148
 msgid ""
 "Explicit congestion notification (ECN) status on inbound packets (ingress):"
 msgstr ""
+"Stato ECN (Explicit Congestion Notification) sui pacchetti in ingresso "
+"(ingress):"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:154
 msgid ""
 "Explicit congestion notification (ECN) status on outbound packets (egress)."
 msgstr ""
+"Stato ECN (Explicit Congestion Notification) sui pacchetti in uscita "
+"(egress)."
 
-#: applications/luci-app-sqm/root/usr/share/rpcd/acl.d/luci-app-sqm.json:3
 msgid "Grant UCI access for luci-app-sqm"
-msgstr ""
+msgstr "Concedi accesso UCI a luci-app-sqm"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:168
 msgid "Hard limit on egress queues; leave empty for default."
-msgstr ""
+msgstr "Limite rigido sulle code in uscita; lascia vuoto per il predefinito."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:164
 msgid "Hard limit on ingress queues; leave empty for default."
-msgstr ""
+msgstr "Limite rigido sulle code in ingresso; lascia vuoto per il predefinito."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:142
 msgid "Ignore DSCP on ingress:"
-msgstr ""
+msgstr "Ignora DSCP in ingresso:"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:89
-msgid "Interface name"
-msgstr "Nome interfaccia"
-
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:176
 msgid ""
 "Latency target for egress, e.g. 5ms [units: s, ms, or us]; leave empty for "
 "automatic selection, put in the word default for the qdisc's default."
 msgstr ""
+"Target di latenza per egress, es. 5ms [unita: s, ms o us]; lascia vuoto per "
+"selezione automatica, inserisci default per il valore predefinito del qdisc."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:172
 msgid ""
 "Latency target for ingress, e.g 5ms [units: s, ms, or us]; leave empty for "
 "automatic selection, put in the word default for the qdisc's default."
 msgstr ""
+"Target di latenza per ingress, es. 5ms [unita: s, ms o us]; lascia vuoto per "
+"selezione automatica, inserisci default per il valore predefinito del qdisc."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:74
 msgid "Link Layer Adaptation"
-msgstr ""
+msgstr "Adattamento livello link"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:203
 msgid ""
 "Maximal Size for size and rate calculations, tcMTU (byte); needs to be >= "
 "interface MTU + overhead:"
 msgstr ""
+"Dimensione massima per i calcoli di dimensione e velocita, tcMTU (byte); "
+"deve essere >= MTU interfaccia + overhead:"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:213
 msgid ""
 "Minimal packet size, MPU (byte); needs to be > 0 for ethernet size tables:"
 msgstr ""
+"Dimensione minima pacchetto, MPU (byte); deve essere > 0 per le tabelle "
+"dimensione ethernet:"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:208
 msgid ""
 "Number of entries in size/rate tables, TSIZE; for ATM choose TSIZE = (tcMTU "
 "+ 1) / 16:"
 msgstr ""
+"Numero di voci nelle tabelle dimensione/velocita, TSIZE; per ATM scegliere "
+"TSIZE = (tcMTU + 1) / 16:"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:193
 msgid "Per Packet Overhead (byte):"
-msgstr ""
+msgstr "Overhead per pacchetto (byte):"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:73
 msgid "Queue Discipline"
-msgstr ""
+msgstr "Disciplina di coda"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:120
 msgid "Queue setup script"
-msgstr ""
+msgstr "Script configurazione coda"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:71
 msgid "Queues"
-msgstr ""
+msgstr "Code"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:112
 msgid ""
 "Queuing disciplines useable on this system. After installing a new qdisc, "
 "you need to restart the router to see updates!"
 msgstr ""
+"Discipline di coda utilizzabili su questo sistema. Dopo aver installato un "
+"nuovo qdisc, devi riavviare il router per vedere gli aggiornamenti!"
 
-#: applications/luci-app-sqm/root/usr/share/luci/menu.d/luci-app-sqm.json:3
 msgid "SQM QoS"
-msgstr ""
+msgstr "SQM QoS"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:199
 msgid ""
 "Show Advanced Linklayer Options, (only needed if MTU > 1500). Advanced "
 "options will only be used as long as this box is checked."
 msgstr ""
+"Mostra opzioni avanzate linklayer (necessarie solo se MTU > 1500). Le "
+"opzioni avanzate saranno usate solo finche questa casella e selezionata."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:133
 msgid ""
 "Show and Use Advanced Configuration. Advanced options will only be used as "
 "long as this box is checked."
 msgstr ""
+"Mostra e usa configurazione avanzata. Le opzioni avanzate saranno usate solo "
+"finche questa casella e selezionata."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:160
 msgid ""
 "Show and Use Dangerous Configuration. Dangerous options will only be used as "
 "long as this box is checked."
 msgstr ""
+"Mostra e usa configurazione pericolosa. Le opzioni pericolose saranno usate "
+"solo finche questa casella e selezionata."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:64
 msgid "Smart Queue Management"
-msgstr ""
+msgstr "Smart Queue Management"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:136
 msgid "Squash DSCP on inbound packets (ingress):"
-msgstr ""
+msgstr "Azzera DSCP sui pacchetti in ingresso (ingress):"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:83
 msgid ""
 "The SQM GUI has just enabled the sqm initscript on your behalf. Remember to "
 "disable the sqm initscript manually under System Startup menu in case this "
 "change was not wished for."
 msgstr ""
+"La GUI SQM ha appena abilitato lo script di init sqm per tuo conto. Ricorda "
+"di disabilitare manualmente lo script di init sqm nel menu Avvio sistema se "
+"questa modifica non era desiderata."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:48
 msgid ""
 "The SQM service seems to be disabled. Please use the button below to "
 "activate this service."
 msgstr ""
+"Il servizio SQM sembra disabilitato. Usa il pulsante qui sotto per attivare "
+"questo servizio."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:96
 msgid ""
 "Upload speed (kbit/s) (egress) set to 0 to selectively disable egress "
 "shaping:"
 msgstr ""
+"Velocita di upload (kbit/s) (egress) impostata a 0 per disabilitare "
+"selettivamente lo shaping in uscita:"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:103
 msgid "Verbosity of SQM's output into the system log."
-msgstr ""
+msgstr "Verbosita dell'output SQM nel log di sistema."
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:187
 msgid "Which link layer to account for:"
-msgstr ""
+msgstr "Quale livello link considerare:"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:218
 msgid "Which linklayer adaptation mechanism to use; for testing only"
-msgstr ""
+msgstr "Quale meccanismo di adattamento linklayer usare; solo per test"
 
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:65
 msgid ""
 "With <abbr title=\"Smart Queue Management\">SQM</abbr> you can enable "
 "traffic shaping, better mixing (Fair Queueing), active queue length "
 "management (AQM) and prioritisation on one network interface."
 msgstr ""
+"Con <abbr title=\"Smart Queue Management\">SQM</abbr> puoi abilitare traffic "
+"shaping, migliore distribuzione (Fair Queueing), gestione attiva della coda "
+"(AQM) e prioritizzazione su una interfaccia di rete."
+
+#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:89
+msgid "Interface name"
+msgstr "Nome interfaccia"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:107
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:149

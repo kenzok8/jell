@@ -10,6 +10,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Weblate 4.10.1\n"
 
+msgid ""
+"The SQM service seems to be disabled. Please use the button below to "
+"activate this service."
+msgstr ""
+"Le service SQM semble desactive. Merci d'utiliser le bouton ci-dessous pour "
+"activer ce service."
+
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:183
 msgid ""
 "Advanced option string to pass to the egress queueing disciplines; no error "
@@ -36,8 +43,8 @@ msgid ""
 "Create log file for this SQM instance under /var/run/sqm/${Interface_name}."
 "[start|stop]-sqm.log."
 msgstr ""
-"Créer un fichier journal pour cette instance SQM sous /var/run/sqm/"
-"${nom_interface}. [start|stop]-sqm.log."
+"Créer un fichier journal pour cette instance SQM sous /var/run/sqm/$"
+"{nom_interface}. [start|stop]-sqm.log."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:92
 msgid ""
@@ -202,12 +209,6 @@ msgstr ""
 "L'interface graphique SQM vient d'activer l'initscript sqm en votre nom. "
 "N'oubliez pas de désactiver manuellement le sqm initscript dans le menu de "
 "démarrage du système au cas où ce changement ne serait pas souhaité."
-
-#: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:48
-msgid ""
-"The SQM service seems to be disabled. Please use the button below to "
-"activate this service."
-msgstr ""
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:96
 msgid ""
