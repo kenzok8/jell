@@ -435,7 +435,7 @@ function gen_outbound(flag, node, tag, proxy_table)
 			if not GLOBAL.DNS_SERVER[dns_key] then
 				GLOBAL.DNS_SERVER[dns_key] = {
 					tag = "dns-node-" .. api.gen_short_uuid(),
-					queryStrategy = node.domain_strategy or "UseIP",
+					-- queryStrategy = node.domain_strategy or "UseIP",
 					address = config_address,
 					port = config_port,
 					finalQuery = true,
