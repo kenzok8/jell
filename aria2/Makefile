@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=aria2
 PKG_VERSION:=1.37.0
-PKG_RELEASE:=14
+PKG_RELEASE:=15
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://github.com/aria2/aria2/releases/download/release-$(PKG_VERSION)/
@@ -108,6 +108,7 @@ define Build/Prepare
 	$(call Build/Prepare/Default)
 	unzip $(DL_DIR)/aria2.conf -d $(PKG_BUILD_DIR)/
 	sed -i '/rpc-secret/d' $(PKG_BUILD_DIR)/aria2.conf-master/*
+	[ -x $(PKG_BUILD_DIR)/aria2.conf-master/tracker.sh ] && { cd $(PKG_BUILD_DIR)/aria2.conf-master && sh ./tracker.sh >/dev/null 2>&1 }
 endef
 
 define Package/aria2/postinst
