@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=my-dnshelper
 PKG_VERSION:=1.1
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_MAINTAINER:=kongfl888 <kongfl888@outlook.com>
 PKG_LICENSE:=GPLv2
@@ -53,9 +53,9 @@ endef
 
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
-	chmod a+x ${IPKG_INSTROOT}/etc/init.d/my-dnshelper >/dev/null 2>&1 || echo ""
-	chmod a+x ${IPKG_INSTROOT}/usr/share/my-dnshelper/* >/dev/null 2>&1 || echo ""
-	chmod a+x ${IPKG_INSTROOT}/usr/bin/my-dnshelper >/dev/null 2>&1 || echo ""
+	chmod a+x $${IPKG_INSTROOT}/etc/init.d/my-dnshelper >/dev/null 2>&1 || echo ""
+	chmod a+x $${IPKG_INSTROOT}/usr/share/my-dnshelper/* >/dev/null 2>&1 || echo ""
+	chmod a+x $${IPKG_INSTROOT}/usr/bin/my-dnshelper >/dev/null 2>&1 || echo ""
 	exit 0
 endef
 

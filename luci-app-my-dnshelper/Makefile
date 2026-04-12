@@ -15,14 +15,6 @@ LUCI_MAINTAINER:=K
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+my-dnshelper
 
-define Package/$(PKG_NAME)/postinst
-#!/bin/sh
-	chmod a+x ${IPKG_INSTROOT}/etc/init.d/my-dnshelper >/dev/null 2>&1 || echo ""
-	chmod a+x ${IPKG_INSTROOT}/usr/share/my-dnshelper/* >/dev/null 2>&1 || echo ""
-	chmod a+x ${IPKG_INSTROOT}/usr/bin/my-dnshelper >/dev/null 2>&1 || echo ""
-	exit 0
-endef
-
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
