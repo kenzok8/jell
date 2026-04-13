@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: luci-app-sms-tool-js\n"
 "Language-Team: Rafał Wabik (IceG)\n"
-"Language: de\n"
+"Language: es\n"
 
 msgid "SMS Messages"
 msgstr "Mensajes SMS"
