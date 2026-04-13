@@ -1,0 +1,10 @@
+{
+    "admin/system/poweroffdevice": {
+        "title": "PowerOff",
+        "order": 99,
+        "action": {
+            "type": "view",
+            "path": "system/poweroffdevice"
+        }
+    }
+}
