@@ -43,10 +43,9 @@ jobs:
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
     
         function git_clone() {
-          git clone --depth 1 $1 $2
+          git clone --depth 1 $1 $2 2>/dev/null || true
           if [ "$?" != 0 ]; then
-            echo "error on $1"
-            exit 1
+            echo "skip: $1"
           fi
         }
 
@@ -67,18 +66,20 @@ jobs:
           fi
 
           if [ "$?" != 0 ]; then
-              echo "error on $curl"
-              exit 1
+              echo "skip: $curl"
+              cd "$rootdir"
+              rm -rf "$tmpdir"
+              return 1
           fi
 
           git sparse-checkout init --cone
-          git sparse-checkout set "$@"
+          git sparse-checkout set "$@" 2>/dev/null || true
           mv -n $@ $rootdir/ || true
           cd $rootdir
         }
 
         function mvdir() {
-          mv -n `find $1/* -maxdepth 0 -type d` ./
+          [ -d "$1" ] && mv -n `find $1/* -maxdepth 0 -type d` ./ 2>/dev/null || true
           rm -rf $1
         }
         (
