@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
 PKG_VERSION:=miniupnpd_2_3_10
-PKG_RELEASE:=21
+PKG_RELEASE:=22
 
 PKG_SOURCE_URL:=https://github.com/miniupnp/miniupnp/releases/download/miniupnpd_$(subst .,_,$(PKG_VERSION))
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -58,6 +58,7 @@ define Package/miniupnpd-nftables
   TITLE+= (nftables)
   VARIANT:=nftables
   DEFAULT_VARIANT:=1
+  CONFLICTS:=miniupnpd-iptables
 endef
 
 define Package/miniupnpd/conffiles/Default
