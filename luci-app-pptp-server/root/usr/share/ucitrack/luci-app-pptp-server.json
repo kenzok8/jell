@@ -1,4 +1,4 @@
 {
-	"config": "luci-app-pptp-server",
-	"init": "luci-app-pptp-server"
+	"config": "pptpd",
+	"init": ""
 }
