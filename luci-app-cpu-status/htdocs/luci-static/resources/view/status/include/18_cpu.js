@@ -8,16 +8,27 @@ document.head.append(E('style', {'type': 'text/css'},
 	display: inline-block;
 	cursor: pointer;
 	margin: 2px 4px 2px 0 !important;
-	padding: 2px 4px;
-	border: 1px dotted;
+	padding: 3px 5px;
+	border: 1px solid;
+	border-color: transparent;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	opacity: 0.7;
+	background-color: rgba(100 100 100 / 0.2);
+}
+.cpu-status-view-mode-entry:hover {
+	opacity: 0.9;
+}
+.cpu-status-view-mode-entry:active {
+	opacity: 1.0;
 }
 .cpu-status-view-mode-entry-checked {
 	border: 1px solid;
-	opacity: 1;
+	opacity: 1.0;
+}
+.cpu-status-view-mode-entry-checked:hover {
+	opacity: 1.0;
 }
 `));
 
@@ -332,7 +343,6 @@ return baseclass.extend({
 			viewModeEntries.push(
 				E('span', {
 					'class'     : 'cpu-status-view-mode-entry',
-					'href'      : 'javascript:void(0)',
 					'data-value': i,
 					'click'     : viewModeSelectOnClick,
 				}, v[1])

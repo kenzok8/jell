@@ -1518,6 +1518,7 @@ form.inline + form.inline,
 	overflow: hidden;
 	height: 0;
 	opacity: 0;
+	pointer-events: none;
 	margin: 0;
 	padding: 0rem 1rem !important;
 }
@@ -1526,6 +1527,7 @@ form.inline + form.inline,
     overflow: auto;
     height: auto;
     opacity: 1;
+    pointer-events: auto;
     transition: opacity .25s ease-in;
     margin: inherit !important;
     display: block;
@@ -1937,7 +1939,8 @@ form.inline + form.inline,
 
 .cbi-dropdown[open] > ul.dropdown {
 	position: absolute;
-	top: calc(100% + 4px);
+	top: auto;
+	bottom: auto;
 	left: 0;
 	z-index: 1200;
 	display: block;
@@ -2131,15 +2134,35 @@ body.modal-overlay-active #modal_overlay .modal.cbi-modal .cbi-section-node-tabb
 	color: var(--model_text_color);
 }
 
-.modal ul {
+.modal > ul,
+.modal > ol {
 	margin-left: 2.2em;
 	word-break: break-word;
 	color: var(--model_text_color);
 }
 
-.modal li {
+.modal > ul > li,
+.modal > ol > li {
 	list-style-type: square;
 	color: var(--model_text_color);
+}
+
+/* Keep LuCI widget lists in modals under JS control instead of generic modal list styling. */
+.modal .cbi-tabmenu,
+.modal .cbi-dropdown > ul,
+.modal .cbi-dropdown > ul.preview,
+.modal .cbi-dropdown[open] > ul.dropdown {
+	margin-left: 0 !important;
+	padding-left: 0 !important;
+	list-style: none !important;
+	color: inherit;
+}
+
+.modal .cbi-tabmenu > li,
+.modal .cbi-dropdown > ul > li,
+.modal .cbi-dropdown[open] > ul.dropdown > li {
+	list-style: none !important;
+	color: inherit;
 }
 
 .modal p {
@@ -4343,7 +4366,8 @@ button.cbi-button {
 .cbi-dropdown:not(.btn):not(.cbi-button)[open] > ul.dropdown {
     position: absolute;
     z-index: 1100;
-    top: 100%;
+    top: auto;
+    bottom: auto;
     left: 0;
     right: auto;
     display: block;
