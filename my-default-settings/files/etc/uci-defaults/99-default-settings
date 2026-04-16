@@ -2,7 +2,12 @@
 
 sed -i "s/op.supes.top/dl.openwrt.ai/" /etc/opkg/distfeeds.conf
 
-([ -x /bin/bash ] && ! grep -q "^root.*bash" /etc/passwd) && sed -i "s/^\(root.*\/\)ash/\1bash/g" /etc/passwd
+[ -x /bin/bash ] && grep -q "/bin/ash" /etc/passwd && {
+    sed -i 's|/bin/ash|/bin/bash|g' "/etc/passwd"
+    ln -sf /bin/bash /bin/sh
+	touch /root/.bash_history
+	ln -sf /root/.bash_history /tmp/.busybox_ash_history
+}
 
 # [[ "$(df | grep overlay)" && ! "$(df | grep /rom/overlay)" ]] && firstboot
 
