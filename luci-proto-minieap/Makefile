@@ -9,6 +9,6 @@ PKG_LICENSE_FILES:=LICENSE
 LUCI_TITLE:=LuCI support for MiniEAP
 LUCI_DEPENDS:=+minieap
 
-include ../../luci.mk
+include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
