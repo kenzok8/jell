@@ -105,6 +105,7 @@ jobs:
         git_clone https://github.com/kongfl888/luci-app-timedreboot
         ) &
         (
+        git_clone https://github.com/rchen14b/luci-theme-glass
         git_clone https://github.com/sirpdboy/luci-app-advancedplus
         git_clone https://github.com/sirpdboy/luci-app-autotimeset
         git_clone https://github.com/sirpdboy/luci-app-lucky oplucky && mvdir oplucky
