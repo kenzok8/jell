@@ -1,0 +1,7 @@
+#!/bin/sh
+
+
+/etc/init.d/ghttpd enable
+/etc/init.d/ghttpd start
+
+exit 0

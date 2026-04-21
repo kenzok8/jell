@@ -2174,20 +2174,30 @@ local execute = function()
 	end
 end
 
-function check_instance(action)
-	local lock_file = "/var/lock/" .. appname .. "_subscribe.lock"
+local function check_instance(action)
+	local sub_lock = "/var/lock/" .. appname .. "_subscribe.lock"
+	local rule_lock = "/var/lock/" .. appname .. "_rule_update.lock"
+
 	if action == "start" then
 		math.randomseed(os.time() + math.floor(os.clock() * 1000))
 		api.nixio.nanosleep(0, math.random(100, 1000) * 1000000)
-		if fs.access(lock_file) then
-			log("有订阅实例正在运行，请稍后再试...\n")
+		if fs.access(sub_lock) then
+			log("有[订阅]实例正在运行，请稍后再试...\n")
 			os.exit(0)
 		else
-			luci.sys.call("touch " .. lock_file)
+			luci.sys.call("touch " .. sub_lock)
 			uci:revert(appname)
 		end
 	elseif action == "end" then
-		luci.sys.call("rm -f " .. lock_file)
+		luci.sys.call("rm -f " .. sub_lock)
+		return
+	end
+
+	if fs.access(rule_lock) then
+		log("[规则更新]实例正在运行，[订阅]进入队列等待...\n")
+	end
+	while fs.access(rule_lock) do
+		api.nixio.nanosleep(2, 0)
 	end
 end
 
