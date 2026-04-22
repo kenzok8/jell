@@ -1,16 +1,16 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=mtproxy
-PKG_VERSION:=3.5.5
-PKG_RELEASE:=21
+PKG_NAME:=teleproxy
+PKG_VERSION:=4.11.0
+PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Kosntantine Shevlakov <shevlakov@132lan.ru>
 PKG_LICENSE:=GPLv2
 PKG_LICENSE_FILES:=LICENSE
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/GetPageSpeed/MTProxy.git
-PKG_SOURCE_VERSION:=55e5f0f575c2dd5decbf5282f4c1ea1f816a7eb0
+PKG_SOURCE_URL:=https://github.com/teleproxy/teleproxy.git
+PKG_SOURCE_VERSION:=09b1ae9c39c456a7b91d24fdd3597ea08519ef22
 
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -32,6 +32,4 @@ define Package/$(PKG_NAME)/install
 			$(1)/usr/bin/
 endef
 
-ifeq ($(ARCH),$(filter $(ARCH), x86_64))
-  $(eval $(call BuildPackage,$(PKG_NAME)))
-endif
+$(eval $(call BuildPackage,$(PKG_NAME)))
