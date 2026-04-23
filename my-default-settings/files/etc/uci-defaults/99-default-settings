@@ -26,7 +26,7 @@ if ! echo "$(uci -q get uhttpd.main.index_page)" | grep -q "cgi-bin/luci"; then
 	uci commit uhttpd
 fi
 
-if [ "$(uci -q get dropbear.main._direct)" != "1" ] && [ "$(uci -q get dropbear.main.Interface)" = "lan" ]; then
+if [ "$(uci -q get dropbear.main._direct)" != "1" ] && [ -n "$(uci -q get dropbear.main.Interface)" ]; then
 	uci del dropbear.main.Interface
 	uci commit dropbear
 fi
@@ -211,8 +211,6 @@ if [ -n "$(command -v nginx)" ]; then
 		uci -q set nginx.default_server.server_name='kwrt'
 		uci -q add_list nginx.default_server.listen='80 default_server'
 		uci -q add_list nginx.default_server.listen='[::]:80 default_server'
-		uci -q add_list nginx.default_server.listen='443 ssl default_server'
-		uci -q add_list nginx.default_server.listen='[::]:443 ssl default_server'
 		uci -q add_list nginx.default_server.include='conf.d/*.locations'
 		uci -q set nginx.default_server.access_log='off; # logd openwrt'
 		uci commit nginx
