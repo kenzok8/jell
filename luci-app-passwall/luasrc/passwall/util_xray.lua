@@ -193,7 +193,7 @@ function gen_outbound(flag, node, tag, proxy_table)
 					}
 				} or nil,
 				kcpSettings = (node.transport == "mkcp") and {
-					mtu = 1350,
+					mtu = (node.mkcp_mtu and node.mkcp_mtu ~= "") and tonumber(node.mkcp_mtu) or 1350,
 					tti = 50,
 					uplinkCapacity = 12,
 					downlinkCapacity = 100,
@@ -654,7 +654,7 @@ function gen_config_server(node)
 						}
 					} or nil,
 					kcpSettings = (node.transport == "mkcp") and {
-						mtu = 1350,
+						mtu = (node.mkcp_mtu and node.mkcp_mtu ~= "") and tonumber(node.mkcp_mtu) or 1350,
 						tti = 50,
 						uplinkCapacity = 12,
 						downlinkCapacity = 100,
