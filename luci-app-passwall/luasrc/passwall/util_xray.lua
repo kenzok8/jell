@@ -1710,6 +1710,7 @@ function gen_config(var)
 							outboundTag = "direct" --dns为本地ip，走直连
 						end
 					end
+					--[[
 					local dns_block_mode = "host"
 					if dns_block_mode == "host" and outboundTag == "blackhole" then
 						for d_i, d_k in ipairs(value.domain) do
@@ -1717,6 +1718,7 @@ function gen_config(var)
 						end
 						dns_server = nil
 					end
+					]]--
 					if dns_server then
 						--dns_server.finalQuery = true
 						dns_server.domains = value.domain
