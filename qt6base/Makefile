@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=qt6base
 PKG_VERSION:=6.11.0
-PKG_RELEASE:=66
+PKG_RELEASE:=67
 
 PKG_SOURCE:=qtbase-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/qt/qtbase/tar.gz/v$(PKG_VERSION)?
@@ -44,7 +44,7 @@ define Package/libQt6/Default
   SUBMENU:=Qt6
   TITLE:=Qt6
   URL:=http://qt-project.org
-  DEPENDS:=@!arc +libatomic +libstdcpp +zlib
+  DEPENDS:=@!arc +libatomic +libstdcpp +liburing +zlib
 endef
 
 define Package/libQt6
