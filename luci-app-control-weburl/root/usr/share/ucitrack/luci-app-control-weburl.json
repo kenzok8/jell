@@ -1,4 +1,4 @@
 {
-	"config": "weburl",
-	"init": "weburl"
+	"config": "luci-app-control-weburl",
+	"init": "luci-app-control-weburl"
 }
