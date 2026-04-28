@@ -3,6 +3,16 @@ listen_port = 5335
 prometheus_listen_addr = "[::]:9000"
 
 [[zones]]
+zone = "lan"
+zone_type = "Primary"
+
+[zones.stores]
+type = "sqlite"
+zone_path = "/etc/hickory-dns/lan.zone"
+journal_path = "/var/lib/hickory-dns/lan.jrnl"
+allow_update = true
+
+[[zones]]
 zone = "."
 zone_type = "External"
 

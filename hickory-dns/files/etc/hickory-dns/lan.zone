@@ -1,0 +1,11 @@
+$TTL 60
+@   IN  SOA ns.lan. admin.lan. (
+            1       ; Serial
+            3600    ; Refresh
+            600     ; Retry
+            86400   ; Expire
+            60 )    ; Negative caching TTL
+
+    IN  NS  ns.lan.
+
+ns  IN  AAAA    ::1

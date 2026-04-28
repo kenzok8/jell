@@ -1,0 +1,24 @@
+[package]
+name = "ip-neigh"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+rtnetlink = { git = "https://github.com/rust-netlink/rtnetlink.git", rev = "515471f" }
+netlink-sys = { version = "0.8" }
+tokio = { version = "1.0.1", features = ["full"]}
+futures = "0.3.11"
+netlink-packet-route = {version = "0.21" }
+netlink-packet-core= {version ="0.7"}
+clap = { version = "4.0", default-features = false, features = ["cargo", "derive", "help", "std", "suggestions"] }
+hickory-proto = { git = "https://github.com/hickory-dns/hickory-dns.git", rev = "34a4cca1a707b642052b427938b7d1e8aaa71e3a" }
+ubus = "0.1.6"
+serde_json = "1.0.108"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
