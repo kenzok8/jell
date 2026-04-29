@@ -215,3 +215,79 @@ msgstr ""
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:219
 msgid "default"
 msgstr "默认"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:75
+msgid "Autorate settings"
+msgstr "自动速率设置"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:90
+msgid "Enable SQM autorate"
+msgstr "启用 SQM 自动速率"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:96
+msgid "Base download speed (kbit/s) (ingress):"
+msgstr "基础下载速度 (kbit/s)（入口）："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:100
+msgid "Minimum download speed (kbit/s):"
+msgstr "最小下载速度 (kbit/s)："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:105
+msgid "Maximum download speed (kbit/s):"
+msgstr "最大下载速度 (kbit/s)："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:110
+msgid "Base upload speed (kbit/s) (egress):"
+msgstr "基础上传速度 (kbit/s)（出口）："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:114
+msgid "Minimum upload speed (kbit/s):"
+msgstr "最小上传速度 (kbit/s)："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:119
+msgid "Maximum upload speed (kbit/s):"
+msgstr "最大上传速度 (kbit/s)："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:136
+msgid "Must be set to cake if autorate is used."
+msgstr "如果使用自动速率，必须设置为 cake。"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:251
+msgid "Output monitoring lines showing processing stats"
+msgstr "输出显示处理统计信息的监控行"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:255
+msgid "Output monitoring lines showing cake bandwidth changes"
+msgstr "输出显示 cake 带宽变化的监控行"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:259
+msgid "Debug"
+msgstr "调试"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:263
+msgid "Reflector ping interval in seconds:"
+msgstr "反射器 Ping 间隔（秒）："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:267
+msgid "Pingers numbers:"
+msgstr "Ping 探测器数量："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:271
+msgid "delay threshold in ms:"
+msgstr "延迟阈值（毫秒）："
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:275
+msgid "Sleep functionnality"
+msgstr "休眠功能"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:279
+msgid "Threshold in Kbit/s below which dl/ul is considered idle"
+msgstr "下载/上传速率低于此阈值（Kbit/s）时视为空闲"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:283
+msgid "Time threshold to put pingers to sleep on substained dl/ul achieved rate < idle_threshold"
+msgstr "当持续下载/上传速率低于空闲阈值时，使 Ping 探测器休眠的时间阈值"
+
+#: luci-app-sqm-autorate/htdocs/luci-static/resources/view/network/sqm.js:287
+msgid "Number of seconds to wait on startup:"
+msgstr "启动时等待的秒数："

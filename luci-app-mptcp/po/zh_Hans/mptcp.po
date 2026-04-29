@@ -320,6 +320,82 @@ msgid ""
 "connection"
 msgstr ""
 
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:326
+msgid "All interfaces"
+msgstr "所有接口"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:456
+msgid "All interfaces – combined view"
+msgstr "所有接口 – 合并视图"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:457
+msgid "All interfaces overlaid, inbound and outbound separately"
+msgstr "所有接口叠加显示，入站与出站分开"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:615
+msgid "Average"
+msgstr "平均"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:611
+msgid "Current"
+msgstr "当前"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:693
+msgid "In"
+msgstr "入站"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:462
+msgid "Inbound – all interfaces"
+msgstr "入站 – 所有接口"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:634
+msgid "Inbound traffic"
+msgstr "入站流量"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:394
+msgid "No multipath WAN interface is currently available."
+msgstr "当前没有可用的多路径 WAN 接口。"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:700
+msgid "Out"
+msgstr "出站"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:468
+msgid "Outbound – all interfaces"
+msgstr "出站 – 所有接口"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:640
+msgid "Outbound traffic"
+msgstr "出站流量"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:422
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:619
+msgid "Peak"
+msgstr "峰值"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:442
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:570
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:585
+msgid "Total"
+msgstr "总计"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:404
+msgid "Total in"
+msgstr "总入站"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:408
+msgid "Total out"
+msgstr "总出站"
+
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:540
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:541
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:673
+#: luci-app-mptcp/htdocs/luci-static/resources/view/mptcp/multipath.js:674
+msgid "minutes window, 1 second interval"
+msgstr "分钟窗口，1 秒间隔"
+
 #~ msgid "BLEST"
 #~ msgstr "最好的"
 
