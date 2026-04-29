@@ -18,7 +18,11 @@
 		    "mptcp_fullmesh",
 		    "mptcp_monitor",
 		    "mptcp_connections",
-		    "mptcp_check_trace"
+		    "mptcp_check_trace",
+		    "get_settings",
+		    "set_settings",
+		    "get_interface_settings",
+		    "set_interface_settings"
 		]
 	    }
 	},

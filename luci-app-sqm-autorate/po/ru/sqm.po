@@ -44,6 +44,8 @@ msgid ""
 "Download speed (kbit/s) (ingress) set to 0 to selectively disable ingress "
 "shaping:"
 msgstr ""
+"Скорость загрузки (Кбит/с) (входящий трафик), установите 0 для отключения "
+"формирования входящего трафика:"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:58
 msgid "Enable SQM"
@@ -63,6 +65,7 @@ msgstr ""
 msgid ""
 "Explicit congestion notification (ECN) status on outbound packets (egress)."
 msgstr ""
+"Состояние явного уведомления о перегрузке (ECN) для исходящих пакетов (egress)."
 
 #: applications/luci-app-sqm/root/usr/share/rpcd/acl.d/luci-app-sqm.json:3
 msgid "Grant UCI access for luci-app-sqm"
@@ -82,7 +85,7 @@ msgstr ""
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:142
 msgid "Ignore DSCP on ingress:"
-msgstr ""
+msgstr "Игнорировать DSCP для входящего трафика:"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:89
 msgid "Interface name"
@@ -93,12 +96,16 @@ msgid ""
 "Latency target for egress, e.g. 5ms [units: s, ms, or us]; leave empty for "
 "automatic selection, put in the word default for the qdisc's default."
 msgstr ""
+"Целевая задержка для исходящего трафика, напр. 5ms [единицы: s, ms, или us]; оставьте пустым для "
+"автоматического выбора, введите слово default для значения по умолчанию qdisc."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:172
 msgid ""
 "Latency target for ingress, e.g 5ms [units: s, ms, or us]; leave empty for "
 "automatic selection, put in the word default for the qdisc's default."
 msgstr ""
+"Целевая задержка для входящего трафика, напр. 5ms [единицы: s, ms, или us]; оставьте пустым для "
+"автоматического выбора, введите слово default для значения по умолчанию qdisc."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:74
 msgid "Link Layer Adaptation"
@@ -109,6 +116,8 @@ msgid ""
 "Maximal Size for size and rate calculations, tcMTU (byte); needs to be >= "
 "interface MTU + overhead:"
 msgstr ""
+"Максимальный размер для расчётов размера и скорости, tcMTU (байт); должен быть >= "
+"MTU интерфейса + накладные расходы:"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:213
 msgid ""
@@ -122,14 +131,16 @@ msgid ""
 "Number of entries in size/rate tables, TSIZE; for ATM choose TSIZE = (tcMTU "
 "+ 1) / 16:"
 msgstr ""
+"Количество записей в таблицах размер/скорость, TSIZE; для ATM выберите TSIZE = (tcMTU "
+"+ 1) / 16:"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:193
 msgid "Per Packet Overhead (byte):"
-msgstr ""
+msgstr "Накладные расходы на пакет (байт):"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:73
 msgid "Queue Discipline"
-msgstr ""
+msgstr "Дисциплина очереди"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:120
 msgid "Queue setup script"
@@ -144,6 +155,8 @@ msgid ""
 "Queuing disciplines useable on this system. After installing a new qdisc, "
 "you need to restart the router to see updates!"
 msgstr ""
+"Дисциплины очереди, доступные на этой системе. После установки нового qdisc "
+"необходимо перезагрузить маршрутизатор, чтобы увидеть обновления!"
 
 #: applications/luci-app-sqm/root/usr/share/luci/menu.d/luci-app-sqm.json:3
 msgid "SQM QoS"
@@ -154,18 +167,24 @@ msgid ""
 "Show Advanced Linklayer Options, (only needed if MTU > 1500). Advanced "
 "options will only be used as long as this box is checked."
 msgstr ""
+"Показать расширенные параметры канального уровня (нужны только если MTU > 1500). "
+"Расширенные параметры используются только пока этот флажок установлен."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:133
 msgid ""
 "Show and Use Advanced Configuration. Advanced options will only be used as "
 "long as this box is checked."
 msgstr ""
+"Показать и использовать расширенную конфигурацию. Расширенные параметры "
+"используются только пока этот флажок установлен."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:160
 msgid ""
 "Show and Use Dangerous Configuration. Dangerous options will only be used as "
 "long as this box is checked."
 msgstr ""
+"Показать и использовать опасную конфигурацию. Опасные параметры "
+"используются только пока этот флажок установлен."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:64
 msgid "Smart Queue Management"
@@ -173,7 +192,7 @@ msgstr "Умное управление очередью"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:136
 msgid "Squash DSCP on inbound packets (ingress):"
-msgstr ""
+msgstr "Обнулить DSCP для входящих пакетов (ingress):"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:83
 msgid ""
@@ -181,18 +200,25 @@ msgid ""
 "disable the sqm initscript manually under System Startup menu in case this "
 "change was not wished for."
 msgstr ""
+"Интерфейс SQM только что включил скрипт инициализации sqm от вашего имени. Не забудьте "
+"вручную отключить скрипт инициализации sqm в меню запуска системы, если это изменение "
+"не было желаемым."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:48
 msgid ""
 "The SQM service seems to be disabled. Please use the button below to "
 "activate this service."
 msgstr ""
+"Похоже, служба SQM отключена. Используйте кнопку ниже для "
+"активации этой службы."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:96
 msgid ""
 "Upload speed (kbit/s) (egress) set to 0 to selectively disable egress "
 "shaping:"
 msgstr ""
+"Скорость отдачи (Кбит/с) (исходящий трафик), установите 0 для отключения "
+"формирования исходящего трафика:"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:103
 msgid "Verbosity of SQM's output into the system log."
@@ -200,11 +226,11 @@ msgstr "Детальность вывода SQM в системный журна
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:187
 msgid "Which link layer to account for:"
-msgstr ""
+msgstr "Какой канальный уровень учитывать:"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:218
 msgid "Which linklayer adaptation mechanism to use; for testing only"
-msgstr ""
+msgstr "Какой механизм адаптации канального уровня использовать; только для тестирования"
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:65
 msgid ""
@@ -212,6 +238,9 @@ msgid ""
 "traffic shaping, better mixing (Fair Queueing), active queue length "
 "management (AQM) and prioritisation on one network interface."
 msgstr ""
+"С помощью <abbr title=\"Smart Queue Management\">SQM</abbr> вы можете включить "
+"формирование трафика, улучшенное смешивание (справедливая очередь), активное управление "
+"длиной очереди (AQM) и расстановку приоритетов на одном сетевом интерфейсе."
 
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:107
 #: applications/luci-app-sqm/htdocs/luci-static/resources/view/network/sqm.js:149

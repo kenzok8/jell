@@ -12,6 +12,8 @@ use rtnetlink::{Error, Handle, new_connection};
 
 use clap::Parser;
 use hickory_proto::rr::Name;
+use hickory_proto::rr::TSigner;
+use hickory_proto::rr::rdata::tsig::TsigAlgorithm;
 use netlink_sys::{AsyncSocket, SocketAddr};
 mod db;
 mod op;
@@ -39,6 +41,12 @@ struct Cli {
     /// DNS zone to update (e.g. "lan")
     #[clap(short, long, default_value = "lan")]
     zone: String,
+    /// Path to TSIG key file (raw HMAC secret)
+    #[clap(short, long, default_value = "/etc/hickory-dns/update.key")]
+    key_file: std::path::PathBuf,
+    /// TSIG key name
+    #[clap(short = 'n', long, default_value = "update-key.")]
+    key_name: String,
 }
 
 #[derive(Debug)]
@@ -135,7 +143,14 @@ async fn main() -> Result<(), ()> {
     let args = Cli::parse();
     let private_subnet = args.private_subnet;
     let zone = Name::from_ascii(&args.zone).expect("invalid zone name");
-    let updater = db::DnsUpdater::new(args.dns_server, zone);
+
+    let key_data = std::fs::read(&args.key_file)
+        .unwrap_or_else(|e| panic!("failed to read TSIG key file {:?}: {e}", args.key_file));
+    let key_name = Name::from_ascii(&args.key_name).expect("invalid TSIG key name");
+    let signer = TSigner::new(key_data, TsigAlgorithm::HmacSha256, key_name, 300)
+        .expect("invalid TSIG key");
+
+    let updater = db::DnsUpdater::new(args.dns_server, zone, signer);
 
     let (connection, handle, _) = new_connection().unwrap();
     tokio::spawn(connection);

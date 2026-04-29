@@ -225,6 +225,7 @@ msgid ""
 "The number of MPTCP-level retransmission intervals with no traffic and "
 "pending outstanding data on a given subflow required to declare it stale"
 msgstr ""
+"Количество интервалов повторной передачи MPTCP без трафика и с ожидающими данными на заданном подпотоке, необходимых для его объявления устаревшим"
 
 #: luci-app-mptcp/luasrc/view/mptcp/multipath.htm:914
 msgid "Upload:"
@@ -317,9 +318,11 @@ msgid ""
 "specifies the maximum number of ADD_ADDR suboptions accepted for each MPTCP "
 "connection"
 msgstr ""
+"задаёт максимальное количество подопций ADD_ADDR, принимаемых для каждого соединения MPTCP"
 
 #: luci-app-mptcp/luasrc/model/cbi/mptcp.lua:59
 msgid ""
 "specifies the maximum number of additional subflows allowed for each MPTCP "
 "connection"
 msgstr ""
+"задаёт максимальное количество дополнительных подпотоков, разрешённых для каждого соединения MPTCP"

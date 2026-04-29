@@ -1,7 +1,8 @@
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use hickory_proto::op::{Message, ResponseCode, update_message};
-use hickory_proto::rr::{Name, RData, RecordSet, RecordType};
+use hickory_proto::rr::{Name, RData, RecordSet, RecordType, TSigner};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
@@ -9,11 +10,12 @@ use tokio::net::TcpStream;
 pub(crate) struct DnsUpdater {
     server_addr: SocketAddr,
     zone: Name,
+    signer: TSigner,
 }
 
 impl DnsUpdater {
-    pub fn new(server_addr: SocketAddr, zone: Name) -> Self {
-        Self { server_addr, zone }
+    pub fn new(server_addr: SocketAddr, zone: Name, signer: TSigner) -> Self {
+        Self { server_addr, zone, signer }
     }
 
     /// Create or append a AAAA record.
@@ -89,7 +91,10 @@ impl DnsUpdater {
     }
 
     /// Send a DNS message over TCP (2-byte length prefix + message bytes) and read the response.
-    async fn send_tcp(&self, msg: Message) -> Result<Message, Box<dyn std::error::Error>> {
+    async fn send_tcp(&self, mut msg: Message) -> Result<Message, Box<dyn std::error::Error>> {
+        let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+        msg.finalize(&self.signer, now)?;
+
         let bytes = msg.to_vec()?;
         let len = u16::try_from(bytes.len())?;
 

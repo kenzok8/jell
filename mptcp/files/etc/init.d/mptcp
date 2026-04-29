@@ -74,10 +74,12 @@ global_multipath_settings() {
 		[ -z "$mptcp_close_timeout" ] || sysctl -qew net.mptcp.close_timeout="$mptcp_close_timeout"
 		[ -z "$mptcp_syn_retrans_before_tcp_fallback" ] || sysctl -qew net.mptcp.syn_retrans_before_tcp_fallback="$mptcp_syn_retrans_before_tcp_fallback"
 		[ -z "$mptcp_blackhole_timeout" ] || sysctl -qew net.mptcp.blackhole_timeout="$mptcp_blackhole_timeout"
-		if [ -n "$mptcp_scheduler" ] && [ -d /usr/share/bpf/scheduler ]; then
-			for scheduler in /usr/share/bpf/scheduler/*.o; do
-				[ -f "$scheduler" ] && bpftool struct_ops register "$scheduler" >/dev/null 2>&1
-			done
+		if [ -n "$mptcp_scheduler" ]; then
+			if [ -d /usr/share/bpf/scheduler ]; then
+				for scheduler in /usr/share/bpf/scheduler/*.o; do
+					[ -f "$scheduler" ] && bpftool struct_ops register "$scheduler" >/dev/null 2>&1
+				done
+			fi
 			local sched="${mptcp_scheduler#mptcp_}"; sched="${sched%.o}"
 			sysctl -qew net.mptcp.scheduler="$sched" >/dev/null 2>&1
 		fi

@@ -12,6 +12,12 @@ zone_path = "/etc/hickory-dns/lan.zone"
 journal_path = "/var/lib/hickory-dns/lan.jrnl"
 allow_update = true
 
+[[zones.stores.tsig_keys]]
+name = "update-key."
+key_file = "/etc/hickory-dns/update.key"
+algorithm = "hmac-sha256"
+fudge = 300
+
 [[zones]]
 zone = "."
 zone_type = "External"

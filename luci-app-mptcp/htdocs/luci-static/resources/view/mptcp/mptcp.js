@@ -28,6 +28,21 @@ return L.view.extend({
 	var m, s, o;
 	var boardinfo = res[0];
 
+	function normalizeSchedulerValue(value) {
+		if (value == null)
+			return value;
+
+		var normalized = String(value).trim();
+
+		if (normalized.endsWith('.o'))
+			normalized = normalized.slice(0, -2);
+
+		if (normalized.startsWith('mptcp_'))
+			normalized = normalized.slice(6);
+
+		return normalized;
+	}
+
 	m = new form.Map('network', _('MPTCP'),_('Networks MPTCP settings.'));
 
 	s = m.section(form.TypedSection, 'globals');
@@ -73,11 +88,19 @@ return L.view.extend({
 	}
 
 	if (parseFloat(boardinfo.kernel.substring(0,3)) > 6) {
+	    scheduler.cfgvalue = function(section_id) {
+		return normalizeSchedulerValue(uci.get('network', section_id, 'mptcp_scheduler'));
+	    };
+
+	    scheduler.write = function(section_id, value) {
+		uci.set('network', section_id, 'mptcp_scheduler', normalizeSchedulerValue(value));
+	    };
+
 	    scheduler.load = function(section_id) {
 		    return L.resolveDefault(fs.list('/usr/share/bpf/scheduler'), []).then(L.bind(function(entries) {
 			    for (var i = 0; i < entries.length; i++)
 				    if (entries[i].type == 'file' && entries[i].name.match(/\.o$/))
-					this.value(entries[i].name);
+					this.value(normalizeSchedulerValue(entries[i].name), entries[i].name);
 			    return this.super('load', [section_id]);
 		    }, this));
 	    };

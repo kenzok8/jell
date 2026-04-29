@@ -57,6 +57,172 @@ end
 
 local methods = {
 
+	-- -----------------------------------------------------------------------
+	-- Settings: global MPTCP (network.globals)
+	-- -----------------------------------------------------------------------
+
+	-- Returns all configurable global MPTCP settings from network.globals.
+	get_settings = {
+		call = function()
+			local result = {}
+			local string_fields = {
+				"multipath", "mptcp_checksum", "mptcp_debug",
+				"mptcp_path_manager", "mptcp_scheduler", "mptcp_syn_retries",
+				"mptcp_version", "congestion", "mptcp_pm_type",
+				"mptcp_disable_initial_config", "mptcp_force_multipath",
+				"mptcpd_enable", "mptcp_subflows", "mptcp_stale_loss_cnt",
+				"mptcp_add_addr_accepted", "mptcp_add_addr_timeout",
+				"mptcp_blackhole_timeout", "mptcp_close_timeout",
+				"mptcp_syn_retrans_before_tcp_fallback",
+				"mptcp_fullmesh_num_subflows", "mptcp_fullmesh_create_on_err",
+				"mptcp_ndiffports_num_subflows", "mptcp_rr_cwnd_limited",
+				"mptcp_rr_num_segments"
+			}
+			local list_fields = {
+				"mptcpd_path_manager", "mptcpd_plugins",
+				"mptcpd_addr_flags", "mptcpd_notify_flags"
+			}
+			for _, field in ipairs(string_fields) do
+				local val = uci:get("network", "globals", field)
+				if val ~= nil then result[field] = val end
+			end
+			for _, field in ipairs(list_fields) do
+				local val = uci:get_list("network", "globals", field)
+				result[field] = val or {}
+			end
+			return result
+		end
+	},
+
+	-- Writes one or more global MPTCP settings to network.globals and commits.
+	-- All parameters are optional; only provided (non-empty) ones are written.
+	-- List fields (mptcpd_path_manager, mptcpd_plugins, mptcpd_addr_flags,
+	-- mptcpd_notify_flags) must be passed as JSON arrays.
+	set_settings = {
+		args = {
+			mptcp_checksum               = "",
+			mptcp_debug                  = "",
+			mptcp_path_manager           = "",
+			mptcp_scheduler              = "",
+			mptcp_syn_retries            = "",
+			mptcp_version                = "",
+			congestion                   = "",
+			mptcp_pm_type                = "",
+			mptcp_disable_initial_config = "",
+			mptcp_force_multipath        = "",
+			mptcpd_enable                = "",
+			mptcpd_path_manager          = {},
+			mptcpd_plugins               = {},
+			mptcpd_addr_flags            = {},
+			mptcpd_notify_flags          = {},
+			mptcp_subflows                       = "",
+			mptcp_stale_loss_cnt                 = "",
+			mptcp_add_addr_accepted              = "",
+			mptcp_add_addr_timeout               = "",
+			mptcp_blackhole_timeout              = "",
+			mptcp_close_timeout                  = "",
+			mptcp_syn_retrans_before_tcp_fallback = "",
+			mptcp_fullmesh_num_subflows  = "",
+			mptcp_fullmesh_create_on_err = "",
+			mptcp_ndiffports_num_subflows = "",
+			mptcp_rr_cwnd_limited        = "",
+			mptcp_rr_num_segments        = ""
+		},
+		call = function(args)
+			local string_fields = {
+				"mptcp_checksum", "mptcp_debug", "mptcp_path_manager",
+				"mptcp_scheduler", "mptcp_syn_retries", "mptcp_version",
+				"congestion", "mptcp_pm_type", "mptcp_disable_initial_config",
+				"mptcp_force_multipath", "mptcpd_enable", "mptcp_subflows",
+				"mptcp_stale_loss_cnt", "mptcp_add_addr_accepted",
+				"mptcp_add_addr_timeout", "mptcp_blackhole_timeout",
+				"mptcp_close_timeout", "mptcp_syn_retrans_before_tcp_fallback",
+				"mptcp_fullmesh_num_subflows", "mptcp_fullmesh_create_on_err",
+				"mptcp_ndiffports_num_subflows", "mptcp_rr_cwnd_limited",
+				"mptcp_rr_num_segments"
+			}
+			local list_fields = {
+				"mptcpd_path_manager", "mptcpd_plugins",
+				"mptcpd_addr_flags", "mptcpd_notify_flags"
+			}
+			for _, field in ipairs(string_fields) do
+				if args[field] ~= nil and args[field] ~= "" then
+					uci:set("network", "globals", field, args[field])
+				end
+			end
+			for _, field in ipairs(list_fields) do
+				if args[field] ~= nil and type(args[field]) == "table" then
+					uci:set_list("network", "globals", field, args[field])
+				end
+			end
+			uci:save("network")
+			uci:commit("network")
+			return { result = "ok" }
+		end
+	},
+
+	-- -----------------------------------------------------------------------
+	-- Settings: per-interface MPTCP (network.interface)
+	-- -----------------------------------------------------------------------
+
+	-- Returns multipath settings for all interfaces (or a single one when
+	-- the optional "iface" argument is provided).
+	get_interface_settings = {
+		args = { iface = "" },
+		call = function(args)
+			local iface = args.iface or ""
+			if iface ~= "" then
+				local section = uci:get_all("network", iface)
+				if not section or section[".type"] ~= "interface" then
+					return { error = "Interface not found" }
+				end
+				return {
+					multipath        = section["multipath"]        or "off",
+					multipath_weight = section["multipath_weight"] or "100"
+				}
+			end
+			local result = {}
+			uci:foreach("network", "interface", function(s)
+				local name = s[".name"]
+				result[name] = {
+					multipath        = s["multipath"]        or "off",
+					multipath_weight = s["multipath_weight"] or "100"
+				}
+			end)
+			return result
+		end
+	},
+
+	-- Sets multipath and/or multipath_weight for the given interface.
+	-- "iface" is required; "multipath" and "multipath_weight" are optional.
+	-- Valid values for multipath: "on", "off", "master", "backup".
+	set_interface_settings = {
+		args = { iface = "", multipath = "", multipath_weight = "" },
+		call = function(args)
+			local iface = args.iface or ""
+			if iface == "" then
+				return { error = "Interface name required" }
+			end
+			local section = uci:get_all("network", iface)
+			if not section or section[".type"] ~= "interface" then
+				return { error = "Interface not found" }
+			end
+			if args.multipath ~= nil and args.multipath ~= "" then
+				uci:set("network", iface, "multipath", args.multipath)
+			end
+			if args.multipath_weight ~= nil and args.multipath_weight ~= "" then
+				uci:set("network", iface, "multipath_weight", args.multipath_weight)
+			end
+			uci:save("network")
+			uci:commit("network")
+			return { result = "ok" }
+		end
+	},
+
+	-- -----------------------------------------------------------------------
+	-- Bandwidth / diagnostics (existing methods below)
+	-- -----------------------------------------------------------------------
+
 	-- Returns per-interface bandwidth arrays plus a "total" entry.
 	-- Each value is an array of [ts, rx_bytes, rx_pkts, tx_bytes, tx_pkts].
 	multipath_bandwidth = {
