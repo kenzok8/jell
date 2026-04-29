@@ -256,11 +256,21 @@ return view.extend({
 		o.depends('jsonpath', '/usr/share/wechatpush/api/msmtp.json');
 		o.placeholder = "25";
 
-		o = s.taboption('basic', form.Flag, 'smtp_tls', _('Enable TLS'));
+		o = s.taboption('basic', form.ListValue, 'smtp_tls', _('Enable/Disable TLS'));
 		o.depends('jsonpath', '/usr/share/wechatpush/api/msmtp.json');
+		o.widget = 'radio';
+		o.value('on', _('Enable'));
+		o.value('off', _('Disable'));
+		o.value('', _('Ignore'));
+		o.default = '';
 
-		o = s.taboption('basic', form.Flag, 'smtp_starttls', _('Enable STARTTLS'));
+		o = s.taboption('basic', form.ListValue, 'smtp_starttls', _('Enable/Disable STARTTLS'));
 		o.depends('jsonpath', '/usr/share/wechatpush/api/msmtp.json');
+		o.widget = 'radio';
+		o.value('on', _('Enable'));
+		o.value('off', _('Disable'));
+		o.value('', _('Ignore'));
+		o.default = '';
 
 		o = s.taboption('basic', form.Value, 'smtp_user', _('User'));
 		o.depends('jsonpath', '/usr/share/wechatpush/api/msmtp.json');

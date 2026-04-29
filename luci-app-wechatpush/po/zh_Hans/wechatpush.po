@@ -231,11 +231,11 @@ msgstr "SMTP 服务器"
 msgid "SMTP Port"
 msgstr "SMTP 端口"
 
-msgid "Enable TLS"
-msgstr "启用 TLS"
+msgid "Enable/Disable TLS"
+msgstr "启用/禁用 TLS"
 
-msgid "Enable STARTTLS"
-msgstr "启用 STARTTLS"
+msgid "Enable/Disable STARTTLS"
+msgstr "启用/禁用 STARTTLS"
 
 msgid "User"
 msgstr "用户名"
