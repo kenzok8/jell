@@ -555,7 +555,7 @@ o:depends({singbox_dns_mode = "udp"})
 o:depends({singbox_dns_mode = "tcp"})
 
 o = s:option(Value, "remote_dns_doh", translate("Remote DNS DoH"))
-o.description = translate("Format: URL[,IP] (omit the latter if URL is an IP)")
+o.description = translate("Format: URL[,IP] (optional IP to map the domain in the URL)")
 o:value("https://1.1.1.1/dns-query", "1.1.1.1 (CloudFlare)")
 o:value("https://1.1.1.2/dns-query", "1.1.1.2 (CloudFlare-Security)")
 o:value("https://8.8.4.4/dns-query", "8.8.4.4 (Google)")
