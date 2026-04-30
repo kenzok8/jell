@@ -581,7 +581,13 @@ run_redir() {
 		server_host=$(config_n_get $node address)
 		port=$(config_n_get $node port)
 	else
-		type="socks"
+		if [ "${DNS_MODE}" = "xray" ]; then
+			type="xray"
+		elif [ "${DNS_MODE}" = "sing-box" ]; then
+			type="sing-box"
+		else
+			type="socks"
+		fi
 		server_host="127.0.0.1"
 		port=$node2socks_port
 		remarks="Socks 配置($port 端口)"

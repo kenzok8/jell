@@ -858,9 +858,8 @@ function gen_config(var)
 		} or nil
 	end
 
-	local node = node_id and uci:get_all(appname, node_id) or nil
-
 	if node_id then
+		local node = uci:get_all(appname, node_id)
 		local balancers = {}
 		local rules = {}
 		if node then
@@ -877,7 +876,7 @@ function gen_config(var)
 				protocol = "socks",
 				settings = {auth = "noauth", udp = true},
 				sniffing = {
-					enabled = xray_settings.sniffing_override_dest == "1" or node.protocol == "_shunt"
+					enabled = (xray_settings.sniffing_override_dest == "1") or (node and node.protocol == "_shunt") or false
 				}
 			}
 			if inbound.sniffing.enabled == true then
@@ -1265,7 +1264,7 @@ function gen_config(var)
 			end
 		end
 
-		if node.protocol == "_shunt" then
+		if node and node.protocol == "_shunt" then
 			inner_fakedns = node.fakedns or "0"
 
 			local function gen_shunt_node(rule_name, _node_id)
@@ -1425,7 +1424,8 @@ function gen_config(var)
 				rules = rules
 			}
 		else
-			COMMON.default_outbound_tag = gen_outbound_get_tag(flag, node, nil, {
+			local _node = node or node_id
+			COMMON.default_outbound_tag = gen_outbound_get_tag(flag, _node, nil, {
 				fragment = xray_settings.fragment == "1" or nil,
 				noise = xray_settings.noise == "1" or nil,
 				run_socks_instance = not no_run
@@ -1451,7 +1451,7 @@ function gen_config(var)
 				settings = {network = "tcp,udp", followRedirect = true},
 				streamSettings = {sockopt = {tproxy = "tproxy"}},
 				sniffing = {
-					enabled = xray_settings.sniffing_override_dest == "1" or node.protocol == "_shunt"
+					enabled = (xray_settings.sniffing_override_dest == "1") or (node and node.protocol == "_shunt") or false
 				}
 			}
 			if inbound.sniffing.enabled == true then
