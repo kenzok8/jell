@@ -1,10 +1,22 @@
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use hickory_proto::op::{Message, ResponseCode, update_message};
 use hickory_proto::rr::{Name, RData, RecordSet, RecordType, TSigner};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
+use tokio::time::timeout;
+
+const TCP_TIMEOUT: Duration = Duration::from_secs(5);
+
+fn check_response(response: &Message, allowed: &[ResponseCode]) -> Result<(), Box<dyn std::error::Error>> {
+    let code = response.metadata.response_code;
+    if code == ResponseCode::NoError || allowed.contains(&code) {
+        Ok(())
+    } else {
+        Err(format!("DNS server returned {code:?}").into())
+    }
+}
 
 /// DNS dynamic update client that sends RFC 2136 updates over TCP to the hickory-dns server.
 pub(crate) struct DnsUpdater {
@@ -35,7 +47,10 @@ impl DnsUpdater {
             let mut rrset = RecordSet::with_ttl(name, RecordType::AAAA, ttl);
             rrset.add_rdata(RData::AAAA(addr.into()));
             let msg = update_message::append(rrset, self.zone.clone(), false, false);
-            self.send_tcp(msg).await?;
+            let response = self.send_tcp(msg).await?;
+            check_response(&response, &[])?;
+        } else {
+            check_response(&response, &[])?;
         }
         Ok(())
     }
@@ -57,7 +72,10 @@ impl DnsUpdater {
             let mut rrset = RecordSet::with_ttl(name, RecordType::A, ttl);
             rrset.add_rdata(RData::A(addr.into()));
             let msg = update_message::append(rrset, self.zone.clone(), false, false);
-            self.send_tcp(msg).await?;
+            let response = self.send_tcp(msg).await?;
+            check_response(&response, &[])?;
+        } else {
+            check_response(&response, &[])?;
         }
         Ok(())
     }
@@ -72,7 +90,8 @@ impl DnsUpdater {
         let mut rrset = RecordSet::new(name, RecordType::AAAA, 0);
         rrset.add_rdata(RData::AAAA(addr.into()));
         let msg = update_message::delete_by_rdata(rrset, self.zone.clone(), false);
-        self.send_tcp(msg).await?;
+        let response = self.send_tcp(msg).await?;
+        check_response(&response, &[])?;
         Ok(())
     }
 
@@ -86,7 +105,8 @@ impl DnsUpdater {
         let mut rrset = RecordSet::new(name, RecordType::A, 0);
         rrset.add_rdata(RData::A(addr.into()));
         let msg = update_message::delete_by_rdata(rrset, self.zone.clone(), false);
-        self.send_tcp(msg).await?;
+        let response = self.send_tcp(msg).await?;
+        check_response(&response, &[])?;
         Ok(())
     }
 
@@ -98,15 +118,23 @@ impl DnsUpdater {
         let bytes = msg.to_vec()?;
         let len = u16::try_from(bytes.len())?;
 
-        let mut stream = TcpStream::connect(self.server_addr).await?;
-        stream.write_all(&len.to_be_bytes()).await?;
-        stream.write_all(&bytes).await?;
-        stream.flush().await?;
+        let result = timeout(TCP_TIMEOUT, async {
+            let mut stream = TcpStream::connect(self.server_addr).await?;
+            stream.write_all(&len.to_be_bytes()).await?;
+            stream.write_all(&bytes).await?;
+            stream.flush().await?;
 
-        let resp_len = stream.read_u16().await? as usize;
-        let mut resp_buf = vec![0u8; resp_len];
-        stream.read_exact(&mut resp_buf).await?;
+            let resp_len = stream.read_u16().await? as usize;
+            let mut resp_buf = vec![0u8; resp_len];
+            stream.read_exact(&mut resp_buf).await?;
 
-        Ok(Message::from_vec(&resp_buf)?)
+            Ok::<_, Box<dyn std::error::Error>>(Message::from_vec(&resp_buf)?)
+        })
+        .await
+        .map_err(|_| -> Box<dyn std::error::Error> {
+            format!("DNS TCP timeout after {}s connecting to {}", TCP_TIMEOUT.as_secs(), self.server_addr).into()
+        })??;
+
+        Ok(result)
     }
 }

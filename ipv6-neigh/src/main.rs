@@ -1,8 +1,9 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr as StdSocketAddr};
 
 use futures::stream::StreamExt;
 use futures::stream::TryStreamExt;
+use log::{debug, error, info, warn};
 use netlink_packet_core::NetlinkPayload;
 use netlink_packet_route::RouteNetlinkMessage;
 use netlink_packet_route::neighbour::NeighbourMessage;
@@ -47,6 +48,9 @@ struct Cli {
     /// TSIG key name
     #[clap(short = 'n', long, default_value = "update-key.")]
     key_name: String,
+    /// Log level (error, warn, info, debug, trace)
+    #[clap(short = 'l', long, default_value = "info")]
+    log_level: String,
 }
 
 #[derive(Debug)]
@@ -95,52 +99,70 @@ fn if_ipv4_in_private_subnet(ip: &Ipv4Addr) -> bool {
     false
 }
 
-async fn process_new_neigh(neigh: &Neigh, updater: &db::DnsUpdater, leases: &HashMap<String, String>) {
+async fn process_new_neigh(neigh: &Neigh, updater: &db::DnsUpdater, leases: &HashMap<String, String>) -> bool {
     let Some(hostname) = leases.get(&neigh.mac) else {
-        eprintln!("no lease for mac {}, skipping DNS update", neigh.mac);
-        return;
+        debug!("no lease for mac {}, skipping DNS update", neigh.mac);
+        return true;
     };
     let result = match &neigh.inet {
         NeighbourAddress::Inet6(addr) => updater.upsert_aaaa(hostname, *addr, DEFAULT_TTL).await,
         NeighbourAddress::Inet(addr) => updater.upsert_a(hostname, *addr, DEFAULT_TTL).await,
-        _ => return,
+        _ => return true,
     };
     match result {
-        Ok(()) => println!("DNS update: added {} -> {:?}", hostname, neigh.inet),
-        Err(e) => eprintln!("DNS update failed for {}: {}", hostname, e),
+        Ok(()) => {
+            info!("DNS update: added {} -> {:?}", hostname, neigh.inet);
+            true
+        }
+        Err(e) => {
+            error!("DNS update failed for {}: {}", hostname, e);
+            false
+        }
     }
 }
 
-async fn process_del_neigh(neigh: &Neigh, updater: &db::DnsUpdater, leases: &HashMap<String, String>) {
+async fn process_del_neigh(neigh: &Neigh, updater: &db::DnsUpdater, leases: &HashMap<String, String>) -> bool {
     let Some(hostname) = leases.get(&neigh.mac) else {
-        return;
+        return true;
     };
     let result = match &neigh.inet {
         NeighbourAddress::Inet6(addr) => updater.delete_aaaa(hostname, *addr).await,
         NeighbourAddress::Inet(addr) => updater.delete_a(hostname, *addr).await,
-        _ => return,
+        _ => return true,
     };
     match result {
-        Ok(()) => println!("DNS update: removed {} -> {:?}", hostname, neigh.inet),
-        Err(e) => eprintln!("DNS delete failed for {}: {}", hostname, e),
+        Ok(()) => {
+            info!("DNS update: removed {} -> {:?}", hostname, neigh.inet);
+            true
+        }
+        Err(e) => {
+            error!("DNS delete failed for {}: {}", hostname, e);
+            false
+        }
     }
 }
 
-fn is_multicast_or_broadcast_route_type(route_type: RouteType) -> bool {
-    match route_type {
-        RouteType::Multicast => true,
-        RouteType::Broadcast => true,
-        _ => false,
-    }
+fn should_skip_route_type(route_type: RouteType) -> bool {
+    matches!(route_type, RouteType::Multicast | RouteType::Broadcast | RouteType::Local)
 }
 
-fn is_multicast_or_broadcast(neigh: &Neigh) -> bool {
-    return is_multicast_or_broadcast_route_type(neigh.kind);
+fn should_skip_neigh(neigh: &Neigh) -> bool {
+    should_skip_route_type(neigh.kind)
 }
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
     let args = Cli::parse();
+
+    env_logger::Builder::new()
+        .filter_level(
+            args.log_level
+                .parse()
+                .expect("invalid log level (use: error, warn, info, debug, trace)"),
+        )
+        .format_timestamp_secs()
+        .init();
+
     let private_subnet = args.private_subnet;
     let zone = Name::from_ascii(&args.zone).expect("invalid zone name");
 
@@ -154,23 +176,34 @@ async fn main() -> Result<(), ()> {
 
     let (connection, handle, _) = new_connection().unwrap();
     tokio::spawn(connection);
-    dump_addresses(handle.clone(), args.iface).await.unwrap();
+    if let Some(ref iface) = args.iface {
+        if let Err(e) = dump_addresses(handle.clone(), iface.clone()).await {
+            warn!("failed to dump addresses for iface {}: {}", iface, e);
+        }
+    }
 
     // Load DHCP leases (mac -> hostname) from ubus
     let mut leases = op::get_lease().unwrap_or_default();
-    println!("loaded {} DHCP leases", leases.len());
+    info!("loaded {} DHCP leases", leases.len());
+
+    // State cache: tracks (mac, ip_string) pairs already registered
+    let mut registered: HashSet<(String, String)> = HashSet::new();
 
     // Dump existing neighbours and register them
-    println!("dumping neighbours");
+    debug!("dumping neighbours");
     if let Ok(neighbours) = dump_neighbours(handle.clone(), private_subnet).await {
         for neigh in &neighbours {
-            println!("{:?}", neigh);
-            if !is_multicast_or_broadcast(neigh) {
-                process_new_neigh(neigh, &updater, &leases).await;
+            debug!("{:?}", neigh);
+            if !should_skip_neigh(neigh) {
+                let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
+                if registered.insert(key.clone()) {
+                    if !process_new_neigh(neigh, &updater, &leases).await {
+                        registered.remove(&key);
+                    }
+                }
             }
         }
     }
-    println!();
 
     let (mut conn, mut _handle, mut messages) =
         new_connection().map_err(|e| format!("{e}")).unwrap();
@@ -194,7 +227,7 @@ async fn main() -> Result<(), ()> {
         if event_count % 50 == 0 {
             if let Ok(new_leases) = op::get_lease() {
                 leases = new_leases;
-                println!("refreshed {} DHCP leases", leases.len());
+                info!("refreshed {} DHCP leases", leases.len());
             }
         }
 
@@ -205,21 +238,41 @@ async fn main() -> Result<(), ()> {
                     let Some(neigh) = parse_neighbour_message(new_neigh, private_subnet) else {
                         continue;
                     };
-                    if is_multicast_or_broadcast(&neigh) {
+                    if should_skip_neigh(&neigh) {
                         continue;
                     }
-                    println!("New neighbour: {:?}", neigh);
-                    process_new_neigh(&neigh, &updater, &leases).await;
+                    // Only act on Reachable state to avoid redundant updates
+                    if neigh.state != NeighbourState::Reachable {
+                        continue;
+                    }
+                    let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
+                    if !registered.insert(key.clone()) {
+                        // Already registered, skip
+                        continue;
+                    }
+                    debug!("New neighbour: {:?}", neigh);
+                    if !process_new_neigh(&neigh, &updater, &leases).await {
+                        // DNS update failed, remove from cache so we retry next time
+                        registered.remove(&key);
+                    }
                 }
                 RouteNetlinkMessage::DelNeighbour(del_neigh) => {
                     let Some(neigh) = parse_neighbour_message(del_neigh, private_subnet) else {
                         continue;
                     };
-                    if is_multicast_or_broadcast(&neigh) {
+                    if should_skip_neigh(&neigh) {
                         continue;
                     }
-                    println!("Del neighbour: {:?}", neigh);
-                    process_del_neigh(&neigh, &updater, &leases).await;
+                    let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
+                    if !registered.remove(&key) {
+                        // Was not registered, skip
+                        continue;
+                    }
+                    debug!("Del neighbour: {:?}", neigh);
+                    if !process_del_neigh(&neigh, &updater, &leases).await {
+                        // DNS delete failed, put back so we retry delete next time
+                        registered.insert(key);
+                    }
                 }
                 _ => {}
             }
@@ -237,11 +290,17 @@ fn format_mac(mac: Vec<u8>) -> String {
     mac_str
 }
 
-async fn dump_addresses(handle: Handle, link: Option<String>) -> Result<(), Error> {
-    let mut request = handle.link().get();
-    if let Some(link) = link {
-        request = request.match_name(link);
+fn inet_to_string(addr: &NeighbourAddress) -> String {
+    match addr {
+        NeighbourAddress::Inet(ip) => ip.to_string(),
+        NeighbourAddress::Inet6(ip) => ip.to_string(),
+        other => format!("{other:?}"),
     }
+}
+
+async fn dump_addresses(handle: Handle, link: String) -> Result<(), Error> {
+    let mut request = handle.link().get();
+    request = request.match_name(link);
 
     let mut links = request.execute();
     if let Some(link) = links.try_next().await? {
@@ -251,24 +310,33 @@ async fn dump_addresses(handle: Handle, link: Option<String>) -> Result<(), Erro
             .set_link_index_filter(link.header.index)
             .execute();
         while let Some(msg) = addresses.try_next().await? {
-            println!("{msg:?}");
+            debug!("{msg:?}");
         }
         Ok(())
     } else {
-        eprintln!("link not found");
+        warn!("link not found");
         Ok(())
     }
 }
 
+fn is_link_local_ipv6(addr: &NeighbourAddress) -> bool {
+    matches!(addr, NeighbourAddress::Inet6(ip) if (ip.segments()[0] & 0xffc0) == 0xfe80)
+}
+
 fn parse_neighbour_message(neigh: NeighbourMessage, private_subnet: bool) -> Option<Neigh> {
     let state = neigh.header.state;
-    if state == NeighbourState::Permanent {
+    // Filter out static and incomplete entries
+    if matches!(state, NeighbourState::Permanent | NeighbourState::Noarp) {
         return None;
     }
     let addr: NeighbourAddress = neigh.attributes.iter().find_map(|attr| match attr {
         NeighbourAttribute::Destination(inet) => Some(inet.to_owned()),
         _ => None,
     })?;
+    // Link-local IPv6 addresses are interface-scoped and useless in DNS
+    if is_link_local_ipv6(&addr) {
+        return None;
+    }
     if private_subnet {
         match addr {
             NeighbourAddress::Inet(addr) => {
@@ -290,12 +358,17 @@ fn parse_neighbour_message(neigh: NeighbourMessage, private_subnet: bool) -> Opt
         NeighbourAttribute::LinkLocalAddress(mac) => Some(mac.to_owned()),
         _ => None,
     })?;
+    let mac_str = format_mac(mac);
+    // Filter out empty or all-zero MACs (router own addresses, incomplete entries)
+    if mac_str.is_empty() || mac_str == "00:00:00:00:00:00" {
+        return None;
+    }
     Some(Neigh {
         ifindex,
         state,
         kind,
         inet: addr,
-        mac: format_mac(mac),
+        mac: mac_str,
     })
 }
 
@@ -304,7 +377,7 @@ async fn dump_neighbours(handle: Handle, private_subnet: bool) -> Result<Vec<Nei
     let mut vec: Vec<Neigh> = Vec::new();
     while let Some(route) = neighbours.try_next().await? {
         if let Some(neigh) = parse_neighbour_message(route, private_subnet) {
-            if !is_multicast_or_broadcast(&neigh) {
+            if !should_skip_neigh(&neigh) {
                 vec.push(neigh);
             }
         }
