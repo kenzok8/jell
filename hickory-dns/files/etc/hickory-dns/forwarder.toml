@@ -1,6 +1,9 @@
-listen_addrs_ipv6 = ["::1"]
-listen_port = 5335
+listen_addrs_ipv6 = ["::"]
+listen_addrs_ipv4 = ["0.0.0.0"]
+listen_port = 53
 prometheus_listen_addr = "[::]:9000"
+user = "nobody"
+group = "nogroup"
 
 [[zones]]
 zone = "lan"
@@ -24,7 +27,7 @@ zone_type = "External"
 
 [[zones.stores]]
 type = "forward"
-options = { edns0 = true, ip_strategy = "Ipv6AndIpv4", cache_size = 0, use_hosts_file = "Never", num_concurrent_reqs = 1, server_ordering_strategy = "RoundRobin" }
+options = { edns0 = true, ip_strategy = "Ipv6AndIpv4", cache_size = 10240, use_hosts_file = "Never", num_concurrent_reqs = 1, server_ordering_strategy = "RoundRobin" }
 
 [[zones.stores.name_servers]]
 ip = "2400:3200:baba::1"
