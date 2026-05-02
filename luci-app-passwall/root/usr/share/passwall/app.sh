@@ -172,12 +172,7 @@ run_singbox() {
 			json_add_string "remote_dns_${_proto}_port" "${_dns_port}"
 		;;
 		doh|http3)
-			local _doh_url _doh_host _doh_port _doh_bootstrap
-			parse_doh "$remote_dns_doh" _doh_url _doh_host _doh_port _doh_bootstrap
-			[ -n "$_doh_bootstrap" ] && json_add_string "remote_dns_doh_ip" "${_doh_bootstrap}"
-			json_add_string "remote_dns_doh_port" "${_doh_port}"
-			json_add_string "remote_dns_doh_url" "${_doh_url}"
-			json_add_string "remote_dns_doh_host" "${_doh_host}"
+			json_add_string "remote_dns_doh" "${remote_dns_doh}"
 			[ "$remote_dns_protocol" = "http3" ] && json_add_string "remote_dns_http3" "1"
 		;;
 	esac
@@ -269,12 +264,7 @@ run_xray() {
 			json_add_string "remote_dns_${_proto}_port" "${_dns_port}"
 		;;
 		doh)
-			local _doh_url _doh_host _doh_port _doh_bootstrap
-			parse_doh "$remote_dns_doh" _doh_url _doh_host _doh_port _doh_bootstrap
-			[ -n "$_doh_bootstrap" ] && json_add_string "remote_dns_doh_ip" "${_doh_bootstrap}"
-			json_add_string "remote_dns_doh_port" "${_doh_port}"
-			json_add_string "remote_dns_doh_url" "${_doh_url}"
-			json_add_string "remote_dns_doh_host" "${_doh_host}"
+			json_add_string "remote_dns_doh" "${remote_dns_doh}"
 		;;
 	esac
 
@@ -1351,10 +1341,6 @@ start_dns() {
 					local remote_dns_doh=$(config_t_get global remote_dns_doh "https://1.1.1.1/dns-query")
 					_args="${_args} remote_dns_doh=${remote_dns_doh}"
 					echolog "  - Sing-Box DNS(${TUN_DNS}) -> ${remote_dns_doh}"
-
-					local _doh_url _doh_host _doh_port _doh_bootstrap
-					parse_doh "$remote_dns_doh" _doh_url _doh_host _doh_port _doh_bootstrap
-					[ -n "${_doh_bootstrap}" ] && REMOTE_DNS="${_doh_bootstrap}#${_doh_port}"
 				;;
 			esac
 			_args="${_args} dns_socks_address=127.0.0.1 dns_socks_port=${tcp_node_socks_port}"
@@ -1390,10 +1376,6 @@ start_dns() {
 					local remote_dns_doh=$(config_t_get global remote_dns_doh "https://1.1.1.1/dns-query")
 					_args="${_args} remote_dns_doh=${remote_dns_doh}"
 					echolog "  - Xray DNS(${TUN_DNS}) -> ${remote_dns_doh}"
-
-					local _doh_url _doh_host _doh_port _doh_bootstrap
-					parse_doh "$remote_dns_doh" _doh_url _doh_host _doh_port _doh_bootstrap
-					[ -n "${_doh_bootstrap}" ] && REMOTE_DNS="${REMOTE_DNS},${_doh_bootstrap}#${_doh_port}"
 				;;
 			esac
 			_args="${_args} dns_socks_address=127.0.0.1 dns_socks_port=${tcp_node_socks_port}"
