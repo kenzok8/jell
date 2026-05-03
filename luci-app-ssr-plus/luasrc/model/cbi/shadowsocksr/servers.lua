@@ -230,6 +230,43 @@ local function preserve_when_hidden(opt, controller, enabled_value)
 	end
 end
 
+local function migrate_legacy_subscribe_urls()
+	local subscribe_sid = uci:get_first("shadowsocksr", "server_subscribe")
+	if not subscribe_sid then
+		return
+	end
+
+	local legacy_urls = uci:get_list("shadowsocksr", subscribe_sid, "subscribe_url") or {}
+	if #legacy_urls == 0 then
+		return
+	end
+
+	local has_items = false
+	uci:foreach("shadowsocksr", "server_subscribe_item", function()
+		has_items = true
+		return false
+	end)
+	if has_items then
+		return
+	end
+
+	for index, url in ipairs(legacy_urls) do
+		local trimmed = trim(url)
+		if trimmed ~= "" then
+			local sid = uci:add("shadowsocksr", "server_subscribe_item")
+			if sid then
+				uci:set("shadowsocksr", sid, "enabled", "1")
+				uci:set("shadowsocksr", sid, "alias", string.format("Subscribe %d", index))
+				uci:set("shadowsocksr", sid, "url", trimmed)
+			end
+		end
+	end
+
+	uci:delete("shadowsocksr", subscribe_sid, "subscribe_url")
+	uci:save("shadowsocksr")
+	uci:commit("shadowsocksr")
+end
+
 local function clash_host_port(clash_url)
 	if not clash_url or clash_url == "" then
 		return nil, nil
@@ -246,6 +283,8 @@ local function clash_host_port(clash_url)
 	return host, port
 end
 
+migrate_legacy_subscribe_urls()
+
 uci:foreach("shadowsocksr", "servers", function(s)
 	server_count = server_count + 1
 	server_cache[s[".name"]] = {
@@ -259,6 +298,7 @@ uci:foreach("shadowsocksr", "servers", function(s)
 		ws_host = s.ws_host,
 		tls_host = s.tls_host,
 		tls = s.tls,
+		reality = s.reality,
 		clash_url = s.clash_url
 	}
 end)
@@ -323,9 +363,6 @@ o.default = 30
 o.rmempty = true
 o:depends("auto_update", "1")
 
-o = s:option(DynamicList, "subscribe_url", translate("Subscribe URL"))
-o.rmempty = true
-
 if has_mihomo then
 	o = s:option(DummyValue, "_upload_clash_yaml", translate("Upload Custom YAML File"))
 	o.template = "shadowsocksr/clash_yaml_upload"
@@ -348,13 +385,6 @@ o.description = translate("Save Words splited by /")
 o:depends("subscribe_advanced", "1")
 preserve_when_hidden(o, "subscribe_advanced", "1")
 
-o = s:option(Button, "update_Sub", translate("Save Subscribe Settings"))
-o.inputstyle = "reload"
-o.description = translate("Save current subscribe settings")
-o.write = function(self, section)
-	self.map.ssr_update_sub_requested = true
-end
-
 o = s:option(Flag, "allow_insecure", translate("Allow subscribe Insecure nodes By default"))
 o.rmempty = false
 o.description = translate("Subscribe nodes allows insecure connection as TLS client (insecure)")
@@ -375,6 +405,13 @@ o.description = translate("Through proxy update list, Not Recommended ")
 o.default = "1"
 o:depends("subscribe_advanced", "1")
 preserve_when_hidden(o, "subscribe_advanced", "1")
+
+o = s:option(Button, "update_Sub", translate("Save Subscribe Settings"))
+o.inputstyle = "reload"
+o.description = translate("Save current subscribe settings")
+o.write = function(self, section)
+	self.map.ssr_update_sub_requested = true
+end
 
 o = s:option(Button, "subscribe", translate("Update All Subscribe Servers"))
 o.rawhtml = true
@@ -424,6 +461,31 @@ preserve_when_hidden(o, "subscribe_advanced", "1")
 
 s:append(cbi.Template("shadowsocksr/subscribe_schedule_compact"))
 
+s = m:section(TypedSection, "server_subscribe_item", translate("Subscribe URL"))
+s.anonymous = true
+s.addremove = true
+s.sortable = true
+s.template = "shadowsocksr/subscribe_item_tblsection"
+s.description = translate("Manage multiple subscribe URLs, including Clash subscriptions. Each entry can be edited and refreshed independently.")
+
+o = s:option(Flag, "enabled", translate("Enable"))
+o.rmempty = false
+o.default = "1"
+o.width = "1%"
+function o.cfgvalue(...)
+	return Flag.cfgvalue(...) or "1"
+end
+
+o = s:option(Value, "alias", translate("Alias"))
+o.rmempty = true
+o.width = "18rem"
+function o.cfgvalue(self, section)
+	return Value.cfgvalue(self, section) or string.format("Subscribe %s", section:sub(-4))
+end
+
+o = s:option(Value, "url", translate("Subscribe URL"))
+o.rmempty = false
+
 -- [[ Servers Manage ]]--
 s = m:section(TypedSection, "servers")
 s.anonymous = true
@@ -469,12 +531,14 @@ o.render = function(self, section, scope)
 	local stype = cfg.type
 	self.type = stype or ""
 	self.proto = cfg.v2ray_protocol or ""
+	self.reality = cfg.reality or ""
 	if stype == "clash" then
 		self.transport = ""
 		self.ws_path = ""
 		self.ws_host = ""
 		self.tls_host = ""
 		self.tls = ""
+		self.reality = ""
 	else
 		self.transport = cfg.transport or ""
 		self.ws_host = cfg.ws_host or ""
