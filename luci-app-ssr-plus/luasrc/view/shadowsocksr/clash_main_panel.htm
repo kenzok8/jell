@@ -5,11 +5,35 @@ local current_sid = self.map:get(section, "global_server") or "nil"
 -%>
 <div id="ssr-clash-main-panel-wrap">
 	<style type="text/css">
+		#ssr-clash-main-panel-wrap {
+			--ssr-clash-modal-bg: #ffffff;
+			--ssr-clash-modal-fg: #333333;
+			--ssr-clash-modal-muted: #666666;
+			--ssr-clash-modal-border: rgba(0, 0, 0, 0.08);
+			--ssr-clash-modal-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+			--ssr-clash-mask-bg: rgba(0, 0, 0, 0.35);
+			--ssr-clash-field-bg: #ffffff;
+			--ssr-clash-field-fg: #333333;
+			--ssr-clash-field-border: #d0d0d0;
+		}
+
+		html[data-darkmode="true"] #ssr-clash-main-panel-wrap {
+			--ssr-clash-modal-bg: #121212;
+			--ssr-clash-modal-fg: #f5f5f5;
+			--ssr-clash-modal-muted: #b7b7b7;
+			--ssr-clash-modal-border: rgba(255, 255, 255, 0.08);
+			--ssr-clash-modal-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+			--ssr-clash-mask-bg: rgba(0, 0, 0, 0.62);
+			--ssr-clash-field-bg: #1f1f1f;
+			--ssr-clash-field-fg: #f3f3f3;
+			--ssr-clash-field-border: #3a3a3a;
+		}
+
 		#ssr-clash-modal-mask {
 			display: none;
 			position: fixed;
 			inset: 0;
-			background: rgba(0, 0, 0, 0.35);
+			background: var(--ssr-clash-mask-bg);
 			z-index: 2000;
 		}
 
@@ -22,9 +46,11 @@ local current_sid = self.map:get(section, "global_server") or "nil"
 			width: min(900px, calc(100vw - 32px));
 			max-height: min(720px, calc(100vh - 80px));
 			overflow: auto;
-			background: #fff;
+			background: var(--ssr-clash-modal-bg);
+			color: var(--ssr-clash-modal-fg);
 			border-radius: 10px;
-			box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+			box-shadow: var(--ssr-clash-modal-shadow);
+			border: 1px solid var(--ssr-clash-modal-border);
 			z-index: 2001;
 			padding: 12px 16px 14px;
 		}
@@ -34,25 +60,72 @@ local current_sid = self.map:get(section, "global_server") or "nil"
 			align-items: center;
 			justify-content: space-between;
 			gap: 12px;
-			margin-bottom: 8px;
+			margin-bottom: 10px;
+		}
+
+		#ssr-clash-modal-heading {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			min-width: 0;
 		}
 
 		#ssr-clash-modal-title {
 			font-size: 17px;
 			font-weight: 600;
-			color: #333;
+			color: var(--ssr-clash-modal-fg);
+			white-space: nowrap;
 		}
 
 		#ssr-clash-modal-actions {
 			display: flex;
+			align-items: center;
+			justify-content: flex-end;
 			gap: 8px;
 			flex-wrap: wrap;
-			margin: 0 0 8px;
+			margin: 0;
+			margin-left: auto;
 		}
 
 		#ssr-clash-modal-status {
-			margin: 0 0 8px;
-			color: #666;
+			margin: 0;
+			color: var(--ssr-clash-modal-muted);
+			font-size: 14px;
+			white-space: nowrap;
+		}
+
+		#ssr-clash-modal-groups .cbi-value-title {
+			color: var(--ssr-clash-modal-muted);
+		}
+
+		#ssr-clash-modal-groups .cbi-input-select,
+		#ssr-clash-modal-groups select {
+			background: var(--ssr-clash-field-bg) !important;
+			color: var(--ssr-clash-field-fg) !important;
+			border: 1px solid var(--ssr-clash-field-border) !important;
+			box-shadow: none;
+		}
+
+		#ssr-clash-modal-groups option {
+			background: var(--ssr-clash-field-bg);
+			color: var(--ssr-clash-field-fg);
+		}
+
+		html[data-darkmode="true"] #ssr-clash-modal .btn.cbi-button {
+			background: #262626 !important;
+			color: #f1f1f1 !important;
+			border-color: #4a4a4a !important;
+		}
+
+		html[data-darkmode="true"] #ssr-clash-modal .btn.cbi-button-apply {
+			background: #1f6feb !important;
+			border-color: #1f6feb !important;
+			color: #ffffff !important;
+		}
+
+		html[data-darkmode="true"] #ssr-clash-modal .btn.cbi-button:hover,
+		html[data-darkmode="true"] #ssr-clash-modal .btn.cbi-button:focus {
+			filter: brightness(1.08);
 		}
 
 		@media (max-width: 700px) {
@@ -63,8 +136,18 @@ local current_sid = self.map:get(section, "global_server") or "nil"
 			}
 
 			#ssr-clash-modal-header {
-				flex-direction: column;
+				flex-wrap: wrap;
 				align-items: flex-start;
+			}
+
+			#ssr-clash-modal-heading {
+				flex-wrap: wrap;
+			}
+
+			#ssr-clash-modal-actions {
+				width: 100%;
+				justify-content: flex-start;
+				margin-left: 0;
 			}
 		}
 	</style>
@@ -384,13 +467,15 @@ local current_sid = self.map:get(section, "global_server") or "nil"
 	<div id="ssr-clash-modal-mask"></div>
 	<div id="ssr-clash-modal" role="dialog" aria-modal="true" aria-labelledby="ssr-clash-modal-title">
 		<div id="ssr-clash-modal-header">
-			<div id="ssr-clash-modal-title"><%:Clash Panel%></div>
+			<div id="ssr-clash-modal-heading">
+				<div id="ssr-clash-modal-title"><%:Clash Panel%></div>
+				<div id="ssr-clash-modal-status"></div>
+			</div>
+			<div id="ssr-clash-modal-actions">
+				<input type="button" id="ssr-clash-modal-refresh" class="btn cbi-button cbi-button-apply" value="<%:Refresh%>" />
+			</div>
 			<input type="button" id="ssr-clash-modal-close" class="btn cbi-button" value="<%:Close%>" />
 		</div>
-		<div id="ssr-clash-modal-actions">
-			<input type="button" id="ssr-clash-modal-refresh" class="btn cbi-button cbi-button-apply" value="<%:Refresh%>" />
-		</div>
-		<div id="ssr-clash-modal-status"></div>
 		<div id="ssr-clash-modal-groups"></div>
 	</div>
 </div>
