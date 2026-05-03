@@ -334,6 +334,13 @@ o = s:option(Flag, "auto_update", translate("Auto Update"))
 o.rmempty = false
 o.description = translate("Auto Update Server subscription, GFW list and CHN route")
 
+o = s:option(ListValue, "config_auto_update_mode", translate("Update Mode"))
+o:value("0", translate("Appointment Mode"))
+o:value("1", translate("Loop Mode"))
+o.default = "0"
+o.rmempty = true
+o:depends("auto_update", "1")
+
 o = s:option(ListValue, "auto_update_week_time", translate("Update cycle (Day/Week)"))
 o:value('*', translate("Every Day"))
 o:value("1", translate("Every Monday"))
@@ -345,7 +352,7 @@ o:value("6", translate("Every Saturday"))
 o:value("0", translate("Every Sunday"))
 o.default = "*"
 o.rmempty = true
-o:depends("auto_update", "1")
+o:depends({auto_update = "1", config_auto_update_mode = "0"})
 
 o = s:option(ListValue, "auto_update_day_time", translate("Regular update (Hour)"))
 for t = 0, 23 do
@@ -353,7 +360,7 @@ for t = 0, 23 do
 end
 o.default = 2
 o.rmempty = true
-o:depends("auto_update", "1")
+o:depends({auto_update = "1", config_auto_update_mode = "0"})
 
 o = s:option(ListValue, "auto_update_min_time", translate("Regular update (Min)"))
 for i = 0, 59 do
@@ -361,7 +368,13 @@ for i = 0, 59 do
 end
 o.default = 30
 o.rmempty = true
-o:depends("auto_update", "1")
+o:depends({auto_update = "1", config_auto_update_mode = "0"})
+
+o = s:option(Value, "config_update_interval", translate("Update Interval(min)"))
+o.default = "60"
+o.datatype = "uinteger"
+o.rmempty = true
+o:depends({auto_update = "1", config_auto_update_mode = "1"})
 
 if has_mihomo then
 	o = s:option(DummyValue, "_upload_clash_yaml", translate("Upload Custom YAML File"))
