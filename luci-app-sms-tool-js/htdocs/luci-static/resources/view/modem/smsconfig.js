@@ -253,7 +253,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 	},
 
 	loadFileList: function() {
-		return fs.exec('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
+		return fs.exec_direct('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
 			.then(function(res) {
 				let files = (res.stdout || '').trim().split('\n').filter(f => f);
 				let fileNames = files.map(f => f.replace(this.baseDir + '/', ''));
@@ -439,7 +439,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 									} else if (name === '_load_gz') {
 										let tmpPath = '/tmp/ussdcodes_upload.tar.gz';
 										ui.uploadFile(tmpPath).then(function() {
-												return fs.exec('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
+												return fs.exec_direct('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
 											}).then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to extract archive') + ': ' + (res.stderr || '')), 'error');
@@ -465,7 +465,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 											});
 									} else if (name === '_save_gz') {
 										let tmpGz = '/tmp/ussdcodes.tar.gz';
-										fs.exec('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
+										fs.exec_direct('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
 											.then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to create archive') + ': ' + (res.stderr || '')), 'error');
@@ -544,12 +544,12 @@ let ussdCodesManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
+		fs.exec_direct('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
 			.then(function() {
 				return fs.write(filePath, '');
 			}.bind(this))
 			.then(function() {
-				return fs.exec('/bin/chmod', ['644', filePath]);
+				return fs.exec_direct('/bin/chmod', ['644', filePath]);
 			})
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File created successfully')), 5000, 'info');
@@ -587,7 +587,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec('/bin/rm', ['-f', filePath])
+		fs.exec_direct('/bin/rm', ['-f', filePath])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File deleted successfully')), 5000, 'info');
 				
@@ -615,7 +615,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 		}
 
 		let self = this;
-		fs.exec('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
+		fs.exec_direct('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('All files deleted successfully')), 5000, 'info');
 
@@ -670,7 +670,7 @@ let atCommandsManagerDialog = baseclass.extend({
 	},
 
 	loadFileList: function() {
-		return fs.exec('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
+		return fs.exec_direct('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
 			.then(function(res) {
 				let files = (res.stdout || '').trim().split('\n').filter(f => f);
 				let fileNames = files.map(f => f.replace(this.baseDir + '/', ''));
@@ -856,7 +856,7 @@ let atCommandsManagerDialog = baseclass.extend({
 									} else if (name === '_load_gz') {
 										let tmpPath = '/tmp/atcmmds_upload.tar.gz';
 										ui.uploadFile(tmpPath).then(function() {
-												return fs.exec('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
+												return fs.exec_direct('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
 											}).then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to extract archive') + ': ' + (res.stderr || '')), 'error');
@@ -882,7 +882,7 @@ let atCommandsManagerDialog = baseclass.extend({
 											});
 									} else if (name === '_save_gz') {
 										let tmpGz = '/tmp/atcmmds.tar.gz';
-										fs.exec('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
+										fs.exec_direct('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
 											.then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to create archive') + ': ' + (res.stderr || '')), 'error');
@@ -961,12 +961,12 @@ let atCommandsManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
+		fs.exec_direct('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
 			.then(function() {
 				return fs.write(filePath, '');
 			}.bind(this))
 			.then(function() {
-				return fs.exec('/bin/chmod', ['644', filePath]);
+				return fs.exec_direct('/bin/chmod', ['644', filePath]);
 			})
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File created successfully')), 5000, 'info');
@@ -1004,7 +1004,7 @@ let atCommandsManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec('/bin/rm', ['-f', filePath])
+		fs.exec_direct('/bin/rm', ['-f', filePath])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File deleted successfully')), 5000, 'info');
 				
@@ -1032,7 +1032,7 @@ let atCommandsManagerDialog = baseclass.extend({
 		}
 
 		let self = this;
-		fs.exec('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
+		fs.exec_direct('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('All files deleted successfully')), 5000, 'info');
 
@@ -1093,13 +1093,14 @@ return view.extend({
 
 		s = m.section(form.TypedSection, 'sms_tool_js', '', null);
 		s.anonymous = true;
+		s.max_sections = 1;
 
 		//TAB SMS
 
 		s.tab('smstab' , _('SMS Settings'));
-		s.anonymous = true;
 
-		o = s.taboption('smstab' , form.Value, 'readport', _('SMS reading port'), 
+		o = s.taboption('smstab' , form.Value, 'readport', _('SMS reading port'),
+ 
 			_('Select one of the available ttyUSBX ports.'));
 		devs.sort((a, b) => a.name > b.name);
 		devs.forEach(dev => o.value('/dev/' + dev.name));
@@ -1205,6 +1206,19 @@ return view.extend({
 
 		o.placeholder = _('Please select a port');
 		o.rmempty = false;
+
+		o = s.taboption('smstab' , form.Value, 'callport', _('Call log reading port'),
+			_('Select one of the available ttyUSBX ports.'));
+		devs.sort((a, b) => a.name > b.name);
+		devs.forEach(dev => o.value('/dev/' + dev.name));
+
+		o.placeholder = _('Please select a port');
+		o.rmempty = false;
+
+		o = s.taboption('smstab', form.Flag, 'calllog_enabled', _('Enable call log daemon'),
+			_('Background process to log incoming and missed calls.'));
+		o.rmempty = false;
+		o.default = '0';
 
 		o = s.taboption('smstab', form.Value, 'pnumber', _('Prefix number'),
 			_("The phone number should be preceded by the country prefix (for Poland it is 48, without '+'). If the number is 5, 4 or 3 characters, it is treated as 'short' and should not be preceded by a country prefix."));
