@@ -42,11 +42,11 @@ local log = function(...)
 end
 
 local function preferred_ss_backend()
-	if has_mihomo then
-		return "ss"
-	end
 	if has_ss_rust then
 		return "ss-rust"
+	end
+	if has_mihomo then
+		return "ss"
 	end
 	if has_xray then
 		return "v2ray"

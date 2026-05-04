@@ -259,11 +259,11 @@ local function migrate_xray_protocol_nodes()
 
 	uci:foreach("shadowsocksr", "servers", function(section)
 		if section.type == "ss" or section.type == "ss-libev" then
-			if has_mihomo then
-				uci:set("shadowsocksr", section[".name"], "type", "ss")
-				changed = true
-			elseif has_ss_rust then
+			if has_ss_rust then
 				uci:set("shadowsocksr", section[".name"], "type", "ss-rust")
+				changed = true
+			elseif has_mihomo then
+				uci:set("shadowsocksr", section[".name"], "type", "ss")
 				changed = true
 			elseif has_xray then
 				uci:set("shadowsocksr", section[".name"], "type", "v2ray")

@@ -443,7 +443,7 @@ prepare_clash_runtime_config() {
 	fi
 	local client_policy_stats=""
 	local client_rules=0
-	client_policy_stats="$(/usr/bin/lua "$CLASH_YAML_HELPER" append_client_policy_rules "$runtime_file" 2>/dev/null)" || true
+	client_policy_stats="$(/usr/bin/lua "$CLASH_YAML_HELPER" append_client_policy_rules "$runtime_file" "$sid" 2>/dev/null)" || true
 	client_rules="$(printf '%s\n' "$client_policy_stats" | sed -n 's/.*client_rules=\([0-9][0-9]*\).*/\1/p' | tail -n1)"
 	[ -n "$client_rules" ] || client_rules=0
 	if [ "$client_rules" -gt 0 ] 2>/dev/null; then
@@ -1074,24 +1074,9 @@ start_local() {
 	fi
 	case "$type" in
 	ss | ssr)
-		if [ "$local_server_type" = "ss" ]; then
-			local mihomo_bin="$(first_type mihomo)"
-			local instance_key="${LOCAL_SERVER}-local"
-			[ -x "$mihomo_bin" ] || {
-				echolog "Global_Socks5:Mihomo 内核不存在，请确认 /usr/bin/mihomo 或 /usr/libexec/mihomo 可执行。"
-				return 1
-			}
-			prepare_ss_mihomo_runtime_config "$LOCAL_SERVER" "$local_port" "$local_port" "$instance_key" "socks" || return 1
-			local ss_workdir="$(get_ss_mihomo_workdir "$instance_key")"
-			ln_start_bin "$mihomo_bin" ss-local -d "$ss_workdir" -f "$ss_workdir/config.yaml"
-			echolog "Global_Socks5:Mihomo (Shadowsocks) Started!"
-		else
+		if [ "$local_server_type" = "ssr" ]; then
 			gen_config_file $LOCAL_SERVER $type 4 $local_port
-			if [ "$local_server_type" = "ssr" ]; then
-				ss_program="$(first_type ${type}-local)"
-			elif [ "$local_server_type" = "ss-rust" ] || [ "$local_server_type" = "ss" ]; then
-				ss_program="$(first_type ${type}local)"
-			fi
+			ss_program="$(first_type ${type}-local)"
 			echolog "$(get_name $type) program is: $ss_program"
 			old_ss_program=$(readlink -f "$TMP_PATH/bin/${type}-local" 2>/dev/null)
 			if [ "$old_ss_program" != "$ss_program" ]; then
@@ -1099,6 +1084,16 @@ start_local() {
 			fi
 			ln_start_bin $ss_program ${type}-local -c $local_config_file
 			echolog "Global_Socks5:$(get_name $type) Started!"
+		else
+			gen_config_file $LOCAL_SERVER $type 4 $local_port
+			ss_program="$(first_type sslocal)"
+			echolog "ShadowSocks program is: $ss_program"
+			old_ss_program=$(readlink -f "$TMP_PATH/bin/${type}-local" 2>/dev/null)
+			if [ "$old_ss_program" != "$ss_program" ]; then
+				rm -rf "$TMP_PATH/bin/${type}-local"
+			fi
+			ln_start_bin $ss_program ${type}-local -c $local_config_file
+			echolog "Global_Socks5:Shadowsocks-rust Started!"
 		fi
 		;;
 	v2ray)
@@ -1389,27 +1384,9 @@ Start_Run() {
 	fi
 	case "$type" in
 	ss | ssr)
-		if [ "$global_server_type" = "ss" ]; then
-			local mihomo_bin="$(first_type mihomo)"
-			local ss_socks_port=0
-			[ -x "$mihomo_bin" ] || {
-				echolog "Main node:Mihomo 内核不存在，请确认 /usr/bin/mihomo 或 /usr/libexec/mihomo 可执行。"
-				return 1
-			}
-			if [ "$_local" = "1" ] && [ "$LOCAL_SERVER" = "$GLOBAL_SERVER" ]; then
-				ss_socks_port=$(uci_get_by_type socks5_proxy local_port 1080)
-			fi
-			prepare_ss_mihomo_runtime_config "$GLOBAL_SERVER" "$tcp_port" "$ss_socks_port" "$GLOBAL_SERVER" "redir" || return 1
-			local ss_workdir="$(get_ss_mihomo_workdir "$GLOBAL_SERVER")"
-			ln_start_bin "$mihomo_bin" ssr-retcp -d "$ss_workdir" -f "$ss_workdir/config.yaml"
-			echolog "Main node:Mihomo (Shadowsocks) Started!"
-		else
+		if [ "$global_server_type" = "ssr" ]; then
 			gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
-			if [ "$global_server_type" = "ssr" ]; then
-				ss_program="$(first_type ${type}-redir)"
-			elif [ "$global_server_type" = "ss-rust" ] || [ "$global_server_type" = "ss" ]; then
-				ss_program="$(first_type ${type}local)"
-			fi
+			ss_program="$(first_type ${type}-redir)"
 			echolog "$(get_name $type) program is: $ss_program"
 			old_ss_program=$(readlink -f "$TMP_PATH/bin/${type}-redir" 2>/dev/null)
 			if [ "$old_ss_program" != "$ss_program" ]; then
@@ -1419,6 +1396,16 @@ Start_Run() {
 				ln_start_bin $ss_program ${type}-redir -c $tcp_config_file
 			done
 			echolog "Main node:$(get_name $type) $threads Threads Started!"
+		else
+			gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
+			ss_program="$(first_type sslocal)"
+			echolog "ShadowSocks program is: $ss_program"
+			old_ss_program=$(readlink -f "$TMP_PATH/bin/${type}-redir" 2>/dev/null)
+			if [ "$old_ss_program" != "$ss_program" ]; then
+				rm -rf "$TMP_PATH/bin/${type}-redir"
+			fi
+			ln_start_bin $ss_program ${type}-redir -c $tcp_config_file
+			echolog "Main node:Shadowsocks-rust Started!"
 		fi
 		;;
 	v2ray)
@@ -1857,6 +1844,7 @@ start_rules() {
 			-w "$(uci_get_by_type access_control wan_fw_ips)" \
 			-B "$(uci_get_by_type access_control lan_bp_ips)" \
 			-p "$(uci_get_by_type access_control lan_fp_ips)" \
+			-G "$(uci_get_by_type access_control lan_gm_ips)" \
 			-m "$(uci_get_by_type access_control Interface)" \
 			-D "$proxyport" \
 			$(get_arg_out) $(gfwmode) $ARG_UDP $ARG_UDP_RULES $ARG_A

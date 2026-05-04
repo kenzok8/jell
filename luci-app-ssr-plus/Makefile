@@ -28,7 +28,7 @@ LUCI_TITLE:=SS/SSR/V2Ray/Trojan/NaiveProxy/Tuic/ShadowTLS/Hysteria/Socks5/Clash 
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
 	+libuci-lua +lua +luci-compat +coreutils +coreutils-base64 +dns2tcp +dnsmasq-full \
-	+jq +ip-full +lua-neturl +libuci-lua +microsocks +ipt2socks \
+	+jq +ip-full +lua-neturl +libuci-lua +microsocks +ipt2socks +lyaml \
 	+resolveip +curl +nping +unzip +xz-utils \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_MosDNS:mosdns \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Shadow_TLS:shadow-tls \
@@ -119,7 +119,6 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Http_Proxy
 config PACKAGE_$(PKG_NAME)_INCLUDE_Mihomo
 	bool "Include Mihomo (Clash Support)"
 	select PACKAGE_mihomo
-	select PACKAGE_lyaml
 	depends on aarch64||arm||i386||loongarch64||riscv64||x86_64
 	default y if aarch64||arm||i386||loongarch64||riscv64||x86_64
 
