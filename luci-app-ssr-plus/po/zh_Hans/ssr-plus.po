@@ -17,11 +17,6 @@ msgstr ""
 msgid "%s Node Use Type"
 msgstr "%s 节点使用类型"
 
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:409
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/servers.lua:227
-msgid "%s Node Use Version"
-msgstr "%s 节点使用版本"
-
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/server.lua:103
 msgid "0"
 msgstr ""
@@ -542,14 +537,6 @@ msgstr "正在检查..."
 msgid "China IP Data"
 msgstr "【中国大陆 IP 段】数据库"
 
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client.lua:255
-msgid "ChinaDNS-NG query protocol"
-msgstr "ChinaDNS-NG 查询协议"
-
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/advanced.lua:226
-msgid "ChinaDNS-NG shunt query protocol"
-msgstr "ChinaDNS-NG 分流查询协议"
-
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/advanced.lua:89
 msgid "Chnroute Update url"
 msgstr "中国大陆 IP 段更新 URL"
@@ -794,10 +781,6 @@ msgstr "禁止连接的域名"
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/control.lua:37
 msgid "Disable"
 msgstr "停用"
-
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client.lua:263
-msgid "Disable ChinaDNS-NG"
-msgstr "直通模式（禁用 ChinaDNS-NG）"
 
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/advanced.lua:152
 msgid "Disable IPv6 In MosDNS Query Mode (Shunt Mode)"
@@ -1146,14 +1129,11 @@ msgstr "SOCKS5 代理服务端（全局）"
 msgid "Global HTTP/HTTPS Proxy Server"
 msgstr "HTTP/HTTPS 代理服务端（全局）"
 
-msgid "Clash is supported only when reusing Same as Global Server."
-msgstr "Clash 仅支持在复用“与全局节点相同”时使用。"
-
 msgid "HTTP Auth Mode"
 msgstr "HTTP 认证模式"
 
-msgid "3proxy HTTP proxy auth method, default:none."
-msgstr "3proxy HTTP 代理认证方式，默认：none。"
+msgid "HTTP proxy auth method, default:none."
+msgstr "HTTP 代理认证方式，默认：none。"
 
 msgid "HTTP User"
 msgstr "HTTP 用户名"
@@ -1166,12 +1146,6 @@ msgstr "HTTP 密码"
 
 msgid "Only when HTTP Auth Mode is password valid, Not mandatory."
 msgstr "仅当 HTTP 认证模式为 password 时有效，非必填。"
-
-msgid "Relay SOCKS5 Port"
-msgstr "中继 SOCKS5 端口"
-
-msgid "Dedicated local Socks5 port used by 3proxy as upstream."
-msgstr "供 3proxy 作为上游使用的专用本地 Socks5 端口。"
 
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/server.lua:81
 msgid "Global Setting"
@@ -1633,9 +1607,9 @@ msgstr ""
 msgid "No Check"
 msgstr "未检查"
 
-#: applications/luci-app-ssr-plus/luasrc/view/shadowsocksr/ssrurl.htm:209
-msgid "No available core (Hysteria2 or Xray) to import this node."
-msgstr "没有可用的核心（Hysteria2 或 Xray）可以导入此节点。"
+#: applications/luci-app-ssr-plus/luasrc/view/shadowsocksr/ssrurl.htm:154
+msgid "No available Xray core to import this Hysteria2 node."
+msgstr "没有可用的 Xray 核心可以导入此 Hysteria2 节点。"
 
 #: applications/luci-app-ssr-plus/luasrc/view/shadowsocksr/ssrurl.htm:632
 msgid "No available core (Shadowsocks or Xray) to import this node."
@@ -2136,11 +2110,6 @@ msgstr "正在保存新的顺序…"
 msgid "Select DNS parse Mode"
 msgstr "选择 DNS 解析方式"
 
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:410
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/servers.lua:228
-msgid "Selection ShadowSocks Node Use Version."
-msgstr "选择 ShadowSocks 节点使用版本。"
-
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1593
 msgid "Self-signed Certificate"
 msgstr "自签证书"
@@ -2211,11 +2180,6 @@ msgstr "代理链类型"
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/server-config.lua:89
 msgid "ShadowSocks"
 msgstr ""
-
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:415
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/servers.lua:101
-msgid "ShadowSocks-libev Version"
-msgstr "ShadowSocks-libev 版本"
 
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:412
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:749
@@ -2601,11 +2565,6 @@ msgstr "Clash YAML 路径"
 
 msgid "Please specify either a Clash subscription URL or a local YAML path."
 msgstr "请填写 Clash 订阅 URL 或本地 YAML 路径中的至少一项。"
-
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/advanced.lua:120
-#: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client.lua:144
-msgid "Use ChinaDNS-NG query and cache"
-msgstr "使用 ChinaDNS-NG 查询并缓存"
 
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/advanced.lua:168
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client.lua:196
@@ -3299,9 +3258,6 @@ msgstr "Clash 订阅链接"
 
 msgid "Clash User-Agent"
 msgstr "Clash User-Agent"
-
-msgid "Lightweight Socks5 transparent proxy nodes are not available here. Clash can be reused only in the Same as Global Server scenario. Use Xray Socks for generic Socks outbound."
-msgstr "轻量 Socks5 透明代理节点不支持在这里使用。Clash 仅可在“与全局节点相同”的场景下复用。通用 Socks 出站请使用 Xray Socks。"
 
 msgid "Panel"
 msgstr "面板"

@@ -9,7 +9,6 @@ local reudp_run = 0
 local sock5_run = 0
 local http_run = 0
 local server_run = 0
-local kcptun_run = 0
 local tunnel_run = 0
 local gfw_count = 0
 local ad_count = 0
@@ -29,20 +28,6 @@ style_blue = [[<b style=color:red>]]
 font_off = [[</b>]]
 bold_on = [[<strong>]]
 bold_off = [[</strong>]]
-local kcptun_version = translate("Unknown")
-local kcp_file = "/usr/bin/kcptun-client"
-if not nixio.fs.access(kcp_file) then
-	kcptun_version = translate("Not exist")
-else
-	if not nixio.fs.access(kcp_file, "rwx", "rx", "rx") then
-		nixio.fs.chmod(kcp_file, 755)
-	end
-	kcptun_version = "<b>" ..luci.sys.exec(kcp_file .. " -v | awk '{printf $3}'") .. "</b>"
-	if not kcptun_version or kcptun_version == "" then
-		kcptun_version = translate("Unknown")
-	end
-end
-
 if nixio.fs.access("/etc/ssrplus/gfw_list.conf") then
 	gfw_count = tonumber(luci.sys.exec("cat /etc/ssrplus/gfw_list.conf | wc -l")) / 2
 end
@@ -110,7 +95,7 @@ if Process_list:find("local.udp.ssr.retcp") then
 	sock5_run = 1
 end
 
-if (global_type == "clash" or global_type == "tuic") and Process_list:find("ssr%-retcp") then
+if (global_type == "clash" or global_type == "tuic" or global_type == "ss") and Process_list:find("ssr%-retcp") then
 	redir_run = 1
 	reudp_run = 1
 	if global_socks_enabled and (global_socks_server == "same" or global_socks_server == global_server) then
@@ -118,7 +103,7 @@ if (global_type == "clash" or global_type == "tuic") and Process_list:find("ssr%
 	end
 end
 
-if (global_type == "clash" or global_type == "tuic") and Process_list:find("mihomo") and (Process_list:find("/clash%-") or Process_list:find("/tuic%-")) then
+if (global_type == "clash" or global_type == "tuic" or global_type == "ss") and Process_list:find("mihomo") and (Process_list:find("/clash%-") or Process_list:find("/tuic%-") or Process_list:find("/ss%-")) then
 	redir_run = 1
 	reudp_run = 1
 	if global_socks_enabled and (global_socks_server == "same" or global_socks_server == global_server) then
@@ -130,21 +115,20 @@ if has_3proxy and global_http_enabled and http_run == 0 and Process_list:find("3
 	http_run = 1
 end
 
-if Process_list:find("kcptun.client") then
-	kcptun_run = 1
-end
-
 if Process_list:find("ssr.server") then
 	server_run = 1
 end
 
+if Process_list:find("mihomo") and Process_list:find("/ss%-server%-") then
+	server_run = 1
+end
+
 if  Process_list:find("ssrplus/bin/dns2tcp") or
-    Process_list:find("ssrplus/bin/mosdns") or
-    Process_list:find("chinadns.*127.0.0.1.*5335") then
+    Process_list:find("ssrplus/bin/mosdns") then
 	pdnsd_run = 1
 end
 
-if pdnsd_mode == "7" and (global_type == "clash" or global_type == "tuic") and Process_list:find("ssr%-retcp") then
+if pdnsd_mode == "7" and (global_type == "clash" or global_type == "tuic" or global_type == "ss") and Process_list:find("ssr%-retcp") then
 	pdnsd_run = 1
 end
 
@@ -206,19 +190,6 @@ if server_run == 1 then
 	s.value = font_blue .. bold_on .. translate("Running") .. bold_off .. font_off
 else
 	s.value = style_blue .. bold_on .. translate("Not Running") .. bold_off .. font_off
-end
-
-if nixio.fs.access("/usr/bin/kcptun-client") then
-	s = m:field(DummyValue, "kcp_version", translate("KcpTun Version"))
-	s.rawhtml = true
-	s.value = kcptun_version
-	s = m:field(DummyValue, "kcptun_run", translate("KcpTun"))
-	s.rawhtml = true
-	if kcptun_run == 1 then
-		s.value = font_blue .. bold_on .. translate("Running") .. bold_off .. font_off
-	else
-		s.value = style_blue .. bold_on .. translate("Not Running") .. bold_off .. font_off
-	end
 end
 
 s = m:field(Button, "Restart", translate("Restart ShadowSocksR Plus+"))

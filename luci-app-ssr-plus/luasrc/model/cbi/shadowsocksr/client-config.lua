@@ -147,8 +147,7 @@ local function set_apply_on_parse(map)
 	end
 end
 
-local has_ss_rust = is_finded("sslocal") or is_finded("ssserver")
-local has_ss_libev = is_finded("ss-redir") or is_finded("ss-local")
+local has_mihomo = is_finded("mihomo")
 local has_xray = is_finded("xray")
 
 local server_table = {}
@@ -258,6 +257,16 @@ local function migrate_xray_protocol_nodes()
 	local changed = false
 
 	uci:foreach("shadowsocksr", "servers", function(section)
+		if section.type == "ss" or section.type == "ss-libev" then
+			if has_mihomo then
+				uci:set("shadowsocksr", section[".name"], "type", "ss")
+				changed = true
+			elseif has_xray then
+				uci:set("shadowsocksr", section[".name"], "type", "v2ray")
+				uci:set("shadowsocksr", section[".name"], "v2ray_protocol", "shadowsocks")
+				changed = true
+			end
+		end
 		if section.type == "hysteria2" then
 			uci:set("shadowsocksr", section[".name"], "type", "v2ray")
 			uci:set("shadowsocksr", section[".name"], "v2ray_protocol", "hysteria2")
@@ -325,49 +334,28 @@ end
 if is_finded("ssr-redir") then
 	o:value("ssr", translate("ShadowsocksR"))
 end
-if has_ss_rust or has_ss_libev then
-    o:value("ss", translate("ShadowSocks"))
+if has_mihomo then
+	o:value("ss", translate("ShadowSocks"))
 end
-	if is_finded("naive") then
-		o:value("naiveproxy", translate("NaiveProxy"))
-	end
-	if is_finded("mihomo") then
-		o:value("clash", translate("Clash/Mihomo"))
-	end
-	if is_finded("mihomo") then
-		o:value("tuic", translate("TUIC"))
-	end
-	if is_finded("shadow-tls") and is_finded("sslocal") then
-		o:value("shadowtls", translate("Shadow-TLS"))
-	end
-	if is_finded("ipt2socks") then
-		o:value("socks5", translate("Socks5"))
-	end
-	local old_cfgvalue = o.cfgvalue
+if is_finded("naive") then
+	o:value("naiveproxy", translate("NaiveProxy"))
+end
+if is_finded("mihomo") then
+	o:value("clash", translate("Clash/Mihomo"))
+end
+if is_finded("mihomo") then
+	o:value("tuic", translate("TUIC"))
+end
+local old_cfgvalue = o.cfgvalue
 o.cfgvalue = function(self, section)
-    local val = self.map.uci:get("shadowsocksr", section, "type")
-    if val == "ss-rust" or val == "ss-libev" then
-		return "ss"
-    end
-    if old_cfgvalue then
+	local val = self.map.uci:get("shadowsocksr", section, "type")
+	if old_cfgvalue then
 		return old_cfgvalue(self, section)
-    end
-    return val
-end
--- 重写 write，当用户选择 "ss" 时不写入（由 _ss_core 负责写入具体核心）
-local old_write = o.write
-o.write = function(self, section, value)
-    if value == "ss" then
-		return  -- 不做任何写入，等待 _ss_core 写入
-    end
-    if old_write then
-		old_write(self, section, value)
-    else
-		self.map.uci:set("shadowsocksr", section, "type", value)
-    end
+	end
+	return val
 end
 
-	o.description = translate("Using incorrect encryption mothod may causes service fail to start")
+		o.description = translate("Using incorrect encryption mothod may causes service fail to start")
 
 	o = s:option(Value, "alias", translate("Alias(optional)"))
 
@@ -405,40 +393,6 @@ end
 	o.rmempty = false
 	o:depends("type", "clash")
 
-	-- 新增一个选择框，用于选择 Shadowsocks 具体版本（仅当节点类型为 ss 或其具体子类型时显示）
-o = s:option(ListValue, "_ss_core", string.format("<b><span style='color:red;'>%s</span></b>", translatef("%s Node Use Version", "ShadowSocks")))
-o.description = translate("Selection ShadowSocks Node Use Version.")
-if has_ss_rust then
-    o:value("ss-rust", translate("ShadowSocks-rust Version"))
-end
-if has_ss_libev then
-    o:value("ss-libev", translate("ShadowSocks-libev Version"))
-end
-o.cfgvalue = function(self, section)
-    -- 读取当前节点的 type 值，如果已经是具体核心则显示对应的选项
-    local node_type = self.map.uci:get("shadowsocksr", section, "type")
-    if node_type == "ss-rust" or node_type == "ss-libev" then
-		return node_type
-    end
-    -- 节点 type 为旧的 "ss" 时，按本地可用核心自动优先选择
-    if has_ss_rust then
-		return "ss-rust"
-    end
-    if has_ss_libev then
-		return "ss-libev"
-    end
-    return nil
-end
--- 显示条件：当节点类型为 "ss" 或其具体核心时显示
-o:depends("type", "ss")
-o.rmempty = true
--- 保存时，将选择的值直接写入当前节点的 type 字段
-o.write = function(self, section, value)
-    if value and value ~= "" then
-		self.map.uci:set("shadowsocksr", section, "type", value)
-    end
-end
-
 o = s:option(ListValue, "v2ray_protocol", translate("V2Ray/XRay protocol"))
 o:value("vless", translate("VLESS"))
 o:value("vmess", translate("VMess"))
@@ -454,30 +408,28 @@ o:value("socks", translate("Socks"))
 o:value("http", translate("HTTP"))
 o:depends("type", "v2ray")
 
-o = s:option(Value, "server", translate("Server Address"))
-o.datatype = "or(host,ip6addr)"
-o.rmempty = false
-o:depends("type", "ssr")
-o:depends("type", "ss")
-o:depends("type", "v2ray")
+	o = s:option(Value, "server", translate("Server Address"))
+	o.datatype = "or(host,ip6addr)"
+	o.rmempty = false
+	o:depends("type", "ssr")
+	o:depends("type", "ss")
+	o:depends("type", "v2ray")
 o:depends("type", "trojan")
 	o:depends("type", "naiveproxy")
 	o:depends("type", "hysteria2")
 	o:depends("type", "tuic")
-	o:depends("type", "shadowtls")
 	o:depends("type", "socks5")
 
-o = s:option(Value, "server_port", translate("Server Port"))
-o.datatype = "port"
-o.rmempty = true
-o:depends("type", "ssr")
-o:depends("type", "ss")
-o:depends("type", "v2ray")
+	o = s:option(Value, "server_port", translate("Server Port"))
+	o.datatype = "port"
+	o.rmempty = true
+	o:depends("type", "ssr")
+	o:depends("type", "ss")
+	o:depends("type", "v2ray")
 o:depends("type", "trojan")
 	o:depends("type", "naiveproxy")
 	o:depends("type", "hysteria2")
 	o:depends("type", "tuic")
-	o:depends("type", "shadowtls")
 	o:depends("type", "socks5")
 
 o = s:option(Flag, "auth_enable", translate("Enable Authentication"))
@@ -494,14 +446,13 @@ o:depends({type = "socks5", auth_enable = true})
 o:depends({type = "v2ray", v2ray_protocol = "http", auth_enable = true})
 o:depends({type = "v2ray", v2ray_protocol = "socks", auth_enable = true})
 
-o = s:option(Value, "password", translate("Password"))
-o.password = true
-o.rmempty = true
-o:depends("type", "ssr")
-o:depends("type", "ss")
-o:depends("type", "trojan")
+	o = s:option(Value, "password", translate("Password"))
+	o.password = true
+	o.rmempty = true
+	o:depends("type", "ssr")
+	o:depends("type", "ss")
+	o:depends("type", "trojan")
 o:depends("type", "naiveproxy")
-o:depends("type", "shadowtls")
 o:depends({type = "socks5", auth_enable = true})
 o:depends({type = "v2ray", v2ray_protocol = "http", auth_enable = true})
 o:depends({type = "v2ray", v2ray_protocol = "socks", socks_ver = "5", auth_enable = true})
@@ -515,7 +466,7 @@ end
 o.rmempty = true
 o:depends("type", "ssr")
 
-o = s:option(ListValue, "encrypt_method_ss", translate("Encrypt Method"))
+	o = s:option(ListValue, "encrypt_method_ss", translate("Encrypt Method"))
 for _, v in ipairs(encrypt_methods_ss) do
 	if v == "none" then
 	   o.default = "none"
@@ -524,9 +475,37 @@ for _, v in ipairs(encrypt_methods_ss) do
 	    o:value(v, translate(v))
 	end
 end
+	o.rmempty = true
+	o:depends("type", "ss")
+	o:depends({type = "v2ray", v2ray_protocol = "shadowsocks"})
+
+o = s:option(Flag, "enable_plugin", translate("Enable Plugin"))
 o.rmempty = true
 o:depends("type", "ss")
-o:depends({type = "v2ray", v2ray_protocol = "shadowsocks"})
+o.default = "0"
+
+o = s:option(ListValue, "plugin", translate("Plugin"))
+o:value("none", translate("None"))
+o:value("obfs-local", translate("obfs-local"))
+o:value("v2ray-plugin", translate("v2ray-plugin"))
+o:value("shadow-tls", translate("shadow-tls"))
+o:value("kcptun", translate("KcpTun"))
+o:value("custom", translate("Custom"))
+o.rmempty = true
+o:depends({type = "ss", enable_plugin = true})
+
+o = s:option(Value, "custom_plugin", translate("Custom Plugin Path"))
+o.placeholder = "/path/to/custom-plugin"
+o:depends({type = "ss", plugin = "custom"})
+
+o = s:option(Value, "plugin_opts", translate("Plugin Opts"))
+o.rmempty = true
+o:depends({type = "ss", enable_plugin = true})
+
+o = s:option(Value, "client_fingerprint", translate("Client Fingerprint"))
+o.rmempty = true
+o.placeholder = "chrome"
+o:depends({type = "ss", plugin = "shadow-tls"})
 
 o = s:option(Flag, "uot", translate("UDP over TCP"))
 o.description = translate("Enable the SUoT protocol, requires server support.")
@@ -540,38 +519,6 @@ o:depends({type = "v2ray", v2ray_protocol = "shadowsocks"})
 o.default = "1"
 
 -- [[ Enable Shadowsocks Plugin ]]--
-o = s:option(Flag, "enable_plugin", translate("Enable Plugin"))
-o.rmempty = true
-o:depends("type", "ss")
-o.default = "0"
-
--- Shadowsocks Plugin
-o = s:option(ListValue, "plugin", translate("Obfs"))
-o:value("none", translate("None"))
-if is_finded("obfs-local") then
-	o:value("obfs-local", translate("obfs-local"))
-end
-if is_finded("v2ray-plugin") then
-	o:value("v2ray-plugin", translate("v2ray-plugin"))
-end
-if is_finded("xray-plugin") then
-	o:value("xray-plugin", translate("xray-plugin"))
-end
-if is_finded("shadow-tls") then
-	o:value("shadow-tls", translate("shadow-tls"))
-end
-o:value("custom", translate("Custom"))
-o.rmempty = true
-o:depends({enable_plugin = true})
-
-o = s:option(Value, "custom_plugin", translate("Custom Plugin Path"))
-o.placeholder = "/path/to/custom-plugin"
-o:depends({plugin = "custom"})
-
-o = s:option(Value, "plugin_opts", translate("Plugin Opts"))
-o.rmempty = true
-o:depends({enable_plugin = true})
-
 o = s:option(ListValue, "protocol", translate("Protocol"))
 for _, v in ipairs(protocol) do
 	o:value(v)
@@ -713,70 +660,6 @@ o.rmempty = true
 o.datatype = "uinteger"
 o.default = "10"
 
-
---[[ Shadow-TLS Options ]]
-o = s:option(ListValue, "shadowtls_protocol", translate("shadowTLS protocol Version"))
-o:depends("type", "shadowtls")
-o:value("v3", translate("Enable V3 protocol."))
-o:value("v2", translate("Enable V2 protocol."))
-o.default = "v3"
-o.rmempty = true
-
-o = s:option(Flag, "strict", translate("TLS 1.3 Strict mode"))
-o:depends("type", "shadowtls")
-o.default = "1"
-o.rmempty = false
-
-o = s:option(Flag, "fastopen", translate("TCP Fast Open"), translate("Enabling TCP Fast Open Requires Server Support."))
-o:depends("type", "shadowtls")
-o.default = "0"
-o.rmempty = false
-
-o = s:option(Flag, "disable_nodelay", translate("Disable TCP No_delay"))
-o:depends("type", "shadowtls")
-o.default = "0"
-o.rmempty = true
-
-o = s:option(Value, "shadowtls_sni", translate("shadow-TLS SNI"))
-o:depends("type", "shadowtls")
-o.datatype = "host"
-o.rmempty = true
-o.default = ""
-
---[[ add a ListValue for Choose chain type,sslocal or vmess ]]
-o = s:option(ListValue, "chain_type", translate("Shadow-TLS ChainPoxy type"))
-o:depends("type", "shadowtls")
-if is_finded("sslocal") then
-	o:value("sslocal", translate("ShadowSocks-rust Version"))
-end
-if is_finded("xray") then
-	o:value("vmess", translate("Vmess Protocol"))
-end
-o.default = "sslocal"
-o.rmempty = false
-
-o = s:option(Value, "sslocal_password",translate("Shadowsocks password"))
-o:depends({type = "shadowtls", chain_type = "sslocal"})
-o.rmempty = true
-
-o = s:option(ListValue, "sslocal_method", translate("Encrypt Method"))
-o:depends({type = "shadowtls", chain_type = "sslocal"})
-for _, v in ipairs(encrypt_methods_ss) do
-	o:value(v)
-end
-
-o = s:option(Value, "vmess_uuid", translate("Vmess UUID"))
-o:depends({type = "shadowtls", chain_type = "vmess"})
-o.rmempty = false
-o.default = uuid
-
-o = s:option(ListValue, "vmess_method", translate("Encrypt Method"))
-o:depends({type = "shadowtls", chain_type = "vmess"})
-for _, v in ipairs(securitys) do
-	o:value(v, v:lower())
-end
-o.rmempty = true
-o.default="auto"
 
 -- [[ TUIC ]]
 -- TuicNameId
@@ -1655,28 +1538,22 @@ o = s:option(Flag, "switch_enable", translate("Enable Auto Switch"))
 o.rmempty = false
 o.default = "1"
 
-if is_finded("kcptun-client") then
-	o = s:option(Flag, "kcp_enable", translate("KcpTun Enable"))
-	o.rmempty = true
-	o.default = "0"
-	o:depends("type", "ssr")
-	o:depends("type", "ss")
+o = s:option(Flag, "kcp_enable", translate("KcpTun Enable"))
+o.rmempty = true
+o.default = "0"
+o:depends("type", "ss")
 
-	o = s:option(Value, "kcp_port", translate("KcpTun Port"))
-	o.datatype = "portrange"
-	o.default = 4000
-	o:depends("type", "ssr")
-	o:depends("type", "ss")
+o = s:option(Value, "kcp_port", translate("KcpTun Port"))
+o.datatype = "portrange"
+o.default = 4000
+o:depends("type", "ss")
 
-	o = s:option(Value, "kcp_password", translate("KcpTun Password"))
-	o.password = true
-	o:depends("type", "ssr")
-	o:depends("type", "ss")
+o = s:option(Value, "kcp_password", translate("KcpTun Password"))
+o.password = true
+o:depends("type", "ss")
 
-	o = s:option(Value, "kcp_param", translate("KcpTun Param"))
-	o.default = "--nocomp"
-	o:depends("type", "ssr")
-	o:depends("type", "ss")
-end
+o = s:option(Value, "kcp_param", translate("KcpTun Param"))
+o.default = "--nocomp"
+o:depends("type", "ss")
 
 return m

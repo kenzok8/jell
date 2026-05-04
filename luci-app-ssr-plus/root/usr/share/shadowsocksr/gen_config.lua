@@ -49,7 +49,7 @@ local b64decode = nixio.bin.b64decode
 local b64encode = nixio.bin.b64encode
 local effective_node_local_port = tonumber(server.local_port) or tonumber(default_node_local_port) or 1234
 
-if server.type == "ss-rust" or server.type == "ss-libev" then
+if server.type == "ss-rust" then
     server.type = "ss"
 end
 
@@ -386,11 +386,11 @@ if proto and proto:find("tcp") and socks_port ~= "0" then
         -- socks
         protocol = "socks",
         port = tonumber(socks_port),
-        settings = {
+		settings = {
 			auth = socks_server.socks5_auth or "noauth",
 			udp = true,
-			mixed = ((socks_server.socks5_mixed == '1') and true or false) or (socks_server.server == 'same') and nil,
-			accounts = (socks_server.server ~= "same" and (socks_server.socks5_auth and socks_server.socks5_auth ~= "noauth")) and {
+			mixed = ((socks_server.socks5_mixed == '1') and true or false) or nil,
+			accounts = (socks_server.socks5_auth and socks_server.socks5_auth ~= "noauth") and {
 				{
 					user = socks_server.socks5_user,
 					pass = socks_server.socks5_pass
