@@ -286,6 +286,15 @@ msgstr ""
 msgid "Auto Update Server subscription, GFW list and CHN route"
 msgstr ""
 
+msgid "Update Mode"
+msgstr ""
+
+msgid "Appointment Mode"
+msgstr ""
+
+msgid "Loop Mode"
+msgstr ""
+
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:811
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1569
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1585
@@ -381,6 +390,15 @@ msgstr ""
 
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/advanced.lua:72
 msgid "Check timout(second)"
+msgstr ""
+
+msgid "Second"
+msgstr ""
+
+msgid "Timeout"
+msgstr ""
+
+msgid "Try Count"
 msgstr ""
 
 #: applications/luci-app-ssr-plus/luasrc/view/shadowsocksr/check.htm:6

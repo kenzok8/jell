@@ -431,6 +431,15 @@ msgstr "自动更新"
 msgid "Auto Update Server subscription, GFW list and CHN route"
 msgstr "自动更新服务器订阅、GFW 列表和中国大陆 IP 段"
 
+msgid "Update Mode"
+msgstr "更新模式"
+
+msgid "Appointment Mode"
+msgstr "定时模式"
+
+msgid "Loop Mode"
+msgstr "循环模式"
+
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:811
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1569
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1585
@@ -527,6 +536,15 @@ msgstr "切换检查重试次数"
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/advanced.lua:72
 msgid "Check timout(second)"
 msgstr "切换检查超时时间（秒）"
+
+msgid "Second"
+msgstr "周期"
+
+msgid "Timeout"
+msgstr "超时"
+
+msgid "Try Count"
+msgstr "重试次数"
 
 #: applications/luci-app-ssr-plus/luasrc/view/shadowsocksr/check.htm:6
 #: applications/luci-app-ssr-plus/luasrc/view/shadowsocksr/checkport.htm:6
@@ -2013,7 +2031,7 @@ msgstr "定时更新（分钟）"
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1572
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1588
 msgid "Reno"
-msgstr ""
+msgstr "Reno"
 
 #: applications/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client-config.lua:1217
 msgid "Reserved bytes(optional)"
