@@ -27,15 +27,10 @@ start_service() {
     procd_set_param stderr 1
     procd_set_param respawn "${respawn_threshold:-3600}" "${respawn_timeout:-5}" "${respawn_retry:-5}"
     procd_close_instance hickory-dns
-}
-
-start() {
-    rc_procd start_service "$@"
     # Journal was wiped above; restart ipv6-neigh so it re-registers all
     # dynamic DNS entries from the current neighbour table.
     /etc/init.d/ipv6-neigh restart
 }
-
 
 service_triggers() {
     procd_add_reload_trigger "dhcp" "network" "system"
