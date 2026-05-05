@@ -6,6 +6,31 @@ user = "nobody"
 group = "nogroup"
 
 [[zones]]
+zone = "localhost"
+zone_type = "Primary"
+file = "/etc/hickory-dns/localhost.zone"
+
+[[zones]]
+zone = "0.0.127.in-addr.arpa"
+zone_type = "Secondary"
+file = "/etc/hickory-dns/127.0.0.1.zone"
+
+[[zones]]
+zone = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa"
+zone_type = "Primary"
+file = "/etc/hickory-dns/ipv6_1.zone"
+
+[[zones]]
+zone = "255.in-addr.arpa"
+zone_type = "Primary"
+file = "/etc/hickory-dns/255.zone"
+
+[[zones]]
+zone = "0.in-addr.arpa"
+zone_type = "Primary"
+file = "/etc/hickory-dns/0.zone"
+
+[[zones]]
 zone = "lan"
 zone_type = "Primary"
 
@@ -27,7 +52,7 @@ zone_type = "External"
 
 [[zones.stores]]
 type = "forward"
-options = { edns0 = true, ip_strategy = "Ipv6AndIpv4", cache_size = 10240, use_hosts_file = "Never", num_concurrent_reqs = 1, server_ordering_strategy = "RoundRobin" }
+options = { edns0 = true, ip_strategy = "Ipv6AndIpv4", cache_size = 8192, use_hosts_file = "Always", num_concurrent_reqs = 1, server_ordering_strategy = "RoundRobin" }
 
 [[zones.stores.name_servers]]
 ip = "2400:3200:baba::1"

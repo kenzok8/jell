@@ -1,0 +1,11 @@
+$TTL 3D
+@               IN      SOA     ns.lan. admin.lan. (
+                                199609203       ; Serial
+                                28800   ; Refresh
+                                7200    ; Retry
+                                604800  ; Expire
+                                86400)  ; Minimum TTL
+                        NS      ns.lan.
+
+localhost.              A        127.0.0.1
+                        AAAA     ::1

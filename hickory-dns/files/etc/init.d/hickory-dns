@@ -17,6 +17,10 @@ generate_tsig_key() {
 
 start_service() {
     generate_tsig_key
+    # Remove stale journal so hickory-dns always starts from the zone file.
+    # ipv6-neigh re-registers all dynamic entries on startup, so the journal
+    # has no durable value and may contain a corrupt state after unclean shutdown.
+    rm -f /var/lib/hickory-dns/lan.jrnl
     procd_open_instance hickory-dns
     procd_set_param command $PROG -c $CONF -q
     procd_set_param stdout 1
@@ -25,7 +29,15 @@ start_service() {
     procd_close_instance hickory-dns
 }
 
+start() {
+    rc_procd start_service "$@"
+    # Journal was wiped above; restart ipv6-neigh so it re-registers all
+    # dynamic DNS entries from the current neighbour table.
+    /etc/init.d/ipv6-neigh restart
+}
+
 
 service_triggers() {
     procd_add_reload_trigger "dhcp" "network" "system"
+    procd_add_reload_interface_trigger "wan_6"
 }

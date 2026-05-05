@@ -227,7 +227,7 @@ async fn main() -> Result<(), ()> {
         if event_count % 50 == 0 {
             if let Ok(new_leases) = op::get_lease() {
                 leases = new_leases;
-                info!("refreshed {} DHCP leases", leases.len());
+                debug!("refreshed {} DHCP leases", leases.len());
             }
         }
 

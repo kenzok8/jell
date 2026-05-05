@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ipv6-neigh
 PKG_VERSION:=0.1.0
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_BUILD_DEPENDS:=rust/host
 PKG_BUILD_PARALLEL:=1
@@ -26,6 +26,13 @@ define Package/ipv6-neigh/description
   updates DNS records in a local hickory-dns server using RFC 2136
   DNS UPDATE over TCP. Maps MAC addresses to hostnames via OpenWrt
   DHCP leases (ubus).
+endef
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)/src
+	$(CP) $(CURDIR)/src/. $(PKG_BUILD_DIR)/src/
+	$(CP) $(CURDIR)/Cargo.toml $(PKG_BUILD_DIR)/
+	$(CP) $(CURDIR)/Cargo.lock $(PKG_BUILD_DIR)/
 endef
 
 define Build/Compile
