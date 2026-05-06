@@ -11,93 +11,97 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: htdocs/luci-static/resources/view/socat.js:27
-#: root/usr/share/luci/menu.d/luci-app-socat.json:3
-msgid "Socat"
-msgstr ""
-
-#: htdocs/luci-static/resources/view/socat.js:27
-msgid ""
-"Socat is a relay for bidirectional data transfer between two independent "
-"data channels."
-msgstr "Socat 是一个在两个独立数据通道之间进行双向数据转发的工具。"
-
-#: htdocs/luci-static/resources/view/socat.js:29
-msgid "Global Settings"
-msgstr "全局设置"
-
-#: htdocs/luci-static/resources/view/socat.js:32
-#: htdocs/luci-static/resources/view/socat.js:51
-msgid "Enabled"
-msgstr "启用"
-
-#: htdocs/luci-static/resources/view/socat.js:35
-#: htdocs/luci-static/resources/view/socat.js:84
-msgid "Port Forwarding"
-msgstr "端口转发"
-
-#: htdocs/luci-static/resources/view/socat.js:48
-msgid "Socat Configuration"
-msgstr "Socat 配置"
-
-#: htdocs/luci-static/resources/view/socat.js:56
-msgid "Status"
-msgstr "状态"
-
-#: htdocs/luci-static/resources/view/socat.js:81
-msgid "Remarks"
-msgstr "备注"
-
-#: htdocs/luci-static/resources/view/socat.js:83
-msgid "Protocol Type"
-msgstr "协议类型"
-
-#: htdocs/luci-static/resources/view/socat.js:87
-msgid "Listen Address Family"
-msgstr "监听地址族"
-
-#: htdocs/luci-static/resources/view/socat.js:88
-msgid "IPv4 and IPv6"
-msgstr "IPv4 和 IPv6"
-
-#: htdocs/luci-static/resources/view/socat.js:89
-msgid "IPv4 Only"
-msgstr "仅 IPv4"
-
-#: htdocs/luci-static/resources/view/socat.js:90
-msgid "IPv6 Only"
-msgstr "仅 IPv6"
-
-#: htdocs/luci-static/resources/view/socat.js:94
-msgid "Listen Protocol"
-msgstr "监听协议"
-
-#: htdocs/luci-static/resources/view/socat.js:108
-msgid "Listen Port"
-msgstr "监听端口"
-
-#: htdocs/luci-static/resources/view/socat.js:113
-msgid "Reuse Port"
-msgstr "重用端口"
-
-#: htdocs/luci-static/resources/view/socat.js:113
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:113
 msgid ""
 "Allow binding to the port even when previous connections are in TIME_WAIT, "
 "preventing restart failures."
 msgstr "允许在端口处于 TIME_WAIT 状态时立即重新绑定，避免服务重启失败。"
 
-#: htdocs/luci-static/resources/view/socat.js:118
-msgid "Destination Protocol"
-msgstr "目标协议"
-
-#: htdocs/luci-static/resources/view/socat.js:125
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:125
 msgid "Destination Address"
 msgstr "目标地址"
 
-#: htdocs/luci-static/resources/view/socat.js:137
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:137
 msgid "Destination Port"
 msgstr "目标端口"
 
-#: htdocs/luci-static/resources/view/socat.js:141
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:118
+msgid "Destination Protocol"
+msgstr "目标协议"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:32
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:51
+msgid "Enabled"
+msgstr "启用"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:29
+msgid "Global Settings"
+msgstr "全局设置"
+
+#: luci-app-socat/root/usr/share/rpcd/acl.d/luci-app-socat.json:3
+msgid "Grant UCI access for luci-app-socat"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:89
+msgid "IPv4 Only"
+msgstr "仅 IPv4"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:88
+msgid "IPv4 and IPv6"
+msgstr "IPv4 和 IPv6"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:90
+msgid "IPv6 Only"
+msgstr "仅 IPv6"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:87
+msgid "Listen Address Family"
+msgstr "监听地址族"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:108
+msgid "Listen Port"
+msgstr "监听端口"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:94
+msgid "Listen Protocol"
+msgstr "监听协议"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:141
 msgid "Open Firewall Port"
 msgstr "打开防火墙端口"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:35
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:84
+msgid "Port Forwarding"
+msgstr "端口转发"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:83
+msgid "Protocol Type"
+msgstr "协议类型"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:81
+msgid "Remarks"
+msgstr "备注"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:113
+msgid "Reuse Port"
+msgstr "重用端口"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:27
+#: luci-app-socat/root/usr/share/luci/menu.d/luci-app-socat.json:3
+msgid "Socat"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:48
+msgid "Socat Configuration"
+msgstr "Socat 配置"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:27
+msgid ""
+"Socat is a relay for bidirectional data transfer between two independent "
+"data channels."
+msgstr "Socat 是一个在两个独立数据通道之间进行双向数据转发的工具。"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:56
+msgid "Status"
+msgstr "状态"
