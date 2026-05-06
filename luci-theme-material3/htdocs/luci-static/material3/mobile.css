@@ -2,14 +2,14 @@ header h3 a {
 	display: none !important;
 }
 
-body[data-page="admin-status-overview"] .cbi-title .label {
+:is(body[data-page="admin-status-overview"], body[data-page=""]) .cbi-title .label {
 	width: 32px;
 	padding: 0;
 	font-size: 0 !important;
 	gap: 0;
 }
 
-body[data-page="admin-status-overview"] .cbi-title .label::before {
+:is(body[data-page="admin-status-overview"], body[data-page=""]) .cbi-title .label::before {
 	flex: 0 0 auto;
 }
 
@@ -307,23 +307,49 @@ body[data-page="admin-status-overview"] .cbi-title .label::before {
 		padding: 8px;
 	}
 
-	[data-page="admin-status-overview"] .td[width="33%"] {
+	:is([data-page="admin-status-overview"], [data-page=""]) .td[width="33%"] {
 		flex-basis: 33%;
 	}
 
-	[data-page="admin-status-overview"] .table {
-		margin: 4px;
-		width: calc(100% - 8px);
-	}
-
-	[data-page="admin-status-overview"] .table,
-	[data-page="admin-status-overview"] .tr,
-	[data-page="admin-status-overview"] .td,
-	[data-page="admin-status-overview"] .th,
-	[data-page="admin-status-overview"] .tr[data-title]::before,
-	[data-page="admin-status-overview"] .td[data-title]::before {
+	:is([data-page="admin-status-overview"], [data-page=""]) .table,
+	:is([data-page="admin-status-overview"], [data-page=""]) .tr,
+	:is([data-page="admin-status-overview"], [data-page=""]) .td,
+	:is([data-page="admin-status-overview"], [data-page=""]) .th,
+	:is([data-page="admin-status-overview"], [data-page=""]) .tr[data-title]::before,
+	:is([data-page="admin-status-overview"], [data-page=""]) .td[data-title]::before {
 		border-top: 0;
 		border-bottom: 0;
+	}
+
+	:is([data-page="admin-dashboard"], [data-page="admin"], [data-page=""]) .Dashboard .router-status-wifi .assoclist.devices-info {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	:is([data-page="admin-dashboard"], [data-page="admin"], [data-page=""]) .Dashboard .router-status-wifi .assoclist.devices-info .tr {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		align-items: stretch;
+		margin: 0;
+		padding: 0;
+	}
+
+	:is([data-page="admin-dashboard"], [data-page="admin"], [data-page=""]) .Dashboard .router-status-wifi .assoclist.devices-info .th,
+	:is([data-page="admin-dashboard"], [data-page="admin"], [data-page=""]) .Dashboard .router-status-wifi .assoclist.devices-info .td {
+		display: block;
+		width: auto !important;
+		min-width: 0;
+		padding: 5px 6px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		word-break: keep-all;
+	}
+
+	:is([data-page="admin-dashboard"], [data-page="admin"], [data-page=""]) .Dashboard .router-status-wifi .assoclist.devices-info .tr> :nth-child(4) {
+		white-space: normal;
+		word-break: keep-all;
+		overflow-wrap: normal;
 	}
 
 	header .pull-right .label {

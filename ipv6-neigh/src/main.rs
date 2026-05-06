@@ -1,15 +1,18 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr as StdSocketAddr};
+use std::time::Instant;
 
 use futures::stream::StreamExt;
 use futures::stream::TryStreamExt;
-use log::{debug, error, info, warn};
+use log::{debug, error, info};
 use netlink_packet_core::NetlinkPayload;
 use netlink_packet_route::RouteNetlinkMessage;
 use netlink_packet_route::neighbour::NeighbourMessage;
 use netlink_packet_route::neighbour::{NeighbourAddress, NeighbourAttribute, NeighbourState};
 use netlink_packet_route::route::RouteType;
 use rtnetlink::{Error, Handle, new_connection};
+use socket2::{Domain, Protocol, SockAddr, Socket, Type};
+use tokio::time::{self, Duration};
 
 use clap::Parser;
 use hickory_proto::rr::Name;
@@ -33,8 +36,6 @@ const fn nl_mgrp(group: u32) -> u32 {
 #[clap()]
 struct Cli {
     #[clap(short, long)]
-    iface: Option<String>,
-    #[clap(short, long)]
     private_subnet: bool,
     /// hickory-dns server address for DNS updates (e.g. "[::1]:5335")
     #[clap(short, long, default_value = "[::1]:5335")]
@@ -51,6 +52,9 @@ struct Cli {
     /// Log level (error, warn, info, debug, trace)
     #[clap(short = 'l', long, default_value = "info")]
     log_level: String,
+    /// Probe interval in seconds for active reachability checks (0 to disable)
+    #[clap(long, default_value = "120")]
+    probe_interval: u64,
 }
 
 #[derive(Debug)]
@@ -150,6 +154,16 @@ fn should_skip_neigh(neigh: &Neigh) -> bool {
     should_skip_route_type(neigh.kind)
 }
 
+/// Whether this NUD state indicates the neighbour is likely reachable (register in DNS).
+fn is_reachable_state(state: NeighbourState) -> bool {
+    matches!(state, NeighbourState::Reachable | NeighbourState::Stale | NeighbourState::Delay | NeighbourState::Probe)
+}
+
+/// Whether this NUD state indicates the neighbour is definitely gone (remove from DNS).
+fn is_failed_state(state: NeighbourState) -> bool {
+    matches!(state, NeighbourState::Failed)
+}
+
 #[tokio::main]
 async fn main() -> Result<(), ()> {
     let args = Cli::parse();
@@ -176,30 +190,26 @@ async fn main() -> Result<(), ()> {
 
     let (connection, handle, _) = new_connection().unwrap();
     tokio::spawn(connection);
-    if let Some(ref iface) = args.iface {
-        if let Err(e) = dump_addresses(handle.clone(), iface.clone()).await {
-            warn!("failed to dump addresses for iface {}: {}", iface, e);
-        }
-    }
 
     // Load DHCP leases (mac -> hostname) from ubus
     let mut leases = op::get_lease().unwrap_or_default();
     info!("loaded {} DHCP leases", leases.len());
 
-    // State cache: tracks (mac, ip_string) pairs already registered
-    let mut registered: HashSet<(String, String)> = HashSet::new();
+    // State cache: tracks (mac, ip_string) -> last confirmed time
+    let mut registered: HashMap<(String, String), Instant> = HashMap::new();
 
-    // Dump existing neighbours and register them
+    // Dump existing neighbours and register only reachable/stale ones
     debug!("dumping neighbours");
     if let Ok(neighbours) = dump_neighbours(handle.clone(), private_subnet).await {
         for neigh in &neighbours {
             debug!("{:?}", neigh);
-            if !should_skip_neigh(neigh) {
-                let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
-                if registered.insert(key.clone()) {
-                    if !process_new_neigh(neigh, &updater, &leases).await {
-                        registered.remove(&key);
-                    }
+            if should_skip_neigh(neigh) || !is_reachable_state(neigh.state) {
+                continue;
+            }
+            let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
+            if !registered.contains_key(&key) {
+                if process_new_neigh(neigh, &updater, &leases).await {
+                    registered.insert(key, Instant::now());
                 }
             }
         }
@@ -218,66 +228,141 @@ async fn main() -> Result<(), ()> {
 
     tokio::spawn(conn);
 
+    // Start periodic probing task
+    let probe_interval = args.probe_interval;
+    let mut probe_timer = if probe_interval > 0 {
+        time::interval(Duration::from_secs(probe_interval))
+    } else {
+        // Create a very long interval that effectively disables probing
+        time::interval(Duration::from_secs(u64::MAX / 2))
+    };
+    probe_timer.tick().await; // consume the immediate first tick
+
     let mut event_count: u64 = 0;
 
-    // Start receiving events through `messages` channel.
-    while let Some((message, _)) = messages.next().await {
-        // Refresh leases periodically (every 50 events)
-        event_count += 1;
-        if event_count % 50 == 0 {
-            if let Ok(new_leases) = op::get_lease() {
-                leases = new_leases;
-                debug!("refreshed {} DHCP leases", leases.len());
-            }
-        }
+    loop {
+        tokio::select! {
+            msg_opt = messages.next() => {
+                let Some((message, _)) = msg_opt else {
+                    break;
+                };
 
-        let payload = message.payload;
-        if let NetlinkPayload::InnerMessage(msg) = payload {
-            match msg {
-                RouteNetlinkMessage::NewNeighbour(new_neigh) => {
-                    let Some(neigh) = parse_neighbour_message(new_neigh, private_subnet) else {
-                        continue;
-                    };
-                    if should_skip_neigh(&neigh) {
-                        continue;
-                    }
-                    // Only act on Reachable state to avoid redundant updates
-                    if neigh.state != NeighbourState::Reachable {
-                        continue;
-                    }
-                    let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
-                    if !registered.insert(key.clone()) {
-                        // Already registered, skip
-                        continue;
-                    }
-                    debug!("New neighbour: {:?}", neigh);
-                    if !process_new_neigh(&neigh, &updater, &leases).await {
-                        // DNS update failed, remove from cache so we retry next time
-                        registered.remove(&key);
+                // Refresh leases periodically (every 50 events)
+                event_count += 1;
+                if event_count % 50 == 0 {
+                    if let Ok(new_leases) = op::get_lease() {
+                        leases = new_leases;
+                        debug!("refreshed {} DHCP leases", leases.len());
                     }
                 }
-                RouteNetlinkMessage::DelNeighbour(del_neigh) => {
-                    let Some(neigh) = parse_neighbour_message(del_neigh, private_subnet) else {
-                        continue;
-                    };
-                    if should_skip_neigh(&neigh) {
-                        continue;
-                    }
-                    let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
-                    if !registered.remove(&key) {
-                        // Was not registered, skip
-                        continue;
-                    }
-                    debug!("Del neighbour: {:?}", neigh);
-                    if !process_del_neigh(&neigh, &updater, &leases).await {
-                        // DNS delete failed, put back so we retry delete next time
-                        registered.insert(key);
+
+                let payload = message.payload;
+                if let NetlinkPayload::InnerMessage(msg) = payload {
+                    match msg {
+                        RouteNetlinkMessage::NewNeighbour(new_neigh) => {
+                            let Some(neigh) = parse_neighbour_message(new_neigh, private_subnet) else {
+                                continue;
+                            };
+                            if should_skip_neigh(&neigh) {
+                                continue;
+                            }
+                            let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
+
+                            if is_failed_state(neigh.state) {
+                                // Neighbour confirmed unreachable — remove DNS record
+                                if registered.remove(&key).is_some() {
+                                    debug!("Neighbour failed: {:?}", neigh);
+                                    if !process_del_neigh(&neigh, &updater, &leases).await {
+                                        // DNS delete failed, put back so we retry
+                                        registered.insert(key, Instant::now());
+                                    }
+                                }
+                            } else if is_reachable_state(neigh.state) {
+                                if registered.contains_key(&key) {
+                                    // Already registered, just update timestamp
+                                    registered.insert(key, Instant::now());
+                                } else {
+                                    // New reachable neighbour — register in DNS
+                                    debug!("New neighbour: {:?}", neigh);
+                                    if process_new_neigh(&neigh, &updater, &leases).await {
+                                        registered.insert(key, Instant::now());
+                                    }
+                                }
+                            }
+                        }
+                        RouteNetlinkMessage::DelNeighbour(del_neigh) => {
+                            let Some(neigh) = parse_neighbour_message(del_neigh, private_subnet) else {
+                                continue;
+                            };
+                            if should_skip_neigh(&neigh) {
+                                continue;
+                            }
+                            let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
+                            if registered.remove(&key).is_none() {
+                                // Was not registered, skip
+                                continue;
+                            }
+                            debug!("Del neighbour: {:?}", neigh);
+                            if !process_del_neigh(&neigh, &updater, &leases).await {
+                                // DNS delete failed, put back so we retry delete next time
+                                registered.insert(key, Instant::now());
+                            }
+                        }
+                        _ => {}
                     }
                 }
-                _ => {}
+            }
+            _ = probe_timer.tick() => {
+                if probe_interval == 0 {
+                    continue;
+                }
+                probe_registered_neighbours(&registered).await;
             }
         }
     }
+    Ok(())
+}
+
+/// Send ICMPv6 Echo Request / ICMPv4 Echo Request to all registered neighbours.
+/// This forces the kernel NUD state machine to verify reachability, generating
+/// NewNeighbour events with the resulting state (Reachable or Failed).
+async fn probe_registered_neighbours(registered: &HashMap<(String, String), Instant>) {
+    let now = Instant::now();
+    for ((_, ip_str), last_confirmed) in registered.iter() {
+        // Only probe entries not confirmed recently (older than 30s)
+        if now.duration_since(*last_confirmed) < Duration::from_secs(30) {
+            continue;
+        }
+        if let Ok(addr) = ip_str.parse::<Ipv6Addr>() {
+            if let Err(e) = send_icmpv6_echo(addr) {
+                debug!("probe failed for {}: {}", ip_str, e);
+            }
+        } else if let Ok(addr) = ip_str.parse::<Ipv4Addr>() {
+            if let Err(e) = send_icmpv4_echo(addr) {
+                debug!("probe failed for {}: {}", ip_str, e);
+            }
+        }
+    }
+}
+
+fn send_icmpv6_echo(addr: Ipv6Addr) -> std::io::Result<()> {
+    let socket = Socket::new(Domain::IPV6, Type::DGRAM, Some(Protocol::ICMPV6))?;
+    socket.set_nonblocking(true)?;
+    // ICMPv6 Echo Request: type=128, code=0, checksum=0 (kernel computes), id=0, seq=1
+    let packet: [u8; 8] = [128, 0, 0, 0, 0, 0, 0, 1];
+    let dest = SockAddr::from(std::net::SocketAddrV6::new(addr, 0, 0, 0));
+    let _ = socket.send_to(&packet, &dest);
+    Ok(())
+}
+
+fn send_icmpv4_echo(addr: Ipv4Addr) -> std::io::Result<()> {
+    let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::ICMPV4))?;
+    socket.set_nonblocking(true)?;
+    // ICMPv4 Echo Request: type=8, code=0, checksum (simple for 8 bytes), id=0, seq=1
+    // Checksum for [08,00,00,00,00,00,00,01]: ~(0x0800 + 0x0001) = 0xf7fe
+    let packet: [u8; 8] = [8, 0, 0xf7, 0xfe, 0, 0, 0, 1];
+    let dest = SockAddr::from(std::net::SocketAddrV4::new(addr, 0));
+    let _ = socket.send_to(&packet, &dest);
     Ok(())
 }
 
@@ -295,27 +380,6 @@ fn inet_to_string(addr: &NeighbourAddress) -> String {
         NeighbourAddress::Inet(ip) => ip.to_string(),
         NeighbourAddress::Inet6(ip) => ip.to_string(),
         other => format!("{other:?}"),
-    }
-}
-
-async fn dump_addresses(handle: Handle, link: String) -> Result<(), Error> {
-    let mut request = handle.link().get();
-    request = request.match_name(link);
-
-    let mut links = request.execute();
-    if let Some(link) = links.try_next().await? {
-        let mut addresses = handle
-            .address()
-            .get()
-            .set_link_index_filter(link.header.index)
-            .execute();
-        while let Some(msg) = addresses.try_next().await? {
-            debug!("{msg:?}");
-        }
-        Ok(())
-    } else {
-        warn!("link not found");
-        Ok(())
     }
 }
 
