@@ -17,7 +17,12 @@ start_service() {
 	local port
 	local data_dir
 	local log_level
+	local tc_order
+	local tc_backend
 	local tc_priority
+	local netlink_priority
+	local tcx_anchor_ingress_id
+	local tcx_anchor_egress_id
 	local traffic_enabled
 	local traffic_realtime_window
 	local traffic_flush_interval
@@ -39,7 +44,12 @@ start_service() {
 	config_get port 'general' 'port'
 	config_get data_dir 'general' 'data_dir'
 	config_get log_level 'general' 'log_level'
+	config_get tc_order 'general' 'tc_order'
+	config_get tc_backend 'general' 'tc_backend'
 	config_get tc_priority 'general' 'tc_priority'
+	config_get netlink_priority 'general' 'netlink_priority'
+	config_get tcx_anchor_ingress_id 'general' 'tcx_anchor_ingress_id'
+	config_get tcx_anchor_egress_id 'general' 'tcx_anchor_egress_id'
 	config_get_bool traffic_enabled 'traffic' 'enabled'
 	config_get traffic_realtime_window 'traffic' 'traffic_realtime_window'
 	config_get traffic_flush_interval 'traffic' 'traffic_flush_interval'
@@ -64,8 +74,29 @@ start_service() {
 	if [ -n "$log_level" ]; then
 		args="$args --log-level $log_level"
 	fi
-	if [ -n "$tc_priority" ]; then
-		args="$args --tc-priority $tc_priority"
+	if [ -z "$tc_order" ]; then
+		case "$tc_priority" in
+			1) tc_order="first" ;;
+			65535) tc_order="last" ;;
+			*) tc_order="default" ;;
+		esac
+	fi
+	[ -z "$tc_order" ] && tc_order="default"
+	if [ -n "$tc_order" ]; then
+		args="$args --tc-order $tc_order"
+	fi
+	[ -z "$tc_backend" ] && tc_backend="auto"
+	if [ -n "$tc_backend" ]; then
+		args="$args --tc-backend $tc_backend"
+	fi
+	if [ -n "$netlink_priority" ]; then
+		args="$args --netlink-priority $netlink_priority"
+	fi
+	if [ -n "$tcx_anchor_ingress_id" ]; then
+		args="$args --tcx-anchor-ingress-id $tcx_anchor_ingress_id"
+	fi
+	if [ -n "$tcx_anchor_egress_id" ]; then
+		args="$args --tcx-anchor-egress-id $tcx_anchor_egress_id"
 	fi
 	
 	# 添加流量监控相关参数
