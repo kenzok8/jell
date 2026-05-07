@@ -31,8 +31,3 @@ start_service() {
     # dynamic DNS entries from the current neighbour table.
     /etc/init.d/ipv6-neigh restart
 }
-
-service_triggers() {
-    procd_add_reload_trigger "dhcp" "network" "system"
-    procd_add_reload_interface_trigger "wan_6"
-}

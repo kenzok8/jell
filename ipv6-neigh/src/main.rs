@@ -1,12 +1,13 @@
 use std::collections::HashMap;
-use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr as StdSocketAddr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr as StdSocketAddr};
 use std::time::Instant;
 
 use futures::stream::StreamExt;
 use futures::stream::TryStreamExt;
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use netlink_packet_core::NetlinkPayload;
 use netlink_packet_route::RouteNetlinkMessage;
+use netlink_packet_route::address::AddressAttribute;
 use netlink_packet_route::neighbour::NeighbourMessage;
 use netlink_packet_route::neighbour::{NeighbourAddress, NeighbourAttribute, NeighbourState};
 use netlink_packet_route::route::RouteType;
@@ -35,8 +36,12 @@ const fn nl_mgrp(group: u32) -> u32 {
 #[derive(Debug, Parser)]
 #[clap()]
 struct Cli {
-    #[clap(short, long)]
-    private_subnet: bool,
+    /// Restrict IPv4 neighbours to private subnets only (10/8, 172.16/12, 192.168/16, 127/8)
+    #[clap(long)]
+    private_subnet_v4: bool,
+    /// Restrict IPv6 neighbours to ULA (fc00::/7) only; without this flag GUA is also included
+    #[clap(long)]
+    private_subnet_v6: bool,
     /// hickory-dns server address for DNS updates (e.g. "[::1]:5335")
     #[clap(short, long, default_value = "[::1]:5335")]
     dns_server: StdSocketAddr,
@@ -53,8 +58,11 @@ struct Cli {
     #[clap(short = 'l', long, default_value = "info")]
     log_level: String,
     /// Probe interval in seconds for active reachability checks (0 to disable)
-    #[clap(long, default_value = "120")]
+    #[clap(long, default_value = "75")]
     probe_interval: u64,
+    /// Network interface to read the router's own addresses from
+    #[clap(long, default_value = "br-lan")]
+    router_iface: String,
 }
 
 #[derive(Debug)]
@@ -68,12 +76,8 @@ struct Neigh {
 
 fn if_ipv6_in_private_subnet(ip: &Ipv6Addr) -> bool {
     // Check if address is ULA (fc00::/7)
-    let is_ula = (ip.segments()[0] & 0xfe00) == 0xfc00;
-
-    // Check if address is link-local (fe80::/10)
-    let is_link_local = (ip.segments()[0] & 0xffc0) == 0xfe80;
-
-    is_ula || is_link_local
+    // Note: link-local is always filtered earlier by is_link_local_ipv6()
+    (ip.segments()[0] & 0xfe00) == 0xfc00
 }
 
 fn if_ipv4_in_private_subnet(ip: &Ipv4Addr) -> bool {
@@ -177,7 +181,8 @@ async fn main() -> Result<(), ()> {
         .format_timestamp_secs()
         .init();
 
-    let private_subnet = args.private_subnet;
+    let private_subnet_v4 = args.private_subnet_v4;
+    let private_subnet_v6 = args.private_subnet_v6;
     let zone = Name::from_ascii(&args.zone).expect("invalid zone name");
 
     let key_data = std::fs::read(&args.key_file)
@@ -191,6 +196,24 @@ async fn main() -> Result<(), ()> {
     let (connection, handle, _) = new_connection().unwrap();
     tokio::spawn(connection);
 
+    // Register router's own addresses in DNS
+    let router_hostname = std::fs::read_to_string("/proc/sys/kernel/hostname")
+        .unwrap_or_default()
+        .trim()
+        .to_owned();
+    if router_hostname.is_empty() {
+        warn!("could not read router hostname from /proc/sys/kernel/hostname");
+    } else {
+        register_router_addresses(
+            handle.clone(),
+            &args.router_iface,
+            &router_hostname,
+            &updater,
+            private_subnet_v6,
+        )
+        .await;
+    }
+
     // Load DHCP leases (mac -> hostname) from ubus
     let mut leases = op::get_lease().unwrap_or_default();
     info!("loaded {} DHCP leases", leases.len());
@@ -200,7 +223,7 @@ async fn main() -> Result<(), ()> {
 
     // Dump existing neighbours and register only reachable/stale ones
     debug!("dumping neighbours");
-    if let Ok(neighbours) = dump_neighbours(handle.clone(), private_subnet).await {
+    if let Ok(neighbours) = dump_neighbours(handle.clone(), private_subnet_v4, private_subnet_v6).await {
         for neigh in &neighbours {
             debug!("{:?}", neigh);
             if should_skip_neigh(neigh) || !is_reachable_state(neigh.state) {
@@ -260,7 +283,7 @@ async fn main() -> Result<(), ()> {
                 if let NetlinkPayload::InnerMessage(msg) = payload {
                     match msg {
                         RouteNetlinkMessage::NewNeighbour(new_neigh) => {
-                            let Some(neigh) = parse_neighbour_message(new_neigh, private_subnet) else {
+                            let Some(neigh) = parse_neighbour_message(new_neigh, private_subnet_v4, private_subnet_v6) else {
                                 continue;
                             };
                             if should_skip_neigh(&neigh) {
@@ -291,7 +314,7 @@ async fn main() -> Result<(), ()> {
                             }
                         }
                         RouteNetlinkMessage::DelNeighbour(del_neigh) => {
-                            let Some(neigh) = parse_neighbour_message(del_neigh, private_subnet) else {
+                            let Some(neigh) = parse_neighbour_message(del_neigh, private_subnet_v4, private_subnet_v6) else {
                                 continue;
                             };
                             if should_skip_neigh(&neigh) {
@@ -387,7 +410,7 @@ fn is_link_local_ipv6(addr: &NeighbourAddress) -> bool {
     matches!(addr, NeighbourAddress::Inet6(ip) if (ip.segments()[0] & 0xffc0) == 0xfe80)
 }
 
-fn parse_neighbour_message(neigh: NeighbourMessage, private_subnet: bool) -> Option<Neigh> {
+fn parse_neighbour_message(neigh: NeighbourMessage, private_subnet_v4: bool, private_subnet_v6: bool) -> Option<Neigh> {
     let state = neigh.header.state;
     // Filter out static and incomplete entries
     if matches!(state, NeighbourState::Permanent | NeighbourState::Noarp) {
@@ -401,20 +424,18 @@ fn parse_neighbour_message(neigh: NeighbourMessage, private_subnet: bool) -> Opt
     if is_link_local_ipv6(&addr) {
         return None;
     }
-    if private_subnet {
-        match addr {
-            NeighbourAddress::Inet(addr) => {
-                if !if_ipv4_in_private_subnet(&addr) {
-                    return None;
-                }
+    match addr {
+        NeighbourAddress::Inet(addr) => {
+            if private_subnet_v4 && !if_ipv4_in_private_subnet(&addr) {
+                return None;
             }
-            NeighbourAddress::Inet6(addr) => {
-                if !if_ipv6_in_private_subnet(&addr) {
-                    return None;
-                }
-            }
-            _ => {}
         }
+        NeighbourAddress::Inet6(addr) => {
+            if private_subnet_v6 && !if_ipv6_in_private_subnet(&addr) {
+                return None;
+            }
+        }
+        _ => {}
     };
     let kind = neigh.header.kind;
     let ifindex = neigh.header.ifindex;
@@ -436,15 +457,70 @@ fn parse_neighbour_message(neigh: NeighbourMessage, private_subnet: bool) -> Opt
     })
 }
 
-async fn dump_neighbours(handle: Handle, private_subnet: bool) -> Result<Vec<Neigh>, Error> {
+async fn dump_neighbours(handle: Handle, private_subnet_v4: bool, private_subnet_v6: bool) -> Result<Vec<Neigh>, Error> {
     let mut neighbours = handle.neighbours().get().execute();
     let mut vec: Vec<Neigh> = Vec::new();
     while let Some(route) = neighbours.try_next().await? {
-        if let Some(neigh) = parse_neighbour_message(route, private_subnet) {
+        if let Some(neigh) = parse_neighbour_message(route, private_subnet_v4, private_subnet_v6) {
             if !should_skip_neigh(&neigh) {
                 vec.push(neigh);
             }
         }
     }
     Ok(vec)
+}
+
+/// Enumerate addresses on `iface`, register A/AAAA records for the router itself.
+async fn register_router_addresses(
+    handle: Handle,
+    iface: &str,
+    hostname: &str,
+    updater: &db::DnsUpdater,
+    private_subnet_v6: bool,
+) {
+    let mut links = handle.link().get().match_name(iface.to_owned()).execute();
+    let link = match links.try_next().await {
+        Ok(Some(l)) => l,
+        Ok(None) => {
+            warn!("interface {} not found, skipping router address registration", iface);
+            return;
+        }
+        Err(e) => {
+            warn!("failed to find interface {}: {}", iface, e);
+            return;
+        }
+    };
+    let ifindex = link.header.index;
+    let mut addresses = handle.address().get().set_link_index_filter(ifindex).execute();
+    while let Ok(Some(msg)) = addresses.try_next().await {
+        for attr in &msg.attributes {
+            let ip = match attr {
+                AddressAttribute::Address(ip) => ip,
+                _ => continue,
+            };
+            match ip {
+                IpAddr::V6(addr) => {
+                    // Always skip link-local
+                    if (addr.segments()[0] & 0xffc0) == 0xfe80 {
+                        continue;
+                    }
+                    // Restrict to ULA only when private_subnet_v6 is set
+                    let is_ula = (addr.segments()[0] & 0xfe00) == 0xfc00;
+                    if private_subnet_v6 && !is_ula {
+                        continue;
+                    }
+                    match updater.upsert_aaaa(hostname, *addr, DEFAULT_TTL).await {
+                        Ok(()) => info!("registered router {} AAAA {}", hostname, addr),
+                        Err(e) => warn!("failed to register router AAAA {} for {}: {}", addr, hostname, e),
+                    }
+                }
+                IpAddr::V4(addr) => {
+                    match updater.upsert_a(hostname, *addr, DEFAULT_TTL).await {
+                        Ok(()) => info!("registered router {} A {}", hostname, addr),
+                        Err(e) => warn!("failed to register router A {} for {}: {}", addr, hostname, e),
+                    }
+                }
+            }
+        }
+    }
 }
