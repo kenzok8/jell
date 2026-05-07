@@ -266,13 +266,45 @@ return view.extend({
 		o.placeholder = '/usr/share/bandix';
 		o.rmempty = false;
 
-		// 添加 tc_priority 设置
-		o = s.option(form.Value, 'tc_priority', _('TC Priority'),
-			_('Set TC filter priority to better coexist with other eBPF TC programs. Lower numbers indicate higher priority. 0 means system-assigned.'));
+		o = s.option(form.ListValue, 'tc_backend', _('TC backend'),
+			_('Select TC attach backend. Recommendation: use auto by default; tcx is preferred on kernel >= 6.6; netlink is safer on older kernels.'));
+		o.value('auto', 'auto');
+		o.value('tcx', 'tcx');
+		o.value('netlink', 'netlink');
+		o.default = 'auto';
+		o.rmempty = false;
+
+		o = s.option(form.ListValue, 'tc_order', _('TC order'));
+		o.value('first', 'first');
+		o.value('default', 'default');
+		o.value('last', 'last');
+		o.value('before', 'before');
+		o.value('after', 'after');
+		o.default = 'default';
+		o.rmempty = false;
+		o.depends('tc_backend', 'tcx');
+
+		o = s.option(form.Value, 'netlink_priority', _('Netlink priority'),
+			_('Only used when backend is netlink. Range: 0..65535 (0 means default).'));
+		o.datatype = 'range(0,65535)';
 		o.default = '0';
-		o.datatype = 'integer';
 		o.placeholder = '0';
 		o.rmempty = false;
+		o.depends('tc_backend', 'netlink');
+
+		o = s.option(form.Value, 'tcx_anchor_ingress_id', _('TCX ingress anchor program id'),
+			_('Used when tc_order is before/after. Must be a valid ingress program id on the same interface.'));
+		o.datatype = 'uinteger';
+		o.rmempty = true;
+		o.depends({ tc_backend: 'tcx', tc_order: 'before' });
+		o.depends({ tc_backend: 'tcx', tc_order: 'after' });
+
+		o = s.option(form.Value, 'tcx_anchor_egress_id', _('TCX egress anchor program id'),
+			_('Used when tc_order is before/after. Must be a valid egress program id on the same interface.'));
+		o.datatype = 'uinteger';
+		o.rmempty = true;
+		o.depends({ tc_backend: 'tcx', tc_order: 'before' });
+		o.depends({ tc_backend: 'tcx', tc_order: 'after' });
 
 		// 添加版本信息显示（合并显示）
 		o = s.option(form.DummyValue, 'version', _('Version'));

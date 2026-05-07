@@ -1228,3 +1228,30 @@ msgstr "Src. répl."
 
 msgid "Repl Dst"
 msgstr "Dest. répl."
+
+msgid "TC backend"
+msgstr "Backend TC"
+
+msgid "Select TC attach backend. Recommendation: use auto by default; tcx is preferred on kernel >= 6.6; netlink is safer on older kernels."
+msgstr "Selectionnez le backend d attache TC. Recommandation : utilisez auto par defaut ; tcx est prefere sur noyau >= 6.6 ; netlink est plus sur sur les anciens noyaux."
+
+msgid "TC order"
+msgstr "Ordre TC"
+
+msgid "Netlink priority"
+msgstr "Priorite Netlink"
+
+msgid "Only used when backend is netlink. Range: 0..65535 (0 means default)."
+msgstr "Utilise uniquement lorsque le backend est netlink. Plage : 0..65535 (0 signifie par defaut)."
+
+msgid "TCX ingress anchor program id"
+msgstr "ID du programme d ancrage ingress TCX"
+
+msgid "Used when tc_order is before/after. Must be a valid ingress program id on the same interface."
+msgstr "Utilise lorsque tc_order est before/after. Doit etre un ID de programme ingress valide sur la meme interface."
+
+msgid "TCX egress anchor program id"
+msgstr "ID du programme d ancrage egress TCX"
+
+msgid "Used when tc_order is before/after. Must be a valid egress program id on the same interface."
+msgstr "Utilise lorsque tc_order est before/after. Doit etre un ID de programme egress valide sur la meme interface."

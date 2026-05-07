@@ -1228,3 +1228,30 @@ msgstr "回覆源"
 
 msgid "Repl Dst"
 msgstr "回覆目標"
+
+msgid "TC backend"
+msgstr "TC 後端"
+
+msgid "Select TC attach backend. Recommendation: use auto by default; tcx is preferred on kernel >= 6.6; netlink is safer on older kernels."
+msgstr "選擇 TC 掛載後端。建議預設使用 auto；在內核 >= 6.6 時優先使用 tcx；較舊內核使用 netlink 更穩妥。"
+
+msgid "TC order"
+msgstr "TC 順序"
+
+msgid "Netlink priority"
+msgstr "Netlink 優先級"
+
+msgid "Only used when backend is netlink. Range: 0..65535 (0 means default)."
+msgstr "僅在後端為 netlink 時使用。範圍：0..65535（0 表示預設）。"
+
+msgid "TCX ingress anchor program id"
+msgstr "TCX 入站錨點程式 ID"
+
+msgid "Used when tc_order is before/after. Must be a valid ingress program id on the same interface."
+msgstr "當 tc_order 為 before/after 時使用。必須是同一介面上的有效入站程式 ID。"
+
+msgid "TCX egress anchor program id"
+msgstr "TCX 出站錨點程式 ID"
+
+msgid "Used when tc_order is before/after. Must be a valid egress program id on the same interface."
+msgstr "當 tc_order 為 before/after 時使用。必須是同一介面上的有效出站程式 ID。"

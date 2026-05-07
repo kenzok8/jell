@@ -1228,3 +1228,30 @@ msgstr "応答元"
 
 msgid "Repl Dst"
 msgstr "応答先"
+
+msgid "TC backend"
+msgstr "TCバックエンド"
+
+msgid "Select TC attach backend. Recommendation: use auto by default; tcx is preferred on kernel >= 6.6; netlink is safer on older kernels."
+msgstr "TCアタッチのバックエンドを選択します。推奨: 既定ではautoを使用し、カーネル>= 6.6ではtcxを優先、古いカーネルではnetlinkの方が安全です。"
+
+msgid "TC order"
+msgstr "TC順序"
+
+msgid "Netlink priority"
+msgstr "Netlink優先度"
+
+msgid "Only used when backend is netlink. Range: 0..65535 (0 means default)."
+msgstr "backendがnetlinkの場合のみ使用します。範囲: 0..65535（0は既定）。"
+
+msgid "TCX ingress anchor program id"
+msgstr "TCX ingressアンカープログラムID"
+
+msgid "Used when tc_order is before/after. Must be a valid ingress program id on the same interface."
+msgstr "tc_orderがbefore/afterのときに使用します。同じインターフェース上の有効なingressプログラムIDである必要があります。"
+
+msgid "TCX egress anchor program id"
+msgstr "TCX egressアンカープログラムID"
+
+msgid "Used when tc_order is before/after. Must be a valid egress program id on the same interface."
+msgstr "tc_orderがbefore/afterのときに使用します。同じインターフェース上の有効なegressプログラムIDである必要があります。"

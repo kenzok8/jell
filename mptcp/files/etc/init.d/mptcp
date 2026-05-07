@@ -75,12 +75,17 @@ global_multipath_settings() {
 		[ -z "$mptcp_syn_retrans_before_tcp_fallback" ] || sysctl -qew net.mptcp.syn_retrans_before_tcp_fallback="$mptcp_syn_retrans_before_tcp_fallback"
 		[ -z "$mptcp_blackhole_timeout" ] || sysctl -qew net.mptcp.blackhole_timeout="$mptcp_blackhole_timeout"
 		if [ -n "$mptcp_scheduler" ]; then
-			if [ -d /usr/share/bpf/scheduler ]; then
-				for scheduler in /usr/share/bpf/scheduler/*.o; do
-					[ -f "$scheduler" ] && bpftool struct_ops register "$scheduler" >/dev/null 2>&1
-				done
-			fi
 			local sched="${mptcp_scheduler#mptcp_}"; sched="${sched%.o}"
+			if [ -d /usr/share/bpf/scheduler ]; then
+				local pin_dir="/sys/fs/bpf/mptcp"
+				mkdir -p "$pin_dir"
+				# Unregister any previously pinned struct_ops to avoid conflicts
+				for pin in "$pin_dir"/*; do
+					[ -e "$pin" ] && bpftool struct_ops unregister pinned "$pin" >/dev/null 2>&1 && rm -f "$pin"
+				done
+				local obj="/usr/share/bpf/scheduler/mptcp_${sched}.o"
+				[ -f "$obj" ] && bpftool struct_ops register "$obj" "$pin_dir/" >/dev/null 2>&1
+			fi
 			sysctl -qew net.mptcp.scheduler="$sched" >/dev/null 2>&1
 		fi
 	fi
@@ -661,6 +666,13 @@ start_service() {
 		ethtool -K eth0 rx off tx off > /dev/null 2>&1
 		ethtool -K eth1 rx off tx off > /dev/null 2>&1
 	;; esac
+}
+
+stop_service() {
+	local pin_dir="/sys/fs/bpf/mptcp"
+	for pin in "$pin_dir"/*; do
+		[ -e "$pin" ] && bpftool struct_ops unregister pinned "$pin" >/dev/null 2>&1 && rm -f "$pin"
+	done
 }
 
 reload_service() {
