@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ipv6-neigh
 PKG_VERSION:=0.1.0
-PKG_RELEASE:=8
+PKG_RELEASE:=9
 
 PKG_BUILD_DEPENDS:=rust/host
 PKG_BUILD_PARALLEL:=1
@@ -50,8 +50,6 @@ endef
 define Package/ipv6-neigh/install
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/ip-neigh $(1)/usr/bin/ipv6-neigh
-	$(INSTALL_DIR) $(1)/etc/init.d/
-	$(INSTALL_BIN) ./files/etc/init.d/ipv6-neigh $(1)/etc/init.d/ipv6-neigh
 endef
 
 $(eval $(call RustBinPackage,ipv6-neigh))
