@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. /lib/functions.sh
+IF_TO_WATCH="wan_6"
+SERVICE="hickory-dns"
+DELAY=5
+
+## Restart service on ifup or ifupdate for the watched interface
+if { [ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifupdate" ]; } && [ "$INTERFACE" = "$IF_TO_WATCH" ]; then
+    logger -t hickory-hotplug "Interface ${IF_TO_WATCH} ${ACTION} - ${SERVICE} restart in ${DELAY}s"
+
+    (
+        sleep ${DELAY}
+
+        if /etc/init.d/${SERVICE} enabled; then
+            /etc/init.d/${SERVICE} restart >/dev/null 2>&1
+            logger -t hickory-hotplug "${SERVICE} restarted successfully after ${IF_TO_WATCH} ${ACTION}"
+        else
+            logger -t hickory-hotplug "${SERVICE} not enabled (skipped)"
+        fi
+    ) &
+fi

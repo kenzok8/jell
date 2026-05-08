@@ -558,6 +558,7 @@ dependencies = [
  "env_logger",
  "futures",
  "hickory-proto",
+ "libc",
  "log",
  "netlink-packet-core",
  "netlink-packet-route",
