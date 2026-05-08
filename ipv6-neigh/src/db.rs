@@ -1,7 +1,7 @@
-use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use hickory_proto::op::{Message, ResponseCode, update_message};
+use hickory_proto::op::{Message, Query, ResponseCode, update_message};
 use hickory_proto::rr::{Name, RData, RecordSet, RecordType, TSigner};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
@@ -137,4 +137,95 @@ impl DnsUpdater {
 
         Ok(result)
     }
+
+    /// Fetch all A and AAAA records in the zone via AXFR (RFC 5936).
+    ///
+    /// Returns a list of `(hostname_label, IpAddr)` pairs — only records whose owner
+    /// name is directly under the zone apex (e.g. `foo.lan.` → `"foo"`).
+    /// SOA, NS, and apex records are excluded.
+    ///
+    /// Requires `axfr_policy = "AllowAll"` (or `"AllowSigned"`) in the server config.
+    pub async fn axfr_records(&self) -> Result<Vec<(String, IpAddr)>, Box<dyn std::error::Error>> {
+        const AXFR_TIMEOUT: Duration = Duration::from_secs(10);
+
+        let query = Query::query(self.zone.clone(), RecordType::AXFR);
+        let mut msg = Message::query();
+        msg.add_query(query);
+
+        let bytes = msg.to_vec()?;
+        let len = u16::try_from(bytes.len())?;
+        let zone = self.zone.clone();
+        let addr = self.server_addr;
+
+        let records = timeout(AXFR_TIMEOUT, async move {
+            let mut stream = TcpStream::connect(addr).await?;
+            stream.write_all(&len.to_be_bytes()).await?;
+            stream.write_all(&bytes).await?;
+            stream.flush().await?;
+
+            let mut records: Vec<(String, IpAddr)> = Vec::new();
+            let mut soa_count = 0u32;
+
+            loop {
+                let resp_len = stream.read_u16().await? as usize;
+                if resp_len == 0 {
+                    break;
+                }
+                let mut buf = vec![0u8; resp_len];
+                stream.read_exact(&mut buf).await?;
+                let response = Message::from_vec(&buf)?;
+
+                if response.metadata.response_code != ResponseCode::NoError {
+                    return Err(format!("AXFR error: {:?}", response.metadata.response_code).into());
+                }
+
+                for record in &response.answers {
+                    match &record.data {
+                        RData::SOA(_) => {
+                            soa_count += 1;
+                        }
+                        RData::A(a) => {
+                            if let Some(host) = extract_hostname(&record.name, &zone) {
+                                records.push((host, IpAddr::V4(a.0)));
+                            }
+                        }
+                        RData::AAAA(aaaa) => {
+                            if let Some(host) = extract_hostname(&record.name, &zone) {
+                                records.push((host, IpAddr::V6(aaaa.0)));
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+
+                if soa_count >= 2 {
+                    break;
+                }
+            }
+
+            Ok::<_, Box<dyn std::error::Error>>(records)
+        })
+        .await
+        .map_err(|_| -> Box<dyn std::error::Error> {
+            format!("AXFR timeout after {}s connecting to {}", AXFR_TIMEOUT.as_secs(), self.server_addr).into()
+        })??;
+
+        Ok(records)
+    }
+}
+
+/// Extract the single label that precedes the zone apex from a fully-qualified record name.
+///
+/// e.g. `"foo.lan."` with zone `"lan."` → `Some("foo")`.
+/// Returns `None` for the apex itself or for names not directly under the zone.
+fn extract_hostname(name: &Name, zone: &Name) -> Option<String> {
+    let n = name.to_ascii().to_lowercase();
+    let z = zone.to_ascii().to_lowercase();
+    let n = n.trim_end_matches('.');
+    let z = z.trim_end_matches('.');
+    if n == z {
+        return None; // apex record
+    }
+    let suffix = format!(".{z}");
+    n.strip_suffix(&suffix).map(|s| s.to_string())
 }

@@ -417,10 +417,135 @@ async fn main() -> Result<(), ()> {
                     continue;
                 }
                 probe_registered_neighbours(&registered).await;
+                reconcile_dns(
+                    &updater,
+                    &mut registered,
+                    &leases,
+                    &active_prefixes,
+                    private_subnet_v4,
+                    private_subnet_v6,
+                )
+                .await;
             }
         }
     }
     Ok(())
+}
+
+/// Reconcile the in-memory `registered` map against the live DNS zone obtained via AXFR.
+///
+/// Two corrections are made on each call:
+/// 1. **DNS orphans** – records present in DNS but absent from `registered`.
+///    These are either stale leftovers from a previous run or records from a prefix that
+///    is no longer active.  Records that fail prefix/subnet filtering are deleted from DNS
+///    immediately; records that pass filtering are probed with ICMP so the kernel NUD
+///    state machine can confirm reachability and re-populate `registered` via the event loop.
+/// 2. **Registered orphans** – entries in `registered` that are missing from DNS (e.g.
+///    because hickory-dns restarted and lost its in-memory state).  These are re-pushed
+///    via DNS UPDATE so the zone stays consistent.
+async fn reconcile_dns(
+    updater: &db::DnsUpdater,
+    registered: &mut HashMap<(String, String), (Instant, u32)>,
+    leases: &HashMap<String, String>,
+    active_prefixes: &[LanPrefix],
+    private_subnet_v4: bool,
+    private_subnet_v6: bool,
+) {
+    use std::collections::{HashMap as Map, HashSet};
+    use std::net::IpAddr;
+
+    let dns_records = match updater.axfr_records().await {
+        Ok(r) => r,
+        Err(e) => {
+            warn!("AXFR reconciliation failed: {}", e);
+            return;
+        }
+    };
+
+    // Only consider records whose hostname appears in the lease table; this avoids
+    // accidentally touching manually-added records or the router's own addresses.
+    let lease_hostnames: HashSet<&str> = leases.values().map(String::as_str).collect();
+
+    // Map: ip_string -> hostname, for DNS records that pass all filters.
+    // Records that fail filtering are deleted from DNS here.
+    let mut dns_ips: Map<String, String> = Map::new();
+
+    for (hostname, ip) in &dns_records {
+        if !lease_hostnames.contains(hostname.as_str()) {
+            continue;
+        }
+        let passes = match ip {
+            IpAddr::V6(addr) => {
+                let subnet_ok = !private_subnet_v6 || if_ipv6_in_private_subnet(addr);
+                let prefix_ok = active_prefixes.is_empty()
+                    || active_prefixes.iter().any(|p| ipv6_in_prefix(*addr, p));
+                subnet_ok && prefix_ok
+            }
+            IpAddr::V4(addr) => !private_subnet_v4 || if_ipv4_in_private_subnet(addr),
+        };
+
+        if passes {
+            dns_ips.insert(ip.to_string(), hostname.clone());
+        } else {
+            // Stale record (wrong prefix / subnet) — remove from DNS.
+            let result = match ip {
+                IpAddr::V6(addr) => updater.delete_aaaa(hostname, *addr).await,
+                IpAddr::V4(addr) => updater.delete_a(hostname, *addr).await,
+            };
+            match result {
+                Ok(()) => info!("reconcile: deleted stale DNS {} -> {}", hostname, ip),
+                Err(e) => warn!("reconcile: failed to delete stale DNS {} {}: {}", hostname, ip, e),
+            }
+        }
+    }
+
+    // Registered ip set for quick lookup.
+    let registered_ips: HashSet<&str> =
+        registered.keys().map(|(_, ip)| ip.as_str()).collect();
+
+    // --- DNS orphans (in DNS but not in registered) ---
+    // Probe with ifindex=0 so the kernel routes via the default LAN route.
+    // If the host is alive the resulting REACHABLE event will re-populate `registered`.
+    // If gone, the record's TTL (60 s) will expire and it won't be renewed.
+    for (ip_str, hostname) in &dns_ips {
+        if registered_ips.contains(ip_str.as_str()) {
+            continue;
+        }
+        info!("reconcile: DNS orphan {} -> {}, probing", hostname, ip_str);
+        match ip_str.parse::<IpAddr>() {
+            Ok(IpAddr::V6(addr)) => {
+                if let Err(e) = send_icmpv6_echo(addr, 0) {
+                    debug!("reconcile: probe failed for {}: {}", addr, e);
+                }
+            }
+            Ok(IpAddr::V4(addr)) => {
+                let _ = send_icmpv4_echo(addr, 0);
+            }
+            _ => {}
+        }
+    }
+
+    // --- Registered orphans (in registered but not in DNS) ---
+    // hickory-dns may have restarted and lost its journal; re-push the record.
+    for ((mac, ip_str), (last_confirmed, _)) in registered.iter_mut() {
+        if dns_ips.contains_key(ip_str.as_str()) {
+            continue;
+        }
+        let Some(hostname) = leases.get(mac) else { continue };
+        debug!("reconcile: registered orphan {} -> {}, re-pushing", hostname, ip_str);
+        let result = match ip_str.parse::<IpAddr>() {
+            Ok(IpAddr::V6(addr)) => updater.upsert_aaaa(hostname, addr, DEFAULT_TTL).await,
+            Ok(IpAddr::V4(addr)) => updater.upsert_a(hostname, addr, DEFAULT_TTL).await,
+            _ => continue,
+        };
+        match result {
+            Ok(()) => {
+                info!("reconcile: re-pushed {} -> {}", hostname, ip_str);
+                *last_confirmed = Instant::now();
+            }
+            Err(e) => warn!("reconcile: failed to re-push {} {}: {}", hostname, ip_str, e),
+        }
+    }
 }
 
 /// Send ICMPv6 Echo Request / ICMPv4 Echo Request to all registered neighbours.

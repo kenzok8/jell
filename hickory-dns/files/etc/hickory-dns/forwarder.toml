@@ -33,6 +33,7 @@ file = "/etc/hickory-dns/0.zone"
 [[zones]]
 zone = "lan"
 zone_type = "Primary"
+axfr_policy = "AllowAll"
 
 [zones.stores]
 type = "sqlite"
