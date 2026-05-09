@@ -175,7 +175,7 @@ stat_update_cb(EV_P_ ev_timer *watcher, int revents)
 
         memset(&svaddr, 0, sizeof(struct sockaddr_un));
         svaddr.sun_family = AF_UNIX;
-        strncpy(svaddr.sun_path, manager_address, sizeof(svaddr.sun_path) - 1);
+        snprintf(svaddr.sun_path, sizeof(svaddr.sun_path), "%s", manager_address);
 
         if (sendto(sfd, resp, strlen(resp) + 1, 0, (struct sockaddr *)&svaddr,
                    sizeof(struct sockaddr_un)) != msgLen) {
@@ -792,6 +792,14 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
 
     if (server->stage == STAGE_HANDSHAKE) {
         size_t header_len = server->header_buf->len;
+        if (header_len + server->buf->len > BUF_SIZE) {
+            LOGE("header buffer overflow detected");
+            server->stage = STAGE_ERROR;
+            report_addr(server->fd, MALFORMED);
+            server->buf->len = 0;
+            server->buf->idx = 0;
+            return;
+        }
         brealloc(server->header_buf, server->buf->len + header_len, BUF_SIZE);
         memcpy(server->header_buf->array + header_len,
                server->buf->array, server->buf->len);
@@ -931,7 +939,7 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
         } else if ((atyp & ADDRTYPE_MASK) == 3) {
             // Domain name
             uint8_t name_len = *(uint8_t *)(server->buf->array + offset);
-            if (name_len + 4 <= server->buf->len) {
+            if (name_len + 4 <= server->buf->len && name_len < sizeof(host)) {
                 memcpy(host, server->buf->array + offset + 1, name_len);
                 offset += name_len + 1;
             } else {
