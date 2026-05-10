@@ -7,7 +7,7 @@ use futures::stream::TryStreamExt;
 use log::{debug, error, info, warn};
 use netlink_packet_core::NetlinkPayload;
 use netlink_packet_route::RouteNetlinkMessage;
-use netlink_packet_route::address::AddressAttribute;
+use netlink_packet_route::address::{AddressAttribute, AddressFlags, AddressHeaderFlags, AddressMessage};
 use netlink_packet_route::neighbour::NeighbourMessage;
 use netlink_packet_route::neighbour::{NeighbourAddress, NeighbourAttribute, NeighbourState};
 use netlink_packet_route::route::RouteType;
@@ -699,6 +699,21 @@ async fn dump_neighbours(handle: Handle, private_subnet_v4: bool, private_subnet
     Ok(vec)
 }
 
+/// Check whether an address message is deprecated (preferred lifetime expired).
+fn is_addr_deprecated(msg: &AddressMessage) -> bool {
+    if msg.header.flags.contains(AddressHeaderFlags::Deprecated) {
+        return true;
+    }
+    for attr in &msg.attributes {
+        match attr {
+            AddressAttribute::Flags(f) if f.contains(AddressFlags::Deprecated) => return true,
+            AddressAttribute::CacheInfo(ci) if ci.ifa_preferred == 0 => return true,
+            _ => {}
+        }
+    }
+    false
+}
+
 /// Enumerate non-link-local IPv6 prefixes currently assigned to `iface`.
 /// Used during startup to filter out neighbour entries from expired/old prefixes.
 async fn get_active_lan_prefixes(handle: Handle, iface: &str, private_subnet_v6: bool) -> Vec<LanPrefix> {
@@ -712,6 +727,11 @@ async fn get_active_lan_prefixes(handle: Handle, iface: &str, private_subnet_v6:
     let mut prefixes = Vec::new();
     while let Ok(Some(msg)) = addresses.try_next().await {
         let prefix_len = msg.header.prefix_len;
+        // Skip deprecated addresses; they are no longer used for new connections
+        // and should not be treated as active LAN prefixes.
+        if is_addr_deprecated(&msg) {
+            continue;
+        }
         for attr in &msg.attributes {
             if let AddressAttribute::Address(IpAddr::V6(addr)) = attr {
                 // Skip link-local
@@ -752,6 +772,9 @@ async fn register_router_addresses(
     let ifindex = link.header.index;
     let mut addresses = handle.address().get().set_link_index_filter(ifindex).execute();
     while let Ok(Some(msg)) = addresses.try_next().await {
+        if is_addr_deprecated(&msg) {
+            continue;
+        }
         for attr in &msg.attributes {
             let ip = match attr {
                 AddressAttribute::Address(ip) => ip,

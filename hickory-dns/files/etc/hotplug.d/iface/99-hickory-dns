@@ -1,22 +1,39 @@
 #!/bin/sh
 
 . /lib/functions.sh
+
 IF_TO_WATCH="wan_6"
 SERVICE="hickory-dns"
 DELAY=5
+LOCK_DIR="/tmp/hickory-hotplug.lock"
+TAG="hickory-hotplug"
 
-## Restart service on ifup or ifupdate for the watched interface
-if { [ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifupdate" ]; } && [ "$INTERFACE" = "$IF_TO_WATCH" ]; then
-    logger -t hickory-hotplug "Interface ${IF_TO_WATCH} ${ACTION} - ${SERVICE} restart in ${DELAY}s"
+[ "$INTERFACE" = "$IF_TO_WATCH" ] || exit 0
+[ "$ACTION" = "ifup" ] || exit 0
 
-    (
-        sleep ${DELAY}
+/etc/init.d/${SERVICE} enabled || {
+    logger -t "$TAG" "${SERVICE} not enabled, skipping restart"
+    exit 0
+}
 
-        if /etc/init.d/${SERVICE} enabled; then
-            /etc/init.d/${SERVICE} restart >/dev/null 2>&1
-            logger -t hickory-hotplug "${SERVICE} restarted successfully after ${IF_TO_WATCH} ${ACTION}"
-        else
-            logger -t hickory-hotplug "${SERVICE} not enabled (skipped)"
-        fi
-    ) &
-fi
+mkdir "$LOCK_DIR" 2>/dev/null || {
+    logger -t "$TAG" "Restart already pending, skipping"
+    exit 0
+}
+
+logger -t "$TAG" "${IF_TO_WATCH} ifup - ${SERVICE} restart in ${DELAY}s"
+
+(
+    sleep "$DELAY"
+
+    /etc/init.d/${SERVICE} restart >/dev/null 2>&1
+    RET=$?
+
+    if [ "$RET" = "0" ]; then
+        logger -t "$TAG" "${SERVICE} restarted successfully after ${IF_TO_WATCH} ifup"
+    else
+        logger -t "$TAG" "${SERVICE} restart failed after ${IF_TO_WATCH} ifup, exit code ${RET}"
+    fi
+
+    rmdir "$LOCK_DIR"
+) &
