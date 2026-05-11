@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
 PKG_VERSION:=2026.05.10~02c4b7b
-PKG_RELEASE:=68
+PKG_RELEASE:=69
 
 HICKORY_COMMIT:=02c4b7b8a259027e3d0b915a04102905e1ff6a2b
 
@@ -50,8 +50,6 @@ define Package/hickory-dns/install
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_DIR) $(1)/etc/hickory-dns/
 	chown nobody:nogroup $(1)/etc/hickory-dns/
-	$(INSTALL_DIR) $(1)/var/lib/hickory-dns/
-	chown nobody:nogroup $(1)/var/lib/hickory-dns/
 	$(INSTALL_BIN) ./files/etc/init.d/hickory-dns $(1)/etc/init.d/hickory-dns
 	$(INSTALL_BIN) ./files/etc/hickory-dns/forwarder.toml $(1)/etc/hickory-dns/forwarder.toml
 	$(INSTALL_DATA) ./files/etc/hickory-dns/lan.zone $(1)/etc/hickory-dns/lan.zone

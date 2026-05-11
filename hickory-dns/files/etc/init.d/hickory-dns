@@ -18,6 +18,8 @@ generate_tsig_key() {
 
 start_service() {
     generate_tsig_key
+    mkdir -p /var/lib/hickory-dns
+    chown nobody:nogroup /var/lib/hickory-dns
     # Remove stale journal so hickory-dns always starts from the zone file.
     # ipv6-neigh re-registers all dynamic entries on startup, so the journal
     # has no durable value and may contain a corrupt state after unclean shutdown.
