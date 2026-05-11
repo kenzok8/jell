@@ -40,9 +40,9 @@ struct Cli {
     /// Restrict IPv4 neighbours to private subnets only (10/8, 172.16/12, 192.168/16, 127/8)
     #[clap(long)]
     private_subnet_v4: bool,
-    /// Restrict IPv6 neighbours to ULA (fc00::/7) only; without this flag GUA is also included
+    /// Also publish GUA (Global Unicast Address) AAAA records; by default only ULA (fc00::/7) is published
     #[clap(long)]
-    private_subnet_v6: bool,
+    publish_gua: bool,
     /// hickory-dns server address for DNS updates (e.g. "[::1]:5335")
     #[clap(short, long, default_value = "[::1]:5335")]
     dns_server: StdSocketAddr,
@@ -64,6 +64,9 @@ struct Cli {
     /// Network interface to read the router's own addresses from
     #[clap(long, default_value = "br-lan")]
     router_iface: String,
+    /// Additional DNS name to register router addresses under (e.g. "router" → "router.lan")
+    #[clap(long)]
+    router_alias: Option<String>,
 }
 
 #[derive(Debug)]
@@ -79,6 +82,13 @@ struct Neigh {
 struct LanPrefix {
     addr: Ipv6Addr,
     prefix_len: u8,
+}
+
+/// State tracked for each (mac, ip) pair that has been successfully registered in DNS.
+struct RegisteredEntry {
+    hostname: String,
+    last_confirmed: Instant,
+    ifindex: u32,
 }
 
 fn if_ipv6_in_private_subnet(ip: &Ipv6Addr) -> bool {
@@ -126,15 +136,21 @@ fn ipv6_in_prefix(addr: Ipv6Addr, prefix: &LanPrefix) -> bool {
     (u128::from(addr) & mask) == (u128::from(prefix.addr) & mask)
 }
 
+/// Returns true if `addr` is within any active LAN prefix, or if the prefix list is empty
+/// (in which case prefix-based filtering is disabled).
+fn ipv6_passes_active_prefix(addr: Ipv6Addr, active_prefixes: &[LanPrefix]) -> bool {
+    active_prefixes.is_empty() || active_prefixes.iter().any(|p| ipv6_in_prefix(addr, p))
+}
+
 async fn process_new_neigh(neigh: &Neigh, updater: &db::DnsUpdater, leases: &HashMap<String, String>) -> bool {
     let Some(hostname) = leases.get(&neigh.mac) else {
         debug!("no lease for mac {}, skipping DNS update", neigh.mac);
-        return true;
+        return false;
     };
     let result = match &neigh.inet {
         NeighbourAddress::Inet6(addr) => updater.upsert_aaaa(hostname, *addr, DEFAULT_TTL).await,
         NeighbourAddress::Inet(addr) => updater.upsert_a(hostname, *addr, DEFAULT_TTL).await,
-        _ => return true,
+        _ => return false,
     };
     match result {
         Ok(()) => {
@@ -148,18 +164,16 @@ async fn process_new_neigh(neigh: &Neigh, updater: &db::DnsUpdater, leases: &Has
     }
 }
 
-async fn process_del_neigh(neigh: &Neigh, updater: &db::DnsUpdater, leases: &HashMap<String, String>) -> bool {
-    let Some(hostname) = leases.get(&neigh.mac) else {
-        return true;
-    };
-    let result = match &neigh.inet {
+/// Delete a specific DNS record directly by hostname and address.
+async fn do_delete_dns(hostname: &str, inet: &NeighbourAddress, updater: &db::DnsUpdater) -> bool {
+    let result = match inet {
         NeighbourAddress::Inet6(addr) => updater.delete_aaaa(hostname, *addr).await,
         NeighbourAddress::Inet(addr) => updater.delete_a(hostname, *addr).await,
         _ => return true,
     };
     match result {
         Ok(()) => {
-            info!("DNS update: removed {} -> {:?}", hostname, neigh.inet);
+            info!("DNS update: removed {} -> {:?}", hostname, inet);
             true
         }
         Err(e) => {
@@ -199,7 +213,7 @@ async fn main() -> Result<(), ()> {
         .init();
 
     let private_subnet_v4 = args.private_subnet_v4;
-    let private_subnet_v6 = args.private_subnet_v6;
+    let private_subnet_v6 = !args.publish_gua;
     let zone = Name::from_ascii(&args.zone).expect("invalid zone name");
 
     let key_data = std::fs::read(&args.key_file)
@@ -224,10 +238,12 @@ async fn main() -> Result<(), ()> {
     if router_hostname.is_empty() {
         warn!("could not read router hostname from /proc/sys/kernel/hostname");
     } else {
+        let router_alias = args.router_alias.as_deref().filter(|a| *a != router_hostname);
         register_router_addresses(
             handle.clone(),
             &args.router_iface,
             &router_hostname,
+            router_alias,
             &updater,
             private_subnet_v6,
         )
@@ -238,8 +254,8 @@ async fn main() -> Result<(), ()> {
     let mut leases = op::get_lease().unwrap_or_default();
     info!("loaded {} DHCP leases", leases.len());
 
-    // State cache: tracks (mac, ip_string) -> (last confirmed time, ifindex)
-    let mut registered: HashMap<(String, String), (Instant, u32)> = HashMap::new();
+    // State cache: tracks (mac, ip_string) -> registered entry (hostname, last confirmed time, ifindex)
+    let mut registered: HashMap<(String, String), RegisteredEntry> = HashMap::new();
 
     // Get active LAN prefixes to filter out neighbours from expired/old prefixes.
     // If prefix detection fails we log a warning but continue without filtering.
@@ -282,8 +298,25 @@ async fn main() -> Result<(), ()> {
                 NeighbourState::Reachable => {
                     // Confirmed online — register in DNS immediately.
                     if !registered.contains_key(&key) {
-                        if process_new_neigh(neigh, &updater, &leases).await {
-                            registered.insert(key, (Instant::now(), neigh.ifindex));
+                        if let Some(hostname) = leases.get(&neigh.mac) {
+                            let result = match &neigh.inet {
+                                NeighbourAddress::Inet6(addr) => updater.upsert_aaaa(hostname, *addr, DEFAULT_TTL).await,
+                                NeighbourAddress::Inet(addr) => updater.upsert_a(hostname, *addr, DEFAULT_TTL).await,
+                                _ => Ok(()),
+                            };
+                            match result {
+                                Ok(()) => {
+                                    info!("DNS update: added {} -> {:?}", hostname, neigh.inet);
+                                    registered.insert(key, RegisteredEntry {
+                                        hostname: hostname.clone(),
+                                        last_confirmed: Instant::now(),
+                                        ifindex: neigh.ifindex,
+                                    });
+                                }
+                                Err(e) => error!("DNS update failed for {}: {}", hostname, e),
+                            }
+                        } else {
+                            debug!("no lease for mac {}, skipping DNS update", neigh.mac);
                         }
                     }
                 }
@@ -336,7 +369,8 @@ async fn main() -> Result<(), ()> {
     };
     probe_timer.tick().await; // consume the immediate first tick
 
-    let mut event_count: u64 = 0;
+    let mut lease_refresh_timer = time::interval(Duration::from_secs(60));
+    lease_refresh_timer.tick().await; // consume the immediate first tick
 
     loop {
         tokio::select! {
@@ -344,15 +378,6 @@ async fn main() -> Result<(), ()> {
                 let Some((message, _)) = msg_opt else {
                     break;
                 };
-
-                // Refresh leases periodically (every 50 events)
-                event_count += 1;
-                if event_count % 50 == 0 {
-                    if let Ok(new_leases) = op::get_lease() {
-                        leases = new_leases;
-                        debug!("refreshed {} DHCP leases", leases.len());
-                    }
-                }
 
                 let payload = message.payload;
                 if let NetlinkPayload::InnerMessage(msg) = payload {
@@ -365,32 +390,53 @@ async fn main() -> Result<(), ()> {
                                 continue;
                             }
                             let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
+                            // Drop IPv6 events for addresses not in any active LAN prefix.
+                            if let NeighbourAddress::Inet6(addr) = &neigh.inet {
+                                if !ipv6_passes_active_prefix(*addr, &active_prefixes) {
+                                    debug!("event: skipping {} — not in any active LAN prefix", addr);
+                                    if let Some(entry) = registered.remove(&key) {
+                                        do_delete_dns(&entry.hostname, &neigh.inet, &updater).await;
+                                    }
+                                    continue;
+                                }
+                            }
 
                             if is_failed_state(neigh.state) {
                                 // Neighbour confirmed unreachable — remove DNS record
-                                if registered.remove(&key).is_some() {
+                                if let Some(entry) = registered.remove(&key) {
                                     debug!("Neighbour failed: {:?}", neigh);
-                                    if !process_del_neigh(&neigh, &updater, &leases).await {
+                                    if !do_delete_dns(&entry.hostname, &neigh.inet, &updater).await {
                                         // DNS delete failed, put back so we retry
-                                        registered.insert(key, (Instant::now(), neigh.ifindex));
+                                        registered.insert(key, entry);
                                     }
                                 }
                             } else if neigh.state == NeighbourState::Reachable {
-                                if registered.contains_key(&key) {
-                                    // Already registered, just update timestamp
-                                    registered.insert(key, (Instant::now(), neigh.ifindex));
+                                if let Some(entry) = registered.get_mut(&key) {
+                                    // Already registered, just update timestamp and ifindex
+                                    entry.last_confirmed = Instant::now();
+                                    entry.ifindex = neigh.ifindex;
                                 } else {
                                     // New reachable neighbour — register in DNS
                                     debug!("New neighbour: {:?}", neigh);
-                                    if process_new_neigh(&neigh, &updater, &leases).await {
-                                        registered.insert(key, (Instant::now(), neigh.ifindex));
+                                    if let Some(hostname) = leases.get(&neigh.mac) {
+                                        if process_new_neigh(&neigh, &updater, &leases).await {
+                                            registered.insert(key, RegisteredEntry {
+                                                hostname: hostname.clone(),
+                                                last_confirmed: Instant::now(),
+                                                ifindex: neigh.ifindex,
+                                            });
+                                        }
+                                    } else {
+                                        debug!("no lease for mac {}, skipping DNS update", neigh.mac);
                                     }
                                 }
                             } else if matches!(neigh.state, NeighbourState::Stale | NeighbourState::Delay | NeighbourState::Probe) {
-                                // Uncertain state: keep existing registrations alive but do
-                                // not create new DNS records without REACHABLE confirmation.
-                                if registered.contains_key(&key) {
-                                    registered.insert(key, (Instant::now(), neigh.ifindex));
+                                // Uncertain state: update ifindex only so the next probe uses
+                                // the right interface, but do NOT refresh last_confirmed —
+                                // STALE/DELAY/PROBE is not confirmed reachable and refreshing
+                                // the timestamp would suppress the periodic probe.
+                                if let Some(entry) = registered.get_mut(&key) {
+                                    entry.ifindex = neigh.ifindex;
                                 }
                             }
                         }
@@ -402,11 +448,15 @@ async fn main() -> Result<(), ()> {
                                 continue;
                             }
                             let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
-                            registered.remove(&key);
+                            let stored_hostname = registered.remove(&key).map(|e| e.hostname);
                             debug!("Del neighbour: {:?}", neigh);
-                            // Always attempt DNS deletion even if not in registered map,
-                            // to clean up records that survived a program restart.
-                            process_del_neigh(&neigh, &updater, &leases).await;
+                            // Use stored hostname if available, fall back to leases for records
+                            // that survived a program restart (not in registered).
+                            let hostname_opt = stored_hostname
+                                .or_else(|| leases.get(&neigh.mac).cloned());
+                            if let Some(ref hostname) = hostname_opt {
+                                do_delete_dns(hostname, &neigh.inet, &updater).await;
+                            }
                         }
                         _ => {}
                     }
@@ -427,6 +477,12 @@ async fn main() -> Result<(), ()> {
                 )
                 .await;
             }
+            _ = lease_refresh_timer.tick() => {
+                if let Ok(new_leases) = op::get_lease() {
+                    leases = new_leases;
+                    debug!("refreshed {} DHCP leases", leases.len());
+                }
+            }
         }
     }
     Ok(())
@@ -445,7 +501,7 @@ async fn main() -> Result<(), ()> {
 ///    via DNS UPDATE so the zone stays consistent.
 async fn reconcile_dns(
     updater: &db::DnsUpdater,
-    registered: &mut HashMap<(String, String), (Instant, u32)>,
+    registered: &mut HashMap<(String, String), RegisteredEntry>,
     leases: &HashMap<String, String>,
     active_prefixes: &[LanPrefix],
     private_subnet_v4: bool,
@@ -504,14 +560,25 @@ async fn reconcile_dns(
         registered.keys().map(|(_, ip)| ip.as_str()).collect();
 
     // --- DNS orphans (in DNS but not in registered) ---
-    // Probe with ifindex=0 so the kernel routes via the default LAN route.
-    // If the host is alive the resulting REACHABLE event will re-populate `registered`.
-    // If gone, the record's TTL (60 s) will expire and it won't be renewed.
+    // Delete the orphan immediately — DNS TTL only controls resolver caches, not
+    // authoritative record lifetime, so records do NOT auto-expire.
+    // After deletion we probe the address: if the device is still alive the kernel
+    // will emit a REACHABLE NewNeighbour event which re-registers it in DNS.
     for (ip_str, hostname) in &dns_ips {
         if registered_ips.contains(ip_str.as_str()) {
             continue;
         }
-        info!("reconcile: DNS orphan {} -> {}, probing", hostname, ip_str);
+        info!("reconcile: DNS orphan {} -> {}, deleting and probing", hostname, ip_str);
+        let del_result = match ip_str.parse::<IpAddr>() {
+            Ok(IpAddr::V6(addr)) => updater.delete_aaaa(hostname, addr).await,
+            Ok(IpAddr::V4(addr)) => updater.delete_a(hostname, addr).await,
+            _ => continue,
+        };
+        match del_result {
+            Ok(()) => info!("reconcile: deleted orphan DNS {} -> {}", hostname, ip_str),
+            Err(e) => warn!("reconcile: failed to delete orphan {} {}: {}", hostname, ip_str, e),
+        }
+        // Probe so alive devices trigger a REACHABLE event and re-register.
         match ip_str.parse::<IpAddr>() {
             Ok(IpAddr::V6(addr)) => {
                 if let Err(e) = send_icmpv6_echo(addr, 0) {
@@ -519,7 +586,9 @@ async fn reconcile_dns(
                 }
             }
             Ok(IpAddr::V4(addr)) => {
-                let _ = send_icmpv4_echo(addr, 0);
+                if let Err(e) = send_icmpv4_echo(addr, 0) {
+                    debug!("reconcile: probe failed for {}: {}", addr, e);
+                }
             }
             _ => {}
         }
@@ -527,11 +596,12 @@ async fn reconcile_dns(
 
     // --- Registered orphans (in registered but not in DNS) ---
     // hickory-dns may have restarted and lost its journal; re-push the record.
-    for ((mac, ip_str), (last_confirmed, _)) in registered.iter_mut() {
+    // Use the hostname stored in the entry — independent of the current lease table.
+    for ((_, ip_str), entry) in registered.iter_mut() {
         if dns_ips.contains_key(ip_str.as_str()) {
             continue;
         }
-        let Some(hostname) = leases.get(mac) else { continue };
+        let hostname = &entry.hostname;
         debug!("reconcile: registered orphan {} -> {}, re-pushing", hostname, ip_str);
         let result = match ip_str.parse::<IpAddr>() {
             Ok(IpAddr::V6(addr)) => updater.upsert_aaaa(hostname, addr, DEFAULT_TTL).await,
@@ -541,7 +611,7 @@ async fn reconcile_dns(
         match result {
             Ok(()) => {
                 info!("reconcile: re-pushed {} -> {}", hostname, ip_str);
-                *last_confirmed = Instant::now();
+                entry.last_confirmed = Instant::now();
             }
             Err(e) => warn!("reconcile: failed to re-push {} {}: {}", hostname, ip_str, e),
         }
@@ -551,19 +621,19 @@ async fn reconcile_dns(
 /// Send ICMPv6 Echo Request / ICMPv4 Echo Request to all registered neighbours.
 /// This forces the kernel NUD state machine to verify reachability, generating
 /// NewNeighbour events with the resulting state (Reachable or Failed).
-async fn probe_registered_neighbours(registered: &HashMap<(String, String), (Instant, u32)>) {
+async fn probe_registered_neighbours(registered: &HashMap<(String, String), RegisteredEntry>) {
     let now = Instant::now();
-    for ((_, ip_str), (last_confirmed, ifindex)) in registered.iter() {
+    for ((_, ip_str), entry) in registered.iter() {
         // Only probe entries not confirmed recently (older than 30s)
-        if now.duration_since(*last_confirmed) < Duration::from_secs(30) {
+        if now.duration_since(entry.last_confirmed) < Duration::from_secs(30) {
             continue;
         }
         if let Ok(addr) = ip_str.parse::<Ipv6Addr>() {
-            if let Err(e) = send_icmpv6_echo(addr, *ifindex) {
+            if let Err(e) = send_icmpv6_echo(addr, entry.ifindex) {
                 debug!("probe failed for {}: {}", ip_str, e);
             }
         } else if let Ok(addr) = ip_str.parse::<Ipv4Addr>() {
-            if let Err(e) = send_icmpv4_echo(addr, *ifindex) {
+            if let Err(e) = send_icmpv4_echo(addr, entry.ifindex) {
                 debug!("probe failed for {}: {}", ip_str, e);
             }
         }
@@ -576,7 +646,7 @@ fn send_icmpv6_echo(addr: Ipv6Addr, ifindex: u32) -> std::io::Result<()> {
     // Bind outgoing packet to the specific interface via IPV6_UNICAST_IF so the
     // kernel NUD state machine updates the correct neighbour entry.
     if ifindex != 0 {
-        unsafe {
+        let ret = unsafe {
             let idx = ifindex as libc::c_int;
             libc::setsockopt(
                 socket.as_raw_fd(),
@@ -584,13 +654,16 @@ fn send_icmpv6_echo(addr: Ipv6Addr, ifindex: u32) -> std::io::Result<()> {
                 libc::IPV6_UNICAST_IF,
                 &idx as *const libc::c_int as *const libc::c_void,
                 std::mem::size_of::<libc::c_int>() as libc::socklen_t,
-            );
+            )
+        };
+        if ret != 0 {
+            return Err(std::io::Error::last_os_error());
         }
     }
     // ICMPv6 Echo Request: type=128, code=0, checksum=0 (kernel computes), id=0, seq=1
     let packet: [u8; 8] = [128, 0, 0, 0, 0, 0, 0, 1];
     let dest = SockAddr::from(std::net::SocketAddrV6::new(addr, 0, 0, 0));
-    let _ = socket.send_to(&packet, &dest);
+    socket.send_to(&packet, &dest)?;
     Ok(())
 }
 
@@ -599,7 +672,7 @@ fn send_icmpv4_echo(addr: Ipv4Addr, ifindex: u32) -> std::io::Result<()> {
     socket.set_nonblocking(true)?;
     // Bind outgoing packet to the specific interface via IP_UNICAST_IF.
     if ifindex != 0 {
-        unsafe {
+        let ret = unsafe {
             let idx = ifindex as libc::c_int;
             libc::setsockopt(
                 socket.as_raw_fd(),
@@ -607,14 +680,17 @@ fn send_icmpv4_echo(addr: Ipv4Addr, ifindex: u32) -> std::io::Result<()> {
                 libc::IP_UNICAST_IF,
                 &idx as *const libc::c_int as *const libc::c_void,
                 std::mem::size_of::<libc::c_int>() as libc::socklen_t,
-            );
+            )
+        };
+        if ret != 0 {
+            return Err(std::io::Error::last_os_error());
         }
     }
     // ICMPv4 Echo Request: type=8, code=0, checksum (simple for 8 bytes), id=0, seq=1
     // Checksum for [08,00,00,00,00,00,00,01]: ~(0x0800 + 0x0001) = 0xf7fe
     let packet: [u8; 8] = [8, 0, 0xf7, 0xfe, 0, 0, 0, 1];
     let dest = SockAddr::from(std::net::SocketAddrV4::new(addr, 0));
-    let _ = socket.send_to(&packet, &dest);
+    socket.send_to(&packet, &dest)?;
     Ok(())
 }
 
@@ -754,6 +830,7 @@ async fn register_router_addresses(
     handle: Handle,
     iface: &str,
     hostname: &str,
+    extra_alias: Option<&str>,
     updater: &db::DnsUpdater,
     private_subnet_v6: bool,
 ) {
@@ -791,15 +868,19 @@ async fn register_router_addresses(
                     if private_subnet_v6 && !is_ula {
                         continue;
                     }
-                    match updater.upsert_aaaa(hostname, *addr, DEFAULT_TTL).await {
-                        Ok(()) => info!("registered router {} AAAA {}", hostname, addr),
-                        Err(e) => warn!("failed to register router AAAA {} for {}: {}", addr, hostname, e),
+                    for name in std::iter::once(hostname).chain(extra_alias) {
+                        match updater.upsert_aaaa(name, *addr, DEFAULT_TTL).await {
+                            Ok(()) => info!("registered router {} AAAA {}", name, addr),
+                            Err(e) => warn!("failed to register router AAAA {} for {}: {}", addr, name, e),
+                        }
                     }
                 }
                 IpAddr::V4(addr) => {
-                    match updater.upsert_a(hostname, *addr, DEFAULT_TTL).await {
-                        Ok(()) => info!("registered router {} A {}", hostname, addr),
-                        Err(e) => warn!("failed to register router A {} for {}: {}", addr, hostname, e),
+                    for name in std::iter::once(hostname).chain(extra_alias) {
+                        match updater.upsert_a(name, *addr, DEFAULT_TTL).await {
+                            Ok(()) => info!("registered router {} A {}", name, addr),
+                            Err(e) => warn!("failed to register router A {} for {}: {}", addr, name, e),
+                        }
                     }
                 }
             }
