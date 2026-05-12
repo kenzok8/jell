@@ -1,0 +1,21 @@
+#!/bin/sh
+
+NEIGH_PROG=/usr/bin/ipv6-neigh
+RETRY=30
+
+trap 'exit 1' TERM INT
+
+logger -t ipv6-neigh-wrapper "waiting for DNS port 53"
+
+i=0
+while [ "$i" -lt "$RETRY" ]; do
+    if ss -lnt | grep -q ':53'; then
+        logger -t ipv6-neigh-wrapper "DNS port 53 ready, starting ipv6-neigh"
+        exec "$NEIGH_PROG" --private-subnet-v4 -d "[::1]:53" -z lan --router-alias router
+    fi
+    i=$((i + 1))
+    sleep 1
+done
+
+logger -t ipv6-neigh-wrapper "DNS port 53 not ready after ${RETRY}s, exiting"
+exit 1

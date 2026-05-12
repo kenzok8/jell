@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
 PKG_VERSION:=2026.05.10~02c4b7b
-PKG_RELEASE:=69
+PKG_RELEASE:=70
 
 HICKORY_COMMIT:=02c4b7b8a259027e3d0b915a04102905e1ff6a2b
 
@@ -47,9 +47,9 @@ endef
 define Package/hickory-dns/install
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/* $(1)/usr/bin/
+	$(INSTALL_BIN) ./files/usr/bin/ipv6-neigh-wrapper $(1)/usr/bin/ipv6-neigh-wrapper
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_DIR) $(1)/etc/hickory-dns/
-	chown nobody:nogroup $(1)/etc/hickory-dns/
 	$(INSTALL_BIN) ./files/etc/init.d/hickory-dns $(1)/etc/init.d/hickory-dns
 	$(INSTALL_BIN) ./files/etc/hickory-dns/forwarder.toml $(1)/etc/hickory-dns/forwarder.toml
 	$(INSTALL_DATA) ./files/etc/hickory-dns/lan.zone $(1)/etc/hickory-dns/lan.zone
@@ -58,8 +58,8 @@ define Package/hickory-dns/install
 	$(INSTALL_DATA) ./files/etc/hickory-dns/ipv6_1.zone $(1)/etc/hickory-dns/ipv6_1.zone
 	$(INSTALL_DATA) ./files/etc/hickory-dns/255.zone $(1)/etc/hickory-dns/255.zone
 	$(INSTALL_DATA) ./files/etc/hickory-dns/0.zone $(1)/etc/hickory-dns/0.zone
-	chown nobody:nogroup $(1)/etc/hickory-dns/*.zone $(1)/etc/hickory-dns/forwarder.toml
 	echo "$(HICKORY_COMMIT)" > $(1)/etc/hickory-dns/commit
+	chown -R nobody:nogroup $(1)/etc/hickory-dns/
 endef
 
 $(eval $(call RustBinPackage,hickory-dns))
