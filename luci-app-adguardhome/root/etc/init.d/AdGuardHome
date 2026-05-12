@@ -508,14 +508,15 @@ start_service() {
 
 	config_get jail_mount $CONFIGURATION jail_mount ""
 	if [ -n "$jail_mount" ]; then
-		echo "$jail_mount" | while IFS= read -r mp; do
+		# pipe 右侧 while 运行在子 shell，但 procd_add_jail_mount 通过继承的 fd 写入 JSON，不受影响
+		printf '%s\n' "$jail_mount" | while IFS= read -r mp; do
 			[ -n "$mp" ] && procd_add_jail_mount "$mp"
 		done
 	fi
 
 	config_get jail_mount_rw $CONFIGURATION jail_mount_rw ""
 	if [ -n "$jail_mount_rw" ]; then
-		echo "$jail_mount_rw" | while IFS= read -r mp; do
+		printf '%s\n' "$jail_mount_rw" | while IFS= read -r mp; do
 			[ -n "$mp" ] && procd_add_jail_mount_rw "$mp"
 		done
 	fi

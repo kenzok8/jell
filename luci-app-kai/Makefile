@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=kai
-LUCI_DEPENDS:=+kai +kai_session
+LUCI_DEPENDS:=+kai +kai_session +luci-compat
 LUCI_MINIFY_CSS:=0
 LUCI_MINIFY_JS:=0
 
@@ -15,7 +15,7 @@ define Package/luci-app-kai/conffiles
 /etc/config/kai
 endef
 
-define Package/luci-nginxer/postrm
+define Package/luci-app-kai/postrm
 #!/bin/sh
 rm -f /tmp/luci-indexcache
 exit 0
