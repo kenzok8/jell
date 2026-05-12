@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
 PKG_VERSION:=2026.05.12~954f1ad
-PKG_RELEASE:=71
+PKG_RELEASE:=72
 
 HICKORY_COMMIT:=954f1ad88e9f23399d0339bc51d4fd2af0dd9340
 
@@ -59,7 +59,6 @@ define Package/hickory-dns/install
 	$(INSTALL_DATA) ./files/etc/hickory-dns/255.zone $(1)/etc/hickory-dns/255.zone
 	$(INSTALL_DATA) ./files/etc/hickory-dns/0.zone $(1)/etc/hickory-dns/0.zone
 	echo "$(HICKORY_COMMIT)" > $(1)/etc/hickory-dns/commit
-	chown -R nobody:nogroup $(1)/etc/hickory-dns/
 endef
 
 $(eval $(call RustBinPackage,hickory-dns))
