@@ -1428,7 +1428,7 @@ body.modal-overlay-active #modal_overlay {
 }
 
 .btn.info, .alert-message.info, .cbi-tooltip.info {
-	background: linear-gradient(ottom, #5bc0de, #339bb9) repeat-x;
+	background: linear-gradient(to bottom, #5bc0de, #339bb9) repeat-x;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
@@ -1445,7 +1445,7 @@ body.modal-overlay-active #modal_overlay {
 	cursor: pointer;
 	display: inline-block;
 	background: #fff;
-	padding: 5px 14px 6p;
+	padding: 5px 14px 6px;
 	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
 	color: #333;
 	font-size: 13px;
@@ -1466,7 +1466,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-input-invalid.cbi-dropdown:not(.btn):not(.cbi-button),
 .cbi-input-invalid.cbi-dropdown:not([open]) > ul > li,
 .cbi-value-error input {
-	co: #f00;
+	color: #f00;
 	border-color: #f00;
 }
 
@@ -1496,7 +1496,7 @@ body.modal-overlay-active #modal_overlay {
 
 .cbi-page-actions::after {
 	display: table;
-	ntent: "";
+	content: "";
 	clear: both;
 }
 
@@ -1517,7 +1517,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-button-action,
 .cbi-button-save,
 .cbi-button-reload,
-.cbi-page-actions .ctton-apply {
+.cbi-page-actions .cbi-button-apply {
 	color: #FFFFFF;
 	background: #4caf50;
 	border-color: #2e7d32;
@@ -1539,7 +1539,7 @@ body.modal-overlay-active #modal_overlay {
 }
 
 .cbi-page-actions .cbi-button-reset:hover,
-.cbi-page-actions .cbi-n-save:hover,
+.cbi-page-actions .cbi-button-save:hover,
 .cbi-page-actions .cbi-button-apply:hover {
 	color: #FFFFFF;
 	background: #2e7d32;
@@ -1564,7 +1564,7 @@ body.modal-overlay-active #modal_overlay {
 
 .cbi-dynlist > .item:focus,
 .cbi-dropdown:focus {
-	outline: 2px d #4caf50;
+	outline: 2px solid #4caf50;
 }
 
 .cbi-dropdown > ul {
@@ -1593,7 +1593,7 @@ body.modal-overlay-active #modal_overlay {
 
 .cbi-dropdown > .open,
 .cbi-dropdown > .more {
-	flgrow: 0;
+	flex-grow: 0;
 	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
@@ -1620,7 +1620,7 @@ body.modal-overlay-active #modal_overlay {
 }
 
 .cbi-dropdown > ul > li {
-	diay: none;
+	display: none;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -1642,7 +1642,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-dropdown > ul > li .hide-close { display: none; }
 
 .cbi-dropdown > ul > li[display]:not([display="0"]) {
-	border-left: x solid #ccc;
+	border-left: 1px solid #ccc;
 }
 
 .cbi-dropdown[empty] > ul {
@@ -1676,7 +1676,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-dropdown[open] > ul.dropdown {
 	display: block;
 	background: #f6f6f5;
-	border: 1 solid #918e8c;
+	border: 1px solid #918e8c;
 	box-shadow: 0 0 4px #918e8c;
 	position: absolute;
 	z-index: 1100;
@@ -1697,7 +1697,7 @@ body.modal-overlay-active #modal_overlay {
 	display: flex !important;
 }
 
-.cbi-dropdompty] > ul > li,
+.cbi-dropdown[empty] > ul > li,
 .cbi-dropdown[optional][open] > ul.dropdown > li[placeholder],
 .cbi-dropdown[multiple][open] > ul.dropdown > li > form {
 	display: block !important;
@@ -1714,7 +1714,7 @@ body.modal-overlay-active #modal_overlay {
 	background: #2e7d32;
 }
 
-.cbi-dropdown[open] > ul.dropdowli.focus {
+.cbi-dropdown[open] > ul.dropdown > li.focus {
 	background: #81c784;
 }
 
@@ -1740,7 +1740,7 @@ input[type="text"] + .cbi-button,
 input[type="password"] + .cbi-button,
 select + .cbi-button {
 	border-radius: 0 3px 3px 0;
-	border-cor: #ccc;
+	border-color: #ccc;
 	margin-left: -2px;
 	padding: 0 6px;
 	vertical-align: top;
@@ -1775,7 +1775,7 @@ input[type="text"] + .cbi-button-remove {
 }
 
 .cbi-tooltip {
-	positionbsolute;
+	position: absolute;
 	z-index: 1000;
 	left: -10000px;
 	box-shadow: 0 0 2px #ccc;
@@ -1800,7 +1800,7 @@ input[type="text"] + .cbi-button-remove {
 	min-width: 170px;
 	height: 8px;
 	margin: 1.4em 0 4px 0;
-	background: var(--background-cdium);
+	background: var(--background-color-medium);
 }
 
 .cbi-progressbar > div {
@@ -1830,7 +1830,7 @@ input[type="text"] + .cbi-button-remove {
 	box-shadow: 0 0 3px #444;
 }
 
-.zonebadge .cbi-tooltip > {
+.zonebadge .cbi-tooltip > * {
 	margin: 1px;
 }
 
@@ -1867,7 +1867,7 @@ input[type="text"] + .cbi-button-remove {
 
 .btn[disabled] {
 	cursor: default;
-	oacity: 0.65;
+	opacity: 0.65;
 	box-shadow: none;
 }
 
@@ -1904,7 +1904,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 	opacity: 0.4;
 }
 
-.aert-message {
+.alert-message {
 	position: relative;
 	padding: .5em .5em .25em .5em;
 	margin-bottom: .5em;
@@ -1921,7 +1921,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 
 .alert-message .close {
 	margin-top: 1px;
-	*margin-t;
+	*margin-top: 0;
 }
 
 .alert-message h4,
@@ -1989,7 +1989,7 @@ header [data-indicator][data-style="active"] {
 /* LuCI specific items */
 .hidden { display: none }
 
-form.inline { display: inline; ma-bottom: 0; }
+form.inline { display: inline; margin-bottom: 0; }
 
 header .pull-right { padding-top: 8px; }
 
@@ -2010,7 +2010,7 @@ header .pull-right { padding-top: 8px; }
 .cbi-section-table-titles.named::before,
 .cbi-section-table-descr.named::before,
 .cbi-section-table-row[data-title]::before {
-	content: attr(data-title) " "
+	content: attr(data-title) " ";
 	display: table-cell;
 	padding: 10px 10px 9px;
 	line-height: 18px;
@@ -2028,7 +2028,8 @@ header .pull-right { padding-top: 8px; }
 .right { text-align: right !important; margin-bottom: 5px !important;}
 .center { text-align: center !mportant; }
 .top { vertical-align: top !important; }
-.middle { vertical-align: middle !important; .bottom { vertical-align: bottom !important; }
+.middle { vertical-align: middle !important; }
+.bottom { vertical-align: bottom !important; }
 
 .cbi-value-field { line-height: 1.5em; }
 
@@ -2085,12 +2086,12 @@ table table td,
 
 .cbi-rowstyle-2,
 .tr.table-titles,
-.tr.-section-table-titles {
+.tr.cbi-section-table-titles {
 	background: #f9f9f9;
 }
 
 .cbi-value-description {
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%23e8f5e9' stroke='%23388e3c' stroke-width='1.2'/%3E%3Ctext x='8' y='12' font-size='11' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%232e7d32'%3E?%3C/text%3E%3C/svg%3E");
+	background-image: url(/luci-static/resources/cbi/help.gif);
 	background-position: .25em .2em;
 	background-repeat: no-repeat;
 	margin: .25em 0 0 0;
@@ -2119,7 +2120,7 @@ table table td,
 	text-align: center;
 	white-space: nowrap;
 	background-image: linear-gradient(#fff, #fff 25%, #f9f9f9);
-	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7
+	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
 	border-radius: 4px;
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
 	display: inline-flex;
@@ -2173,7 +2174,7 @@ table table td,
 	flex-wrap: wrap;
 }
 
-.network-status-table .ifa {
+.network-status-table .ifacebox {
 	margin: .5em;
 	flex-grow: 1;
 }
@@ -2205,7 +2206,7 @@ table table td,
 }
 
 .ifacebadge.large,
-.networktus-table .ifacebox-body .ifacebadge {
+.network-status-table .ifacebox-body .ifacebadge {
 	display: flex;
 	flex: 1;
 	padding: .25em;
@@ -2237,7 +2238,7 @@ table table td,
 }
 
 .zonebadge > em,
-.zoe > strong {
+.zonebadge > strong {
 	margin: 0 2px;
 	display: inline-block;
 }
@@ -2267,7 +2268,7 @@ div.cbi-value var[data-tooltip],
 div.cbi-value var.cbi-tooltip-container,
 .td.cbi-value-field var.cbi-tooltip-container {
 	cursor: help;
-	borderom: 1px dotted #2e7d32;
+	border-bottom: 1px dotted #2e7d32;
 }
 
 div.cbi-value var.cbi-tooltip-container,
@@ -2293,7 +2294,7 @@ div.cbi-value var.cbi-tooltip-container,
 .uci-change-legend-label del,
 .uci-change-legend-label ins,
 .uci-change-legend-label var {
-	text-decoratio: none;
+	text-decoration: none;
 	font-family: monospace;
 	font-style: normal;
 	border: 1px solid #ccc;
@@ -2323,7 +2324,7 @@ div.cbi-value var.cbi-tooltip-container,
 }
 
 .uci-change-list var ins,
-.uci-change-list var del
+.uci-change-list var del {
 	display: inline-block;
 	border: none;
 	width: 100%;
@@ -2357,7 +2358,7 @@ div.cbi-value var.cbi-tooltip-container,
 	top: 2px;
 	left: 2px;
 	right: 2px;
-	bttom: 2px;
+	bottom: 2px;
 }
 
 #modal_overlay {
@@ -2386,7 +2387,7 @@ div.cbi-value var.cbi-tooltip-container,
 	background: #fff;
 	box-shadow: 0 0 3px #444;
 	padding: 1em 1em .5em 1em;
-	mindth: 270px;
+	min-width: 270px;
 }
 
 #modal_overlay .modal > * {
@@ -2420,7 +2421,7 @@ html body.apply-overlay-active {
 	line-height: 300%;
 }
 
-[data-page="admin-network-dhcp"] [datame="ip"] {
+[data-page="admin-network-dhcp"] [data-name="ip"] {
 	width: 15%;
 }
 
@@ -2457,7 +2458,7 @@ html body.apply-overlay-active {
 }
 
 [data-tab-active="true"] {
-	opacit 1;
+	opacity: 1;
 	height: auto;
 	overflow: visible;
 	transition: opacity .25s ease-in;
@@ -2520,7 +2521,7 @@ html body.apply-overlay-active {
 	text-align: right;
 }
 
-.cbi-filebrowser > li > div:last-child > button {
+.cbi-filebrowser > ul > li > div:last-child > button {
 	padding: .125em .25em;
 	margin: 1px 0 1px .25em;
 }
@@ -2552,7 +2553,7 @@ html body.apply-overlay-active {
 	width: 100%;
 }
 
-@keyframefade-in {
+@keyframes fade-in {
 	0% { opacity: 0; }
 	100% { opacity: 1; }
 }
@@ -2587,5 +2588,7 @@ html body.apply-overlay-active {
 	width: 25%;
 }
 
-.assoclist .td:nth-of-type(6) button {rd-break: normal;
+.assoclist .td:nth-of-type(6) button {
+	word-break: normal;
 }
+

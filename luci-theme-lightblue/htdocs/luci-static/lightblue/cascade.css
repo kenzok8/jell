@@ -1450,7 +1450,7 @@ body.modal-overlay-active #modal_overlay {
 	border: 1px solid #ccc;
 	border-bottom-color: #bbb;
 	border-radius: 4px;
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0x 2px rgba(0, 0, 0, 0.05);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
 	white-space: pre;
 }
 
@@ -1479,7 +1479,7 @@ body.modal-overlay-active #modal_overlay {
 .btn.primary,
 .cbi-button-apply,
 .cbi-button-negative {
-	border-color: #;
+	border-color: #1f4287;
 	color: #1f4287;
 	text-shadow: none !important;
 }
@@ -1507,7 +1507,7 @@ body.modal-overlay-active #modal_overlay {
 
 .cbi-button-edit,
 .cbi-button-positive.important,
-.cbi-button-postive,
+.cbi-button-positive,
 .cbi-button-action.important,
 .cbi-button-action,
 .cbi-button-save,
@@ -1529,7 +1529,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-section-actions .cbi-button-action {
 	color: #132ba1;
 	background: #ffffff;
-	bordcolor: #132ba1;
+	border-color: #132ba1;
 	text-shadow: none !important;
 }
 
@@ -1579,7 +1579,8 @@ body.modal-overlay-active #modal_overlay {
 }
 
 .cbi-dropdown.btn.spinning > ul:not(.dropdown),
-.cbi-dropdown.cbi-button.spinning > ul:not(.dropdown) margin: 0 !important;
+.cbi-dropdown.cbi-button.spinning > ul:not(.dropdown) {
+	margin: 0 !important;
 }
 
 .cbi-dropdown > ul.preview {
@@ -1608,7 +1609,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-dropdown > .more,
 .cbi-dropdown:not(.btn):not(.cbi-button) > ul > li[placeholder] {
 	color: #777;
-ont-weight: bold;
+	font-weight: bold;
 	text-shadow: 1px 1px 0px #fff;
 	display: none;
 	justify-content: center;
@@ -1664,7 +1665,7 @@ ont-weight: bold;
 	height: 20px;
 }
 
-.cropdown[open] {
+.cbi-dropdown[open] {
 	position: relative;
 }
 
@@ -1686,7 +1687,7 @@ ont-weight: bold;
 .cbi-dropdown[open] > ul.dropdown > li,
 .cbi-dropdown[multiple] > ul > li > label,
 .cbi-dropdown[multiple][open] > ul.dropdown > li,
-.cbi-dropwn[multiple][more] > .more,
+.cbi-dropdown[multiple][more] > .more,
 .cbi-dropdown[multiple][empty] > .more {
 	flex-grow: 1;
 	display: flex !important;
@@ -1757,7 +1758,7 @@ input[type="text"] + .cbi-button-add {
 
 input[type="text"] + .cbi-button-remove {
 	color: #124;
-	boadius: 0 3px 3px 0;
+	border-radius: 0 3px 3px 0;
 	border-color: #ccc;
 }
 
@@ -1817,7 +1818,7 @@ input[type="text"] + .cbi-button-remove {
 	content: attr(title);
 	white-space: pre;
 	overflow: hidden;
-	text-overflow: ipsis;
+	text-overflow: ellipsis;
 }
 
 .zonebadge .cbi-tooltip {
@@ -1854,7 +1855,7 @@ input[type="text"] + .cbi-button-remove {
 	flex-direction: column;
 }
 
-.btn.active, .btn:ave {
+.btn.active, .btn:active {
 	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -1888,7 +1889,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 }
 
 .close {
-	float: ri;
+	float: right;
 	color: #000;
 	font-size: 20px;
 	font-weight: bold;
@@ -1911,7 +1912,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 	background: linear-gradient(to bottom, #fceec1, #eedc94) repeat-x;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-	text-shadow: 0 1px 0 ra(255, 255, 255, 0.5);
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	border-width: 1px;
 	border-style: solid;
 	border-radius: 4px;
@@ -1942,7 +1943,8 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 }
 
 .label,
-header [data-indicator] ding: 1px 3px 2px;
+header [data-indicator] {
+	padding: 1px 3px 2px;
 	font-size: 9.75px;
 	font-weight: bold;
 	color: #fff !important;
@@ -1976,7 +1978,7 @@ a.label:hover {
 }
 
 .label.success {
-	background-colo#339933;
+	background-color: #339933;
 }
 
 .label.notice,
@@ -2001,7 +2003,7 @@ header .pull-right { padding-top: 8px; }
 	background-color: #f5f5f5;
 }
 
-.cbi-section-table .tr.cbi-section-tablr .th {
+.cbi-section-table .tr.cbi-section-table-descr .th {
 	font-weight: normal;
 }
 
@@ -2023,7 +2025,7 @@ header .pull-right { padding-top: 8px; }
 }
 
 .left { text-align: left !important; }
-.right { -align: right !important; margin-bottom: 5px !important;}
+.right { text-align: right !important; margin-bottom: 5px !important;}
 .center { text-align: center !important; }
 .top { vertical-align: top !important; }
 .middle { vertical-align: middle !important; }
@@ -2043,7 +2045,7 @@ table table td,
 }
 
 .table.cbi-section-table input[type="password"],
-.tablection-table input[type="text"],
+.table.cbi-section-table input[type="text"],
 .table.cbi-section-table textarea,
 .table.cbi-section-table select {
 	width: 100%;
@@ -2070,7 +2072,7 @@ table table td,
 .td.cbi-section-actions > * > *,
 .td.cbi-section-actions > * > form > * {
 	flex: 1 1 4em;
-: 0 1px;
+	margin: 0 1px;
 }
 
 .td.cbi-section-actions > * > form {
@@ -2089,7 +2091,7 @@ table table td,
 }
 
 .cbi-value-description {
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%234b9cd1' stroke='%232b73b5'/%3E%3Ctext x='8' y='12' font-size='11' font-family='sansif' font-weight='bold' text-anchor='middle' fill='%23fff'%3E?%3C/text%3E%3C/svg%3E");
+	background-image: url(/luci-static/resources/cbi/help.gif);
 	background-position: .25em .2em;
 	background-repeat: no-repeat;
 	margin: .25em 0 0 0;
@@ -2114,7 +2116,7 @@ table table td,
 .ifacebox {
 	background-color: #fff;
 	border: 1px solid #ccc;
-	marg10px;
+	margin: 0 10px;
 	text-align: center;
 	white-space: nowrap;
 	background-image: linear-gradient(#fff, #fff 25%, #f9f9f9);
@@ -2137,7 +2139,7 @@ table table td,
 	background: #4b9cd1;
 }
 
-box .ifacebox-body {
+.ifacebox .ifacebox-body {
 	padding: .25em;
 }
 
@@ -2159,7 +2161,7 @@ box .ifacebox-body {
 .ifacebadge img {
 	width: 16px;
 	height: 16px;
-	vertical-align: m;
+	vertical-align: middle;
 }
 
 .ifacebadge-active {
@@ -2194,7 +2196,7 @@ box .ifacebox-body {
 }
 
 .network-status-table .ifacebox-body > div {
-	margin25em;
+	margin: -.125em;
 	display: flex;
 	flex-wrap: wrap;
 }
@@ -2227,7 +2229,8 @@ box .ifacebox-body {
 	margin: 0 .125em;
 }
 
-.zonebadgpadding: 2px;
+.zonebadge {
+	padding: 2px;
 	border-radius: 4px;
 	display: inline-block;
 	white-space: nowrap;
@@ -2262,7 +2265,7 @@ div.cbi-value var,
 	color: #0069d6;
 }
 
-div.cbiue var[data-tooltip],
+div.cbi-value var[data-tooltip],
 .td.cbi-value-field var[data-tooltip],
 div.cbi-value var.cbi-tooltip-container,
 .td.cbi-value-field var.cbi-tooltip-container {
@@ -2312,7 +2315,7 @@ div.cbi-value var.cbi-tooltip-container,
 
 .uci-change-list del,
 .uci-change-legend-label del {
-	borderlor: #f00;
+	border-color: #f00;
 	background: #fcc;
 }
 
@@ -2346,7 +2349,7 @@ div.cbi-value var.cbi-tooltip-container,
 	margin-right: 4px;
 	width: 16px;
 	height: 16px;
-	di block;
+	display: block;
 	position: relative;
 }
 
@@ -2378,7 +2381,7 @@ div.cbi-value var.cbi-tooltip-container,
 	width: 90%;
 	margin: 5em auto;
 	display: flex;
-	wrap: wrap;
+	flex-wrap: wrap;
 	min-height: 32px;
 	max-width: 600px;
 	align-items: center;
@@ -2478,7 +2481,8 @@ html body.apply-overlay-active {
 .cbi-filebrowser.open {
 	opacity: 1;
 	height: auto;
-	overflow: vis	transition: opacity .25s ease-in;
+	overflow: visible;
+	transition: opacity .25s ease-in;
 }
 
 .cbi-filebrowser > * {
@@ -2508,7 +2512,7 @@ html body.apply-overlay-active {
 	background: #f5f5f5;
 }
 
-.cbi-filebrowser > ul > li > difirst-child {
+.cbi-filebrowser > ul > li > div:first-child {
 	flex: 10;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -2538,7 +2542,7 @@ html body.apply-overlay-active {
 	flex: 1;
 }
 
-.cbi-filebrowr .upload > .btn {
+.cbi-filebrowser .upload > .btn {
 	flex-basis: 60px;
 }
 
@@ -2574,7 +2578,8 @@ html body.apply-overlay-active {
 	flex-direction: column;
 	align-items: center;
 	white-space: normal;
-	text-align: c}
+	text-align: center;
+}
 
 .assoclist .ifacebadge > img {
 	margin: .2em;

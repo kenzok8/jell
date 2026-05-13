@@ -1448,7 +1448,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-button-negative {
 	border-color: #b60000;
 	color: #b60000;
-	text-shadone !important;
+	text-shadow: none !important;
 }
 
 .cbi-section-remove .cbi-button,
@@ -1475,7 +1475,8 @@ body.modal-overlay-active #modal_overlay {
 .cbi-button-edit,
 .cbi-button-positive.important,
 .cbi-button-positive,
-.cbi-button-action.importancbi-button-action,
+.cbi-button-action.important,
+.cbi-button-action,
 .cbi-button-save,
 .cbi-button-reload,
 .cbi-page-actions .cbi-button-apply {
@@ -1496,7 +1497,7 @@ body.modal-overlay-active #modal_overlay {
 	color: #95110F;
 	background: #ffffff;
 	border-color: #95110F;
-	text-shadow: noneortant;
+	text-shadow: none !important;
 }
 
 
@@ -1549,7 +1550,7 @@ body.modal-overlay-active #modal_overlay {
 	margin: 0 !important;
 }
 
-.cbi-dropdo > ul.preview {
+.cbi-dropdown > ul.preview {
 	display: none;
 }
 
@@ -1576,7 +1577,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-dropdown:not(.btn):not(.cbi-button) > ul > li[placeholder] {
 	color: #777;
 	font-weight: bold;
-	text-shadow: 1px  0px #fff;
+	text-shadow: 1px 1px 0px #fff;
 	display: none;
 	justify-content: center;
 }
@@ -1601,7 +1602,7 @@ body.modal-overlay-active #modal_overlay {
 }
 
 .cbi-dropdown > ul > li .hide-open { display: block; display: initial; }
-.cbi-dropdown > ul > li .hide-close lay: none; }
+.cbi-dropdown > ul > li .hide-close { display: none; }
 
 .cbi-dropdown > ul > li[display]:not([display="0"]) {
 	border-left: 1px solid #ccc;
@@ -1635,7 +1636,7 @@ body.modal-overlay-active #modal_overlay {
 	position: relative;
 }
 
-.ropdown[open] > ul.dropdown {
+.cbi-dropdown[open] > ul.dropdown {
 	display: block;
 	background: #f6f6f5;
 	border: 1px solid #918e8c;
@@ -1654,7 +1655,7 @@ body.modal-overlay-active #modal_overlay {
 .cbi-dropdown[multiple] > ul > li > label,
 .cbi-dropdown[multiple][open] > ul.dropdown > li,
 .cbi-dropdown[multiple][more] > .more,
-.cbi-dropdown[mule][empty] > .more {
+.cbi-dropdown[multiple][empty] > .more {
 	flex-grow: 1;
 	display: flex !important;
 }
@@ -1672,7 +1673,7 @@ body.modal-overlay-active #modal_overlay {
 	border-bottom: 1px solid #ccc;
 }
 
-.cbi-dropdown[open] > ul.drn > li[selected] {
+.cbi-dropdown[open] > ul.dropdown > li[selected] {
 	background: #e58a8a;
 }
 
@@ -1728,7 +1729,7 @@ input[type="text"] + .cbi-button-remove {
 	border-color: #ccc;
 }
 
-.cbe-ref {
+.cbi-title-ref {
 	color: #b60000;
 }
 
@@ -1761,7 +1762,7 @@ input[type="text"] + .cbi-button-remove {
 
 
 .cbi-progressbar {
-	border: 1px solid var(--border-olor-high);
+	border: 1px solid var(--border-color-high);
 	border-radius: 3px;
 	position: relative;
 	min-width: 170px;
@@ -1791,7 +1792,7 @@ input[type="text"] + .cbi-button-remove {
 .zonebadge .cbi-tooltip {
 	padding: 1px;
 	background: inherit;
-	margin: -1.6em 0 0 x;
+	margin: -1.6em 0 0 -5px;
 	border-radius: 3px;
 	pointer-events: none;
 	box-shadow: 0 0 3px #444;
@@ -1826,7 +1827,7 @@ input[type="text"] + .cbi-button-remove {
 	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.btndisabled {
+.btn.disabled {
 	cursor: default;
 	opacity: 0.65;
 	box-shadow: none;
@@ -1861,7 +1862,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 	font-size: 20px;
 	font-weight: bold;
 	line-height: 13.5px;
-	text-shadow: 0 0 #fff;
+	text-shadow: 0 1px 0 #fff;
 	opacity: 0.25;
 }
 
@@ -1883,7 +1884,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 	border-width: 1px;
 	border-style: solid;
 	border-radius: 4px;
-	box-shw: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .alert-message .close {
@@ -1915,7 +1916,7 @@ header [data-indicator] {
 	font-size: 9.75px;
 	font-weight: bold;
 	color: #fff !important;
-	text-form: uppercase;
+	text-transform: uppercase;
 	white-space: nowrap;
 	background-color: #D12626;
 	border-radius: 3px;
@@ -1950,7 +1951,7 @@ a.label:hover {
 
 .label.notice,
 header [data-indicator][data-style="active"] {
-	background-color:df826f;
+	background-color: #df826f;
 }
 
 /* LuCI specific items */
@@ -1975,7 +1976,7 @@ header .pull-right { padding-top: 8px; }
 }
 
 .cbi-section-table-titles.named::before,
-.cbi-section-tscr.named::before,
+.cbi-section-table-descr.named::before,
 .cbi-section-table-row[data-title]::before {
 	content: attr(data-title) " ";
 	display: table-cell;
@@ -1993,7 +1994,7 @@ header .pull-right { padding-top: 8px; }
 
 .left { text-align: left !important; }
 .right { text-align: right !important; margin-bottom: 5px !important;}
-.center { text-align: center !imprtant; }
+.center { text-align: center !important; }
 .top { vertical-align: top !important; }
 .middle { vertical-align: middle !important; }
 .bottom { vertical-align: bottom !important; }
@@ -2014,7 +2015,7 @@ table table td,
 .table.cbi-section-table input[type="password"],
 .table.cbi-section-table input[type="text"],
 .table.cbi-section-table textarea,
-.table.cbi-sectiole select {
+.table.cbi-section-table select {
 	width: 100%;
 }
 
@@ -2044,7 +2045,8 @@ table table td,
 
 .td.cbi-section-actions > * > form {
 	display: inline-flex;
-	margin: 0;}
+	margin: 0;
+}
 
 .table.valign-middle .td {
 	vertical-align: middle;
@@ -2057,7 +2059,7 @@ table table td,
 }
 
 .cbi-value-description {
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='%23d2492d' stroke='%23b03020'/%3E%3Ctext x='8' y='12' font-size='11' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%23fff'%3E?%3C/text%3E%3C/svg%E");
+	background-image: url(/luci-static/resources/cbi/help.gif);
 	background-position: .25em .2em;
 	background-repeat: no-repeat;
 	margin: .25em 0 0 0;
@@ -2085,7 +2087,7 @@ table table td,
 	margin: 0 10px;
 	text-align: center;
 	white-space: nowrap;
-	background-image: linear-nt(#fff, #fff 25%, #f9f9f9);
+	background-image: linear-gradient(#fff, #fff 25%, #f9f9f9);
 	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
 	border-radius: 4px;
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -2110,7 +2112,8 @@ table table td,
 }
 
 .ifacebadge {
-	display: inline-blo	flex-direction: row;
+	display: inline-block;
+	flex-direction: row;
 	white-space: nowrap;
 	background-color: #fff;
 	border: 1px solid #ccc;
@@ -2134,7 +2137,7 @@ table table td,
 	font-weight: bold;
 }
 
-.net-status-table {
+.network-status-table {
 	display: flex;
 	flex-wrap: wrap;
 }
@@ -2166,7 +2169,7 @@ table table td,
 	flex-wrap: wrap;
 }
 
-#dsl_status_table .ifacebox-boan > strong {
+#dsl_status_table .ifacebox-body span > strong {
 	display: inline-block;
 	min-width: 35%;
 }
@@ -2198,7 +2201,7 @@ table table td,
 	padding: 2px;
 	border-radius: 4px;
 	display: inline-block;
-	white-space: 
+	white-space: nowrap;
 	color: #666;
 	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
 }
@@ -2258,7 +2261,7 @@ div.cbi-value var.cbi-tooltip-container,
 .uci-change-list del,
 .uci-change-list ins,
 .uci-change-list var,
-.nge-legend-label del,
+.uci-change-legend-label del,
 .uci-change-legend-label ins,
 .uci-change-legend-label var {
 	text-decoration: none;
@@ -2285,7 +2288,8 @@ div.cbi-value var.cbi-tooltip-container,
 }
 
 .uci-change-list var,
-.uci-change-legend-label 	border-color: #ccc;
+.uci-change-legend-label var {
+	border-color: #ccc;
 	background: #eee;
 }
 
@@ -2318,7 +2322,7 @@ div.cbi-value var.cbi-tooltip-container,
 }
 
 .uci-change-legend-label var ins,
-.uci-change-lend-label var del {
+.uci-change-legend-label var del {
 	border: none;
 	position: absolute;
 	top: 2px;
@@ -2349,7 +2353,7 @@ div.cbi-value var.cbi-tooltip-container,
 	min-height: 32px;
 	max-width: 600px;
 	align-items: center;
-	bordradius: 3px;
+	border-radius: 3px;
 	background: #fff;
 	box-shadow: 0 0 3px #444;
 	padding: 1em 1em .5em 1em;
@@ -2380,7 +2384,7 @@ body.modal-overlay-active #modal_overlay {
 }
 
 html body.apply-overlay-active {
-	height: calc(100vh - ;
+	height: calc(100vh - 63px);
 }
 
 #applyreboot-section {
@@ -2417,7 +2421,7 @@ html body.apply-overlay-active {
 	background-size: 16px;
 }
 
-[data-taitle] {
+[data-tab-title] {
 	height: 0;
 	opacity: 0;
 	overflow: hidden;
@@ -2451,7 +2455,7 @@ html body.apply-overlay-active {
 
 .cbi-filebrowser > * {
 	max-width: 100%;
-	ovlow: hidden;
+	overflow: hidden;
 	text-overflow: ellipsis;
 	padding: 0 0 .25em 0;
 	margin: .25em .25em 0px .25em;
@@ -2482,7 +2486,7 @@ html body.apply-overlay-active {
 	text-overflow: ellipsis;
 }
 
-.cbi-filebser > ul > li > div:last-child {
+.cbi-filebrowser > ul > li > div:last-child {
 	flex: 3;
 	text-align: right;
 }
@@ -2511,7 +2515,8 @@ html body.apply-overlay-active {
 }
 
 .cbi-filebrowser .upload > div {
-	flex: 10;	min-width: 150px;
+	flex: 10;
+	min-width: 150px;
 }
 
 .cbi-filebrowser .upload > div > input {
