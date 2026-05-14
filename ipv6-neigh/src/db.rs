@@ -148,7 +148,7 @@ impl DnsUpdater {
     pub async fn axfr_records(&self) -> Result<Vec<(String, IpAddr)>, Box<dyn std::error::Error>> {
         const AXFR_TIMEOUT: Duration = Duration::from_secs(10);
 
-        let query = Query::query(self.zone.clone(), RecordType::AXFR);
+        let query = Query::new(self.zone.clone(), RecordType::AXFR);
         let mut msg = Message::query();
         msg.add_query(query);
 

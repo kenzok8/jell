@@ -16,7 +16,7 @@ pub fn call_ubus(obj_path: &str, method: &str) -> Result<Value, Box<dyn std::err
 fn format_mac_from_hex(hex: &str) -> String {
     hex.as_bytes()
         .chunks(2)
-        .map(|chunk| std::str::from_utf8(chunk).unwrap())
+        .filter_map(|chunk| std::str::from_utf8(chunk).ok())
         .collect::<Vec<&str>>()
         .join(":")
 }
