@@ -19,16 +19,6 @@
   <img src="https://raw.githubusercontent.com/eamonxg/assets/master/aurora/preview/theme/multi-device-showcase.png" alt="Multi-Device Showcase" width="100%">
 </div>
 
-> [!NOTE]
-> **🤖 Exploring AI Workflows...**
->
-> Hey everyone — I've been pretty busy with work lately, so my time for Aurora has been limited. But I don't want the project to stall, so I've been exploring AI-assisted workflows to help pick up the slack, especially on the debugging side.
->
-> There's a backlog of open issues right now, and honestly, most of them are styling compatibility problems with third-party plugins. These aren't huge issues individually, but they're incredibly time-consuming to track down — you have to install the plugin, sometimes set up specific conditions on the router just to reproduce the problem.
->
-> The root cause is that LuCI only provides a basic set of web components. When plugin authors need more complex UI, they end up rolling their own HTML/CSS/JS with no shared conventions, so compatibility headaches are inevitable. With the sheer number of LuCI plugins out there, getting them all to play nicely is a massive undertaking — especially when some plugins don't even follow LuCI's own JS conventions.
->
-> So I'm bringing AI into the loop to handle these tedious but important tasks, and ideally automate as much of it as possible. If you have better ideas or suggestions, I'd love to hear them — come chat on [Discord](https://discord.gg/EBncRrzfTw).
 
 ## Features
 
@@ -80,36 +70,16 @@ OpenWrt 25.12+ and snapshots use `apk`; other versions use `opkg`:
 
 ## Contributing
 
-<details>
-<summary><b>Development</b></summary>
+Aurora uses **Vite** and a modern front-end toolchain, and is experimenting with end-to-end AI integration across the full development workflow. See [Development Documentation](.dev/docs/DEVELOPMENT.md) to get started. Suggestions and PRs are always welcome.
 
-<p>As we step into 2026, front-end toolchains have become mature and advanced, and modern browsers now support a wide range of exciting new features. Fully embracing the modern front-end ecosystem is at the core of the Aurora theme.</p>
-
-<p>Aurora uses <strong>Vite</strong> as the build tool.</p>
-
-<ul>
-<li>During development, you can freely choose and integrate any CSS toolchain.</li>
-<li>In production, multiple strategies are available to optimize bundled assets.</li>
-<li>Most importantly, with the help of a local proxy server, style changes can be previewed in real time!</li>
-</ul>
-
-<p>For more development information, see <a href=".dev/docs/DEVELOPMENT.md">Development Documentation</a>.</p>
-
-</details>
-
-<h4>Community</h4>
-
-<p>I've got a Discord server going - come hang out and chat! 👋 <a href="https://discord.gg/EBncRrzfTw">Join Discord</a></p>
+[discord.gg/EBncRrzfTw](https://discord.gg/EBncRrzfTw)
 
 ## License & Credits
 
-This project is licensed under the Apache License 2.0.
+[Apache 2.0](LICENSE). Thanks to:
 
-The production build structure is based on the official OpenWrt theme
-[luci-theme-bootstrap](https://github.com/openwrt/luci/tree/master/themes/luci-theme-bootstrap).
-
-Visual style and some implementations are influenced by
-[Apple](https://www.apple.com/) and [Vercel](https://vercel.com/).
-
-The project is developed using a modern front-end stack, including
-[Vite](https://vitejs.dev/) and [Tailwind CSS](https://tailwindcss.com/).
+- [luci-theme-bootstrap](https://github.com/openwrt/luci/tree/master/themes/luci-theme-bootstrap)
+- [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Claude Code](https://claude.ai/code)
+- [Apple](https://www.apple.com/) and [Vercel](https://vercel.com/) — design inspiration

@@ -11,6 +11,8 @@
   nocompatible: true;
 }
 
+@import "tw-animate-css";
+
 :root {
   --background: oklch(0.968 0.007 247.896);
   --foreground: oklch(0.208 0.042 265.755);
@@ -434,7 +436,7 @@
       @apply max-w-max-width mx-auto min-h-[calc(100vh-4rem)] w-23/24 px-4 max-md:w-full max-md:px-3;
 
       #view {
-        @apply md:border-border/30 md:bg-page-bg md:hover:border-border/50 mx-0 w-full p-0 shadow-none transition-all duration-300 empty:hidden md:rounded-4xl md:border md:p-6 md:shadow-xl md:hover:shadow-2xl;
+        @apply animate-in fade-in-0 slide-in-from-top-2 fill-mode-both md:border-border/30 md:bg-page-bg md:hover:border-border/50 mx-0 w-full p-0 shadow-none transition-all duration-300 empty:hidden md:rounded-4xl md:border md:p-6 md:shadow-xl md:hover:shadow-2xl;
 
         .cbi-title-section {
           @apply mb-6 leading-relaxed max-md:mx-2 max-md:mb-3;
@@ -1949,7 +1951,7 @@
     @apply relative inline-block pl-8!;
     @apply before:absolute before:top-1/2 before:left-[6px] before:size-5 before:-translate-y-1/2 before:animate-spin before:bg-current before:[mask:url('@assets/icons/spinning.svg')_center/cover_no-repeat];
     #view > & {
-      @apply first:mx-auto first:grid first:min-h-[15vh] first:w-fit first:place-items-center first:max-md:min-h-dvh;
+      @apply first:mx-auto first:grid first:min-h-48 first:w-fit first:place-items-center first:max-md:min-h-[calc(100dvh-4rem)];
     }
   }
 }

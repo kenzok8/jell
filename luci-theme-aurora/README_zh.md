@@ -19,16 +19,6 @@
   <img src="https://raw.githubusercontent.com/eamonxg/assets/master/aurora/preview/theme/multi-device-showcase.png" alt="Multi-Device Showcase" width="100%">
 </div>
 
-> [!NOTE]
-> **🤖 AI 工作流探索中…**
->
-> 大家好，最近工作比较忙，能投入到 Aurora 主题的时间有限，但我不希望 Aurora 因此停滞不前，所以最近一直在研究 AI 工作流，希望借助 AI 来分担一部分工作，尤其是调试方面。
->
-> 目前主题积压了不少 issue，其实大部分都是第三方插件的样式兼容问题。这类问题说大不大，但调起来真的很耗时间——你得先装上对应的插件，有时候路由器还得满足特定条件才能复现。
->
-> 归根结底，LuCI 本身只提供了一套基础的 Web 组件，插件作者想实现更复杂的交互，就只能用 HTML + CSS + JS 自行实现，没有统一的规范，各种兼容问题在所难免。LuCI 插件数量庞大，要逐一做好兼容，工作量可想而知——更何况有些插件本身也没有按照 LuCI JS 的规范来开发。
->
-> 所以我希望引入 AI，把这些琐碎但繁重的任务交给它来完成，如果能实现自动化那就更理想了。如果你有更好的建议或想法，欢迎来 [Discord](https://discord.gg/EBncRrzfTw) 聊聊。
 
 ## 特性
 
@@ -81,33 +71,16 @@ OpenWrt 25.12+ 和 Snapshot 版本使用 `apk`；其他版本使用 `opkg`：
 
 ## 加入贡献
 
-<details>
-<summary><b>关于开发</b></summary>
+Aurora 使用 **Vite** 与现代前端工具链构建，并尝试将 AI 融入开发全链路。详见[开发文档](.dev/docs/DEVELOPMENT.md)。欢迎提交建议或 PR。
 
-<p>步入 2026 年，前端工具链已相当成熟先进，并且现代浏览器也支持了很多有趣的新特性。所以全面拥抱现代前端生态是 Aurora 主题的核心理念。</p>
-
-<p>Aurora 使用 <strong>Vite</strong> 作为构建工具。</p>
-
-<ul>
-<li>在开发过程中，您可以自由选择并集成任何 CSS 工具链。</li>
-<li>在生产环境中，提供多种策略来优化打包资源。</li>
-<li>最重要的是，借助于本地代理服务器，样式的修改可以实时预览！</li>
-</ul>
-
-<p>更多开发信息，请参阅 <a href=".dev/docs/DEVELOPMENT.md">开发文档</a>。</p>
-
-</details>
-
-<h4>社区</h4>
-
-<p>我建立了一个 Discord 服务器 —— 欢迎来聊天！👋 <a href="https://discord.gg/EBncRrzfTw">加入 Discord</a></p>
+[discord.gg/EBncRrzfTw](https://discord.gg/EBncRrzfTw)
 
 ## 许可与致谢
 
-本项目基于 Apache License 2.0 许可开源。
+[Apache 2.0](LICENSE)。致谢：
 
-生产构建结构基于官方 OpenWrt 主题 [luci-theme-bootstrap](https://github.com/openwrt/luci/tree/master/themes/luci-theme-bootstrap)。
-
-视觉风格和部分实现受到 [Apple](https://www.apple.com/) 和 [Vercel](https://vercel.com/) 的影响。
-
-本项目使用现代前端技术栈开发，包括 [Vite](https://vitejs.dev/) 和 [Tailwind CSS](https://tailwindcss.com/)。
+- [luci-theme-bootstrap](https://github.com/openwrt/luci/tree/master/themes/luci-theme-bootstrap)
+- [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Claude Code](https://claude.ai/code)
+- [Apple](https://www.apple.com/) 和 [Vercel](https://vercel.com/) — 设计灵感
