@@ -8,3 +8,6 @@ yarn.lock
 
 # System Configuration File
 .DS_Store
+
+# Superpowers AI workflow docs
+docs/superpowers/

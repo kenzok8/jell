@@ -77,6 +77,7 @@
 
   --spacing: 0.25rem;
   --container-max-width: 80rem;
+  --radius-base: 0.5rem;
 }
 
 [data-darkmode="true"] {
@@ -208,6 +209,15 @@
 
   --spacing: var(--spacing);
   --container-max-width: var(--container-max-width);
+
+  --radius-sm:  calc(var(--radius-base) * 0.25);
+  --radius:     calc(var(--radius-base) * 0.5);
+  --radius-md:  calc(var(--radius-base) * 0.75);
+  --radius-lg:  var(--radius-base);
+  --radius-xl:  calc(var(--radius-base) * 1.5);
+  --radius-2xl: calc(var(--radius-base) * 2);
+  --radius-3xl: calc(var(--radius-base) * 3);
+  --radius-4xl: calc(var(--radius-base) * 4);
 }
 
 @layer base {
