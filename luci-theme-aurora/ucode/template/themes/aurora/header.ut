@@ -101,8 +101,12 @@
 		<meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
 		<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
 		<meta name="color-scheme" content="light dark">
+		{% if (blank_page): %}
+		<link rel="stylesheet" href="{{ media }}/login.css">
+		{% else %}
 		<link rel="stylesheet" href="{{ media }}/main.css">
 		<link rel="stylesheet" href="{{ media }}/fonts/aurora-font.css?v={{ icon_cache_version }}">
+		{% endif %}
 		<link rel="icon" href="{{ media }}/images/{{ logo_png }}?v={{ icon_cache_version }}" sizes="32x32">
 		<link rel="icon" href="{{ media }}/images/{{ logo_svg }}?v={{ icon_cache_version }}" sizes="any">
 		<link rel="icon" type="image/png" sizes="16x16" href="{{ media }}/images/favicon-16x16.png">

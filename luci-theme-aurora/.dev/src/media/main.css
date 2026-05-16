@@ -13,212 +13,7 @@
 
 @import "tw-animate-css";
 
-:root {
-  --background: oklch(0.968 0.007 247.896);
-  --foreground: oklch(0.208 0.042 265.755);
-
-  --primary: oklch(0.68 0.11 233);
-  --primary-foreground: oklch(1 0 0);
-
-  --secondary: oklch(0.929 0.013 255.508);
-  --secondary-foreground: oklch(0.372 0.044 257.287);
-
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.446 0.043 257.281);
-
-  --destructive: oklch(0.94 0.05 25);
-  --destructive-foreground: oklch(0.35 0.12 25);
-
-  --accent: oklch(0.62 0.22 25);
-  --accent-foreground: oklch(0.97 0.02 25);
-
-  --default: oklch(0.97 0 0);
-  --default-foreground: oklch(0.205 0 0);
-
-  --info: oklch(0.94 0.05 230);
-  --info-foreground: oklch(0.35 0.08 240);
-
-  --warning: oklch(0.95 0.05 90);
-  --warning-foreground: oklch(0.35 0.08 60);
-
-  --success: oklch(0.94 0.05 160);
-  --success-foreground: oklch(0.32 0.09 165);
-
-  --error: oklch(0.94 0.05 25);
-  --error-foreground: oklch(0.35 0.12 25);
-
-  --border: oklch(0.92 0 0);
-
-  --link: oklch(0.74 0.238 322.16);
-
-  --input-checked: oklch(1 0 0);
-
-  --label-surface: oklch(from var(--panel-bg) calc(l - 0.02) c h);
-
-  --terminal-bg: oklch(0.24 0.02 260);
-  --terminal-foreground: oklch(1 0 0);
-
-  --overlay-base: oklch(0 0 0);
-
-  --progress-bar-start: oklch(0.68 0.11 233);
-  --progress-bar-end: oklch(0.7535 0.1034 198.37);
-
-  --header-bg: oklch(from var(--background) l c h);
-  --header-interactive: oklch(from var(--header-bg) calc(l - 0.12) c h);
-
-  --page-bg: oklch(1 0 0);
-
-  --panel-bg: oklch(1 0 0);
-
-  --tooltip-bg: oklch(from var(--page-bg) calc(l - 0.015) c h);
-
-  --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
-
-  --spacing: 0.25rem;
-  --container-max-width: 80rem;
-  --radius-base: 0.5rem;
-}
-
-[data-darkmode="true"] {
-  --background: oklch(0.32 0.059 188.42);
-  --foreground: oklch(0.968 0.007 247.896);
-
-  --primary: oklch(0.6 0.13 188.745);
-  --primary-foreground: oklch(1 0 0);
-
-  --secondary: oklch(0.372 0.044 257.287);
-  --secondary-foreground: oklch(0.928 0.006 264.531);
-
-  --muted: oklch(0.373 0.026 259.733);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-
-  --destructive: oklch(0.258 0.092 26.042);
-  --destructive-foreground: oklch(0.88 0.14 26.042);
-
-  --accent: oklch(0.35 0.12 25);
-  --accent-foreground: oklch(0.88 0.14 25);
-
-  --default: oklch(0.274 0.006 286.033/0.5);
-  --default-foreground: oklch(0.985 0.01 285.805);
-
-  --info: oklch(0.391 0.09 240.876/0.5);
-  --info-foreground: oklch(0.88 0.06 230);
-
-  --warning: oklch(0.414 0.112 45.904/0.5);
-  --warning-foreground: oklch(0.924 0.12 95.746);
-
-  --success: oklch(0.378 0.077 168.94/0.5);
-  --success-foreground: oklch(0.92 0.09 160);
-
-  --error: oklch(0.41 0.159 10.272/0.5);
-  --error-foreground: oklch(0.88 0.14 25);
-
-  --border: oklch(0.38 0.041 260.031);
-
-  --link: oklch(0.702 0.183 293.541);
-
-  --input-checked: oklch(1 0 0);
-
-  --label-surface: oklch(from var(--panel-bg) calc(l + 0.04) c h);
-
-  --terminal-bg: oklch(0.18 0.03 260);
-  --terminal-foreground: oklch(1 0 0);
-
-  --overlay-base: oklch(0 0 0);
-
-  --progress-bar-start: oklch(0.4318 0.0865 166.91);
-  --progress-bar-end: oklch(62.1% 0.145 189.632);
-
-  --header-bg: oklch(from var(--page-bg) l c h);
-  --header-interactive: oklch(from var(--header-bg) calc(l + 0.24) c h);
-
-  --page-bg: oklch(0.21 0.034 264.665);
-
-  --panel-bg: oklch(0.279 0.041 260.031);
-
-  --tooltip-bg: oklch(from var(--page-bg) calc(l + 0.06) c h);
-}
-
-@theme inline {
-  /* Base Colors */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  --color-page-bg: var(--page-bg);
-
-  --color-panel-bg: var(--panel-bg);
-
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-
-  --color-border: var(--border);
-
-  /* Component Colors */
-
-  --color-header-bg: var(--header-bg);
-  --color-header-interactive: var(--header-interactive);
-
-  --color-progress-bar-start: var(--progress-bar-start);
-  --color-progress-bar-end: var(--progress-bar-end);
-
-  --color-terminal-bg: var(--terminal-bg);
-  --color-terminal-foreground: var(--terminal-foreground);
-
-  --color-tooltip-bg: var(--tooltip-bg);
-
-  --color-overlay-base: var(--overlay-base);
-
-  --color-link: var(--link);
-
-  --color-input-checked: var(--input-checked);
-
-  --color-label-surface: var(--label-surface);
-
-  /* Semantic & Status Colors */
-
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-
-  --color-default: var(--default);
-  --color-default-foreground: var(--default-foreground);
-
-  --color-info: var(--info);
-  --color-info-foreground: var(--info-foreground);
-
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-
-  --color-error: var(--error);
-  --color-error-foreground: var(--error-foreground);
-
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-
-  --spacing: var(--spacing);
-  --container-max-width: var(--container-max-width);
-
-  --radius-sm:  calc(var(--radius-base) * 0.25);
-  --radius:     calc(var(--radius-base) * 0.5);
-  --radius-md:  calc(var(--radius-base) * 0.75);
-  --radius-lg:  var(--radius-base);
-  --radius-xl:  calc(var(--radius-base) * 1.5);
-  --radius-2xl: calc(var(--radius-base) * 2);
-  --radius-3xl: calc(var(--radius-base) * 3);
-  --radius-4xl: calc(var(--radius-base) * 4);
-}
+@import "./_tokens.css";
 
 @layer base {
   *:not(html) {
@@ -1833,7 +1628,7 @@
         @apply relative z-10 flex w-full max-w-md flex-col items-stretch gap-6;
 
         .login-card {
-          @apply border-border bg-panel-bg relative overflow-hidden rounded-4xl border p-10 shadow-xl backdrop-blur-xl max-md:rounded-3xl max-md:p-6;
+          @apply border-border bg-panel-bg relative overflow-hidden rounded-4xl border p-10 shadow-xl max-md:rounded-3xl max-md:p-6;
 
           .login-brand {
             @apply flex items-center gap-4;
@@ -1877,7 +1672,7 @@
                 }
 
                 .login-input {
-                  @apply border-border bg-panel-bg/70 text-foreground focus:border-primary rounded-2xl border px-3 py-2.5 text-base;
+                  @apply border-border bg-panel-bg text-foreground focus:border-primary focus:ring-0 focus:shadow-sm rounded-2xl border px-3 py-2.5 text-base shadow-sm transition-none;
                 }
               }
             }

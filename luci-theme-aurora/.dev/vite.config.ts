@@ -99,6 +99,7 @@ function createLocalServePlugin(): Plugin {
     css: {
       routes: {
         "/luci-static/aurora/main.css": "/src/media/main.css",
+        "/luci-static/aurora/login.css": "/src/media/login.css",
       },
       shouldRewrite: true,
       hmrMessage: "CSS file changed",
@@ -396,6 +397,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           main: resolve(CURRENT_DIR, "src/media/main.css"),
+          login: resolve(CURRENT_DIR, "src/media/login.css"),
         },
         output: {
           assetFileNames: "aurora/[name].[ext]",

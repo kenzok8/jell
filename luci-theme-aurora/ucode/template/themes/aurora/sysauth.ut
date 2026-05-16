@@ -11,6 +11,9 @@
 {% include('header', { blank_page: true }) %}
 
 <div class="login-screen">
+	<div class="login-aurora" aria-hidden="true">
+		<div class="login-aurora-inner"></div>
+	</div>
 	<div class="login-shell">
 		<form method="post" class="login-card">
 			<div class="login-brand">
@@ -23,34 +26,38 @@
 				</div>
 			</div>
 
-			<div class="login-divider" aria-hidden="true"></div>
+			<hr class="login-divider">
 
 			<div class="login-form">
 				<div class="login-fields">
 					<div class="login-field">
 						<label class="login-label" for="luci_username">{{ _('Username') }}</label>
-						<input name="luci_username" id="luci_username" type="text" class="login-input" value="{{ entityencode(duser ?? '', true) }}" autocomplete="username">
+						<div class="input-wrap">
+							<input name="luci_username" id="luci_username" type="text" class="login-input" value="{{ entityencode(duser ?? '', true) }}" autocomplete="username">
+						</div>
 					</div>
 
 					<div class="login-field">
 						<label class="login-label" for="luci_password">{{ _('Password') }}</label>
-						<input name="luci_password" id="luci_password" type="password" class="login-input" autocomplete="current-password">
+						<div class="input-wrap">
+							<input name="luci_password" id="luci_password" type="password" class="login-input" autocomplete="current-password">
+						</div>
 					</div>
 				</div>
 
 				{% if (fuser): %}
-				<div class="alert-message error" role="alert">{{ _('Invalid username and/or password! Please try again.') }}</div>
+				<div class="login-error" role="alert">{{ _('Invalid username and/or password! Please try again.') }}</div>
 				{% endif %}
 
 				<div class="login-actions">
-					<button type="submit" class="btn primary login-submit">{{ _('Log in') }}</button>
+					<button type="submit" class="login-submit">{{ _('Log in') }}</button>
 				</div>
 			</div>
 		</form>
+	</div>
 
-		<div class="login-footer">
-			<p>© <a href="https://github.com/eamonxg/luci-theme-aurora/graphs/contributors" target="_blank" rel="noreferrer">Aurora Theme Contributors</a> · Powered by <a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">{{ version.distname }}</a> & <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }}</a></p>
-		</div>
+	<div class="login-footer">
+		<p>© <a href="https://github.com/eamonxg/luci-theme-aurora/graphs/contributors" target="_blank" rel="noreferrer">Aurora Theme Contributors</a> · Powered by <a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">{{ version.distname }}</a> & <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }}</a></p>
 	</div>
 </div>
 
