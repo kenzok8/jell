@@ -38,13 +38,16 @@
 			"path": "modem/sendsms"
 		}
 	},
-
+	
 	"admin/modem/luci-app-sms-tool-js/calllog": {
 		"title": "Call Log",
 		"order": 25,
 		"action": {
 			"type": "view",
 			"path": "modem/calllog"
+		},
+		"depends": {
+			"fs": { "/tmp/sms_tool_call_log.json": "file" }
 		}
 	},
 

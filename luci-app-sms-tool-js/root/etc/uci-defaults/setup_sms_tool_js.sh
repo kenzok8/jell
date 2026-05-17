@@ -10,7 +10,6 @@ chmod +x /etc/uci-defaults/off_sms.sh >/dev/null 2>&1 &
 chmod +x /etc/uci-defaults/setup_sms_tool_js.sh >/dev/null 2>&1 &
 chmod +x /etc/init.d/my_new_sms >/dev/null 2>&1 &
 chmod +x /etc/init.d/sms_tool_calllogd >/dev/null 2>&1 &
-/etc/init.d/sms_tool_calllogd enable >/dev/null 2>&1 &
 chmod +x /usr/bin/sms_tool_calllogd >/dev/null 2>&1 &
 
 mkdir -p /etc/modem/atcmmds >/dev/null 2>&1 &

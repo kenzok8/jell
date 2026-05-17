@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: luci-app-atinout\n"
 "Language-Team: Rafał Wabik (IceG)\n"
-"Language: zh_TW\n"
+"Language: zh_Hant\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "SMS Messages"
 msgstr "簡訊訊息"
@@ -825,3 +825,125 @@ msgstr "確定要刪除資料夾中的所有檔案嗎？"
 
 msgid "All files deleted successfully"
 msgstr "所有檔案已成功刪除"
+
+msgid "Call Log"
+msgstr "通話紀錄"
+
+msgid "Clear all call log entries?"
+msgstr "清除所有通話紀錄？"
+
+msgid "No call log entries found"
+msgstr "未找到通話紀錄"
+
+msgid "No matching call log entries found"
+msgstr "未找到符合的通話紀錄"
+
+msgid "User interface for viewing call logs. The log is collected by a background daemon."
+msgstr "用於查看通話紀錄的使用者介面。紀錄由背景守護行程收集。"
+
+msgid "Call log daemon is disabled. Please enable it in the configuration to start collecting logs."
+msgstr "通話紀錄守護行程已停用。請在設定中將其啟用以開始收集紀錄。"
+
+msgid "Filter call type"
+msgstr "過濾通話類型"
+
+msgid "All calls"
+msgstr "所有通話"
+
+msgid "Missed calls"
+msgstr "未接來電"
+
+msgid "Received calls"
+msgstr "已接來電"
+
+msgid "Dialed calls"
+msgstr "已撥電話"
+
+msgid "Refresh"
+msgstr "重新整理"
+
+msgid "Clear Log"
+msgstr "清除紀錄"
+
+msgid "Date"
+msgstr "日期"
+
+msgid "Type"
+msgstr "類型"
+
+msgid "Number"
+msgstr "號碼"
+
+msgid "Duration"
+msgstr "通話時長"
+
+msgid "Name"
+msgstr "姓名"
+
+msgid "Call log reading port"
+msgstr "通話紀錄讀取連接埠"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "請選擇一個可用的 ttyUSBX 連接埠。"
+
+msgid "Please select a port"
+msgstr "請選擇連接埠"
+
+msgid "Enable call log daemon"
+msgstr "啟用通話紀錄守護行程"
+
+msgid "Background process to log incoming and missed calls."
+msgstr "用於記錄來電與未接來電的背景程序。"
+
+msgid "Forward SMS"
+msgstr "轉寄簡訊"
+
+msgid "Calls"
+msgstr "通話"
+
+msgid "Notification Settings"
+msgstr "通知設定"
+
+msgid "The LED informs about a new message. Before activating this function, please config and save the SMS reading port, time to check SMS inbox and select the notification LED."
+msgstr "LED 指示燈用於通知新訊息。在啟用此功能之前，請設定並儲存簡訊讀取連接埠、簡訊收件匣檢查時間並選擇通知 LED。"
+
+msgid "Check inbox every minute(s)"
+msgstr "每分鐘檢查一次收件匣"
+
+msgid "Specify how many minutes you want your inbox to be checked."
+msgstr "指定檢查收件匣的時間間隔（分鐘）。"
+
+msgid "Notification LED"
+msgstr "通知 LED"
+
+msgid "Select the notification LED."
+msgstr "選擇通知 LED。"
+
+msgid "Notify new messages"
+msgstr "新訊息通知"
+
+msgid "Restart the inbox checking process every"
+msgstr "重新啟動收件匣檢查程序，每隔"
+
+msgid "The process will restart at the selected time interval. This will eliminate the delay in checking your inbox."
+msgstr "該程序將按選定的時間間隔重新啟動。這將消除檢查收件匣時的延遲。"
+
+msgid "4h"
+msgstr "4小時"
+
+msgid "6h"
+msgstr "6小時"
+
+msgid "8h"
+msgstr "8小時"
+
+msgid "12h"
+msgstr "12小時"
+
+msgid "The diode is dedicated only to these notifications"
+msgstr "該指示燈僅用於此類通知"
+
+msgid "Select 'No' in case the router has only one LED or if the LED is multi-tasking. <br /><br /><b>Important</b> <br />This option requires LED to be defined in the system (if possible) to work properly. This requirement applies when the diode supports multiple tasks."
+msgstr "如果路由器只有一個 LED 或 LED 是多功能的，請選擇「否」。<br /><br /><b>重要提示</b> <br />此選項要求在系統中定義 LED（如果可能）才能正常運作。當指示燈支援多個任務時，此要求適用。"
+
+

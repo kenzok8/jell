@@ -1,8 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: luci-app-sms-tool-js\n"
 "Language-Team: Rafał Wabik (IceG)\n"
-"Language: it\n"
+"Language: lt\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"(n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 msgid "SMS Messages"
 msgstr "Messaggi SMS"
@@ -823,3 +826,123 @@ msgstr "Sei sicuro di voler eliminare tutti i file nella cartella?"
 
 msgid "All files deleted successfully"
 msgstr "Tutti i file sono stati eliminati correttamente"
+
+msgid "Call Log"
+msgstr "Registro chiamate"
+
+msgid "Clear all call log entries?"
+msgstr "Cancellare tutte le voci del registro chiamate?"
+
+msgid "No call log entries found"
+msgstr "Nessuna voce trovata nel registro chiamate"
+
+msgid "No matching call log entries found"
+msgstr "Nessuna voce corrispondente trovata"
+
+msgid "User interface for viewing call logs. The log is collected by a background daemon."
+msgstr "Interfaccia utente per la visualizzazione dei registri chiamate. Il registro è raccolto da un demone in background."
+
+msgid "Call log daemon is disabled. Please enable it in the configuration to start collecting logs."
+msgstr "Il demone del registro chiamate è disabilitato. Abilitatelo nella configurazione per iniziare a raccogliere i log."
+
+msgid "Filter call type"
+msgstr "Filtra tipo di chiamata"
+
+msgid "All calls"
+msgstr "Tutte le chiamate"
+
+msgid "Missed calls"
+msgstr "Chiamate perse"
+
+msgid "Received calls"
+msgstr "Chiamate ricevute"
+
+msgid "Dialed calls"
+msgstr "Chiamate effettuate"
+
+msgid "Refresh"
+msgstr "Aggiorna"
+
+msgid "Clear Log"
+msgstr "Cancella registro"
+
+msgid "Date"
+msgstr "Data"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Number"
+msgstr "Numero"
+
+msgid "Duration"
+msgstr "Durata"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Call log reading port"
+msgstr "Porta di lettura registro chiamate"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Selezionare una delle porte ttyUSBX disponibili."
+
+msgid "Please select a port"
+msgstr "Si prega di selezionare una porta"
+
+msgid "Enable call log daemon"
+msgstr "Abilita demone registro chiamate"
+
+msgid "Background process to log incoming and missed calls."
+msgstr "Processo in background per registrare le chiamate in entrata e perse."
+
+msgid "Forward SMS"
+msgstr "Inoltra SMS"
+
+msgid "Calls"
+msgstr "Chiamate"
+
+msgid "Notification Settings"
+msgstr "Impostazioni notifiche"
+
+msgid "The LED informs about a new message. Before activating this function, please config and save the SMS reading port, time to check SMS inbox and select the notification LED."
+msgstr "Il LED informa di un nuovo messaggio. Prima di attivare questa funzione, configurare e salvare la porta di lettura SMS, il tempo di controllo della posta in arrivo e selezionare il LED di notifica."
+
+msgid "Check inbox every minute(s)"
+msgstr "Controlla posta in arrivo ogni minuto(i)"
+
+msgid "Specify how many minutes you want your inbox to be checked."
+msgstr "Specifica ogni quanti minuti controllare la posta in arrivo."
+
+msgid "Notification LED"
+msgstr "LED di notifica"
+
+msgid "Select the notification LED."
+msgstr "Seleziona il LED di notifica."
+
+msgid "Notify new messages"
+msgstr "Notifica nuovi messaggi"
+
+msgid "Restart the inbox checking process every"
+msgstr "Riavvia il processo di controllo ogni"
+
+msgid "The process will restart at the selected time interval. This will eliminate the delay in checking your inbox."
+msgstr "Il processo verrà riavviato all'intervallo selezionato. Ciò eliminerà il ritardo nel controllo della posta in arrivo."
+
+msgid "4h"
+msgstr "4 ore"
+
+msgid "6h"
+msgstr "6 ore"
+
+msgid "8h"
+msgstr "8 ore"
+
+msgid "12h"
+msgstr "12 ore"
+
+msgid "The diode is dedicated only to these notifications"
+msgstr "Il diodo è dedicato solo a queste notifiche"
+
+msgid "Select 'No' in case the router has only one LED or if the LED is multi-tasking. <br /><br /><b>Important</b> <br />This option requires LED to be defined in the system (if possible) to work properly. This requirement applies when the diode supports multiple tasks."
+msgstr "Seleziona 'No' se il router ha un solo LED o se il LED è multi-funzione. <br /><br /><b>Importante</b> <br />Questa opzione richiede che il LED sia definito nel sistema (se possibile) per funzionare correttamente. Questo requisito si applica quando il diodo supporta più attività."

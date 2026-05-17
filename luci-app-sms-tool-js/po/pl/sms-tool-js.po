@@ -827,3 +827,75 @@ msgstr "Czy na pewno chcesz usunąć wszystkie pliki w folderze?"
 
 msgid "All files deleted successfully"
 msgstr "Wszystkie pliki zostały pomyślnie usunięte"
+
+msgid "Calls"
+msgstr "Połączenia"
+
+msgid "Call Log"
+msgstr "Rejestr połączeń"
+
+msgid "Clear all call log entries?"
+msgstr "Wyczyścić wszystkie wpisy w rejestrze połączeń?"
+
+msgid "No call log entries found"
+msgstr "Nie znaleziono wpisów w rejestrze połączeń"
+
+msgid "No matching call log entries found"
+msgstr "Nie znaleziono pasujących wpisów w rejestrze"
+
+msgid "User interface for viewing call logs. The log is collected by a background daemon."
+msgstr "Interfejs użytkownika do przeglądania rejestrów połączeń. Rejestr jest gromadzony przez usługę działającą w tle."
+
+msgid "Call log daemon is disabled. Please enable it in the configuration to start collecting logs."
+msgstr "Usługa rejestru połączeń jest wyłączona. Włącz ją w konfiguracji, aby rozpocząć gromadzenie logów."
+
+msgid "Filter call type"
+msgstr "Filtruj typ połączenia"
+
+msgid "All calls"
+msgstr "Wszystkie połączenia"
+
+msgid "Missed calls"
+msgstr "Nieodebrane"
+
+msgid "Received calls"
+msgstr "Odebrane"
+
+msgid "Dialed calls"
+msgstr "Wybrane numery"
+
+msgid "Refresh"
+msgstr "Odśwież"
+
+msgid "Clear Log"
+msgstr "Wyczyść rejestr"
+
+msgid "Date"
+msgstr "Data"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Number"
+msgstr "Numer"
+
+msgid "Duration"
+msgstr "Czas trwania"
+
+msgid "Name"
+msgstr "Nazwa"
+
+msgid "Call log reading port"
+msgstr "Port odczytu rejestru połączeń"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Wybierz jeden z dostępnych portów ttyUSBX."
+
+msgid "Please select a port"
+msgstr "Proszę wybrać port"
+
+msgid "Enable call log daemon"
+msgstr "Włącz usługę rejestru połączeń"
+
+msgid "Background process to log incoming and missed calls."
+msgstr "Proces w tle do rejestrowania połączeń przychodzących i nieodebranych."

@@ -253,7 +253,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 	},
 
 	loadFileList: function() {
-		return fs.exec_direct('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
+		return fs.exec('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
 			.then(function(res) {
 				let files = (res.stdout || '').trim().split('\n').filter(f => f);
 				let fileNames = files.map(f => f.replace(this.baseDir + '/', ''));
@@ -439,7 +439,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 									} else if (name === '_load_gz') {
 										let tmpPath = '/tmp/ussdcodes_upload.tar.gz';
 										ui.uploadFile(tmpPath).then(function() {
-												return fs.exec_direct('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
+												return fs.exec('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
 											}).then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to extract archive') + ': ' + (res.stderr || '')), 'error');
@@ -465,7 +465,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 											});
 									} else if (name === '_save_gz') {
 										let tmpGz = '/tmp/ussdcodes.tar.gz';
-										fs.exec_direct('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
+										fs.exec('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
 											.then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to create archive') + ': ' + (res.stderr || '')), 'error');
@@ -544,12 +544,12 @@ let ussdCodesManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec_direct('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
+		fs.exec('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
 			.then(function() {
 				return fs.write(filePath, '');
 			}.bind(this))
 			.then(function() {
-				return fs.exec_direct('/bin/chmod', ['644', filePath]);
+				return fs.exec('/bin/chmod', ['644', filePath]);
 			})
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File created successfully')), 5000, 'info');
@@ -587,7 +587,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec_direct('/bin/rm', ['-f', filePath])
+		fs.exec('/bin/rm', ['-f', filePath])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File deleted successfully')), 5000, 'info');
 				
@@ -615,7 +615,7 @@ let ussdCodesManagerDialog = baseclass.extend({
 		}
 
 		let self = this;
-		fs.exec_direct('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
+		fs.exec('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('All files deleted successfully')), 5000, 'info');
 
@@ -670,7 +670,7 @@ let atCommandsManagerDialog = baseclass.extend({
 	},
 
 	loadFileList: function() {
-		return fs.exec_direct('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
+		return fs.exec('/bin/sh', ['-c', 'ls ' + this.baseDir + '/*.user 2>/dev/null || true'])
 			.then(function(res) {
 				let files = (res.stdout || '').trim().split('\n').filter(f => f);
 				let fileNames = files.map(f => f.replace(this.baseDir + '/', ''));
@@ -856,7 +856,7 @@ let atCommandsManagerDialog = baseclass.extend({
 									} else if (name === '_load_gz') {
 										let tmpPath = '/tmp/atcmmds_upload.tar.gz';
 										ui.uploadFile(tmpPath).then(function() {
-												return fs.exec_direct('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
+												return fs.exec('/bin/tar', ['-xzf', tmpPath, '-C', self.baseDir]);
 											}).then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to extract archive') + ': ' + (res.stderr || '')), 'error');
@@ -882,7 +882,7 @@ let atCommandsManagerDialog = baseclass.extend({
 											});
 									} else if (name === '_save_gz') {
 										let tmpGz = '/tmp/atcmmds.tar.gz';
-										fs.exec_direct('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
+										fs.exec('/bin/tar', ['-czf', tmpGz, '-C', self.baseDir, '.'])
 											.then(function(res) {
 												if (res.code !== 0) {
 													ui.addNotification(null, E('p', {}, _('Failed to create archive') + ': ' + (res.stderr || '')), 'error');
@@ -961,12 +961,12 @@ let atCommandsManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec_direct('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
+		fs.exec('/bin/sh', ['-c', 'mkdir -p ' + this.baseDir])
 			.then(function() {
 				return fs.write(filePath, '');
 			}.bind(this))
 			.then(function() {
-				return fs.exec_direct('/bin/chmod', ['644', filePath]);
+				return fs.exec('/bin/chmod', ['644', filePath]);
 			})
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File created successfully')), 5000, 'info');
@@ -1004,7 +1004,7 @@ let atCommandsManagerDialog = baseclass.extend({
 
 		let filePath = this.baseDir + '/' + fileName;
 
-		fs.exec_direct('/bin/rm', ['-f', filePath])
+		fs.exec('/bin/rm', ['-f', filePath])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('File deleted successfully')), 5000, 'info');
 				
@@ -1032,7 +1032,7 @@ let atCommandsManagerDialog = baseclass.extend({
 		}
 
 		let self = this;
-		fs.exec_direct('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
+		fs.exec('/bin/sh', ['-c', 'rm -f ' + this.baseDir + '/*.user'])
 			.then(function() {
 				popTimeout(null, E('p', {}, _('All files deleted successfully')), 5000, 'info');
 
@@ -1093,14 +1093,13 @@ return view.extend({
 
 		s = m.section(form.TypedSection, 'sms_tool_js', '', null);
 		s.anonymous = true;
-		s.max_sections = 1;
 
 		//TAB SMS
 
 		s.tab('smstab' , _('SMS Settings'));
+		s.anonymous = true;
 
-		o = s.taboption('smstab' , form.Value, 'readport', _('SMS reading port'),
- 
+		o = s.taboption('smstab' , form.Value, 'readport', _('SMS reading port'), 
 			_('Select one of the available ttyUSBX ports.'));
 		devs.sort((a, b) => a.name > b.name);
 		devs.forEach(dev => o.value('/dev/' + dev.name));
@@ -1198,6 +1197,42 @@ return view.extend({
 				});
 			}
 		};
+		
+		o = s.taboption('smstab' , form.Value, 'callport', _('Call log reading port'),
+			_('Select one of the available ttyUSBX ports.'));
+		devs.sort((a, b) => a.name > b.name);
+		devs.forEach(dev => o.value('/dev/' + dev.name));
+
+		o.placeholder = _('Please select a port');
+		o.rmempty = false;
+		
+        o = s.taboption('smstab', form.Flag, 'calllog_enabled', _('Enable call log daemon'),
+	        _('Background process to log incoming and missed calls.'));
+        o.rmempty = false;
+        o.default = '0';
+        o.write = function(section_id, value) {
+	        return uci.load('sms_tool_js').then(function() {
+		        if (value == '1') {
+			        uci.set('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled', '1');
+			        return uci.save().then(function() {
+				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['enable']);
+			        }).then(function() {
+				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['start']);
+			        });
+		        }
+		        
+		        if (value == '0') {
+			        uci.set('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled', '0');
+			        return uci.save().then(function() {
+				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['stop']);
+			        }).then(function() {
+				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['disable']);
+			        });
+		        }
+	        }.bind(this)).then(function() {
+		        return form.Flag.prototype.write.apply(this, [section_id, value]);
+	        }.bind(this));
+        };
 
 		o = s.taboption('smstab', form.Value, 'sendport', _('SMS sending port'), 
 			_("Select one of the available ttyUSBX ports."));
@@ -1206,19 +1241,6 @@ return view.extend({
 
 		o.placeholder = _('Please select a port');
 		o.rmempty = false;
-
-		o = s.taboption('smstab' , form.Value, 'callport', _('Call log reading port'),
-			_('Select one of the available ttyUSBX ports.'));
-		devs.sort((a, b) => a.name > b.name);
-		devs.forEach(dev => o.value('/dev/' + dev.name));
-
-		o.placeholder = _('Please select a port');
-		o.rmempty = false;
-
-		o = s.taboption('smstab', form.Flag, 'calllog_enabled', _('Enable call log daemon'),
-			_('Background process to log incoming and missed calls.'));
-		o.rmempty = false;
-		o.default = '0';
 
 		o = s.taboption('smstab', form.Value, 'pnumber', _('Prefix number'),
 			_("The phone number should be preceded by the country prefix (for Poland it is 48, without '+'). If the number is 5, 4 or 3 characters, it is treated as 'short' and should not be preceded by a country prefix."));
@@ -1592,87 +1614,83 @@ return view.extend({
 		);
 		o.rmempty = false;
 		o.default = true;
-		o.write = function(section_id, value) {
-
-			return uci.load('sms_tool_js').then(function() {
-				let storeL = uci.get('sms_tool_js', '@sms_tool_js[0]', 'storage');
-				let portR  = uci.get('sms_tool_js', '@sms_tool_js[0]', 'readport');
-				let dsled  = uci.get('sms_tool_js', '@sms_tool_js[0]', 'ledtype');
-
-				if (!portR) {
-					ui.addNotification(null, E('p', {}, _('Please configure SMS reading port first')), 'info');
-					return form.Flag.prototype.write.apply(this, [section_id, value]);
-				}
-
-				return L.resolveDefault(fs.exec_direct('/usr/bin/sms_tool', ['-s', storeL, '-d', portR, 'status']))
-					.then(function(res) {
-						if (!res) return;
-
-						let total = res.substring(res.indexOf('total'));
-						let t = total.replace(/[^\d.]/g, '');
-						let used = res.substring(17, res.indexOf('total'));
-						let u = used.replace(/[^\d.]/g, '');
-
-						let sections = uci.sections('sms_tool_js');
-						let led = sections[0].smsled;
-
-						if (value == '1') {
-							return update_sms_count_for_modem_sync(u, portR).then(function(updatedValue) {
-								uci.set('sms_tool_js', '@sms_tool_js[0]', 'sms_count', updatedValue);
-								uci.set('sms_tool_js', '@sms_tool_js[0]', 'lednotify', '1');
-
-								let PTR = uci.get('sms_tool_js', '@sms_tool_js[0]', 'prestart');
-
-								return uci.save().then(function() {
-									return L.resolveDefault(fs.read('/etc/crontabs/root'), '');
-								}).then(function(crontab) {
-									let lines = (crontab || '').trim().replace(/\r\n/g, '\n').split('\n');
-									let filteredLines = lines.filter(function(line) {
-										return line.trim() !== '' && !line.includes('my_new_sms');
-									});
-									let cronEntry = '1 */' + PTR + ' * * * /etc/init.d/my_new_sms enable && /etc/init.d/my_new_sms restart';
-									filteredLines.push(cronEntry);
-									let newCrontab = filteredLines.join('\n') + '\n';
-									return fs.write('/etc/crontabs/root', newCrontab);
-								}).then(function() {
-									return fs.exec_direct('/etc/init.d/cron', ['restart']);
-								}).then(function() {
-									return fs.exec_direct('/etc/init.d/my_new_sms', ['enable']);
-								}).then(function() {
-									return fs.exec_direct('/etc/init.d/my_new_sms', ['start']);
-								});
-							});
-						}
-
-						if (value == '0') {
-							uci.set('sms_tool_js', '@sms_tool_js[0]', 'lednotify', '0');
-
-							return uci.save().then(function() {
-								return L.resolveDefault(fs.read('/etc/crontabs/root'), '');
-							}).then(function(crontab) {
-								let lines = (crontab || '').trim().replace(/\r\n/g, '\n').split('\n');
-								let filteredLines = lines.filter(function(line) {
-									return line.trim() !== '' && !line.includes('my_new_sms');
-								});
-								let newCrontab = filteredLines.join('\n') + '\n';
-								return fs.write('/etc/crontabs/root', newCrontab);
-							}).then(function() {
-								return fs.exec_direct('/etc/init.d/cron', ['restart']);
-							}).then(function() {
-								return fs.exec_direct('/etc/init.d/my_new_sms', ['stop']);
-							}).then(function() {
-								return fs.exec_direct('/etc/init.d/my_new_sms', ['disable']);
-							}).then(function() {
-								if (dsled == 'D') {
-									return fs.write('/sys/class/leds/' + led + '/brightness', '0');
-								}
-							});
-						}
-					}.bind(this));
-			}.bind(this)).then(function() {
-				return form.Flag.prototype.write.apply(this, [section_id, value]);
-			}.bind(this));
-		};
+        o.write = function(section_id, value) {
+	        return uci.load('sms_tool_js').then(function() {
+		        let storeL = uci.get('sms_tool_js', '@sms_tool_js[0]', 'storage');
+		        let portR  = uci.get('sms_tool_js', '@sms_tool_js[0]', 'readport');
+		        let dsled  = uci.get('sms_tool_js', '@sms_tool_js[0]', 'ledtype');
+		        
+		        if (!portR) {
+			        ui.addNotification(null, E('p', {}, _('Please configure SMS reading port first')), 'info');
+			        return form.Flag.prototype.write.apply(this, [section_id, value]);
+		        }
+		        
+		        return L.resolveDefault(fs.exec_direct('/usr/bin/sms_tool', ['-s', storeL, '-d', portR, 'status']))
+			        .then(function(res) {
+				        if (!res) return;
+				        
+				        let total = res.substring(res.indexOf('total'));
+				        let t = total.replace(/[^\d.]/g, '');
+				        let used = res.substring(17, res.indexOf('total'));
+				        let u = used.replace(/[^\d.]/g, '');
+				        
+				        if (value == '1') {
+					        return update_sms_count_for_modem_sync(u, portR).then(function(updatedValue) {
+						        uci.set('sms_tool_js', '@sms_tool_js[0]', 'sms_count', updatedValue);
+						        uci.set('sms_tool_js', '@sms_tool_js[0]', 'lednotify', '1');
+						        let PTR = uci.get('sms_tool_js', '@sms_tool_js[0]', 'prestart');
+						        return uci.save().then(function() {
+							        return L.resolveDefault(fs.read('/etc/crontabs/root'), '');
+						        }).then(function(crontab) {
+							        let lines = (crontab || '').trim().replace(/\r\n/g, '\n').split('\n');
+							        let filteredLines = lines.filter(function(line) {
+								        return line.trim() !== '' && !line.includes('my_new_sms');
+							        });
+							        let cronEntry = '1 */' + PTR + ' * * * /etc/init.d/my_new_sms enable && /etc/init.d/my_new_sms restart';
+							        filteredLines.push(cronEntry);
+							        let newCrontab = filteredLines.join('\n') + '\n';
+							        return fs.write('/etc/crontabs/root', newCrontab);
+						        }).then(function() {
+							        return fs.exec_direct('/etc/init.d/cron', ['restart']);
+						        }).then(function() {
+							        return fs.exec_direct('/etc/init.d/my_new_sms', ['enable']);
+						        }).then(function() {
+							        return fs.exec_direct('/etc/init.d/my_new_sms', ['start']);
+						        });
+					        });
+				        }
+				        
+				        if (value == '0') {
+					        uci.set('sms_tool_js', '@sms_tool_js[0]', 'lednotify', '0');
+					        return uci.save().then(function() {
+						        return L.resolveDefault(fs.read('/etc/crontabs/root'), '');
+					        }).then(function(crontab) {
+						        let lines = (crontab || '').trim().replace(/\r\n/g, '\n').split('\n');
+						        let filteredLines = lines.filter(function(line) {
+							        return line.trim() !== '' && !line.includes('my_new_sms');
+						        });
+						        let newCrontab = filteredLines.join('\n') + '\n';
+						        return fs.write('/etc/crontabs/root', newCrontab);
+					        }).then(function() {
+						        return fs.exec_direct('/etc/init.d/cron', ['restart']);
+					        }).then(function() {
+						        return fs.exec_direct('/etc/init.d/my_new_sms', ['stop']);
+					        }).then(function() {
+						        return fs.exec_direct('/etc/init.d/my_new_sms', ['disable']);
+					        }).then(function() {
+						        if (dsled == 'D') {
+							        let led = uci.get('sms_tool_js', '@sms_tool_js[0]', 'smsled');
+							        if (led) {
+								        return fs.write('/sys/class/leds/' + led + '/brightness', '0');
+							        }
+						        }
+					        });
+				        }
+			        }.bind(this));
+	        }.bind(this)).then(function() {
+		        return form.Flag.prototype.write.apply(this, [section_id, value]);
+	        }.bind(this));
+        };
 		
 		o = s.taboption('notifytab', form.Flag, 'ontopsms', _('Show notification icon'),
 		_('Show the new message notification icon on the status overview page.')

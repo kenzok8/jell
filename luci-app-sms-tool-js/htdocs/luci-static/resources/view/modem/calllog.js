@@ -80,22 +80,22 @@ return view.extend({
 	},
 
 	setTableMessage: function(message, spinning) {
-		var table = document.getElementById('callLogTable');
+		let table = document.getElementById('callLogTable');
 		if (!table)
 			return;
 
 		while (table.rows.length > 1)
 			table.deleteRow(1);
 
-		var row = table.insertRow(-1);
-		var cell = row.insertCell(0);
+		let row = table.insertRow(-1);
+		let cell = row.insertCell(0);
 		cell.colSpan = 5;
 		cell.style.textAlign = 'center';
 		cell.appendChild(E('span', spinning ? { 'class': 'spinning' } : {}, message));
 	},
 
 	updateCallLogTable: function(calls) {
-		var table = document.getElementById('callLogTable');
+		let table = document.getElementById('callLogTable');
 		if (!table)
 			return;
 
@@ -108,14 +108,14 @@ return view.extend({
 		}
 
 		// Filter by type if needed, but for now show all
-		var select = document.getElementById('call-log-type');
-		var filter = select ? select.value : 'all';
+		let select = document.getElementById('call-log-type');
+		let filter = select ? select.value : 'all';
 
-		for (var i = 0; i < calls.length; i++) {
+		for (let i = 0; i < calls.length; i++) {
 			if (filter !== 'all' && calls[i].type.toLowerCase() !== filter)
 				continue;
 
-			var row = table.insertRow(-1);
+			let row = table.insertRow(-1);
 			row.insertCell(0).textContent = calls[i].date;
 			row.insertCell(1).textContent = _(calls[i].type);
 			row.insertCell(2).textContent = calls[i].number;
@@ -129,7 +129,7 @@ return view.extend({
 	},
 
 	render: function(data) {
-		var callLogData;
+		let callLogData;
 
 		try {
 			callLogData = JSON.parse(data[1] || '{"calls":[]}');
@@ -138,9 +138,9 @@ return view.extend({
 			callLogData = { calls: [] };
 		}
 
-		var calls = callLogData.calls || [];
+		let calls = callLogData.calls || [];
 
-		var calllog_enabled = uci.get('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled') === '1';
+		let calllog_enabled = uci.get('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled') === '1';
 
 		setTimeout(function() {
 			this.updateCallLogTable(calls);

@@ -1,8 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: luci-app-sms-tool-js\n"
 "Language-Team: Rafał Wabik (IceG)\n"
 "Language: de\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 msgid "SMS Messages"
 msgstr "SMS-Nachrichten"
@@ -823,3 +825,123 @@ msgstr "Möchten Sie wirklich alle Dateien im Ordner löschen?"
 
 msgid "All files deleted successfully"
 msgstr "Alle Dateien wurden erfolgreich gelöscht"
+
+msgid "Call Log"
+msgstr "Anrufliste"
+
+msgid "Clear all call log entries?"
+msgstr "Alle Einträge in der Anrufliste löschen?"
+
+msgid "No call log entries found"
+msgstr "Keine Einträge in der Anrufliste gefunden"
+
+msgid "No matching call log entries found"
+msgstr "Keine passenden Einträge in der Anrufliste gefunden"
+
+msgid "User interface for viewing call logs. The log is collected by a background daemon."
+msgstr "Benutzeroberfläche zur Anzeige von Anruflisten. Die Liste wird von einem Hintergrund-Daemon gesammelt."
+
+msgid "Call log daemon is disabled. Please enable it in the configuration to start collecting logs."
+msgstr "Der Anruflisten-Daemon ist deaktiviert. Bitte in der Konfiguration aktivieren, um die Protokollierung zu starten."
+
+msgid "Filter call type"
+msgstr "Anruftyp filtern"
+
+msgid "All calls"
+msgstr "Alle Anrufe"
+
+msgid "Missed calls"
+msgstr "Verpasste Anrufe"
+
+msgid "Received calls"
+msgstr "Angenommene Anrufe"
+
+msgid "Dialed calls"
+msgstr "Gewählte Nummern"
+
+msgid "Refresh"
+msgstr "Aktualisieren"
+
+msgid "Clear Log"
+msgstr "Liste leeren"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Number"
+msgstr "Nummer"
+
+msgid "Duration"
+msgstr "Dauer"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Call log reading port"
+msgstr "Port zum Auslesen der Anrufliste"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Wählen Sie einen der verfügbaren ttyUSBX-Ports aus."
+
+msgid "Please select a port"
+msgstr "Bitte wählen Sie einen Port aus"
+
+msgid "Enable call log daemon"
+msgstr "Anruflisten-Daemon aktivieren"
+
+msgid "Background process to log incoming and missed calls."
+msgstr "Hintergrundprozess zur Protokollierung eingehender und verpasster Anrufe."
+
+msgid "Forward SMS"
+msgstr "SMS weiterleiten"
+
+msgid "Calls"
+msgstr "Anrufe"
+
+msgid "Notification Settings"
+msgstr "Benachrichtigungseinstellungen"
+
+msgid "The LED informs about a new message. Before activating this function, please config and save the SMS reading port, time to check SMS inbox and select the notification LED."
+msgstr "Die LED informiert über eine neue Nachricht. Bevor Sie diese Funktion aktivieren, konfigurieren und speichern Sie bitte den SMS-Leseport, die Zeit zur Überprüfung des SMS-Posteingangs und wählen Sie die Benachrichtigungs-LED aus."
+
+msgid "Check inbox every minute(s)"
+msgstr "Posteingang alle Minute(n) prüfen"
+
+msgid "Specify how many minutes you want your inbox to be checked."
+msgstr "Geben Sie an, alle wie viele Minuten der Posteingang auf neue Nachrichten geprüft werden soll."
+
+msgid "Notification LED"
+msgstr "Benachrichtigungs-LED"
+
+msgid "Select the notification LED."
+msgstr "Wählen Sie die Benachrichtigungs-LED aus."
+
+msgid "Notify new messages"
+msgstr "Benachrichtigung über neue Nachrichten"
+
+msgid "Restart the inbox checking process every"
+msgstr "Prozess zur Posteingangsprüfung neu starten alle"
+
+msgid "The process will restart at the selected time interval. This will eliminate the delay in checking your inbox."
+msgstr "Der Prozess wird im gewählten Zeitintervall neu gestartet. Dies eliminiert Verzögerungen bei der Posteingangsprüfung."
+
+msgid "4h"
+msgstr "4 Std."
+
+msgid "6h"
+msgstr "6 Std."
+
+msgid "8h"
+msgstr "8 Std."
+
+msgid "12h"
+msgstr "12 Std."
+
+msgid "The diode is dedicated only to these notifications"
+msgstr "Die Diode ist nur für diese Benachrichtigungen reserviert"
+
+msgid "Select 'No' in case the router has only one LED or if the LED is multi-tasking. <br /><br /><b>Important</b> <br />This option requires LED to be defined in the system (if possible) to work properly. This requirement applies when the diode supports multiple tasks."
+msgstr "Wählen Sie 'Nein', falls der Router nur eine LED hat oder wenn die LED mehrfach belegt ist. <br /><br /><b>Wichtig</b> <br />Diese Option erfordert die Definition der LED im System (falls möglich), um ordnungsgemäß zu funktionieren. Dies gilt, wenn die Diode mehrere Aufgaben unterstützt."
