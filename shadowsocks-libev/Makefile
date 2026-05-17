@@ -14,11 +14,11 @@ include $(TOPDIR)/rules.mk
 #
 PKG_NAME:=shadowsocks-libev
 PKG_VERSION:=3.3.6
-PKG_RELEASE:=14
+PKG_RELEASE:=15
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/shadowsocks/shadowsocks-libev.git
-PKG_SOURCE_DATE:=2026-2-9
+PKG_SOURCE_DATE:=2026-02-09
 PKG_SOURCE_VERSION:=8ad3036f29c7a77a34f5b34eb9bc02c1fcfaa863
 PKG_MIRROR_HASH:=skip
 
@@ -45,30 +45,54 @@ CMAKE_OPTIONS += \
 	-DENABLE_NFTABLES=OFF
 
 define Package/shadowsocks-libev/Default
-  define Package/shadowsocks-libev-$(1)
-    SECTION:=net
-    CATEGORY:=Network
-    SUBMENU:=Web Servers/Proxies
-    TITLE:=shadowsocks-libev $(1)
-    URL:=https://github.com/shadowsocks/shadowsocks-libev
-    DEPENDS:=+libev +libmbedtls +libpthread +libsodium +libcares +libpcre2
-  endef
-
-  define Package/shadowsocks-libev-$(1)/install
-	$$(INSTALL_DIR) $$(1)/usr/bin
-	$$(INSTALL_BIN) $$(PKG_INSTALL_DIR)/usr/bin/$(1) $$(1)/usr/bin
-  endef
-
+  SECTION:=net
+  CATEGORY:=Network
+  SUBMENU:=Web Servers/Proxies
+  URL:=https://github.com/shadowsocks/shadowsocks-libev
+  DEPENDS:=+libev +libmbedtls +libpthread +libsodium +libcares +libpcre2
 endef
 
-SHADOWSOCKS_COMPONENTS:=ss-local ss-redir ss-tunnel ss-server
-define shadowsocks-libev/templates
-  $(foreach component,$(SHADOWSOCKS_COMPONENTS),
-    $(call Package/shadowsocks-libev/Default,$(component))
-  )
+define Package/shadowsocks-libev-ss-local
+  $(call Package/shadowsocks-libev/Default)
+  TITLE:=shadowsocks-libev ss-local
 endef
-$(eval $(call shadowsocks-libev/templates))
 
-$(foreach component,$(SHADOWSOCKS_COMPONENTS), \
-  $(eval $(call BuildPackage,shadowsocks-libev-$(component))) \
-)
+define Package/shadowsocks-libev-ss-redir
+  $(call Package/shadowsocks-libev/Default)
+  TITLE:=shadowsocks-libev ss-redir
+endef
+
+define Package/shadowsocks-libev-ss-tunnel
+  $(call Package/shadowsocks-libev/Default)
+  TITLE:=shadowsocks-libev ss-tunnel
+endef
+
+define Package/shadowsocks-libev-ss-server
+  $(call Package/shadowsocks-libev/Default)
+  TITLE:=shadowsocks-libev ss-server
+endef
+
+define Package/shadowsocks-libev-ss-local/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ss-local $(1)/usr/bin
+endef
+
+define Package/shadowsocks-libev-ss-redir/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ss-redir $(1)/usr/bin
+endef
+
+define Package/shadowsocks-libev-ss-tunnel/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ss-tunnel $(1)/usr/bin
+endef
+
+define Package/shadowsocks-libev-ss-server/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ss-server $(1)/usr/bin
+endef
+
+$(eval $(call BuildPackage,shadowsocks-libev-ss-local))
+$(eval $(call BuildPackage,shadowsocks-libev-ss-redir))
+$(eval $(call BuildPackage,shadowsocks-libev-ss-tunnel))
+$(eval $(call BuildPackage,shadowsocks-libev-ss-server))
