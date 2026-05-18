@@ -259,6 +259,13 @@ if load_balancing_options then -- [[ Load balancing Start ]]
 	o.default = "2"
 	o.placeholder = "2"
 	o.description = translate("The load balancer selects the optimal number of nodes, and traffic is randomly distributed among them.")
+
+	o = s:option(Value, _n("tolerance"), translate("Failure Tolerance (%)"))
+	o:depends({ [_n("balancingStrategy")] = "leastLoad" })
+	o.datatype = "uinteger"
+	o.default = "10"
+	o.placeholder = "10"
+	o.description = translate("The maximum acceptable speed test failure rate. For example, 1 means allowing a 1% failure rate.")
 end -- [[ Load balancing End ]]
 
 if load_iface_options then -- [[ Custom Interface Start ]]

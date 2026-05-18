@@ -1085,7 +1085,13 @@ function gen_config(var)
 				type = _node.balancingStrategy,
 				settings = {
 					expected = _node.expected and tonumber(_node.expected) and tonumber(_node.expected) or 2,
-					maxRTT = "1s"
+					maxRTT = "1s",
+					tolerance = (function(t)
+						t = tonumber(t) or 0
+						if t < 1 then return nil end
+						if t > 100 then t = 100 end
+						return t / 100
+					end)(_node.tolerance)
 				}
 			}
 		else
@@ -1766,15 +1772,22 @@ function gen_config(var)
 								end
 							end
 						end
-						local dns_block_mode = "host"
-						dns_block_mode = ""
-						if dns_block_mode == "host" and dns_outboundTag == "blackhole" then
-							for d_i, d_k in ipairs(value.domain) do
-								dns.hosts[d_k] = "0.0.0.0"
+						local dns_block = true -- If you do not want the blackhole rule to use DNS routing, please change it to `nil` or do not assign a value.
+						if dns_outboundTag == "blackhole" then
+							if dns_block then
+								local dns_block_mode = "Hosts" -- use the Hosts mode to block.
+								if dns_block_mode == "Hosts" then
+									for d_i, d_k in ipairs(value.domain) do
+										dns.hosts[d_k] = "0.0.0.0"
+									end
+									dns_server = nil
+								end
+							else
+								dns_server = nil
 							end
-							dns_server = nil
 						end
 						if dns_server then
+							dns_server.finalQuery = true
 							dns_server.domains = value.domain
 							if value.shunt_rule_name then
 								dns_server.tag = "dns-in-" .. value.shunt_rule_name
