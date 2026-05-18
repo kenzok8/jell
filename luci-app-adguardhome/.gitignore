@@ -4,4 +4,6 @@
 adg-*.png
 m-*.png
 bs-*.png
+*.png
+!screenshots/*.png
 .playwright-cli/
