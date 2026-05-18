@@ -3,4 +3,5 @@
 # Local debug artifacts from playwright-cli UI verification
 adg-*.png
 m-*.png
+bs-*.png
 .playwright-cli/

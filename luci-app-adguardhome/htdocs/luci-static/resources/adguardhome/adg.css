@@ -25,13 +25,11 @@
 	}
 }
 
-/* page-wide width cap */
-.adg-wrap .cbi-map,
-.adg-wrap .cbi-map > form,
-.adg-wrap > form {
-	max-width: 980px;
-	margin-left: auto;
-	margin-right: auto;
+/* Cards are constrained for comfortable reading; form fills its natural width.
+   Bootstrap theme has sidebar; Argon is full-width. Let the theme decide the
+   outer container width — we only cap the card content. */
+.adg-wrap .cbi-section {
+	max-width: 1000px;
 }
 
 /* every CBI section becomes a card */

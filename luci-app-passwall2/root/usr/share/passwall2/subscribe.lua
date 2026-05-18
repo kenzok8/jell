@@ -25,7 +25,6 @@ local log = api.log
 local i18n = api.i18n
 local lyaml = require "lyaml"
 
-local has_ss = api.is_finded("ss-redir")
 local has_ss_rust = api.is_finded("sslocal")
 local has_ssr = api.is_finded("ssr-local") and api.is_finded("ssr-redir")
 local has_singbox = api.finded_com("sing-box")
@@ -36,7 +35,7 @@ local DEFAULT_FILTER_KEYWORD_MODE = uci:get(appname, "@global_subscribe[0]", "fi
 local DEFAULT_FILTER_KEYWORD_DISCARD_LIST = uci:get(appname, "@global_subscribe[0]", "filter_discard_list") or {}
 local DEFAULT_FILTER_KEYWORD_KEEP_LIST = uci:get(appname, "@global_subscribe[0]", "filter_keep_list") or {}
 -- Nodes should be retrieved using the core type (if not set on the node subscription page, the default type will be used automatically).
-local DEFAULT_SS_TYPE = api.get_core("ss_type", {{has_ss,"shadowsocks-libev"},{has_ss_rust,"shadowsocks-rust"},{has_singbox,"sing-box"},{has_xray,"xray"}})
+local DEFAULT_SS_TYPE = api.get_core("ss_type", {{has_ss_rust,"shadowsocks-rust"},{has_singbox,"sing-box"},{has_xray,"xray"}})
 local DEFAULT_TROJAN_TYPE = api.get_core("trojan_type", {{has_singbox,"sing-box"},{has_xray,"xray"}})
 local DEFAULT_VMESS_TYPE = api.get_core("vmess_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
 local DEFAULT_VLESS_TYPE = api.get_core("vless_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
@@ -44,7 +43,6 @@ local DEFAULT_HYSTERIA2_TYPE = api.get_core("hysteria2_type", {{has_hysteria2,"h
 local core_has = {
 	["xray"] = has_xray,
 	["sing-box"] = has_singbox,
-	["shadowsocks-libev"] = has_ss,
 	["shadowsocks-rust"] = has_ss_rust,
 	["hysteria2"] = has_hysteria2
 }
@@ -460,9 +458,7 @@ end
 
 -- Configure the SS protocol implementation type
 local function set_ss_implementation(ss_type, result)
-	if ss_type == "shadowsocks-libev" and has_ss then
-		result.type = "SS"
-	elseif ss_type == "shadowsocks-rust" and has_ss_rust then
+	if ss_type == "shadowsocks-rust" and has_ss_rust then
 		result.type = 'SS-Rust'
 	elseif ss_type == "xray" and has_xray then
 		result.type = 'Xray'
@@ -1108,20 +1104,6 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 				end
 			end
 
-			if result.type == "SS" then
-				local aead2022_methods = { "2022-blake3-aes-128-gcm", "2022-blake3-aes-256-gcm", "2022-blake3-chacha20-poly1305" }
-				local aead2022 = false
-				for k, v in ipairs(aead2022_methods) do
-					if method:lower() == v:lower() then
-						aead2022 = true
-					end
-				end
-				if aead2022 then
-					-- shadowsocks-libev does not support 2022 encryption.
-					result.error_msg = i18n.translatef("shadowsocks-libev unsupport 2022 encryption.")
-				end
-			end
-
 			if params.type then
 				params.type = string.lower(params.type)
 				if result.type == "sing-box" and params.type == "raw" then 
@@ -1135,7 +1117,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 				else
 					result.transport = params.type
 				end
-				if result.type ~= "SS-Rust" and result.type ~= "SS" then
+				if result.type ~= "SS-Rust" then
 					if params.type == 'ws' then
 						result.ws_host = params.host
 						result.ws_path = params.path
@@ -1688,22 +1670,19 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 		local insecure = params.allowinsecure or params.insecure
 		result.tls_allowInsecure = (insecure == "1" or insecure == "0") and insecure or (sub_allowinsecure and "1" or "0")
 		result.hysteria2_hop = params.mport
+		if params["obfs-password"] or params["obfs_password"] then
+			result.hysteria2_obfs_type = "salamander"
+			result.hysteria2_obfs_password = params["obfs-password"] or params["obfs_password"]
+		end
 
 		if (sub_hysteria2_type == "sing-box" and has_singbox) or (sub_hysteria2_type == "xray" and has_xray) then
 			local is_singbox = sub_hysteria2_type == "sing-box" and has_singbox
 			result.type = is_singbox and 'sing-box' or 'Xray'
 			result.protocol = "hysteria2"
-			if params["obfs-password"] or params["obfs_password"] then
-				result.hysteria2_obfs_type = "salamander"
-				result.hysteria2_obfs_password = params["obfs-password"] or params["obfs_password"]
-			end
 			result.use_finalmask = (params.fm and params.fm ~= "") and "1" or nil
 			result.finalmask = (params.fm and params.fm ~= "") and api.base64Encode(params.fm) or nil
 		elseif has_hysteria2 then
 			result.type = "Hysteria2"
-			if params["obfs-password"] or params["obfs_password"] then
-				result.hysteria2_obfs = params["obfs-password"] or params["obfs_password"]
-			end
 		else
 			log(2, i18n.translatef("Skipping the %s node is due to incompatibility with the %s core program or incorrect node usage type settings.", "Hysteria2", "Hysteria2"))
 			return nil
@@ -1761,7 +1740,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 		end
 		result.tls_serverName = params.sni
 		result.tls_disable_sni = params.disable_sni
-		result.tuic_alpn = params.alpn or "default"
+		result.tuic_alpn = params.alpn or "h3"
 		result.tuic_congestion_control = params.congestion_control or "cubic"
 		result.tuic_udp_relay_mode = params.udp_relay_mode or "native"
 		local insecure = params.allowinsecure or params.insecure or params.allow_insecure
@@ -2049,12 +2028,12 @@ local function select_node(nodes, config, parentConfig)
 				end
 			end
 		end
-		-- First priority: Type + Notes + IP + Port
+		-- First priority: Type + Notes + IP + Port + Group
 		if not server then
 			for index, node in pairs(nodes) do
 				if config.currentNode.type and config.currentNode.remarks and config.currentNode.address and config.currentNode.port then
 					if node.type and node.remarks and node.address and node.port then
-						if node.type == config.currentNode.type and node.remarks == config.currentNode.remarks and (node.address .. ':' .. node.port == config.currentNode.address .. ':' .. config.currentNode.port) then
+						if node.type == config.currentNode.type and node.remarks == config.currentNode.remarks and (node.address .. ':' .. node.port == config.currentNode.address .. ':' .. config.currentNode.port) and node.group == config.currentNode.group then
 							if config.log == nil or config.log == true then
 								log(log_level, i18n.translatef("Update [%s]", config.remarks) .. " " .. i18n.translatef("First Matching node:") .. " " .. node.remarks)
 							end
@@ -2065,12 +2044,12 @@ local function select_node(nodes, config, parentConfig)
 				end
 			end
 		end
-		-- Second priority: Type + IP + Port
+		-- Second priority: Type + IP + Port + Group
 		if not server then
 			for index, node in pairs(nodes) do
 				if config.currentNode.type and config.currentNode.address and config.currentNode.port then
 					if node.type and node.address and node.port then
-						if node.type == config.currentNode.type and (node.address .. ':' .. node.port == config.currentNode.address .. ':' .. config.currentNode.port) then
+						if node.type == config.currentNode.type and (node.address .. ':' .. node.port == config.currentNode.address .. ':' .. config.currentNode.port) and node.group == config.currentNode.group then
 							if config.log == nil or config.log == true then
 								log(log_level, i18n.translatef("Update [%s]", config.remarks) .. " " .. i18n.translatef("Second Matching node:") .. " " .. node.remarks)
 							end
@@ -2081,12 +2060,12 @@ local function select_node(nodes, config, parentConfig)
 				end
 			end
 		end
-		-- Third priority: IP + Port
+		-- Third priority: IP + Port + Group
 		if not server then
 			for index, node in pairs(nodes) do
 				if config.currentNode.address and config.currentNode.port then
 					if node.address and node.port then
-						if node.address .. ':' .. node.port == config.currentNode.address .. ':' .. config.currentNode.port then
+						if node.address .. ':' .. node.port == config.currentNode.address .. ':' .. config.currentNode.port and node.group == config.currentNode.group then
 							if config.log == nil or config.log == true then
 								log(log_level, i18n.translatef("Update [%s]", config.remarks) .. " " .. i18n.translatef("Third Matching node:") .. " " .. node.remarks)
 							end
@@ -2097,12 +2076,12 @@ local function select_node(nodes, config, parentConfig)
 				end
 			end
 		end
-		-- Fourth priority: IP
+		-- Fourth priority: IP + Group
 		if not server then
 			for index, node in pairs(nodes) do
 				if config.currentNode.address then
 					if node.address then
-						if node.address == config.currentNode.address then
+						if node.address == config.currentNode.address and node.group == config.currentNode.group then
 							if config.log == nil or config.log == true then
 								log(log_level, i18n.translatef("Update [%s]", config.remarks) .. " " .. i18n.translatef("Fourth Matching node:") .. " " .. node.remarks)
 							end
@@ -2113,12 +2092,12 @@ local function select_node(nodes, config, parentConfig)
 				end
 			end
 		end
-		-- Fifth priority: remarks
+		-- Fifth priority: remarks + Group
 		if not server then
 			for index, node in pairs(nodes) do
 				if config.currentNode.remarks then
 					if node.remarks then
-						if node.remarks == config.currentNode.remarks then
+						if node.remarks == config.currentNode.remarks and node.group == config.currentNode.group then
 							if config.log == nil or config.log == true then
 								log(log_level, i18n.translatef("Update [%s]", config.remarks) .. " " .. i18n.translatef("Fifth Matching node:") .. " " .. node.remarks)
 							end
