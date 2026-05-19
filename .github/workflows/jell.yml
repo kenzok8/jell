@@ -154,6 +154,7 @@ jobs:
         (
         git_clone https://github.com/KyleRicardo/MentoHUST-OpenWrt-ipk
         git_clone https://github.com/frainzy1477/luci-app-clash
+        git_clone https://github.com/sbwml/luci-app-quickfile
         git_clone https://github.com/peter-tank/luci-app-fullconenat
         git_clone https://github.com/KFERMercer/luci-app-tcpdump
         git_clone https://github.com/ykxVK8yL5L/pikpak-webdav pikpak && mv -n pikpak/openwrt/* ./;rm -rf pikpak
