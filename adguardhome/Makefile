@@ -4,7 +4,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=adguardhome
 PKG_VERSION:=0.107.75
-PKG_RELEASE:=332
+PKG_RELEASE:=333
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/AdguardTeam/AdGuardHome/tar.gz/v$(PKG_VERSION)?
@@ -13,7 +13,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/AdGuardHome-$(PKG_VERSION)
 
 FRONTEND_DEST:=$(PKG_NAME)-frontend-$(PKG_VERSION).tar.gz
 FRONTEND_URL:=https://github.com/AdguardTeam/AdGuardHome/releases/download/v$(PKG_VERSION)/
-FRONTEND_HASH:=bca5a8a4d777f984d9a6992214dc158cb35c12e6fd6fd61a30f677896aaa1758
+FRONTEND_HASH:=2b8ce700dfb382d3c1bd0ffde05614e454626385ec5878fab91f2133c94e30fc
 
 PKG_LICENSE:=GPL-3.0-only
 PKG_LICENSE_FILES:=LICENSE.txt
