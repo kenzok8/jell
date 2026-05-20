@@ -67,20 +67,20 @@ pub(crate) async fn do_delete_dns(
     }
 }
 
-/// Enforce the per-host ULA AAAA limit.  If `mac` already has `max` or more ULA AAAA
+/// Enforce the per-host ULA AAAA limit.  If `host` already has `max` or more ULA AAAA
 /// records in `registered`, remove the oldest (by `last_confirmed`) and delete from DNS.
-/// Returns the number of existing ULA AAAA records for this MAC (after pruning).
-pub(crate) async fn prune_ula_for_mac(
-    mac: &str,
+/// Returns the number of existing ULA AAAA records for this host (after pruning).
+pub(crate) async fn prune_ula_for_host(
+    host: &str,
     max: usize,
     registered: &mut HashMap<(String, String), RegisteredEntry>,
     updater: &DnsUpdater,
 ) -> usize {
-    // Collect existing ULA AAAA keys for this MAC.
+    // Collect existing ULA AAAA keys for this host.
     let mut ula_keys: Vec<((String, String), Instant)> = registered
         .iter()
-        .filter(|((m, ip_str), _)| {
-            m == mac && ip_str.parse::<Ipv6Addr>().map_or(false, |a| if_ipv6_in_private_subnet(&a))
+        .filter(|((h, ip_str), _)| {
+            h == host && ip_str.parse::<Ipv6Addr>().map_or(false, |a| if_ipv6_in_private_subnet(&a))
         })
         .map(|(k, e)| (k.clone(), e.last_confirmed))
         .collect();
@@ -99,15 +99,15 @@ pub(crate) async fn prune_ula_for_mac(
             let addr: Ipv6Addr = key.1.parse().unwrap();
             let inet = NeighbourAddress::Inet6(addr);
             do_delete_dns(&entry.hostname, &inet, updater).await;
-            info!("ULA pruning: removed oldest {} -> {} for mac {}", entry.hostname, key.1, mac);
+            info!("ULA pruning: removed oldest {} -> {} for host {}", entry.hostname, key.1, host);
         }
     }
 
     // Return count after pruning.
     registered
         .iter()
-        .filter(|((m, ip_str), _)| {
-            m == mac && ip_str.parse::<Ipv6Addr>().map_or(false, |a| if_ipv6_in_private_subnet(&a))
+        .filter(|((h, ip_str), _)| {
+            h == host && ip_str.parse::<Ipv6Addr>().map_or(false, |a| if_ipv6_in_private_subnet(&a))
         })
         .count()
 }
