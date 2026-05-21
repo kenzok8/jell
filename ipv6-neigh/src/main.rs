@@ -585,13 +585,21 @@ fn parse_neighbour_message(neigh: NeighbourMessage, private_subnet_v4: bool) -> 
     }
     let kind = neigh.header.kind;
     let ifindex = neigh.header.ifindex;
-    let mac = neigh.attributes.iter().find_map(|attr| match attr {
+    let mac_bytes = neigh.attributes.iter().find_map(|attr| match attr {
         NeighbourAttribute::LinkLayerAddress(mac) => Some(mac.to_owned()),
         _ => None,
-    })?;
-    let mac_str = format_mac(mac);
-    // Filter out empty or all-zero MACs (router own addresses, incomplete entries)
-    if mac_str.is_empty() || mac_str == "00:00:00:00:00:00" {
+    });
+    // FAILED events may arrive without a hardware address (e.g. when ARP/NDP never
+    // succeeded, or the kernel cleared the lladdr on failure). Allow them through
+    // with an empty MAC so the FAILED handler can fall back to IP-based lookup.
+    let mac_str = match mac_bytes {
+        Some(m) => format_mac(m),
+        None if matches!(state, NeighbourState::Failed) => String::new(),
+        None => return None,
+    };
+    // Filter out empty or all-zero MACs for non-FAILED states
+    // (router own addresses, incomplete entries).
+    if !matches!(state, NeighbourState::Failed) && (mac_str.is_empty() || mac_str == "00:00:00:00:00:00") {
         return None;
     }
     Some(Neigh {
