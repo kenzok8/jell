@@ -1453,6 +1453,10 @@ function act_ping()
 		})
 	end
 
+	if e.ping then
+		e.ping = math.floor(e.ping + 0.5)
+	end
+
 	luci.http.prepare_content("application/json")
 	luci.http.write_json(e)
 end
