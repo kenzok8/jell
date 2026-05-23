@@ -23,7 +23,7 @@ start() {
 		-H "Referer: ${scheme}://${host}:${web_port}" \
 		-d "username=${username}&password=${password}" \
 		--url ${scheme}://${host}:${web_port}/api/v2/auth/login \
-		| grep -i set-cookie | sed -En 's|^.*(SID=\S+);.*|\1|p')"
+		| grep -i set-cookie | sed -En 's#^.*\b((SID|QBT_SID_'"${web_port}"')=[^;]+);.*#\1#p')"
 	$CURL $retry $self_signed -L -X POST \
 		-b "$cookie" \
 		-d "$payload" \
