@@ -5,12 +5,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=daed
-PKG_VERSION:=dae-lang-core-v0.2.0
-PKG_RELEASE:=89
+PKG_VERSION:=2026.04.27
+PKG_WEB_VERSION:=1.27.2
+PKG_RELEASE:=90
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/daeuniverse/daed.git
-PKG_SOURCE_VERSION:=06857f52c33cc3264aea9eb90431afbe8909073c
+PKG_SOURCE_URL:=https://github.com/ksong008/daed.git
+PKG_SOURCE_VERSION:=4a519fcbaa7004e50e80a309c68d6811596468cf
 PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=AGPL-3.0-only MIT
@@ -21,6 +22,14 @@ PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)/wing
 PKG_BUILD_DEPENDS:=golang/host bpf-headers
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
+
+PATCH_DIR:=patches
+
+ifeq ($(ARCH),arm)
+  PATCH_DIR_ARCH:=patches_arm
+else ifeq ($(ARCH),mips)
+  PATCH_DIR_ARCH:=patches_mips
+endif
 
 GO_PKG:=github.com/daeuniverse/dae-wing
 GO_PKG_LDFLAGS:= \
@@ -43,27 +52,37 @@ define Package/daed/Default
   URL:=https://github.com/daeuniverse/daed
 endef
 
+define Package/daed/config
+  choice
+    prompt "BPF dependency type"
+    default DAED_USE_VMLINUX_BTF
+    help
+      Select the BPF dependency type.
+      - BPF CO-RE (vmlinux-btf): Recommended. Does not require kernel headers.
+      - Kernel DEBUG_INFO_BTF (bpf-depends): Requires kernel to be compiled with BTF debug info.
+
+    config DAED_USE_VMLINUX_BTF
+      bool "BPF CO-RE (vmlinux-btf)"
+
+    config DAED_USE_BPF_DEPENDS
+      bool "Kernel DEBUG_INFO_BTF (bpf-depends)"
+  endchoice
+endef
+
 define Package/daed
   $(call Package/daed/Default)
   TITLE:=A Modern Dashboard For dae
   # You need enable KERNEL_DEBUG_INFO_BTF and KERNEL_BPF_EVENTS
-  DEPENDS:=$(GO_ARCH_DEPENDS) $(BPF_DEPENDS) \
-    +ca-bundle +kmod-sched-core +kmod-sched-bpf +kmod-xdp-sockets-diag \
-    +kmod-veth
-endef
+  DEPENDS:=$(GO_ARCH_DEPENDS) \
+    +ca-bundle +kmod-sched-core +kmod-sched-bpf \
+    +kmod-veth +v2ray-geoip +v2ray-geosite
 
-define Package/daed-geoip
-  $(call Package/daed/Default)
-  TITLE:=geoip for daed
-  DEPENDS:=+daed +v2ray-geoip
-  PKGARCH:=all
-endef
-
-define Package/daed-geosite
-  $(call Package/daed/Default)
-  TITLE:=geosite for daed
-  DEPENDS:=+daed +v2ray-geosite
-  PKGARCH:=all
+  ifeq ($(CONFIG_DAED_USE_VMLINUX_BTF),y)
+    DEPENDS+=+vmlinux-btf
+  endif
+  ifeq ($(CONFIG_DAED_USE_BPF_DEPENDS),y)
+    DEPENDS+=$(BPF_DEPENDS) +kmod-xdp-sockets-diag
+  endif
 endef
 
 define Package/daed/description
@@ -76,12 +95,19 @@ define Package/daed/conffiles
 /etc/config/daed
 endef
 
-WEB_FILE:=$(PKG_NAME)-web-$(PKG_VERSION).zip
+WEB_FILE:=$(PKG_NAME)-web-$(PKG_WEB_VERSION).zip
 define Download/daed-web
-	URL:=https://github.com/daeuniverse/daed/releases/download/v$(PKG_VERSION)
+	URL:=https://github.com/ksong008/daed/releases/download/v$(PKG_WEB_VERSION)
 	URL_FILE:=web.zip
 	FILE:=$(WEB_FILE)
 	HASH:=skip
+endef
+
+define Build/Patch
+	$(call PatchDir,$(PKG_BUILD_DIR),$(PATCH_DIR),)
+ifneq ($(PATCH_DIR_ARCH),)
+	$(call PatchDir,$(PKG_BUILD_DIR),$(PATCH_DIR_ARCH),)
+endif
 endef
 
 define Build/Prepare
@@ -145,18 +171,6 @@ define Package/daed/install
 	$(INSTALL_BIN) $(CURDIR)/files/daed.init $(1)/etc/init.d/daed
 endef
 
-define Package/daed-geoip/install
-	$(INSTALL_DIR) $(1)/usr/share/daed
-	$(LN) ../v2ray/geoip.dat $(1)/usr/share/daed/geoip.dat
-endef
-
-define Package/daed-geosite/install
-	$(INSTALL_DIR) $(1)/usr/share/daed
-	$(LN) ../v2ray/geosite.dat $(1)/usr/share/daed/geosite.dat
-endef
-
 $(eval $(call Download,daed-web))
 $(eval $(call GoBinPackage,daed))
 $(eval $(call BuildPackage,daed))
-$(eval $(call BuildPackage,daed-geoip))
-$(eval $(call BuildPackage,daed-geosite))
