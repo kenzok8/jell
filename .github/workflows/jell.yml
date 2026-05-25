@@ -103,6 +103,7 @@ jobs:
         git_clone https://github.com/NateLol/luci-app-beardropper
         git_clone https://github.com/riverscn/openwrt-iptvhelper && mvdir openwrt-iptvhelper
         git_clone https://github.com/kongfl888/luci-app-timedreboot
+        git_clone https://github.com/YingHaoIT/luci-app-wifi-ap     
         ) &
         (
         git_clone https://github.com/rchen14b/luci-theme-glass
