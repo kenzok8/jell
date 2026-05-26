@@ -525,11 +525,8 @@ async fn main() -> Result<(), ()> {
                 // reconcile_dns's AXFR pass cannot catch these because the record is
                 // also absent from DNS, so no probe is ever triggered for them.
                 if let Ok(neighbours) = dump_neighbours(handle.clone(), private_subnet_v4).await {
-                    // Build a set of IPs that are currently REACHABLE in the kernel,
-                    // used below to detect registered entries the kernel has marked FAILED.
-                    let reachable_ips: std::collections::HashSet<String> = neighbours
+                    let all_dump_ips: std::collections::HashSet<String> = neighbours
                         .iter()
-                        .filter(|n| n.state == NeighbourState::Reachable)
                         .map(|n| inet_to_string(&n.inet))
                         .collect();
 
@@ -622,7 +619,7 @@ async fn main() -> Result<(), ()> {
                     let to_remove: Vec<(String, String)> = registered
                         .iter()
                         .filter(|((_hostname, ip_str), entry)| {
-                            !reachable_ips.contains(ip_str.as_str())
+                            !all_dump_ips.contains(ip_str.as_str())
                                 && now.duration_since(entry.last_confirmed) > stale_cutoff
                         })
                         .map(|(k, _)| k.clone())
