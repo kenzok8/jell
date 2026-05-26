@@ -518,6 +518,133 @@ async fn main() -> Result<(), ()> {
                     private_subnet_v6,
                 )
                 .await;
+                // Recover kernel orphans: neighbours that are REACHABLE in the kernel
+                // but absent from `registered` and DNS.  This happens when a netlink
+                // NewNeighbour event is lost (receive-buffer overflow) or when a device
+                // transitions to REACHABLE during the startup race window.
+                // reconcile_dns's AXFR pass cannot catch these because the record is
+                // also absent from DNS, so no probe is ever triggered for them.
+                if let Ok(neighbours) = dump_neighbours(handle.clone(), private_subnet_v4).await {
+                    // Build a set of IPs that are currently REACHABLE in the kernel,
+                    // used below to detect registered entries the kernel has marked FAILED.
+                    let reachable_ips: std::collections::HashSet<String> = neighbours
+                        .iter()
+                        .filter(|n| n.state == NeighbourState::Reachable)
+                        .map(|n| inet_to_string(&n.inet))
+                        .collect();
+
+                    for neigh in &neighbours {
+                        if should_skip_neigh(neigh) {
+                            continue;
+                        }
+
+                        if is_failed_state(neigh.state) {
+                            // Kernel confirms FAILED — remove from registered + DNS if present.
+                            // Mirrors the real-time NewNeighbour(FAILED) handler but catches
+                            // cases where that event was lost.
+                            let ip_str = inet_to_string(&neigh.inet);
+                            let key_opt: Option<(String, String)> = leases
+                                .get(&neigh.mac)
+                                .map(|h| (h.clone(), ip_str.clone()))
+                                .or_else(|| {
+                                    registered
+                                        .keys()
+                                        .find(|(_, ip)| ip == &ip_str)
+                                        .cloned()
+                                });
+                            if let Some(key) = key_opt {
+                                if let Some(entry) = registered.remove(&key) {
+                                    debug!("reconcile neigh: kernel FAILED {} -> {:?}", entry.hostname, neigh.inet);
+                                    if !do_delete_dns(&entry.hostname, &neigh.inet, &updater).await {
+                                        registered.insert(key, entry);
+                                    }
+                                }
+                            }
+                            continue;
+                        }
+
+                        if neigh.state != NeighbourState::Reachable {
+                            continue;
+                        }
+                        if let NeighbourAddress::Inet6(addr) = &neigh.inet {
+                            if !active_prefixes.is_empty()
+                                && !active_prefixes.iter().any(|p| ipv6_in_prefix(*addr, p))
+                            {
+                                continue;
+                            }
+                            if is_gua_ipv6(addr) && private_subnet_v6 {
+                                continue;
+                            }
+                        }
+                        let ip_str = inet_to_string(&neigh.inet);
+                        let Some(hostname) = leases.get(&neigh.mac) else {
+                            continue;
+                        };
+                        let key = (hostname.clone(), ip_str);
+                        if let Some(entry) = registered.get_mut(&key) {
+                            // Already tracked — refresh to suppress spurious probes.
+                            entry.last_confirmed = Instant::now();
+                            entry.ifindex = neigh.ifindex;
+                        } else {
+                            debug!("reconcile neigh: kernel orphan {} -> {:?}", hostname, neigh.inet);
+                            if let NeighbourAddress::Inet6(addr) = &neigh.inet {
+                                if if_ipv6_in_private_subnet(addr) {
+                                    prune_ula_for_host(
+                                        hostname,
+                                        max_ula_per_host,
+                                        &mut registered,
+                                        &updater,
+                                    )
+                                    .await;
+                                }
+                            }
+                            if process_new_neigh(neigh, &updater, &leases, private_subnet_v6).await {
+                                registered.insert(
+                                    key,
+                                    RegisteredEntry {
+                                        hostname: hostname.clone(),
+                                        last_confirmed: Instant::now(),
+                                        ifindex: neigh.ifindex,
+                                    },
+                                );
+                            }
+                        }
+                    }
+
+                    // Sweep registered entries whose IP the kernel has evicted entirely
+                    // (not present in the dump at all, not even as FAILED) AND that haven't
+                    // been confirmed recently.  These are devices whose FAILED event was
+                    // lost and which the kernel has since garbage-collected from its table.
+                    // Only act if the entry is old enough (> 2× probe interval) to avoid
+                    // racing with normal STALE→REACHABLE transitions.
+                    let stale_cutoff = Duration::from_secs(probe_interval.saturating_mul(2));
+                    let now = Instant::now();
+                    let to_remove: Vec<(String, String)> = registered
+                        .iter()
+                        .filter(|((_hostname, ip_str), entry)| {
+                            !reachable_ips.contains(ip_str.as_str())
+                                && now.duration_since(entry.last_confirmed) > stale_cutoff
+                        })
+                        .map(|(k, _)| k.clone())
+                        .collect();
+                    for key in to_remove {
+                        if let Some(entry) = registered.remove(&key) {
+                            let ip_str = &key.1;
+                            let inet = if let Ok(addr) = ip_str.parse::<std::net::Ipv6Addr>() {
+                                NeighbourAddress::Inet6(addr)
+                            } else if let Ok(addr) = ip_str.parse::<std::net::Ipv4Addr>() {
+                                NeighbourAddress::Inet(addr)
+                            } else {
+                                registered.insert(key, entry);
+                                continue;
+                            };
+                            debug!("reconcile neigh: evicted {} -> {}", entry.hostname, ip_str);
+                            if !do_delete_dns(&entry.hostname, &inet, &updater).await {
+                                registered.insert(key, entry);
+                            }
+                        }
+                    }
+                }
             }
             _ = gua_keepalive_timer.tick() => {
                 if !keepalive_gua || keepalive_gua_interval == 0 {
