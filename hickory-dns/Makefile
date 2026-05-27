@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hickory-dns
 PKG_VERSION:=2026.05.26~ee7ba64
-PKG_RELEASE:=75
+PKG_RELEASE:=76
 
 HICKORY_COMMIT:=ee7ba64757eca61d86f323ef992eba482605d7c3
 
@@ -21,6 +21,16 @@ RUST_PKG_FEATURES:=resolver,tls-ring,https-ring,quic-ring,h3-ring,rustls-platfor
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/rust/rust-package.mk
 
+# Derive Rust CPU flags from TARGET_CFLAGS (e.g. -mcpu=cortex-a53+crc+crypto)
+_comma:=,
+_empty:=
+_space:=$(_empty) $(_empty)
+_mcpu:=$(patsubst -mcpu=%,%,$(filter -mcpu=%,$(TARGET_CFLAGS)))
+_mcpu_parts:=$(subst +,$(_space),$(_mcpu))
+_cpu_base:=$(firstword $(_mcpu_parts))
+_cpu_feats:=$(subst $(_space),$(_comma),$(addprefix +,$(wordlist 2,99,$(_mcpu_parts))))
+PKG_RUST_CPU_FLAGS:=$(if $(_cpu_base),-Ctarget-cpu=$(_cpu_base)$(if $(_cpu_feats), -Ctarget-feature=$(_cpu_feats)))
+
 define Package/hickory-dns
   SECTION:=net
   CATEGORY:=Network
@@ -32,6 +42,9 @@ endef
 
 define Build/Compile
 	+$(CARGO_PKG_VARS) \
+	CARGO_PROFILE_RELEASE_OPT_LEVEL=3 \
+	CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=false \
+	RUSTFLAGS="$(CARGO_RUSTFLAGS) $(PKG_RUST_CPU_FLAGS)" \
 	cargo build -v --profile $(CARGO_PKG_PROFILE) \
 		--manifest-path "$(PKG_BUILD_DIR)/Cargo.toml" \
 		--bin hickory-dns \

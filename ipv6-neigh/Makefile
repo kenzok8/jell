@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ipv6-neigh
 PKG_VERSION:=0.1.0
-PKG_RELEASE:=20
+PKG_RELEASE:=21
 
 PKG_BUILD_DEPENDS:=rust/host
 PKG_BUILD_PARALLEL:=1
@@ -11,6 +11,16 @@ RUST_PKG_LOCKED:=0
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/rust/rust-package.mk
+
+# Derive Rust CPU flags from TARGET_CFLAGS (e.g. -mcpu=cortex-a53+crc+crypto)
+_comma:=,
+_empty:=
+_space:=$(_empty) $(_empty)
+_mcpu:=$(patsubst -mcpu=%,%,$(filter -mcpu=%,$(TARGET_CFLAGS)))
+_mcpu_parts:=$(subst +,$(_space),$(_mcpu))
+_cpu_base:=$(firstword $(_mcpu_parts))
+_cpu_feats:=$(subst $(_space),$(_comma),$(addprefix +,$(wordlist 2,99,$(_mcpu_parts))))
+PKG_RUST_CPU_FLAGS:=$(if $(_cpu_base),-Ctarget-cpu=$(_cpu_base)$(if $(_cpu_feats), -Ctarget-feature=$(_cpu_feats)))
 
 define Package/ipv6-neigh
   SECTION:=net
@@ -37,6 +47,10 @@ endef
 
 define Build/Compile
 	+$(CARGO_PKG_VARS) \
+	CARGO_PROFILE_RELEASE_OPT_LEVEL=3 \
+	CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=false \
+	CARGO_PROFILE_RELEASE_PANIC=abort \
+	RUSTFLAGS="$(CARGO_RUSTFLAGS) $(PKG_RUST_CPU_FLAGS)" \
 	cargo build -v --profile $(CARGO_PKG_PROFILE) \
 		--manifest-path "$(PKG_BUILD_DIR)/Cargo.toml" \
 		--target $(RUSTC_TARGET_ARCH) \
@@ -44,12 +58,12 @@ define Build/Compile
 		$(if $(filter --jobserver%,$(PKG_JOBS)),,-j1) \
 		$(CARGO_PKG_ARGS)
 	+$(INSTALL_DIR) $(PKG_INSTALL_DIR)/bin/
-	+$(INSTALL_BIN) $(PKG_BUILD_DIR)/target/$(RUSTC_TARGET_ARCH)/$(CARGO_PKG_PROFILE)/ip-neigh $(PKG_INSTALL_DIR)/bin/
+	+$(INSTALL_BIN) $(PKG_BUILD_DIR)/target/$(RUSTC_TARGET_ARCH)/$(CARGO_PKG_PROFILE)/ipv6-neigh $(PKG_INSTALL_DIR)/bin/
 endef
 
 define Package/ipv6-neigh/install
 	$(INSTALL_DIR) $(1)/usr/bin/
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/ip-neigh $(1)/usr/bin/ipv6-neigh
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/ipv6-neigh $(1)/usr/bin/ipv6-neigh
 endef
 
 $(eval $(call RustBinPackage,ipv6-neigh))
