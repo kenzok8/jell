@@ -11,7 +11,10 @@ i=0
 while [ "$i" -lt "$RETRY" ]; do
     if ss -lnt | grep -q ':53'; then
         logger -t ipv6-neigh-wrapper "DNS port 53 ready, starting ipv6-neigh"
-        exec "$NEIGH_PROG" --private-subnet-v4 -d "[::1]:53" -z lan --router-alias router --keepalive-gua
+        exec "$NEIGH_PROG" --private-subnet-v4 -d "[::1]:53" -z lan --router-alias router --keepalive-gua \
+            --ptr-ipv4-subnet 10.0.0.0/24 \
+            --ptr-ipv4-subnet 192.168.3.0/24 \
+            --ptr-ula
     fi
     i=$((i + 1))
     sleep 1

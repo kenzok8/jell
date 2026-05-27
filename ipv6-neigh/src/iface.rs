@@ -112,6 +112,9 @@ pub(crate) async fn register_router_addresses(
                             Err(e) => warn!("failed to register router AAAA {} for {}: {}", addr, name, e),
                         }
                     }
+                    if let Err(e) = updater.upsert_ptr(IpAddr::V6(*addr), hostname, DEFAULT_TTL).await {
+                        warn!("failed to register router PTR for {}: {}", addr, e);
+                    }
                 }
                 IpAddr::V4(addr) => {
                     for name in std::iter::once(hostname).chain(extra_alias) {
@@ -119,6 +122,9 @@ pub(crate) async fn register_router_addresses(
                             Ok(()) => info!("registered router {} A {}", name, addr),
                             Err(e) => warn!("failed to register router A {} for {}: {}", addr, name, e),
                         }
+                    }
+                    if let Err(e) = updater.upsert_ptr(IpAddr::V4(*addr), hostname, DEFAULT_TTL).await {
+                        warn!("failed to register router PTR for {}: {}", addr, e);
                     }
                 }
             }

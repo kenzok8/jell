@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::net::SocketAddr as StdSocketAddr;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr as StdSocketAddr};
 use std::time::Instant;
 
 use futures::stream::StreamExt;
@@ -80,6 +80,12 @@ struct Cli {
     /// Maximum number of ULA AAAA records to publish per host (oldest pruned first)
     #[clap(long, default_value = "2")]
     max_ula_per_host: usize,
+    /// IPv4 subnets for PTR reverse DNS (CIDR notation, e.g. "192.168.3.0/24", repeatable)
+    #[clap(long, value_name = "SUBNET")]
+    ptr_ipv4_subnet: Vec<String>,
+    /// Enable PTR reverse DNS for ULA IPv6 addresses (fc00::/7) via d.f.ip6.arpa
+    #[clap(long)]
+    ptr_ula: bool,
 }
 
 
@@ -94,6 +100,22 @@ fn should_skip_neigh(neigh: &Neigh) -> bool {
 /// Whether this NUD state indicates the neighbour is definitely gone (remove from DNS).
 fn is_failed_state(state: NeighbourState) -> bool {
     matches!(state, NeighbourState::Failed)
+}
+
+/// Parse an IPv4 CIDR string like "192.168.3.0/24" into (network_addr, prefix_len).
+/// Panics with a clear message on invalid input.
+fn parse_ipv4_cidr(s: &str) -> (Ipv4Addr, u8) {
+    let (addr_str, prefix_str) = s.split_once('/').unwrap_or_else(|| {
+        panic!("invalid --ptr-ipv4-subnet \"{s}\": expected CIDR notation like \"192.168.3.0/24\"")
+    });
+    let addr: Ipv4Addr = addr_str.parse().unwrap_or_else(|_| {
+        panic!("invalid --ptr-ipv4-subnet \"{s}\": \"{addr_str}\" is not a valid IPv4 address")
+    });
+    let prefix_len: u8 = prefix_str.parse().unwrap_or_else(|_| {
+        panic!("invalid --ptr-ipv4-subnet \"{s}\": prefix length must be 0–32")
+    });
+    assert!(prefix_len <= 32, "invalid --ptr-ipv4-subnet \"{s}\": prefix length {prefix_len} > 32");
+    (addr, prefix_len)
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -126,7 +148,12 @@ async fn main() -> Result<(), ()> {
     let signer = TSigner::new(key_data, TsigAlgorithm::HmacSha256, key_name, 300)
         .expect("invalid TSIG key");
 
-    let updater = db::DnsUpdater::new(args.dns_server, zone, signer);
+    let ipv4_ptr_subnets: Vec<(Ipv4Addr, u8)> = args.ptr_ipv4_subnet
+        .iter()
+        .map(|s| parse_ipv4_cidr(s))
+        .collect();
+    let updater = db::DnsUpdater::new(args.dns_server, zone, signer)
+        .with_ptr_zones(&ipv4_ptr_subnets, args.ptr_ula);
 
     // Wait for the DNS server to become available before sending any updates.
     wait_for_dns_server(args.dns_server).await;
@@ -274,6 +301,16 @@ async fn main() -> Result<(), ()> {
                             match result {
                                 Ok(()) => {
                                     info!("DNS update: added {} -> {:?}", hostname, neigh.inet);
+                                    let ip = match &neigh.inet {
+                                        NeighbourAddress::Inet6(addr) => Some(IpAddr::V6(*addr)),
+                                        NeighbourAddress::Inet(addr)  => Some(IpAddr::V4(*addr)),
+                                        _ => None,
+                                    };
+                                    if let Some(ip) = ip {
+                                        if let Err(e) = updater.upsert_ptr(ip, hostname, DEFAULT_TTL).await {
+                                            warn!("PTR update failed for {}: {}", hostname, e);
+                                        }
+                                    }
                                     registered.insert(key, RegisteredEntry {
                                         hostname: hostname.clone(),
                                         last_confirmed: Instant::now(),

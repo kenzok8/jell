@@ -48,6 +48,57 @@ algorithm = "hmac-sha256"
 fudge = 300
 
 [[zones]]
+zone = "d.f.ip6.arpa"
+zone_type = "Primary"
+axfr_policy = "AllowAll"
+
+[zones.stores]
+type = "sqlite"
+zone_path = "/etc/hickory-dns/d.f.ip6.arpa.zone"
+journal_path = ":memory:"
+allow_update = true
+
+[[zones.stores.tsig_keys]]
+name = "update-key."
+key_file = "/etc/hickory-dns/update.key"
+algorithm = "hmac-sha256"
+fudge = 300
+
+[[zones]]
+zone = "0.0.10.in-addr.arpa"
+zone_type = "Primary"
+axfr_policy = "AllowAll"
+
+[zones.stores]
+type = "sqlite"
+zone_path = "/etc/hickory-dns/0.0.10.zone"
+journal_path = ":memory:"
+allow_update = true
+
+[[zones.stores.tsig_keys]]
+name = "update-key."
+key_file = "/etc/hickory-dns/update.key"
+algorithm = "hmac-sha256"
+fudge = 300
+
+[[zones]]
+zone = "3.168.192.in-addr.arpa"
+zone_type = "Primary"
+axfr_policy = "AllowAll"
+
+[zones.stores]
+type = "sqlite"
+zone_path = "/etc/hickory-dns/3.168.192.zone"
+journal_path = ":memory:"
+allow_update = true
+
+[[zones.stores.tsig_keys]]
+name = "update-key."
+key_file = "/etc/hickory-dns/update.key"
+algorithm = "hmac-sha256"
+fudge = 300
+
+[[zones]]
 zone = "."
 zone_type = "External"
 

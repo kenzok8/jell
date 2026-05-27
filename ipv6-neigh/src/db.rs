@@ -2,7 +2,8 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use hickory_proto::op::{Message, Query, ResponseCode, update_message};
-use hickory_proto::rr::{Name, RData, RecordSet, RecordType, TSigner};
+use hickory_proto::rr::{Name, RData, Record, RecordSet, RecordType, TSigner};
+use hickory_proto::rr::rdata::PTR as PtrRData;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 use tokio::time::timeout;
@@ -23,11 +24,100 @@ pub(crate) struct DnsUpdater {
     server_addr: SocketAddr,
     zone: Name,
     signer: TSigner,
+    /// (network as u32, prefix_len, reverse zone name) for IPv4 PTR
+    ipv4_ptr_zones: Vec<(u32, u8, Name)>,
+    /// Reverse zone for ULA IPv6 (d.f.ip6.arpa)
+    ula_ptr_zone: Option<Name>,
 }
 
 impl DnsUpdater {
     pub fn new(server_addr: SocketAddr, zone: Name, signer: TSigner) -> Self {
-        Self { server_addr, zone, signer }
+        Self { server_addr, zone, signer, ipv4_ptr_zones: vec![], ula_ptr_zone: None }
+    }
+
+    /// Configure reverse PTR zones.
+    /// `ipv4_subnets`: list of (network_addr, prefix_len); /8, /16, /24 boundaries supported.
+    /// `ula`: if true, enables ULA PTR via `d.f.ip6.arpa`.
+    pub fn with_ptr_zones(mut self, ipv4_subnets: &[(Ipv4Addr, u8)], ula: bool) -> Self {
+        self.ipv4_ptr_zones = ipv4_subnets
+            .iter()
+            .map(|(net, prefix_len)| (u32::from(*net), *prefix_len, ipv4_zone_name(*net, *prefix_len)))
+            .collect();
+        if ula {
+            self.ula_ptr_zone = Some(Name::from_ascii("d.f.ip6.arpa.").expect("always valid"));
+        }
+        self
+    }
+
+    /// Upsert a PTR record. Silently skips IPs with no configured reverse zone.
+    pub async fn upsert_ptr(
+        &self,
+        addr: IpAddr,
+        hostname: &str,
+        ttl: u32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let (ptr_name, rev_zone) = match addr {
+            IpAddr::V4(ip) => {
+                let Some(zone) = self.find_ipv4_ptr_zone(ip).cloned() else { return Ok(()) };
+                (ipv4_ptr_name(ip), zone)
+            }
+            IpAddr::V6(ip) if (ip.segments()[0] & 0xfe00) == 0xfc00 => {
+                let Some(zone) = self.ula_ptr_zone.clone() else { return Ok(()) };
+                (ipv6_ptr_name(ip), zone)
+            }
+            _ => return Ok(()),
+        };
+        let target = Name::from_ascii(hostname)?.append_domain(&self.zone)?;
+
+        // Delete any existing PTR rrset first (replace semantics: one PTR per IP).
+        let del_record = Record::update0(ptr_name.clone(), 0, RecordType::PTR);
+        let del_msg = update_message::delete_rrset(del_record, rev_zone.clone(), false);
+        let del_resp = self.send_tcp(del_msg).await?;
+        check_response(&del_resp, &[])?;
+
+        // Add the new PTR.
+        let mut rrset = RecordSet::with_ttl(ptr_name, RecordType::PTR, ttl);
+        rrset.add_rdata(RData::PTR(PtrRData(target)));
+        let msg = update_message::append(rrset, rev_zone, false, false);
+        let response = self.send_tcp(msg).await?;
+        check_response(&response, &[])?;
+        Ok(())
+    }
+
+    /// Delete a PTR record. Silently skips IPs with no configured reverse zone.
+    pub async fn delete_ptr(
+        &self,
+        addr: IpAddr,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let (ptr_name, rev_zone) = match addr {
+            IpAddr::V4(ip) => {
+                let Some(zone) = self.find_ipv4_ptr_zone(ip).cloned() else { return Ok(()) };
+                (ipv4_ptr_name(ip), zone)
+            }
+            IpAddr::V6(ip) if (ip.segments()[0] & 0xfe00) == 0xfc00 => {
+                let Some(zone) = self.ula_ptr_zone.clone() else { return Ok(()) };
+                (ipv6_ptr_name(ip), zone)
+            }
+            _ => return Ok(()),
+        };
+        let record = Record::update0(ptr_name, 0, RecordType::PTR);
+        let msg = update_message::delete_rrset(record, rev_zone, false);
+        let response = self.send_tcp(msg).await?;
+        check_response(&response, &[])?;
+        Ok(())
+    }
+
+    fn find_ipv4_ptr_zone(&self, addr: Ipv4Addr) -> Option<&Name> {
+        let addr_u32 = u32::from(addr);
+        self.ipv4_ptr_zones
+            .iter()
+            .filter(|(net, prefix_len, _)| {
+                if *prefix_len == 0 { return true; }
+                let shift = 32u8.saturating_sub(*prefix_len);
+                (addr_u32 >> shift) == (net >> shift)
+            })
+            .max_by_key(|(_, prefix_len, _)| *prefix_len)
+            .map(|(_, _, name)| name)
     }
 
     /// Create or append a AAAA record.
@@ -212,6 +302,41 @@ impl DnsUpdater {
 
         Ok(records)
     }
+}
+
+/// Build the PTR owner name for an IPv4 address.
+/// e.g. 192.168.3.5 → `5.3.168.192.in-addr.arpa.`
+fn ipv4_ptr_name(addr: Ipv4Addr) -> Name {
+    let o = addr.octets();
+    Name::from_ascii(&format!("{}.{}.{}.{}.in-addr.arpa.", o[3], o[2], o[1], o[0]))
+        .expect("always valid")
+}
+
+/// Build the PTR owner name for an IPv6 address (nibble-reversed).
+fn ipv6_ptr_name(addr: Ipv6Addr) -> Name {
+    let nibbles: String = addr
+        .octets()
+        .iter()
+        .rev()
+        .flat_map(|b| {
+            let lo = char::from_digit((b & 0x0f) as u32, 16).unwrap();
+            let hi = char::from_digit((b >> 4) as u32, 16).unwrap();
+            [lo, '.', hi, '.']
+        })
+        .collect();
+    Name::from_ascii(&format!("{}ip6.arpa.", nibbles)).expect("always valid")
+}
+
+/// Derive the reverse zone name for an IPv4 subnet (only /8, /16, /24 boundaries).
+fn ipv4_zone_name(net: Ipv4Addr, prefix_len: u8) -> Name {
+    let o = net.octets();
+    let s = match prefix_len {
+        24..=32 => format!("{}.{}.{}.in-addr.arpa.", o[2], o[1], o[0]),
+        16..=23 => format!("{}.{}.in-addr.arpa.", o[1], o[0]),
+        8..=15  => format!("{}.in-addr.arpa.", o[0]),
+        _       => "in-addr.arpa.".to_string(),
+    };
+    Name::from_ascii(&s).expect("always valid")
 }
 
 /// Extract the single label that precedes the zone apex from a fully-qualified record name.
