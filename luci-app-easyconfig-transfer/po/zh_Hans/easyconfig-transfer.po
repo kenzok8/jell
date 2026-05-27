@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: luci-app-easyconfig-transfer\n"
 "Language-Team: Rafał Wabik (IceG)\n"
-"Language: zh_CN\n"
+"Language: zh_Hans\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "Transfer"
 msgstr "流量"
@@ -493,3 +493,24 @@ msgstr "日期"
 
 msgid "Statistics restored from external backup"
 msgstr "统计数据已从外部备份恢复"
+
+msgid "Please enter a hostname"
+msgstr "请输入主机名"
+
+msgid "Configuration error"
+msgstr "配置错误"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "主机名添加成功。正在重新加载…"
+
+msgid "Enter hostname"
+msgstr "输入主机名"
+
+msgid "Hostname"
+msgstr "主机名"
+
+msgid "Hostname Settings"
+msgstr "主机名设置"
+
+msgid "hostname"
+msgstr "主机名"

@@ -492,3 +492,24 @@ msgstr "Data"
 
 msgid "Statistics restored from external backup"
 msgstr "Statystyki przywrócone z zewnętrznej kopii zapasowej"
+
+msgid "Please enter a hostname"
+msgstr "Proszę wprowadzić nazwę hosta"
+
+msgid "Configuration error"
+msgstr "Błąd konfiguracji"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "Nazwa hosta została pomyślnie dodana. Odświeżam widok…"
+
+msgid "Enter hostname"
+msgstr "Podaj nazwę hosta"
+
+msgid "Hostname"
+msgstr "Nazwa hosta"
+
+msgid "Hostname Settings"
+msgstr "Ustawienia nazwy hosta"
+
+msgid "hostname"
+msgstr "nazwa hosta"

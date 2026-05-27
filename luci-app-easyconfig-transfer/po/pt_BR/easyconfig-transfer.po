@@ -1,0 +1,517 @@
+msgid ""
+msgstr ""
+"Language: pt_BR\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+
+msgid "Transfer"
+msgstr "Transferência"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "Interface do usuário para scripts easyconfig que estimam o consumo de transferência. Mais informações no fórum %seko.one.pl%s."
+
+msgid "Estimated data usage"
+msgstr "Uso estimado de dados"
+
+msgid "First Seen"
+msgstr "Primeira vista"
+
+msgid "Last Seen"
+msgstr "Última vista"
+
+msgid "Downloaded"
+msgstr "Baixado"
+
+msgid "Uploaded"
+msgstr "Enviado"
+
+msgid "Configuration - Transfer"
+msgstr "Configuração - Transferência"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "Painel de configuração do aplicativo que calcula estatísticas de transferência."
+
+msgid "Data reading period"
+msgstr "Período de leitura de dados"
+
+msgid "Data recording period"
+msgstr "Período de gravação de dados"
+
+msgid "Beginning of the billing period"
+msgstr "Início do período de cobrança"
+
+msgid "Warning enabled"
+msgstr "Aviso ativado"
+
+msgid "Transfer available"
+msgstr "Transferência disponível"
+
+msgid "Warning level"
+msgstr "Nível de aviso"
+
+msgid "Warning cycle"
+msgstr "Ciclo de aviso"
+
+msgid "per period"
+msgstr "por período"
+
+msgid "per day"
+msgstr "por dia"
+
+msgid "Days until the end of the billing period"
+msgstr "Dias até o final do período de cobrança"
+
+msgid "Estimated remaining transfer"
+msgstr "Transferência restante estimada"
+
+msgid "approximately remains"
+msgstr "aproximadamente permanece"
+
+msgid "Summary"
+msgstr "Resumo"
+
+msgid "Today"
+msgstr "Hoje"
+
+msgid "Yesterday"
+msgstr "Ontem"
+
+msgid "Last 7 days"
+msgstr "Últimos 7 dias"
+
+msgid "Last 30 days"
+msgstr "Últimos 30 dias"
+
+msgid "Yearly"
+msgstr "Anualmente"
+
+msgid "Clients data usage"
+msgstr "Uso de dados dos clientes"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Current billing period"
+msgstr "Período de cobrança atual"
+
+msgid "Expected data usage for the current period"
+msgstr "Uso de dados esperado para o período atual"
+
+msgid "Previous billing period"
+msgstr "Período de cobrança anterior"
+
+msgid "Transfer usage statistics"
+msgstr "Estatísticas de uso de transferência"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "Os cálculos podem diferir das indicações do operador"
+
+msgid "Make a copy of Database"
+msgstr "Fazer uma cópia do banco de dados"
+
+msgid "Restore"
+msgstr "Restaurar"
+
+msgid "Make"
+msgstr "Fazer"
+
+msgid "a backup"
+msgstr "um backup"
+
+msgid "Make a backup"
+msgstr "Fazer um backup"
+
+msgid "Reset data"
+msgstr "Redefinir dados"
+
+msgid "Main Settings"
+msgstr "Configurações principais"
+
+msgid "Traffic Settings"
+msgstr "Configurações de tráfego"
+
+msgid "Traffic Settings"
+msgstr "Configurações de tráfego"
+
+msgid "Hide MAC addresses"
+msgstr "Ocultar endereços MAC"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "Oculte endereços MAC sem informações de transferência."
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"Selecione com que frequência uma cópia compactada dos dados será feita.<br />Caminho do arquivo <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>.<br /><br /><b>Importante</b><br />Lembre-se de que operações de escrita frequentes encurtam o ciclo de vida da memória."
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+
+msgstr ""
+"Ativar coleta de dados de transferência.<br />Os dados são salvos no arquivo <code>/tmp/easyconfig_statistics.json</code>.<br /><br /><b>O que você deve saber</b><br />Com o descarregamento de fluxo ativado, os dados de transferência estarão inconsistentes com a realidade ou podem estar completamente indisponíveis."
+
+msgid "1 minute"
+msgstr "1 minuto"
+
+msgid "3 minutes"
+msgstr "3 minutos"
+
+msgid "5 minutes"
+msgstr "5 minutos"
+
+msgid "10 minutes"
+msgstr "10 minutos"
+
+msgid "15 minutes"
+msgstr "15 minutos"
+
+msgid "30 minutes"
+msgstr "30 minutos"
+
+msgid "1 hour"
+msgstr "1 hora"
+
+msgid "3 hours"
+msgstr "3 horas"
+
+msgid "6 hours"
+msgstr "6 horas"
+
+msgid "12 hours"
+msgstr "12 horas"
+
+msgid "24 hours"
+msgstr "24 horas"
+
+msgid "Enter the starting day of the billing period."
+msgstr "Digite o dia inicial do período de cobrança."
+
+msgid "Hide selected data in the table"
+msgstr "Ocultar dados selecionados na tabela"
+
+msgid "Select data that will be hidden."
+msgstr "Selecione os dados que serão ocultados."
+
+msgid "MAC addresses"
+msgstr "Endereços MAC"
+
+msgid "MAC addresses & Hostnames"
+msgstr "Endereços MAC e nomes de host"
+
+msgid "Show wan in table"
+msgstr "Mostrar wan na tabela"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "Marque esta opção se desejar que wan fique visível na tabela."
+
+msgid "Enable data usage progress bar"
+msgstr "Ativar barra de progresso de uso de dados"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "Exiba uma visualização do uso de transferência na forma de uma barra de progresso."
+
+msgid "Enter the available transfer during the billing period."
+msgstr "Digite a transferência disponível durante o período de cobrança."
+
+msgid "Unit of data size"
+msgstr "Unidade de tamanho de dados"
+
+msgid "Data Count Cycle"
+msgstr "Ciclo de contagem de dados"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "Especifique o intervalo de visualização/contagem de dados."
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "Marque esta opção se desejar salvar dados durante uma reinicialização agendada do dispositivo."
+
+msgid "Backup at"
+msgstr "Backup em"
+
+msgid "Restore backup at"
+msgstr "Restaurar backup em"
+
+msgid "Backup Settings"
+msgstr "Configurações de backup"
+
+msgid "Move .json file"
+msgstr "Mover arquivo .json"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "Formato de hora correto <code>HH:MM</code>."
+
+msgid "Expected time is in HH:MM format"
+msgstr "A hora esperada está no formato HH:MM"
+
+msgid "Enter a numeric value"
+msgstr "Digite um valor numérico"
+
+msgid "Add a hostname"
+msgstr "Adicionar um nome de host"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "Digite os dados como <code>Endereço MAC;Nome do host</code>."
+
+msgid "Transfer details"
+msgstr "Detalhes da transferência"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "Digite o endereço MAC;nome do host"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Deseja limpar os dados de estatísticas de transferência?"
+
+msgid "Transfer statistics"
+msgstr "Estatísticas de transferência"
+
+msgid "There are currently no data to show..."
+msgstr "Atualmente não há dados para mostrar..."
+
+msgid "Additional settings"
+msgstr "Configurações adicionais"
+
+msgid "from"
+msgstr "de"
+
+msgid "out of"
+msgstr "fora de"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "Você excedeu sua transferência disponível por"
+
+msgid "Statistics from the current billing period."
+msgstr "Estatísticas do período de cobrança atual."
+
+msgid "Must be configured"
+msgstr "Deve ser configurado"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "Pressione Continuar para restaurar o backup ou Cancelar para anular a operação."
+
+msgid "Restore .json file from archive"
+msgstr "Restaurar arquivo .json do arquivo"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "A opção permite que o usuário restaure estatísticas do arquivo."
+
+msgid "Restore .json file"
+msgstr "Restaurar arquivo .json"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "A opção permite que o usuário restaure estatísticas do arquivo .json."
+
+msgid "Download .gz archive"
+msgstr "Baixar arquivo .gz"
+
+msgid "Click to download .gz archive."
+msgstr "Clique para baixar o arquivo .gz."
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "Arquivo easyconfig_statistics.json.gz não encontrado."
+
+msgid "Download error"
+msgstr "Erro de download"
+
+msgid "Download .json file"
+msgstr "Baixar arquivo .json"
+
+msgid "Click to download .json file."
+msgstr "Clique para baixar o arquivo .json."
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "O download de easyconfig_statistics.json falhou. Por favor, tente novamente."
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "Erro ao executar easyconfig_statistics.sh"
+
+msgid "Upload .gz archive"
+msgstr "Carregar arquivo .gz"
+
+msgid "Upload .json file"
+msgstr "Carregar arquivo .json"
+
+msgid "Save .gz file"
+msgstr "Salvar arquivo .gz"
+
+msgid "Save .json file"
+msgstr "Salvar arquivo .json"
+
+msgid "Copy .json file to external storage"
+msgstr "Copiar arquivo .json para armazenamento externo"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "Marque esta opção se desejar criar uma cópia em uma unidade externa."
+
+msgid "Path to .json file"
+msgstr "Caminho para o arquivo .json"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr "Digite o caminho do diretório onde uma cópia do arquivo .json será salva."
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "Os dados no arquivo easyconfig_statistics.json foram redefinidos."
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "Arquivo easyconfig_statistics.json copiado com sucesso para"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "Arquivo easyconfig_statistics.json copiado com sucesso para /usr/lib/easyconfig."
+
+msgid "Auto data reset"
+msgstr "Redefinição automática de dados"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "Marque esta opção se desejar redefinir dados com o novo ano."
+
+msgid "Monthly"
+msgstr "Mensalmente"
+
+msgid "Last 12 months"
+msgstr "Últimos 12 meses"
+
+msgid "Refreshing data…"
+msgstr "Atualizando dados…"
+
+msgid "Current period"
+msgstr "Período atual"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "Apresentação de dados baixados e enviados. Clique em Atualizar para atualizar os gráficos."
+
+msgid "Jan"
+msgstr "Jan"
+
+msgid "Feb"
+msgstr "Fev"
+
+msgid "Mar"
+msgstr "Mar"
+
+msgid "Apr"
+msgstr "Abr"
+
+msgid "May"
+msgstr "Mai"
+
+msgid "Jun"
+msgstr "Jun"
+
+msgid "Jul"
+msgstr "Jul"
+
+msgid "Aug"
+msgstr "Ago"
+
+msgid "Sep"
+msgstr "Set"
+
+msgid "Oct"
+msgstr "Out"
+
+msgid "Nov"
+msgstr "Nov"
+
+msgid "Dec"
+msgstr "Dez"
+
+msgid "No data available"
+msgstr "Nenhum dado disponível"
+
+msgid "Percentage"
+msgstr "Porcentagem"
+
+msgid "Legend"
+msgstr "Legenda"
+
+msgid "Select day"
+msgstr "Selecionar dia"
+
+msgid "Select month"
+msgstr "Selecionar mês"
+
+msgid "Select year"
+msgstr "Selecionar ano"
+
+msgid "Select period"
+msgstr "Selecionar período"
+
+msgid "Others"
+msgstr "Outros"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(Gráfico de uso de dados hora a hora para o dia selecionado)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(Gráfico de uso diário para um mês selecionado)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(Gráfico de uso de dados para meses individuais)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(Gráfico de uso de dados para cada mês do ano "
+
+msgid "Refreshing data..."
+msgstr "Atualizando dados..."
+
+msgid "Please wait..."
+msgstr "Por favor aguarde..."
+
+msgid "Statistics of data usage by clients."
+msgstr "Estatísticas de uso de dados por clientes."
+
+msgid "Clients"
+msgstr "Clientes"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Deseja limpar os dados de estatísticas de transferência?"
+
+msgid "Statistics data cleared"
+msgstr "Dados de estatísticas limpos"
+
+msgid "No hourly data available for this day"
+msgstr "Nenhum dado por hora disponível para este dia"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "Gostaria de mostrar uma distribuição horária estimada com base nos totais diários? (Esta é apenas uma aproximação)"
+
+msgid "Yes, show estimate"
+msgstr "Sim, mostrar estimativa"
+
+msgid "Size of .json file"
+msgstr "Tamanho do arquivo .json"
+
+msgid "Size of .gz file"
+msgstr "Tamanho do arquivo .gz"
+
+msgid "Client"
+msgstr "Cliente"
+
+msgid "Date"
+msgstr "Data"
+
+msgid "Statistics restored from external backup"
+msgstr "Estatísticas restauradas do backup externo"
+
+msgid "Please enter a hostname"
+msgstr "Por favor, digite um nome de host"
+
+msgid "Configuration error"
+msgstr "Erro de configuração"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "Nome do host adicionado com sucesso. Recarregando..."
+
+msgid "Enter hostname"
+msgstr "Digitar nome do host"
+
+msgid "Hostname"
+msgstr "Nome do host"
+
+msgid "Hostname Settings"
+msgstr "Configurações de nome de host"
+
+msgid "hostname"
+msgstr "nome do host"

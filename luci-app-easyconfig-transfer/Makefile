@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 LUCI_TITLE:=LuCI JS Support for easyconfig transfer statistics
 PKG_MAINTAINER:=Rafał Wabik <4Rafal@gmail.com>
 LUCI_DESCRIPTION:=LuCI JS interface for the easyconfig transfer statistics.
-LUCI_DEPENDS:=+luci-base
+LUCI_DEPENDS:=+luci-base +jq
 LUCI_PKGARCH:=all
 
 

@@ -24,38 +24,112 @@ MBACKUP=$(uci -q get easyconfig_transfer.traffic.external_backup)
 MBACKUPATH=$(uci -q get easyconfig_transfer.traffic.external_path)
 EXTERNAL_JSON="$MBACKUPATH/easyconfig_statistics.json"
 
+json_valid() {
+	local file="$1"
+	[ -e "$file" ] || return 1
+	[ -s "$file" ] || return 1
+	jq -e 'type == "object"' "$file" >/dev/null 2>&1
+}
+
+safe_copy() {
+	local src="$1"
+	local dst="$2"
+	if json_valid "$src"; then
+		cp "$src" "$dst"
+		return 0
+	else
+		logger -t easyconfig_statistics "OSTRZEŻENIE: plik $src zawiera nieprawidłowy JSON, pomijam kopiowanie"
+		return 1
+	fi
+}
+
 if [ ! -e "$DB" ]; then
 	if [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && [ -e "$EXTERNAL_JSON" ] && [ -e "$SDB" ]; then
 		TMP_GZ=/tmp/easyconfig_statistics_gz_tmp.json
 		zcat "$SDB" > "$TMP_GZ" 2>/dev/null
 		if [ -e "$TMP_GZ" ]; then
-			EXT_SIZE=$(wc -c < "$EXTERNAL_JSON")
-			GZ_SIZE=$(wc -c < "$TMP_GZ")
-			if [ "$EXT_SIZE" -gt "$GZ_SIZE" ]; then
+
+			EXT_VALID=0
+			GZ_VALID=0
+			json_valid "$EXTERNAL_JSON" && EXT_VALID=1
+			json_valid "$TMP_GZ"        && GZ_VALID=1
+
+			if [ "$EXT_VALID" = "1" ] && [ "$GZ_VALID" = "1" ]; then
+				EXT_SIZE=$(wc -c < "$EXTERNAL_JSON")
+				GZ_SIZE=$(wc -c < "$TMP_GZ")
+				if [ "$EXT_SIZE" -gt "$GZ_SIZE" ]; then
+					cp "$EXTERNAL_JSON" "$DB"
+				else
+					cp "$TMP_GZ" "$DB"
+					easyconfig_statistics.uc "init" "init" 0 0 0 "" 0
+				fi
+			elif [ "$EXT_VALID" = "1" ]; then
+				logger -t easyconfig_statistics "OSTRZEŻENIE: plik gz zawiera nieprawidłowy JSON, używam zewnętrznej kopii"
 				cp "$EXTERNAL_JSON" "$DB"
-			else
+			elif [ "$GZ_VALID" = "1" ]; then
+				logger -t easyconfig_statistics "OSTRZEŻENIE: zewnętrzna kopia zawiera nieprawidłowy JSON, używam pliku gz"
 				cp "$TMP_GZ" "$DB"
 				easyconfig_statistics.uc "init" "init" 0 0 0 "" 0
+			else
+				logger -t easyconfig_statistics "OSTRZEŻENIE: oba źródła zawierają nieprawidłowy JSON, inicjalizuję nową bazę"
+				mkdir -p $(dirname "$SDB")
+				echo "{}" > "$DB"
 			fi
 			rm -f "$TMP_GZ"
 		else
-			cp "$EXTERNAL_JSON" "$DB"
+			safe_copy "$EXTERNAL_JSON" "$DB" || echo "{}" > "$DB"
 		fi
 	elif [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && [ -e "$EXTERNAL_JSON" ]; then
-		cp "$EXTERNAL_JSON" "$DB"
+		safe_copy "$EXTERNAL_JSON" "$DB" || echo "{}" > "$DB"
 	elif [ -e "$SDB" ]; then
-		zcat "$SDB" > "$DB"
-		easyconfig_statistics.uc "init" "init" 0 0 0 "" 0
+		TMP_GZ=/tmp/easyconfig_statistics_gz_tmp.json
+		zcat "$SDB" > "$TMP_GZ" 2>/dev/null
+		if json_valid "$TMP_GZ"; then
+			mv "$TMP_GZ" "$DB"
+			easyconfig_statistics.uc "init" "init" 0 0 0 "" 0
+		else
+			logger -t easyconfig_statistics "OSTRZEŻENIE: plik gz zawiera nieprawidłowy JSON, inicjalizuję nową bazę"
+			rm -f "$TMP_GZ"
+			mkdir -p $(dirname "$SDB")
+			echo "{}" > "$DB"
+		fi
 	else
 		mkdir -p $(dirname "$SDB")
 		echo "{}" > "$DB"
 	fi
 else
-	if [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && [ -e "$EXTERNAL_JSON" ]; then
-		EXT_SIZE=$(wc -c < "$EXTERNAL_JSON")
-		DB_SIZE=$(wc -c < "$DB")
-		if [ "$EXT_SIZE" -gt "$DB_SIZE" ]; then
+	if ! json_valid "$DB"; then
+		logger -t easyconfig_statistics "OSTRZEŻENIE: bieżący plik $DB jest uszkodzony, próba odtworzenia"
+
+		if [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && json_valid "$EXTERNAL_JSON"; then
+			logger -t easyconfig_statistics "Odtwarzanie z zewnętrznej kopii: $EXTERNAL_JSON"
 			cp "$EXTERNAL_JSON" "$DB"
+		elif [ -e "$SDB" ]; then
+			TMP_GZ=/tmp/easyconfig_statistics_gz_tmp.json
+			zcat "$SDB" > "$TMP_GZ" 2>/dev/null
+			if json_valid "$TMP_GZ"; then
+				logger -t easyconfig_statistics "Odtwarzanie z pliku gz: $SDB"
+				mv "$TMP_GZ" "$DB"
+			else
+				logger -t easyconfig_statistics "BŁĄD: brak poprawnego źródła do odtworzenia, inicjalizuję nową bazę"
+				rm -f "$TMP_GZ"
+				echo "{}" > "$DB"
+			fi
+		else
+			logger -t easyconfig_statistics "BŁĄD: brak źródła do odtworzenia, inicjalizuję nową bazę"
+			echo "{}" > "$DB"
+		fi
+	else
+		if [ "$MBACKUP" = "1" ] && [ -n "$MBACKUPATH" ] && [ -e "$EXTERNAL_JSON" ]; then
+			if json_valid "$EXTERNAL_JSON"; then
+				EXT_SIZE=$(wc -c < "$EXTERNAL_JSON")
+				DB_SIZE=$(wc -c < "$DB")
+				if [ "$EXT_SIZE" -gt "$DB_SIZE" ]; then
+					cp "$EXTERNAL_JSON" "$DB"
+				fi
+			else
+				logger -t easyconfig_statistics "OSTRZEŻENIE: zewnętrzna kopia $EXTERNAL_JSON jest uszkodzona, pomijam nadpisanie"
+			fi
 		fi
 	fi
 fi
@@ -103,13 +177,21 @@ else
 	WRITETS=$((NOW - 1))
 fi
 if [ $WRITETS -le $NOW ]; then
-	gzip -k "$DB"
-	mv "$DB.gz" "$SDB"
-	sync
+	if json_valid "$DB"; then
+		gzip -k "$DB"
+		mv "$DB.gz" "$SDB"
+		sync
+	else
+		logger -t easyconfig_statistics "OSTRZEŻENIE: $DB jest uszkodzony, pomijam zapis do archiwum gz"
+	fi
 fi
 if [ "$MBACKUP" = "1" ]; then
 	sleep 10
-	cp "$DB" "$MBACKUPATH/easyconfig_statistics.json"
+	if json_valid "$DB"; then
+		cp "$DB" "$MBACKUPATH/easyconfig_statistics.json"
+	else
+		logger -t easyconfig_statistics "OSTRZEŻENIE: $DB jest uszkodzony, pomijam kopię zewnętrzną"
+	fi
 fi
 
 lock -u $LOCK

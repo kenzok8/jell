@@ -18,9 +18,7 @@
 				"/usr/bin/easyconfig_statistics.uc": [ "exec" ],
 				"/usr/bin/easyconfig_statistics.sh": [ "exec" ],
 				"/usr/bin/auto_reset_statistics.sh": [ "exec" ],
-				"/sbin/transfer2cron.sh": [ "exec" ],
-				"/sbin/backup2cron.sh": [ "exec" ],
-				"/sbin/ar2cron.sh": [ "exec" ],
+				"/etc/init.d/cron restart": [ "exec" ],
 				"/tmp/easyconfig_statistics.json": [ "read" ],
 				"/tmp/easyconfig_statistics_gz_tmp.json": [ "read" ],
 				"/tmp/dhcp.leases": [ "read" ],
@@ -28,6 +26,7 @@
 				"/usr/lib/easyconfig/easyconfig_statistics.json": [ "read" ],
 				"/var/lock/easyconfig_statistics.lock": [ "read" ],
 				"/etc/config/easyconfig_transfer": [ "read" ],
+				"/etc/crontabs/root": [ "read" ],
 				"/mnt/easyconfig_statistics.json": [ "read" ]
 			},
 			"uci": [ "easyconfig_transfer" ]
@@ -41,9 +40,7 @@
 				"/usr/bin/easyconfig_statistics.uc": [ "exec" ],
 				"/usr/bin/easyconfig_statistics.sh": [ "exec" ],
 				"/usr/bin/auto_reset_statistics.sh": [ "exec" ],
-				"/sbin/transfer2cron.sh": [ "exec" ],
-				"/sbin/backup2cron.sh": [ "exec" ],
-				"/sbin/ar2cron.sh": [ "exec" ],
+				"/etc/init.d/cron restart": [ "exec" ],
 				"/tmp/easyconfig_statistics.json": [ "write" ],
 				"/tmp/easyconfig_statistics.json.gz": [ "write" ],
 				"/tmp/easyconfig_statistics_gz_tmp.json": [ "write" ],
@@ -51,6 +48,7 @@
 				"/usr/lib/easyconfig/easyconfig_statistics.json": [ "write" ],
 				"/var/lock/easyconfig_statistics.lock": [ "write" ],
 				"/etc/config/easyconfig_transfer": [ "write" ],
+				"/etc/crontabs/root": [ "write" ],
 				"/mnt/easyconfig_statistics.json": [ "write" ]
 			},
 			"ubus": {

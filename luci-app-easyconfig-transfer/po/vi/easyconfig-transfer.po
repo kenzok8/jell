@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: luci-app-easyconfig-transfer\n"
 "Language-Team: Rafał Wabik (IceG)\n"
 "Language: vi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "Transfer"
 msgstr "Lưu lượng"
@@ -493,3 +493,24 @@ msgstr "Ngày"
 
 msgid "Statistics restored from external backup"
 msgstr "Thống kê đã được khôi phục từ bản sao lưu bên ngoài"
+
+msgid "Please enter a hostname"
+msgstr "Vui lòng nhập tên máy chủ"
+
+msgid "Configuration error"
+msgstr "Lỗi cấu hình"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "Đã thêm tên máy chủ thành công. Đang tải lại…"
+
+msgid "Enter hostname"
+msgstr "Nhập tên máy chủ"
+
+msgid "Hostname"
+msgstr "Tên máy chủ"
+
+msgid "Hostname Settings"
+msgstr "Cài đặt tên máy chủ"
+
+msgid "hostname"
+msgstr "tên máy chủ"

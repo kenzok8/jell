@@ -416,18 +416,22 @@ async fn main() -> Result<(), ()> {
                                 // Resolve key by hostname (handles MAC changes: new MAC in leases
                                 // can now evict entries registered under an old MAC).
                                 // Fall back to scanning registered by IP if MAC is no longer in leases.
+                                debug!("Neighbour failed: {:?}", neigh);
                                 let key_opt: Option<(String, String)> = leases
                                     .get(&neigh.mac)
                                     .map(|h| (h.clone(), ip_str.clone()))
                                     .or_else(|| registered.keys().find(|(_, ip)| ip == &ip_str).cloned());
                                 if let Some(key) = key_opt {
                                     if let Some(entry) = registered.remove(&key) {
-                                        debug!("Neighbour failed: {:?}", neigh);
                                         if !do_delete_dns(&entry.hostname, &neigh.inet, &updater).await {
                                             // DNS delete failed, put back so we retry
                                             registered.insert(key, entry);
                                         }
+                                    } else {
+                                        debug!("Neighbour failed: not in registered map, key={:?}", key);
                                     }
+                                } else {
+                                    debug!("Neighbour failed: no registered key for ip={}", ip_str);
                                 }
                             } else if neigh.state == NeighbourState::Reachable {
                                 if let Some(hostname) = leases.get(&neigh.mac) {

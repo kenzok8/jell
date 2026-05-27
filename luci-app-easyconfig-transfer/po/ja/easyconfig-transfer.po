@@ -1,0 +1,517 @@
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Transfer"
+msgstr "転送"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "転送消費量を推定するeasyconfigスクリプト用のユーザーインターフェース。詳細は%seko.one.plフォーラム%sを参照してください。"
+
+msgid "Estimated data usage"
+msgstr "推定データ使用量"
+
+msgid "First Seen"
+msgstr "初回検出"
+
+msgid "Last Seen"
+msgstr "最終検出"
+
+msgid "Downloaded"
+msgstr "ダウンロード"
+
+msgid "Uploaded"
+msgstr "アップロード"
+
+msgid "Configuration - Transfer"
+msgstr "設定 - 転送"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "転送統計を計算するアプリケーションの設定パネル。"
+
+msgid "Data reading period"
+msgstr "データ読み込み期間"
+
+msgid "Data recording period"
+msgstr "データ記録期間"
+
+msgid "Beginning of the billing period"
+msgstr "請求期間の開始"
+
+msgid "Warning enabled"
+msgstr "警告を有効にする"
+
+msgid "Transfer available"
+msgstr "利用可能な転送"
+
+msgid "Warning level"
+msgstr "警告レベル"
+
+msgid "Warning cycle"
+msgstr "警告サイクル"
+
+msgid "per period"
+msgstr "期間あたり"
+
+msgid "per day"
+msgstr "1日あたり"
+
+msgid "Days until the end of the billing period"
+msgstr "請求期間終了までの日数"
+
+msgid "Estimated remaining transfer"
+msgstr "推定残存転送"
+
+msgid "approximately remains"
+msgstr "およそ残存"
+
+msgid "Summary"
+msgstr "概要"
+
+msgid "Today"
+msgstr "今日"
+
+msgid "Yesterday"
+msgstr "昨日"
+
+msgid "Last 7 days"
+msgstr "過去7日間"
+
+msgid "Last 30 days"
+msgstr "過去30日間"
+
+msgid "Yearly"
+msgstr "年単位"
+
+msgid "Clients data usage"
+msgstr "クライアントのデータ使用量"
+
+msgid "Total"
+msgstr "合計"
+
+msgid "Current billing period"
+msgstr "現在の請求期間"
+
+msgid "Expected data usage for the current period"
+msgstr "現在の期間の予想データ使用量"
+
+msgid "Previous billing period"
+msgstr "前の請求期間"
+
+msgid "Transfer usage statistics"
+msgstr "転送使用統計"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "計算はオペレーターの表示と異なる場合があります"
+
+msgid "Make a copy of Database"
+msgstr "データベースのコピーを作成"
+
+msgid "Restore"
+msgstr "復元"
+
+msgid "Make"
+msgstr "作成"
+
+msgid "a backup"
+msgstr "バックアップ"
+
+msgid "Make a backup"
+msgstr "バックアップを作成"
+
+msgid "Reset data"
+msgstr "データをリセット"
+
+msgid "Main Settings"
+msgstr "メイン設定"
+
+msgid "Traffic Settings"
+msgstr "トラフィック設定"
+
+msgid "Traffic Settings"
+msgstr "トラフィック設定"
+
+msgid "Hide MAC addresses"
+msgstr "MACアドレスを非表示"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "転送情報がないMACアドレスを非表示にします。"
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"圧縮されたデータコピーを作成する頻度を選択します。<br />アーカイブパス <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>。<br /><br /><b>重要</b><br />頻繁な書き込み操作はメモリのライフサイクルを短縮することに注意してください。"
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+
+msgstr ""
+"転送データ収集を有効にします。<br />データはファイル<code>/tmp/easyconfig_statistics.json</code>に保存されます。<br /><br /><b>ご注意</b><br />フローオフロードが有効になっている場合、転送データは現実と一致しなくなるか、完全に利用できなくなる可能性があります。"
+
+msgid "1 minute"
+msgstr "1分"
+
+msgid "3 minutes"
+msgstr "3分"
+
+msgid "5 minutes"
+msgstr "5分"
+
+msgid "10 minutes"
+msgstr "10分"
+
+msgid "15 minutes"
+msgstr "15分"
+
+msgid "30 minutes"
+msgstr "30分"
+
+msgid "1 hour"
+msgstr "1時間"
+
+msgid "3 hours"
+msgstr "3時間"
+
+msgid "6 hours"
+msgstr "6時間"
+
+msgid "12 hours"
+msgstr "12時間"
+
+msgid "24 hours"
+msgstr "24時間"
+
+msgid "Enter the starting day of the billing period."
+msgstr "請求期間の開始日を入力します。"
+
+msgid "Hide selected data in the table"
+msgstr "テーブル内の選択したデータを非表示"
+
+msgid "Select data that will be hidden."
+msgstr "非表示にするデータを選択します。"
+
+msgid "MAC addresses"
+msgstr "MACアドレス"
+
+msgid "MAC addresses & Hostnames"
+msgstr "MACアドレス&ホスト名"
+
+msgid "Show wan in table"
+msgstr "テーブルにwanを表示"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "テーブルにwanが表示されるようにする場合はこのオプションをチェックします。"
+
+msgid "Enable data usage progress bar"
+msgstr "データ使用状況進捗バーを有効にする"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "転送使用量をプログレスバーの形式で視覚化します。"
+
+msgid "Enter the available transfer during the billing period."
+msgstr "請求期間中に利用可能な転送を入力します。"
+
+msgid "Unit of data size"
+msgstr "データサイズの単位"
+
+msgid "Data Count Cycle"
+msgstr "データカウントサイクル"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "データの可視化/カウント間隔を指定します。"
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "スケジュール設定されたデバイス再起動時にデータを保存する場合はこのオプションをチェックします。"
+
+msgid "Backup at"
+msgstr "バックアップを実行時刻"
+
+msgid "Restore backup at"
+msgstr "バックアップを復元時刻"
+
+msgid "Backup Settings"
+msgstr "バックアップ設定"
+
+msgid "Move .json file"
+msgstr ".jsonファイルを移動"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "正しい時刻形式<code>HH:MM</code>。"
+
+msgid "Expected time is in HH:MM format"
+msgstr "予想時刻はHH:MM形式です"
+
+msgid "Enter a numeric value"
+msgstr "数値を入力します"
+
+msgid "Add a hostname"
+msgstr "ホスト名を追加"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "データを<code>MACアドレス;ホスト名</code>として入力します。"
+
+msgid "Transfer details"
+msgstr "転送の詳細"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "MACアドレス;ホスト名を入力"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "転送統計データをクリアしますか？"
+
+msgid "Transfer statistics"
+msgstr "転送統計"
+
+msgid "There are currently no data to show..."
+msgstr "表示するデータがありません..."
+
+msgid "Additional settings"
+msgstr "追加設定"
+
+msgid "from"
+msgstr "から"
+
+msgid "out of"
+msgstr "の中から"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "利用可能な転送を超えています"
+
+msgid "Statistics from the current billing period."
+msgstr "現在の請求期間の統計。"
+
+msgid "Must be configured"
+msgstr "設定する必要があります"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "バックアップを復元するには[続行]を押すか、操作を中止するには[キャンセル]を押します。"
+
+msgid "Restore .json file from archive"
+msgstr "アーカイブから.jsonファイルを復元"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "オプションを使用するとユーザーはアーカイブから統計を復元できます。"
+
+msgid "Restore .json file"
+msgstr ".jsonファイルを復元"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "オプションを使用するとユーザーは.jsonファイルから統計を復元できます。"
+
+msgid "Download .gz archive"
+msgstr ".gzアーカイブをダウンロード"
+
+msgid "Click to download .gz archive."
+msgstr "クリックして.gzアーカイブをダウンロード。"
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "easyconfig_statistics.json.gzファイルが見つかりません。"
+
+msgid "Download error"
+msgstr "ダウンロードエラー"
+
+msgid "Download .json file"
+msgstr ".jsonファイルをダウンロード"
+
+msgid "Click to download .json file."
+msgstr "クリックして.jsonファイルをダウンロード。"
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "easyconfig_statistics.jsonのダウンロードに失敗しました。もう一度お試しください。"
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "easyconfig_statistics.shの実行エラー"
+
+msgid "Upload .gz archive"
+msgstr ".gzアーカイブをアップロード"
+
+msgid "Upload .json file"
+msgstr ".jsonファイルをアップロード"
+
+msgid "Save .gz file"
+msgstr ".gzファイルを保存"
+
+msgid "Save .json file"
+msgstr ".jsonファイルを保存"
+
+msgid "Copy .json file to external storage"
+msgstr ".jsonファイルを外部ストレージにコピー"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "外部ドライブにコピーを作成する場合はこのオプションをチェックします。"
+
+msgid "Path to .json file"
+msgstr ".jsonファイルへのパス"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr ".jsonファイルのコピーが保存されるディレクトリへのパスを入力します。"
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "easyconfig_statistics.jsonファイル内のデータがリセットされました。"
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "easyconfig_statistics.jsonファイルを正常にコピーしました"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "easyconfig_statistics.jsonファイルを/usr/lib/easyconfigに正常にコピーしました。"
+
+msgid "Auto data reset"
+msgstr "自動データリセット"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "新年にデータをリセットする場合はこのオプションをチェックします。"
+
+msgid "Monthly"
+msgstr "月単位"
+
+msgid "Last 12 months"
+msgstr "過去12か月"
+
+msgid "Refreshing data…"
+msgstr "データを更新中…"
+
+msgid "Current period"
+msgstr "現在の期間"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "ダウンロードおよびアップロードされたデータの表示。[更新]をクリックしてグラフを更新します。"
+
+msgid "Jan"
+msgstr "1月"
+
+msgid "Feb"
+msgstr "2月"
+
+msgid "Mar"
+msgstr "3月"
+
+msgid "Apr"
+msgstr "4月"
+
+msgid "May"
+msgstr "5月"
+
+msgid "Jun"
+msgstr "6月"
+
+msgid "Jul"
+msgstr "7月"
+
+msgid "Aug"
+msgstr "8月"
+
+msgid "Sep"
+msgstr "9月"
+
+msgid "Oct"
+msgstr "10月"
+
+msgid "Nov"
+msgstr "11月"
+
+msgid "Dec"
+msgstr "12月"
+
+msgid "No data available"
+msgstr "データが利用できません"
+
+msgid "Percentage"
+msgstr "パーセンテージ"
+
+msgid "Legend"
+msgstr "凡例"
+
+msgid "Select day"
+msgstr "日を選択"
+
+msgid "Select month"
+msgstr "月を選択"
+
+msgid "Select year"
+msgstr "年を選択"
+
+msgid "Select period"
+msgstr "期間を選択"
+
+msgid "Others"
+msgstr "その他"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(選択した日の時間ごとのデータ使用量グラフ)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(選択した月の日単位使用量グラフ)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(個別の月のデータ使用量グラフ)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(年の各月のデータ使用量グラフ"
+
+msgid "Refreshing data..."
+msgstr "データを更新しています..."
+
+msgid "Please wait..."
+msgstr "お待ちください..."
+
+msgid "Statistics of data usage by clients."
+msgstr "クライアントによるデータ使用統計。"
+
+msgid "Clients"
+msgstr "クライアント"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "転送統計データをクリアしますか？"
+
+msgid "Statistics data cleared"
+msgstr "統計データがクリアされました"
+
+msgid "No hourly data available for this day"
+msgstr "この日の時間ごとのデータはありません"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "日単位の合計に基づいて推定時間分布を表示しますか？(これは近似値です)"
+
+msgid "Yes, show estimate"
+msgstr "はい、推定値を表示"
+
+msgid "Size of .json file"
+msgstr ".jsonファイルのサイズ"
+
+msgid "Size of .gz file"
+msgstr ".gzファイルのサイズ"
+
+msgid "Client"
+msgstr "クライアント"
+
+msgid "Date"
+msgstr "日付"
+
+msgid "Statistics restored from external backup"
+msgstr "外部バックアップから復元された統計"
+
+msgid "Please enter a hostname"
+msgstr "ホスト名を入力してください"
+
+msgid "Configuration error"
+msgstr "設定エラー"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "ホスト名が正常に追加されました。リロード中..."
+
+msgid "Enter hostname"
+msgstr "ホスト名を入力"
+
+msgid "Hostname"
+msgstr "ホスト名"
+
+msgid "Hostname Settings"
+msgstr "ホスト名設定"
+
+msgid "hostname"
+msgstr "ホスト名"

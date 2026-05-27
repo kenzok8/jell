@@ -1,0 +1,517 @@
+msgid ""
+msgstr ""
+"Language: ko\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Transfer"
+msgstr "전송"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "전송 소비를 추정하는 easyconfig 스크립트용 사용자 인터페이스. 자세한 정보는 %seko.one.pl 포럼%s을(를) 참조하세요."
+
+msgid "Estimated data usage"
+msgstr "추정 데이터 사용량"
+
+msgid "First Seen"
+msgstr "처음 확인"
+
+msgid "Last Seen"
+msgstr "마지막 확인"
+
+msgid "Downloaded"
+msgstr "다운로드"
+
+msgid "Uploaded"
+msgstr "업로드"
+
+msgid "Configuration - Transfer"
+msgstr "설정 - 전송"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "전송 통계를 계산하는 애플리케이션의 설정 패널."
+
+msgid "Data reading period"
+msgstr "데이터 읽기 기간"
+
+msgid "Data recording period"
+msgstr "데이터 기록 기간"
+
+msgid "Beginning of the billing period"
+msgstr "청구 기간 시작"
+
+msgid "Warning enabled"
+msgstr "경고 활성화"
+
+msgid "Transfer available"
+msgstr "사용 가능한 전송"
+
+msgid "Warning level"
+msgstr "경고 수준"
+
+msgid "Warning cycle"
+msgstr "경고 주기"
+
+msgid "per period"
+msgstr "기간당"
+
+msgid "per day"
+msgstr "일당"
+
+msgid "Days until the end of the billing period"
+msgstr "청구 기간 종료까지의 일수"
+
+msgid "Estimated remaining transfer"
+msgstr "추정 남은 전송"
+
+msgid "approximately remains"
+msgstr "대략 남음"
+
+msgid "Summary"
+msgstr "요약"
+
+msgid "Today"
+msgstr "오늘"
+
+msgid "Yesterday"
+msgstr "어제"
+
+msgid "Last 7 days"
+msgstr "지난 7일"
+
+msgid "Last 30 days"
+msgstr "지난 30일"
+
+msgid "Yearly"
+msgstr "연간"
+
+msgid "Clients data usage"
+msgstr "클라이언트 데이터 사용량"
+
+msgid "Total"
+msgstr "합계"
+
+msgid "Current billing period"
+msgstr "현재 청구 기간"
+
+msgid "Expected data usage for the current period"
+msgstr "현재 기간의 예상 데이터 사용량"
+
+msgid "Previous billing period"
+msgstr "이전 청구 기간"
+
+msgid "Transfer usage statistics"
+msgstr "전송 사용 통계"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "계산이 운영자 표시와 다를 수 있습니다"
+
+msgid "Make a copy of Database"
+msgstr "데이터베이스 복사본 만들기"
+
+msgid "Restore"
+msgstr "복원"
+
+msgid "Make"
+msgstr "만들기"
+
+msgid "a backup"
+msgstr "백업"
+
+msgid "Make a backup"
+msgstr "백업 만들기"
+
+msgid "Reset data"
+msgstr "데이터 재설정"
+
+msgid "Main Settings"
+msgstr "주요 설정"
+
+msgid "Traffic Settings"
+msgstr "트래픽 설정"
+
+msgid "Traffic Settings"
+msgstr "트래픽 설정"
+
+msgid "Hide MAC addresses"
+msgstr "MAC 주소 숨기기"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "전송 정보가 없는 MAC 주소를 숨깁니다."
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"압축된 데이터 복사본을 만드는 빈도를 선택합니다.<br />아카이브 경로 <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>.<br /><br /><b>중요</b><br />빈번한 쓰기 작업은 메모리의 수명을 단축한다는 점을 기억하세요."
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+
+msgstr ""
+"전송 데이터 수집을 활성화합니다.<br />데이터는 파일 <code>/tmp/easyconfig_statistics.json</code>에 저장됩니다.<br /><br /><b>알아야 할 사항</b><br />플로우 오프로딩이 활성화되면 전송 데이터가 현실과 일치하지 않거나 완전히 사용할 수 없을 수 있습니다."
+
+msgid "1 minute"
+msgstr "1분"
+
+msgid "3 minutes"
+msgstr "3분"
+
+msgid "5 minutes"
+msgstr "5분"
+
+msgid "10 minutes"
+msgstr "10분"
+
+msgid "15 minutes"
+msgstr "15분"
+
+msgid "30 minutes"
+msgstr "30분"
+
+msgid "1 hour"
+msgstr "1시간"
+
+msgid "3 hours"
+msgstr "3시간"
+
+msgid "6 hours"
+msgstr "6시간"
+
+msgid "12 hours"
+msgstr "12시간"
+
+msgid "24 hours"
+msgstr "24시간"
+
+msgid "Enter the starting day of the billing period."
+msgstr "청구 기간의 시작일을 입력합니다."
+
+msgid "Hide selected data in the table"
+msgstr "테이블에서 선택된 데이터 숨기기"
+
+msgid "Select data that will be hidden."
+msgstr "숨길 데이터를 선택합니다."
+
+msgid "MAC addresses"
+msgstr "MAC 주소"
+
+msgid "MAC addresses & Hostnames"
+msgstr "MAC 주소 & 호스트 이름"
+
+msgid "Show wan in table"
+msgstr "테이블에서 wan 표시"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "테이블에서 wan을 표시하려면 이 옵션을 선택합니다."
+
+msgid "Enable data usage progress bar"
+msgstr "데이터 사용량 진행률 표시줄 활성화"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "전송 사용량을 진행률 표시줄 형태로 시각화합니다."
+
+msgid "Enter the available transfer during the billing period."
+msgstr "청구 기간 중 사용 가능한 전송을 입력합니다."
+
+msgid "Unit of data size"
+msgstr "데이터 크기 단위"
+
+msgid "Data Count Cycle"
+msgstr "데이터 카운트 주기"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "데이터 시각화/카운팅 간격을 지정합니다."
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "예약된 장치 재시작 시 데이터를 저장하려면 이 옵션을 선택합니다."
+
+msgid "Backup at"
+msgstr "백업 시간"
+
+msgid "Restore backup at"
+msgstr "백업 복원 시간"
+
+msgid "Backup Settings"
+msgstr "백업 설정"
+
+msgid "Move .json file"
+msgstr ".json 파일 이동"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "올바른 시간 형식 <code>HH:MM</code>."
+
+msgid "Expected time is in HH:MM format"
+msgstr "예상 시간은 HH:MM 형식입니다"
+
+msgid "Enter a numeric value"
+msgstr "숫자 값을 입력합니다"
+
+msgid "Add a hostname"
+msgstr "호스트 이름 추가"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "데이터를 <code>MAC 주소;호스트 이름</code>으로 입력합니다."
+
+msgid "Transfer details"
+msgstr "전송 세부 정보"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "MAC 주소;호스트 이름 입력"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "전송 통계 데이터를 지우시겠습니까?"
+
+msgid "Transfer statistics"
+msgstr "전송 통계"
+
+msgid "There are currently no data to show..."
+msgstr "표시할 데이터가 없습니다..."
+
+msgid "Additional settings"
+msgstr "추가 설정"
+
+msgid "from"
+msgstr "에서"
+
+msgid "out of"
+msgstr "중에서"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "사용 가능한 전송을 초과했습니다"
+
+msgid "Statistics from the current billing period."
+msgstr "현재 청구 기간의 통계입니다."
+
+msgid "Must be configured"
+msgstr "구성해야 함"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "백업을 복원하려면 계속을 누르거나 작업을 중단하려면 취소를 누르세요."
+
+msgid "Restore .json file from archive"
+msgstr "아카이브에서 .json 파일 복원"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "옵션을 사용하면 사용자가 아카이브에서 통계를 복원할 수 있습니다."
+
+msgid "Restore .json file"
+msgstr ".json 파일 복원"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "옵션을 사용하면 사용자가 .json 파일에서 통계를 복원할 수 있습니다."
+
+msgid "Download .gz archive"
+msgstr ".gz 아카이브 다운로드"
+
+msgid "Click to download .gz archive."
+msgstr ".gz 아카이브를 다운로드하려면 클릭합니다."
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "easyconfig_statistics.json.gz 파일을 찾을 수 없습니다."
+
+msgid "Download error"
+msgstr "다운로드 오류"
+
+msgid "Download .json file"
+msgstr ".json 파일 다운로드"
+
+msgid "Click to download .json file."
+msgstr ".json 파일을 다운로드하려면 클릭합니다."
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "easyconfig_statistics.json 다운로드 실패. 다시 시도하세요."
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "easyconfig_statistics.sh 실행 오류"
+
+msgid "Upload .gz archive"
+msgstr ".gz 아카이브 업로드"
+
+msgid "Upload .json file"
+msgstr ".json 파일 업로드"
+
+msgid "Save .gz file"
+msgstr ".gz 파일 저장"
+
+msgid "Save .json file"
+msgstr ".json 파일 저장"
+
+msgid "Copy .json file to external storage"
+msgstr ".json 파일을 외부 저장소에 복사"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "외부 드라이브에 복사본을 만들려면 이 옵션을 선택합니다."
+
+msgid "Path to .json file"
+msgstr ".json 파일 경로"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr ".json 파일의 복사본이 저장될 디렉토리의 경로를 입력합니다."
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "easyconfig_statistics.json 파일의 데이터가 재설정되었습니다."
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "easyconfig_statistics.json 파일을 다음으로 성공적으로 복사했습니다"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "easyconfig_statistics.json 파일을 /usr/lib/easyconfig에 성공적으로 복사했습니다."
+
+msgid "Auto data reset"
+msgstr "자동 데이터 재설정"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "새해에 데이터를 재설정하려면 이 옵션을 선택합니다."
+
+msgid "Monthly"
+msgstr "월간"
+
+msgid "Last 12 months"
+msgstr "지난 12개월"
+
+msgid "Refreshing data…"
+msgstr "데이터 새로 고침 중…"
+
+msgid "Current period"
+msgstr "현재 기간"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "다운로드 및 업로드된 데이터의 표시입니다. 차트를 업데이트하려면 새로 고침을 클릭합니다."
+
+msgid "Jan"
+msgstr "1월"
+
+msgid "Feb"
+msgstr "2월"
+
+msgid "Mar"
+msgstr "3월"
+
+msgid "Apr"
+msgstr "4월"
+
+msgid "May"
+msgstr "5월"
+
+msgid "Jun"
+msgstr "6월"
+
+msgid "Jul"
+msgstr "7월"
+
+msgid "Aug"
+msgstr "8월"
+
+msgid "Sep"
+msgstr "9월"
+
+msgid "Oct"
+msgstr "10월"
+
+msgid "Nov"
+msgstr "11월"
+
+msgid "Dec"
+msgstr "12월"
+
+msgid "No data available"
+msgstr "사용 가능한 데이터 없음"
+
+msgid "Percentage"
+msgstr "백분율"
+
+msgid "Legend"
+msgstr "범례"
+
+msgid "Select day"
+msgstr "날짜 선택"
+
+msgid "Select month"
+msgstr "월 선택"
+
+msgid "Select year"
+msgstr "연도 선택"
+
+msgid "Select period"
+msgstr "기간 선택"
+
+msgid "Others"
+msgstr "기타"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(선택한 날짜의 시간별 데이터 사용량 차트)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(선택한 월의 일일 사용량 차트)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(개별 월의 데이터 사용량 차트)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(연도의 각 월 데이터 사용량 차트"
+
+msgid "Refreshing data..."
+msgstr "데이터를 새로 고치는 중..."
+
+msgid "Please wait..."
+msgstr "잠시 기다려주세요..."
+
+msgid "Statistics of data usage by clients."
+msgstr "클라이언트별 데이터 사용 통계입니다."
+
+msgid "Clients"
+msgstr "클라이언트"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "전송 통계 데이터를 지우시겠습니까?"
+
+msgid "Statistics data cleared"
+msgstr "통계 데이터가 지워졌습니다"
+
+msgid "No hourly data available for this day"
+msgstr "이 날짜의 시간별 데이터가 없습니다"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "일일 합계를 기반으로 예상 시간별 분포를 표시하시겠습니까? (이것은 근사치일 뿐입니다)"
+
+msgid "Yes, show estimate"
+msgstr "예, 예상치 표시"
+
+msgid "Size of .json file"
+msgstr ".json 파일의 크기"
+
+msgid "Size of .gz file"
+msgstr ".gz 파일의 크기"
+
+msgid "Client"
+msgstr "클라이언트"
+
+msgid "Date"
+msgstr "날짜"
+
+msgid "Statistics restored from external backup"
+msgstr "외부 백업에서 복원된 통계"
+
+msgid "Please enter a hostname"
+msgstr "호스트 이름을 입력하세요"
+
+msgid "Configuration error"
+msgstr "구성 오류"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "호스트 이름이 성공적으로 추가되었습니다. 다시 로드 중..."
+
+msgid "Enter hostname"
+msgstr "호스트 이름 입력"
+
+msgid "Hostname"
+msgstr "호스트 이름"
+
+msgid "Hostname Settings"
+msgstr "호스트 이름 설정"
+
+msgid "hostname"
+msgstr "호스트 이름"

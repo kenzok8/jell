@@ -1,10 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: luci-app-easyconfig-transfer\n"
 "Language-Team: Rafał Wabik (IceG)\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 msgid "Transfer"
 msgstr "Трафик"
@@ -493,3 +494,24 @@ msgstr "Дата"
 
 msgid "Statistics restored from external backup"
 msgstr "Статистика восстановлена из внешней резервной копии"
+
+msgid "Please enter a hostname"
+msgstr "Пожалуйста, введите имя хоста"
+
+msgid "Configuration error"
+msgstr "Ошибка конфигурации"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "Имя хоста успешно добавлено. Перезагрузка…"
+
+msgid "Enter hostname"
+msgstr "Введите имя хоста"
+
+msgid "Hostname"
+msgstr "Имя хоста"
+
+msgid "Hostname Settings"
+msgstr "Настройки имени хоста"
+
+msgid "hostname"
+msgstr "имя хоста"

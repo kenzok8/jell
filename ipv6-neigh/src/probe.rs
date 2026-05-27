@@ -33,12 +33,12 @@ fn compute_icmpv4_checksum(packet: &mut [u8]) {
 }
 
 pub(crate) fn send_icmpv6_echo(addr: Ipv6Addr, ifindex: u32) -> std::io::Result<()> {
-    let socket = Socket::new(Domain::IPV6, Type::DGRAM, Some(Protocol::ICMPV6))?;
+    let socket = Socket::new(Domain::IPV6, Type::RAW, Some(Protocol::ICMPV6))?;
     socket.set_nonblocking(true)?;
     // Bind outgoing packet to the specific interface via IPV6_UNICAST_IF so the
     // kernel NUD state machine updates the correct neighbour entry.
     set_ipv6_unicast_if(&socket, ifindex)?;
-    // ICMPv6 Echo Request: type=128, code=0, checksum=0 (kernel computes), id=0, seq=1
+    // ICMPv6 Echo Request: type=128, code=0, checksum=0 (kernel computes for RAW ICMPV6), id=0, seq=1
     let packet: [u8; 8] = [128, 0, 0, 0, 0, 0, 0, 1];
     let dest = SockAddr::from(std::net::SocketAddrV6::new(addr, 0, 0, 0));
     socket.send_to(&packet, &dest)?;
@@ -46,7 +46,7 @@ pub(crate) fn send_icmpv6_echo(addr: Ipv6Addr, ifindex: u32) -> std::io::Result<
 }
 
 pub(crate) fn send_icmpv4_echo(addr: Ipv4Addr, ifindex: u32) -> std::io::Result<()> {
-    let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::ICMPV4))?;
+    let socket = Socket::new(Domain::IPV4, Type::RAW, Some(Protocol::ICMPV4))?;
     socket.set_nonblocking(true)?;
     // Bind outgoing packet to the specific interface via IP_UNICAST_IF.
     set_ip_unicast_if(&socket, ifindex)?;

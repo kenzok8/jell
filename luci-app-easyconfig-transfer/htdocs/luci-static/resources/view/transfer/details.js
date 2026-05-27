@@ -525,6 +525,70 @@ function sortClientObjectsByHeader(tableKey) {
 	return out;
 }
 
+function handleAddHostname(macAddr, inputId) {
+	var inputField = document.getElementById(inputId);
+	if (!inputField) return;
+	
+	var hostname = inputField.value.trim();
+	if (!hostname) {
+		ui.addNotification(null, E('p', _('Please enter a hostname')), 'error');
+		return;
+	}
+	
+	var entry = macAddr + ';' + hostname;
+	var macUpper = macAddr.toUpperCase();
+	
+	var sections = uci.sections('easyconfig_transfer', 'hostname');
+	var targetSection = null;
+	
+	for (var i = 0; i < sections.length; i++) {
+		if (sections[i]['.name'] === 'hostnames') {
+			targetSection = sections[i];
+			break;
+		}
+	}
+	
+	if (!targetSection) {
+		uci.add('easyconfig_transfer', 'hostname', 'hostnames');
+		targetSection = { host_names: [] };
+	}
+	
+	var hostNames = Array.isArray(targetSection.host_names) ? targetSection.host_names.slice() : [];
+	
+	var existingIndex = -1;
+	for (var i = 0; i < hostNames.length; i++) {
+		if (hostNames[i].split(';')[0].toUpperCase() === macUpper) {
+			existingIndex = i;
+			break;
+		}
+	}
+	
+	if (existingIndex >= 0) {
+		hostNames[existingIndex] = entry;
+	} else {
+		hostNames.push(entry);
+	}
+
+	uci.set('easyconfig_transfer', 'hostnames', 'host_names', hostNames);
+	uci.save();
+	
+	L.ui.showModal(_('Please wait...'), [
+		E('p', { 'class': 'spinning' }, _('Hostname added successfully. Reloading...'))
+	]);
+	
+	uci.apply().then(function() {
+		setTimeout(function() {
+			location.reload();
+		}, 4000);
+	});
+}
+
+function isHostnameDuplicate(macAddr, hostname) {
+	var cleanMac = macAddr.replace(/:/g, '').toUpperCase();
+	var cleanHostname = hostname.replace(/:/g, '').replace(/\s/g, '').toUpperCase();
+	return cleanHostname.indexOf(cleanMac) !== -1;
+}
+
 function renderClientTableManual(table, tableKey) {
 	while (table.childElementCount > 1) {
 		table.removeChild(table.lastElementChild);
@@ -563,9 +627,54 @@ function renderClientTableManual(table, tableKey) {
 		});
 	} else {
 		rows.forEach(function(o, i){
+			var shouldShowInput = (o.nameOut === '-') || isHostnameDuplicate(o.macOut, o.nameOut);
+			
+			var hostnameCell;
+			if (shouldShowInput) {
+				var inputId = 'hostname-input-' + o.macOut.replace(/:/g, '_');
+				var ipAddress = '';
+				var ipMatch = o.nameOut.match(/\(([0-9.]+)\)/);
+				if (ipMatch && ipMatch[1]) {
+					ipAddress = ' (' + ipMatch[1] + ')';
+				}
+				
+				var inputElements = [
+					E('input', { 
+						'type': 'text', 
+						'id': inputId,
+						'placeholder': _('Enter hostname'),
+						'style': 'width: 150px; padding: 0.25em 0.5em !important; border: 1px solid #ccc; border-radius: 3px; font-size: inherit; height: auto !important; line-height: normal !important; box-sizing: border-box !important; vertical-align: middle !important;',
+						'keydown': function(ev) { 
+							if (ev.keyCode === 13) {
+								handleAddHostname(o.macOut, inputId);
+							}
+						}
+					}),
+					E('button', { 
+						'class': 'btn cbi-button cbi-button-add',
+						'style': 'padding: 0.25em 0.6em !important; height: auto !important; line-height: normal !important; font-size: inherit !important; font-weight: bold; box-sizing: border-box !important; vertical-align: middle !important; min-height: 0 !important;',
+						'click': function() {
+							handleAddHostname(o.macOut, inputId);
+						}
+					}, [ '+' ])
+				];
+				
+				if (ipAddress) {
+					inputElements.push(
+						E('span', { 'style': 'color: #666; margin-left: 0.5em; font-size: inherit; vertical-align: middle;' }, ipAddress)
+					);
+				}
+				
+				hostnameCell = E('td', { 'class': 'td', 'data-title': _('Hostname'), 'style': 'padding: 5px;' }, [
+					E('span', { 'class': 'control-group', 'style': 'display: inline-flex; gap: 0.25em; align-items: center; vertical-align: middle;' }, inputElements)
+				]);
+			} else {
+				hostnameCell = E('td', { 'class': 'td', 'data-title': _('Hostname') }, o.nameOut);
+			}
+			
 			var tr = E('tr', { 'class': 'tr cbi-rowstyle-%d'.format(i % 2 ? 2 : 1) }, [
 				E('td', { 'class': 'td', 'data-title': _('MAC Address') }, o.macOut),
-				E('td', { 'class': 'td', 'data-title': _('Hostname')   }, o.nameOut && o.nameOut.length>1 ? o.nameOut : '-'),
+				hostnameCell,
 				E('td', { 'class': 'td', 'data-title': _('First Seen')  }, o.first),
 				E('td', { 'class': 'td', 'data-title': _('Last Seen')   }, o.last),
 				(function(){ 
@@ -1772,7 +1881,15 @@ function updatePieChart(key, jsonData, dates) {
 	var sections = uci.sections('easyconfig_transfer');
 	var hideZeros = sections[1].zero_view;
 	var hidden_data_value = sections[1].hidden_data;
-	var mac_list = Array.isArray(sections[1].host_names) ? sections[1].host_names : [];
+	
+	var hostnamesSection = null;
+	for (var i = 0; i < sections.length; i++) {
+		if (sections[i]['.name'] === 'hostnames') {
+			hostnamesSection = sections[i];
+			break;
+		}
+	}
+	var mac_list = (hostnamesSection && Array.isArray(hostnamesSection.host_names)) ? hostnamesSection.host_names : [];
 	var macs_list = [];
 	for (var i = 0; i < mac_list.length; i++) macs_list.push(mac_list[i]);
 
@@ -2540,7 +2657,15 @@ function populateClientDropdowns(jsonData) {
 		if (clientDropdown) {
 			clientDropdown.innerHTML = '';
 			var sections2 = uci.sections('easyconfig_transfer');
-			var mac_list2 = Array.isArray(sections2[1].host_names) ? sections2[1].host_names : [];
+			
+			var hostnamesSection2 = null;
+			for (var i = 0; i < sections2.length; i++) {
+				if (sections2[i]['.name'] === 'hostnames') {
+					hostnamesSection2 = sections2[i];
+					break;
+				}
+			}
+			var mac_list2 = (hostnamesSection2 && Array.isArray(hostnamesSection2.host_names)) ? hostnamesSection2.host_names : [];
 			callLuciDHCPLeases().then(function(leaseData2) {
 				var leases2 = Array.isArray(leaseData2.dhcp_leases) ? leaseData2.dhcp_leases : [];
 				var clients = getClientsList(jsonData, leases2, mac_list2);
@@ -2621,7 +2746,15 @@ function updateClientTable(tableKey, jsonData, dates) {
 	var sections = uci.sections('easyconfig_transfer');
 	var hideZeros = sections[1].zero_view;
 	var hidden_data_value = sections[1].hidden_data;
-	var mac_list = Array.isArray(sections[1].host_names) ? sections[1].host_names : [];
+	
+	var hostnamesSection = null;
+	for (var i = 0; i < sections.length; i++) {
+		if (sections[i]['.name'] === 'hostnames') {
+			hostnamesSection = sections[i];
+			break;
+		}
+	}
+	var mac_list = (hostnamesSection && Array.isArray(hostnamesSection.host_names)) ? hostnamesSection.host_names : [];
 	var macs_list = [];
 	for (var i = 0; i < mac_list.length; i++) macs_list.push(mac_list[i]);
 	

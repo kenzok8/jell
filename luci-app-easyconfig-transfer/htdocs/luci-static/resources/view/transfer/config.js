@@ -94,6 +94,52 @@ return view.extend({
 
 	render: function(devs) {
 		var m, s, o;
+		
+		var updateCron = function() {
+			var transferEnabled = uci.get('easyconfig_transfer', 'global', 'transfer_enabled');
+			var PD = uci.get('easyconfig_transfer', 'global', 'dataread_period');
+			var autoReset = uci.get('easyconfig_transfer', 'global', 'auto_reset');
+			var enableBackup = uci.get('easyconfig_transfer', 'traffic', 'enable_backup');
+			var makeTime = uci.get('easyconfig_transfer', 'traffic', 'make_time');
+			var restoreTime = uci.get('easyconfig_transfer', 'traffic', 'restore_time');
+			
+			return L.resolveDefault(fs.read('/etc/crontabs/root'), '').then(function(crontab) {
+				var lines = (crontab || '').replace(/\r\n/g, '\n').split('\n');
+
+				var filtered = lines.filter(function(l) {
+					return l.trim() !== '' && 
+						   !l.includes('easyconfig_statistics.sh') && 
+						   !l.includes('auto_reset_statistics.sh') && 
+						   !l.includes('/usr/lib/easyconfig');
+				});
+				
+				if (transferEnabled === '1') {
+					filtered.push('*/' + PD + ' * * * * /usr/bin/easyconfig_statistics.sh');
+					
+					if (autoReset === '1') {
+						filtered.push('0 0 1 1 * /usr/bin/auto_reset_statistics.sh');
+					}
+					
+					if (enableBackup === '1' && makeTime && restoreTime) {
+						var makeParts = makeTime.split(':');
+						var makeHH = parseInt(makeParts[0], 10);
+						var makeMM = parseInt(makeParts[1], 10);
+						
+						var restoreParts = restoreTime.split(':');
+						var restoreHH = parseInt(restoreParts[0], 10);
+						var restoreMM = parseInt(restoreParts[1], 10);
+						
+						filtered.push(makeMM + ' ' + makeHH + ' * * * cp /tmp/easyconfig_statistics.json /usr/lib/easyconfig');
+						filtered.push(restoreMM + ' ' + restoreHH + ' * * * cp /usr/lib/easyconfig/easyconfig_statistics.json /tmp');
+					}
+				}
+				
+				return fs.write('/etc/crontabs/root', filtered.join('\n') + '\n');
+			}).then(function() {
+				return fs.exec('/etc/init.d/cron', ['restart']);
+			});
+		};
+		
 		m = new form.Map('easyconfig_transfer', _('Configuration - Transfer'), _('Configuration panel of the application calculating transfer statistics.'));
 
 		s = m.section(form.TypedSection, 'ectransfer', _('Main Settings'), null);
@@ -105,38 +151,28 @@ return view.extend({
 
 		o.rmempty = false;
 		o.write = function(section_id, value) {
-			if(value == '1') {
-				uci.set('easyconfig_transfer', 'global', 'transfer_enabled', "1");
-				uci.save();
-				fs.exec('sleep 2');
-				fs.exec_direct('/sbin/transfer2cron.sh');
-			}
-			if(value == '0') {
-				uci.set('easyconfig_transfer', 'global', 'transfer_enabled', "0");
-				uci.save();
-				fs.exec('sleep 2');
-				fs.exec_direct('/sbin/transfer2cron.sh');
-			}
-			return form.Flag.prototype.write.apply(this, [section_id, value]);
+			return uci.load('easyconfig_transfer').then(function() {
+				uci.set('easyconfig_transfer', 'global', 'transfer_enabled', value);
+				return uci.save();
+			}).then(function() {
+				return updateCron();
+			}).then(function() {
+				return form.Flag.prototype.write.apply(this, [section_id, value]);
+			}.bind(this));
 		};
 		
 		o = s.option(form.Flag, 'auto_reset', _('Auto data reset'), _('Check this option if you want reset data with the new year.'));
 
 		o.rmempty = false;
 		o.write = function(section_id, value) {
-			if(value == '1') {
-				uci.set('easyconfig_transfer', 'global', 'auto_reset', "1");
-				uci.save();
-				fs.exec('sleep 2');
-				fs.exec_direct('/sbin/ar2cron.sh');
-			}
-			if(value == '0') {
-				uci.set('easyconfig_transfer', 'global', 'auto_reset', "0");
-				uci.save();
-				fs.exec('sleep 2');
-				fs.exec_direct('/sbin/ar2cron.sh');
-			}
-			return form.Flag.prototype.write.apply(this, [section_id, value]);
+			return uci.load('easyconfig_transfer').then(function() {
+				uci.set('easyconfig_transfer', 'global', 'auto_reset', value);
+				return uci.save();
+			}).then(function() {
+				return updateCron();
+			}).then(function() {
+				return form.Flag.prototype.write.apply(this, [section_id, value]);
+			}.bind(this));
 		};
 
 		o = s.option(widgets.NetworkSelect, 'network', _('Interface'), _('Network interface for Internet access.'));
@@ -199,16 +235,6 @@ return view.extend({
 
 		o = s.taboption('trTab', form.Flag, 'wan_view', _('Show wan in table'), _('Check this option if you want wan to be visible in the table.'));
 		o.rmempty = false;
-
-		o = s.taboption('trTab', form.DynamicList, 'host_names', _('Add a hostname'), _('Enter data as <code>MAC adress;Hostname</code>.'));
-		o.rmempty = true;
-		o.validate = function(section_id, value) {
-			if(value === "" || value.match(/^([0-9A-F]{2}:){5}([0-9A-F]{2});.+$/)) {
-				return true;
-			} else {
-				return _('Enter the MAC address;Hostname');
-			}
-		};
 
 		o = s.taboption('trTab', form.Flag, 'warning_enabled', _('Enable data usage progress bar'), _('Show a visualization of transfer usage in the form of a progress bar.'));
 		o.rmempty = true;
@@ -289,14 +315,10 @@ return view.extend({
 			if(value == '1') {
 				uci.set('easyconfig_transfer', 'service', 'traffic', 'external_backup', "1");
 				uci.save();
-				//fs.exec('sleep 2');
-				//fs.exec_direct('/sbin/backup2cron.sh');
 			}
 			if(value == '0') {
 				uci.set('easyconfig_transfer', 'service', 'traffic', 'external_backup', "0");
 				uci.save();
-				//fs.exec('sleep 2');
-				//fs.exec_direct('/sbin/backup2cron.sh');
 			}
 			return form.Flag.prototype.write.apply(this, [section_id, value]);
 		};
@@ -311,21 +333,14 @@ return view.extend({
 		o = s.taboption('bkTab', form.Flag, 'enable_backup', _('Move .json file'), _('Check this option if you want to save data during a scheduled device restart.'));
 		o.rmempty = false;
 		o.write = function(section_id, value) {
-			if(value == '1') {
-				uci.set('easyconfig_transfer', 'service', 'traffic', 'enable_backup', "1");
-				uci.save();
-				uci.apply();
-				fs.exec('sleep 2');
-			        fs.exec_direct('/sbin/backup2cron.sh');
-			}
-			if(value == '0') {
-				uci.set('easyconfig_transfer', 'service', 'traffic', 'enable_backup', "0");
-				uci.save();
-				uci.apply();
-				fs.exec('sleep 2');
-			        fs.exec_direct('/sbin/backup2cron.sh');
-			}
-			return form.Flag.prototype.write.apply(this, [section_id, value]);
+			return uci.load('easyconfig_transfer').then(function() {
+				uci.set('easyconfig_transfer', 'service', 'traffic', 'enable_backup', value);
+				return uci.save();
+			}).then(function() {
+				return updateCron();
+			}).then(function() {
+				return form.Flag.prototype.write.apply(this, [section_id, value]);
+			}.bind(this));
 		};
 		//o.depends('transfer_enabled', '1');
 
@@ -360,6 +375,75 @@ return view.extend({
 			return _('Expected time is in HH:MM format');
 		};
 		o.default = '05:10';
+
+        s.tab('hnTab', _('Hostname Settings'));
+        o = s.taboption('hnTab', form.DynamicList, 'host_names', _('Add a hostname'), _('Enter data as <code>MAC adress;Hostname</code>.'));
+        o.rmempty = false;
+        o.ucioption = 'host_names';
+
+        var PLACEHOLDER = 'AA:BB:CC:DD:EE:FF;' + _('hostname');
+
+        o.ucisection = function() {
+            var sections = uci.sections('easyconfig_transfer', 'hostname');
+            return sections.length > 0 ? sections[0]['.name'] : null;
+        };
+
+        o.load = function(section_id) {
+            var hostnameSection = uci.sections('easyconfig_transfer', 'hostname');
+            var values = [];
+            if (hostnameSection.length > 0) {
+                values = hostnameSection[0].host_names || [];
+            }
+            if (values.length === 0) {
+                values = [PLACEHOLDER];
+            }
+            return values;
+        };
+
+        o.write = function(section_id, value) {
+            var hostnameSection = uci.sections('easyconfig_transfer', 'hostname');
+            var targetSection = hostnameSection.length > 0 ? hostnameSection[0]['.name'] : null;
+
+            if (!targetSection) {
+                targetSection = uci.add('easyconfig_transfer', 'hostname');
+            }
+
+            var filtered = Array.isArray(value)
+                ? value.filter(function(v) { return v !== PLACEHOLDER; })
+                : [];
+
+            if (filtered.length === 0) {
+                var existing = uci.get('easyconfig_transfer', targetSection, 'host_names');
+                if (existing !== undefined && existing !== null) {
+                    uci.unset('easyconfig_transfer', targetSection, 'host_names');
+                }
+            } else {
+                uci.set('easyconfig_transfer', targetSection, 'host_names', filtered);
+            }
+
+            return uci.save();
+        };
+
+        o.remove = function(section_id) {
+            var hostnameSection = uci.sections('easyconfig_transfer', 'hostname');
+            if (hostnameSection.length > 0) {
+                var sectionName = hostnameSection[0]['.name'];
+                var existing = uci.get('easyconfig_transfer', sectionName, 'host_names');
+                if (existing !== undefined && existing !== null) {
+                    uci.unset('easyconfig_transfer', sectionName, 'host_names');
+                }
+                return uci.save();
+            }
+            return Promise.resolve();
+        };
+
+        o.validate = function(section_id, value) {
+            if (value === PLACEHOLDER) return true;
+            if (value === '' || value.match(/^([0-9A-F]{2}:){5}([0-9A-F]{2});.+$/)) {
+                return true;
+            }
+            return _('Enter the MAC address;Hostname');
+        };
 
 		return m.render();
 	}

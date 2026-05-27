@@ -9,9 +9,10 @@
 // From eko.one.pl forum
 //
 
-import { readfile, writefile } from "fs";
+import { readfile, writefile, rename, unlink, error } from "fs";
 
 let filename = `/tmp/easyconfig_statistics.json`;
+let filename_tmp = `/tmp/easyconfig_statistics.json.tmp`;
 
 let MAC       = shift(ARGV);
 let IFNAME    = shift(ARGV);
@@ -43,11 +44,49 @@ let day    = sprintf("%04d%02d%02d", ts.year, ts.mon, ts.mday);
 let hour   = sprintf("%02d", ts.hour);
 let ts_now = sprintf("%04d%02d%02d%02d%02d", ts.year, ts.mon, ts.mday, ts.hour, ts.min);
 
+function safe_write(data) {
+	let serialized = sprintf("%J", data);
+	if (!serialized || length(serialized) < 2) {
+		warn("easyconfig_statistics.uc: błąd serializacji danych, zapis pominięty\n");
+		return false;
+	}
+
+	let verify = null;
+	try { verify = json(serialized); }
+	catch { verify = null; }
+	if (verify === null) {
+		warn("easyconfig_statistics.uc: walidacja JSON nie powiodła się, zapis pominięty\n");
+		return false;
+	}
+
+	let ret = writefile(filename_tmp, serialized);
+	if (!ret) {
+		warn("easyconfig_statistics.uc: nie można zapisać pliku tymczasowego\n");
+		unlink(filename_tmp);
+		return false;
+	}
+
+	if (!rename(filename_tmp, filename)) {
+		warn("easyconfig_statistics.uc: nie można zastąpić pliku docelowego (rename)\n");
+		unlink(filename_tmp);
+		return false;
+	}
+	return true;
+}
+
 let db = {};
 let content = readfile(filename);
 if (content) {
 	try { db = json(content); }
-	catch { db = {}; }
+	catch {
+		warn("easyconfig_statistics.uc: uszkodzony JSON w pliku bazy, resetowanie do {}\n");
+		db = {};
+	}
+
+	if (type(db) != "object" || db === null) {
+		warn("easyconfig_statistics.uc: nieprawidłowy typ danych w bazie, resetowanie do {}\n");
+		db = {};
+	}
 }
 
 let tmp = null;
@@ -63,7 +102,7 @@ if (IFNAME == "init") {
 			}
 		}
 	}
-	writefile(filename, db);
+	safe_write(db);
 	exit(0)
 }
 
@@ -71,7 +110,7 @@ if (IFNAME == "delete") {
 	tmp = db[MAC];
 	if (tmp) {
 		delete db[MAC];
-		writefile(filename, db);
+		safe_write(db);
 	}
 	exit(0)
 }
@@ -126,7 +165,6 @@ if (CONNECTED <= 60) {
 db[MAC][IFNAME][day].total_tx = total_tx + dtx;
 db[MAC][IFNAME][day].total_rx = total_rx + drx;
 
-// Dodaj statystyki godzinowe tylko jeśli był jakiś ruch danych
 if (dtx > 0 || drx > 0) {
 	if (!db[MAC][IFNAME][day].hours[hour]) {
 		db[MAC][IFNAME][day].hours[hour] = {
@@ -147,5 +185,5 @@ db[MAC][IFNAME].last_rx = RX;
 db[MAC][IFNAME].last_seen = ts_now;
 db[MAC].last_seen = ts_now;
 
-writefile(filename, db);
+safe_write(db);
 exit(0);
