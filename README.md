@@ -1,30 +1,28 @@
 <div align="center">
-<h1 align="center">openwrt主流软件包合集</h1>
-<img src="https://img.shields.io/github/issues/kenzok8/jell?color=green">
-<img src="https://img.shields.io/github/stars/kenzok8/jell?color=yellow">
-<img src="https://img.shields.io/github/forks/kenzok8/jell?color=orange">
-<img src="https://img.shields.io/github/license/kenzok8/jell?color=ff69b4">
-<img src="https://img.shields.io/github/languages/code-size/kenzok8/jell?color=blueviolet">
+  <img src="https://github-readme-stats.vercel.app/api?username=kenzok8&show_icons=true&theme=default&hide_border=true&cache_seconds=86400" alt="kenzok8 github stats" height="165">
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=kenzok8&layout=compact&theme=default&hide_border=true&cache_seconds=86400" alt="kenzok8 top langs" height="165">
+</div>
+<div align="center">
+<h1 align="center">wall仓库</h1>
+<img src="https://img.shields.io/github/issues/kenzok8/wall?color=green">
+<img src="https://img.shields.io/github/stars/kenzok8/wall?color=yellow">
+<img src="https://img.shields.io/github/forks/kenzok8/wall?color=orange">
+<img src="https://img.shields.io/github/license/kenzok8/wall?color=ff69b4">
+<img src="https://img.shields.io/github/languages/code-size/kenzok8/wall?color=blueviolet">
 </div>
 
-<a href="https://t.me/joinchat/JjxmyRZZXJWb74I-sCrryA" target="_blank">Telegram</a>
 
-#### 源码来源：
-[![kiddin9](https://img.shields.io/badge/package-garypang13-red.svg?style=flat&logo=appveyor)](https://github.com/garypang13/openwrt-packages)
- [![Lienol](https://img.shields.io/badge/passwall-xiaorouji-blueviolet.svg?style=flat&logo=appveyor)](https://github.com/xiaorouji/openwrt-passwall) 
-[![immortalwrt](https://img.shields.io/badge/packages-immortalwrt-orange.svg?style=flat&logo=appveyor)](https://github.com/immortalwrt/immortalwrt) 
-[![Lean](https://img.shields.io/badge/package-Lean-blueviolet.svg?style=flat&logo=appveyor)](https://github.com/coolsnowwolf/lede) 
+#### wall
 
+*  集合了常用的几个插件更新，
 
-##### 插件下载:
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/kenzok78/compile-small?style=for-the-badge&label=插件下载)](https://github.com/kenzok78/compile-small/releases/latest)
+*  adguardhome
+*  alist 
+*  filebrowser 
+*  gost 
+*  lucky 
+*  mosdns 
+*  smartdns
+*  UnblockNeteaseMusic
 
-#### 特色:
-
-+ 该仓库插件适配18.06、2*.的最新luci
-
-##### 安装:
-
-```sh
-sed -i '$a src-git jell https://github.com/kenzok8/jell' feeds.conf.default && ./scripts/feeds update -a && ./scripts/feeds install -a
-```
+*  感谢以上github仓库所有者！
