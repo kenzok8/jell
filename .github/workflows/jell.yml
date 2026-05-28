@@ -196,7 +196,7 @@ jobs:
         ) &
         (
         git_clone https://github.com/honwen/luci-app-shadowsocks-rust
-        git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
+        #git_clone https://github.com/Hyy2001X/AutoBuild-Packages && rm -rf AutoBuild-Packages/luci-app-adguardhome && mvdir AutoBuild-Packages
         #git_clone https://github.com/papagaye744/luci-theme-design -b js --depth 1
         git_clone https://github.com/lazywalker/mmdvm-openwrt && rm -rf mmdvm-openwrt/misc && mvdir mmdvm-openwrt
         git_clone https://github.com/4IceG/luci-app-3ginfo-lite 3ginfol && mvdir 3ginfol
