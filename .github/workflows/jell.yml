@@ -39,7 +39,7 @@ jobs:
       run : |
         shopt -s extglob
         set +e
-        git rm -r --cache * >/dev/null 2>&1 &
+        git rm -r --cache * >/dev/null 2>&1
         rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
     
         function git_clone() {
@@ -335,12 +335,12 @@ jobs:
         (
         git_clone https://github.com/kenzok78/luci-theme-argone
         git_clone https://github.com/kenzok78/luci-app-argone-config
-        git_clone https://github.com/kenzok8/wall && mv -n wall/* ./ ; rm -rf wall
+        git_clone https://github.com/kenzok8/wall && cp -rf wall/* ./ ; rm -rf wall
         git_clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
         git_clone https://github.com/kenzok78/luci-theme-design luci-theme-design_new
         git_clone https://github.com/kenzok78/luci-app-adguardhome
-        git_clone https://github.com/kenzok8/luci-app-daede daede-luci && mv -n daede-luci/luci-app-daede ./; rm -rf daede-luci
-        git_clone https://github.com/kenzok8/openwrt-clashoo openwrt-clashoo && mv -n openwrt-clashoo/*clashoo ./; rm -rf openwrt-clashoo
+        git_clone https://github.com/kenzok8/luci-app-daede daede-luci && cp -rf daede-luci/luci-app-daede ./; rm -rf daede-luci
+        git_clone https://github.com/kenzok8/openwrt-clashoo openwrt-clashoo && cp -rf openwrt-clashoo/*clashoo ./; rm -rf openwrt-clashoo
         git_clone https://github.com/kiddin9/kwrt-packages && mv -n kwrt-packages/luci-app-bypass ./ ; rm -rf kwrt-packages
         ) &
         (
@@ -494,7 +494,7 @@ jobs:
              -H "Authorization: Bearer ${{ secrets.REPO_TOKEN }}" \
              -X POST -d '{ "query": "query {repository(owner: \"'"$1"'\", name: \"'"$2"'\"){latestRelease{tagName tagCommit{oid}}refs(refPrefix:\"refs/tags/\",last:1,orderBy:{field:TAG_COMMIT_DATE,direction:ASC}){edges{node{name target{oid}}}}defaultBranchRef{target{...on Commit {oid}}}}}"}' https://api.github.com/graphql)
         }
-        for pkg in $(ls !(luci-*|cloudflared|dnsproxy|ppp|joker|openwrt-ympd|gost|aic8800|headscale|aria2|webd|mihomo|netmaker-openwrt|hickory-dns|frp|libcryptopp|toml11|chinadns-ng|ddns-go|libtorrent-rasterbar|ua2f|homebox|xtables-wgobfs|nexttrace|tuic-server|subconverter|softethervpn5|shadowsocksr-libev|mt76|sub-web|mmdvm-host|alist|curl|qBittorrent-Enhanced-Edition|libwxwidgets|ysf-clients|natter|fullconenat|v2raya|r8152|amule|brook|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|tailscale|mosdns|coremark|mbedtls|quickjspp|accel-ppp)/Makefile); do
+        for pkg in $(ls !(luci-*|cloudflared|dnsproxy|ppp|joker|openwrt-ympd|gost|aic8800|headscale|aria2|webd|mihomo|clashoo|netmaker-openwrt|hickory-dns|frp|libcryptopp|toml11|chinadns-ng|ddns-go|libtorrent-rasterbar|ua2f|homebox|xtables-wgobfs|nexttrace|tuic-server|subconverter|softethervpn5|shadowsocksr-libev|mt76|sub-web|mmdvm-host|alist|curl|qBittorrent-Enhanced-Edition|libwxwidgets|ysf-clients|natter|fullconenat|v2raya|r8152|amule|brook|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|tailscale|mosdns|coremark|mbedtls|quickjspp|accel-ppp)/Makefile); do
           repo="$(grep ^PKG_SOURCE_URL $pkg | grep github | cut -f 4-5 -d '/' | sed -e 's/.git//' | grep -E '[0-9a-zA-Z_-]+$')" || true
           if [ "$repo" ]; then
             owner="$(echo $repo | cut -f 1 -d '/')"
