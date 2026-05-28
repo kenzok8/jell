@@ -13,7 +13,7 @@ futures = "0.3.32"
 netlink-packet-route = {version = "0.30" }
 netlink-packet-core= {version ="0.8"}
 clap = { version = "4.6", default-features = false, features = ["cargo", "derive", "help", "std", "suggestions"] }
-hickory-proto = { git = "https://github.com/hickory-dns/hickory-dns.git", rev = "ee7ba64757eca61d86f323ef992eba482605d7c3", features = ["dnssec-ring"] }
+hickory-proto = { git = "https://github.com/hickory-dns/hickory-dns.git", rev = "50ee6c13a2272d42e5d03eff84dca8efd5109d96", features = ["dnssec-ring"] }
 ubus = "0.1.7"
 serde_json = "1.0.150"
 log = "0.4"
