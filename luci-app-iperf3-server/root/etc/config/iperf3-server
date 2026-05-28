@@ -1,3 +1,0 @@
-
-config iperf3-server 'main'
-	option main_enable '0'
