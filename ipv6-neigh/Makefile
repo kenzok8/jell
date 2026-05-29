@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ipv6-neigh
 PKG_VERSION:=0.1.0
-PKG_RELEASE:=23
+PKG_RELEASE:=24
 
 PKG_BUILD_DEPENDS:=rust/host
 PKG_BUILD_PARALLEL:=1
@@ -21,6 +21,11 @@ _mcpu_parts:=$(subst +,$(_space),$(_mcpu))
 _cpu_base:=$(firstword $(_mcpu_parts))
 _cpu_feats:=$(subst $(_space),$(_comma),$(addprefix +,$(wordlist 2,99,$(_mcpu_parts))))
 PKG_RUST_CPU_FLAGS:=$(if $(_cpu_base),-Ctarget-cpu=$(_cpu_base)$(if $(_cpu_feats), -Ctarget-feature=$(_cpu_feats)))
+# ring 0.17 在 x86 上强制要求 SSE2；OpenWrt i586 rust target 默认没开，
+# 而 i386_pentium4 (Pentium 4) 实际支持 SSE2，显式打开以通过 ring 的编译期断言
+ifeq ($(ARCH_PACKAGES),i386_pentium4)
+  PKG_RUST_CPU_FLAGS+= -Ctarget-feature=+sse,+sse2
+endif
 
 define Package/ipv6-neigh
   SECTION:=net

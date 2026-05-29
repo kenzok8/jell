@@ -7,9 +7,9 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=naiveproxy
 PKG_REAL_VERSION:=148.0.7778.96-5
 PKG_VERSION:=$(subst -,.,$(PKG_REAL_VERSION))
-PKG_RELEASE:=95
+PKG_RELEASE:=96
 
-# intel 80386 & riscv64 & cortex-a76
+ARCH_PREBUILT:=$(ARCH_PACKAGES)
 ifeq ($(ARCH_PREBUILT),aarch64_cortex-a76)
   ARCH_PREBUILT:=aarch64_generic
 else ifeq ($(ARCH_PREBUILT),i386_pentium-mmx)
@@ -20,53 +20,53 @@ else ifeq ($(ARCH_PREBUILT),riscv64_riscv64)
   ARCH_PREBUILT:=riscv64
 endif
 
-ifeq ($(ARCH_PACKAGES),aarch64_cortex-a53)
+ifeq ($(ARCH_PREBUILT),aarch64_cortex-a53)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),aarch64_cortex-a72)
+else ifeq ($(ARCH_PREBUILT),aarch64_cortex-a72)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),aarch64_generic)
+else ifeq ($(ARCH_PREBUILT),aarch64_generic)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_arm1176jzf-s_vfp)
+else ifeq ($(ARCH_PREBUILT),arm_arm1176jzf-s_vfp)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_arm926ej-s)
+else ifeq ($(ARCH_PREBUILT),arm_arm926ej-s)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a15_neon-vfpv4)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a15_neon-vfpv4)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a5_vfpv4)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a5_vfpv4)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a7)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a7)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a7_neon-vfpv4)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a7_neon-vfpv4)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a7_vfpv4)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a7_vfpv4)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a8_vfpv3)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a8_vfpv3)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a9)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a9)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a9_neon)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a9_neon)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_cortex-a9_vfpv3-d16)
+else ifeq ($(ARCH_PREBUILT),arm_cortex-a9_vfpv3-d16)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_mpcore)
+else ifeq ($(ARCH_PREBUILT),arm_mpcore)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),arm_xscale)
+else ifeq ($(ARCH_PREBUILT),arm_xscale)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),mipsel_24kc)
+else ifeq ($(ARCH_PREBUILT),mipsel_24kc)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),mipsel_mips32)
+else ifeq ($(ARCH_PREBUILT),mipsel_mips32)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),riscv64)
+else ifeq ($(ARCH_PREBUILT),riscv64)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),x86)
+else ifeq ($(ARCH_PREBUILT),x86)
   PKG_HASH:=skip
-else ifeq ($(ARCH_PACKAGES),x86_64)
+else ifeq ($(ARCH_PREBUILT),x86_64)
   PKG_HASH:=skip
 else
   PKG_HASH:=skip
 endif
 
-PKG_SOURCE:=naiveproxy-v$(PKG_REAL_VERSION)-openwrt-$(ARCH_PACKAGES).tar.xz
+PKG_SOURCE:=naiveproxy-v$(PKG_REAL_VERSION)-openwrt-$(ARCH_PREBUILT).tar.xz
 PKG_SOURCE_URL:=https://github.com/klzgrad/naiveproxy/releases/download/v$(PKG_REAL_VERSION)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/naiveproxy-v$(PKG_REAL_VERSION)-openwrt-$(ARCH_PACKAGES)
 
