@@ -240,7 +240,8 @@ return view.extend({
 		o.rmempty = true;
 
 		o = s.taboption('trTab', form.Value, 'warning_value', _('Transfer available'), _('Enter the available transfer during the billing period.'));
-		o.rmempty = true;
+		o.rmempty = false;
+		o.retain = true;
 		o.depends('warning_enabled', '1');
 		o.validate = function(section_id, value) {
 			if(!isNaN(value) && value !== "" && Number.isInteger(Number(value))) {
@@ -248,22 +249,25 @@ return view.extend({
 			}
 			return _('Enter a numeric value');
 		};
-		o.default = '100';
+		o.default = '200';
 
 		o = s.taboption('trTab', form.ListValue, 'warning_unit', _('Unit of data size'));
 		o.value('m', _('MiB'));
 		o.value('g', _('GiB'));
 		o.value('t', _('TiB'));
-		o.rmempty = true;
+		o.rmempty = false;
+		o.retain = true;
 		o.depends('warning_enabled', '1');
 		o.default = 'g';
 
 		o = s.taboption('trTab', form.ListValue, 'warning_cycle', _('Data Count Cycle'), _('Specify the data visualization/counting interval.'));
 		o.value('p', _('per period'));
 		o.value('d', _('per day'));
-		o.rmempty = true;
+		o.rmempty = false;
+		o.retain = true;
 		o.depends('warning_enabled', '1');
 		o.default = 'p';
+		
 		s.tab('bkTab', _('Backup Settings'));
 
 		o = s.taboption('bkTab', form.Button, 'restore', _('Restore .json file from archive'), _('Option allows user to restore statistics from the archive.'));
@@ -313,11 +317,11 @@ return view.extend({
 		o.rmempty = false;
 		o.write = function(section_id, value) {
 			if(value == '1') {
-				uci.set('easyconfig_transfer', 'service', 'traffic', 'external_backup', "1");
+				uci.set('easyconfig_transfer', 'traffic', 'external_backup', "1");
 				uci.save();
 			}
 			if(value == '0') {
-				uci.set('easyconfig_transfer', 'service', 'traffic', 'external_backup', "0");
+				uci.set('easyconfig_transfer', 'traffic', 'external_backup', "0");
 				uci.save();
 			}
 			return form.Flag.prototype.write.apply(this, [section_id, value]);
@@ -448,4 +452,3 @@ return view.extend({
 		return m.render();
 	}
 });
-

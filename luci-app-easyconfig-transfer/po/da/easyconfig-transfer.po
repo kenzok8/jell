@@ -1,0 +1,513 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: da\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+msgid "Transfer"
+msgstr "Overførsel"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "Brugerflade til easyconfig-scripts, der estimerer dataforbrug. Mere information på %seko.one.pl-forummet%s."
+
+msgid "Estimated data usage"
+msgstr "Estimeret dataforbrug"
+
+msgid "First Seen"
+msgstr "Først set"
+
+msgid "Last Seen"
+msgstr "Sidst set"
+
+msgid "Downloaded"
+msgstr "Downloadet"
+
+msgid "Uploaded"
+msgstr "Uploadet"
+
+msgid "Configuration - Transfer"
+msgstr "Konfiguration - Overførsel"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "Konfigurationspanel for applikationen, der beregner overførselsstatistikker."
+
+msgid "Data reading period"
+msgstr "Dataaflæsningsperiode"
+
+msgid "Data recording period"
+msgstr "Dataregistreringsperiode"
+
+msgid "Beginning of the billing period"
+msgstr "Starten på afregningsperioden"
+
+msgid "Warning enabled"
+msgstr "Advarsel aktiveret"
+
+msgid "Transfer available"
+msgstr "Tilgængelig dataoverførsel"
+
+msgid "Warning level"
+msgstr "Advarselsniveau"
+
+msgid "Warning cycle"
+msgstr "Advarselscyklus"
+
+msgid "per period"
+msgstr "pr. periode"
+
+msgid "per day"
+msgstr "pr. dag"
+
+msgid "Days until the end of the billing period"
+msgstr "Dage til afregningsperiodens udløb"
+
+msgid "Estimated remaining transfer"
+msgstr "Estimeret resterende dataoverførsel"
+
+msgid "approximately remains"
+msgstr "ca. tilbage"
+
+msgid "Summary"
+msgstr "Oversigt"
+
+msgid "Today"
+msgstr "I dag"
+
+msgid "Yesterday"
+msgstr "I går"
+
+msgid "Last 7 days"
+msgstr "Sidste 7 dage"
+
+msgid "Last 30 days"
+msgstr "Sidste 30 dage"
+
+msgid "Yearly"
+msgstr "Årlig"
+
+msgid "Clients data usage"
+msgstr "Klienters dataforbrug"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Current billing period"
+msgstr "Nuværende afregningsperiode"
+
+msgid "Expected data usage for the current period"
+msgstr "Forventet dataforbrug for den nuværende periode"
+
+msgid "Previous billing period"
+msgstr "Foregående afregningsperiode"
+
+msgid "Transfer usage statistics"
+msgstr "Statistik for dataoverførsel"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "Beregninger kan afvige fra operatørens oplysninger"
+
+msgid "Make a copy of Database"
+msgstr "Opret en kopi af databasen"
+
+msgid "Restore"
+msgstr "Gendan"
+
+msgid "Make"
+msgstr "Opret"
+
+msgid "a backup"
+msgstr "en sikkerhedskopi"
+
+msgid "Make a backup"
+msgstr "Opret en sikkerhedskopi"
+
+msgid "Reset data"
+msgstr "Nulstil data"
+
+msgid "Main Settings"
+msgstr "Hovedindstillinger"
+
+msgid "Traffic Settings"
+msgstr "Trafikindstillinger"
+
+msgid "Hide MAC addresses"
+msgstr "Skjul MAC-adresser"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "Skjul MAC-adresser uden overførselsinformation."
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"Vælg, hvor ofte der skal oprettes en komprimeret kopi af dataene. <br />Arkivsti <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Vigtigt</b> <br />Husk, "
+"at hyppige skriveoperationer forkorter hukommelsens levetid."
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+msgstr ""
+"Aktiver indsamling af overførselsdata. <br />Data gemmes i filen <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>Hvad du bør vide</b> <br />Når "
+"flow offloading er aktiveret, vil overførselsdata være inkonsistente med virkeligheden eller kan være helt utilgængelige."
+
+msgid "1 minute"
+msgstr "1 minut"
+
+msgid "3 minutes"
+msgstr "3 minutter"
+
+msgid "5 minutes"
+msgstr "5 minutter"
+
+msgid "10 minutes"
+msgstr "10 minutter"
+
+msgid "15 minutes"
+msgstr "15 minutter"
+
+msgid "30 minutes"
+msgstr "30 minutter"
+
+msgid "1 hour"
+msgstr "1 time"
+
+msgid "3 hours"
+msgstr "3 timer"
+
+msgid "6 hours"
+msgstr "6 timer"
+
+msgid "12 hours"
+msgstr "12 timer"
+
+msgid "24 hours"
+msgstr "24 timer"
+
+msgid "Enter the starting day of the billing period."
+msgstr "Indtast startdagen for afregningsperioden."
+
+msgid "Hide selected data in the table"
+msgstr "Skjul valgte data i tabellen"
+
+msgid "Select data that will be hidden."
+msgstr "Vælg de data, der skal skjules."
+
+msgid "MAC addresses"
+msgstr "MAC-adresser"
+
+msgid "MAC addresses & Hostnames"
+msgstr "MAC-adresser & værtsnavne"
+
+msgid "Show wan in table"
+msgstr "Vis WAN i tabellen"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "Marker denne indstilling, hvis du ønsker, at WAN skal være synlig i tabellen."
+
+msgid "Enable data usage progress bar"
+msgstr "Aktiver statuslinje for dataforbrug"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "Vis en visualisering af overførselsforbruget i form af en statuslinje."
+
+msgid "Enter the available transfer during the billing period."
+msgstr "Indtast den tilgængelige datamængde i afregningsperioden."
+
+msgid "Unit of data size"
+msgstr "Enhed for datastørrelse"
+
+msgid "Data Count Cycle"
+msgstr "Cyklus for datatælling"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "Angiv intervallet for datavisualisering/-tælling."
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "Marker denne indstilling, hvis du vil gemme data under en planlagt genstart af enheden."
+
+msgid "Backup at"
+msgstr "Sikkerhedskopier klokken"
+
+msgid "Restore backup at"
+msgstr "Gendan sikkerhedskopi klokken"
+
+msgid "Backup Settings"
+msgstr "Indstillinger for sikkerhedskopiering"
+
+msgid "Move .json file"
+msgstr "Flyt .json-fil"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "Korrekt tidsformat <code>HH:MM</code>."
+
+msgid "Expected time is in HH:MM format"
+msgstr "Forventet tid er i formatet HH:MM"
+
+msgid "Enter a numeric value"
+msgstr "Indtast en numerisk værdi"
+
+msgid "Add a hostname"
+msgstr "Tilføj et værtsnavn"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "Indtast data som <code>MAC-adresse;Værtsnavn</code>."
+
+msgid "Transfer details"
+msgstr "Detaljer om overførsel"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "Indtast MAC-adresse;Værtsnavn"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Vil du slette statistikdata for overførsel?"
+
+msgid "Transfer statistics"
+msgstr "Overførselsstatistik"
+
+msgid "There are currently no data to show..."
+msgstr "Der er i øjeblikket ingen data at vise..."
+
+msgid "Additional settings"
+msgstr "Yderligere indstillinger"
+
+msgid "from"
+msgstr "fra"
+
+msgid "out of"
+msgstr "ud af"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "Du har overskredet din tilgængelige datamængde med over"
+
+msgid "Statistics from the current billing period."
+msgstr "Statistik fra den nuværende afregningsperiode."
+
+msgid "Must be configured"
+msgstr "Skal konfigureres"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "Tryk på Fortsæt for at gendanne sikkerhedskopien, eller Annuller for at afbryde handlingen."
+
+msgid "Restore .json file from archive"
+msgstr "Gendan .json-fil fra arkiv"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "Mulighed for at lade brugeren gendanne statistik fra arkivet."
+
+msgid "Restore .json file"
+msgstr "Gendan .json-fil"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "Mulighed for at lade brugeren gendanne statistik fra en .json-fil."
+
+msgid "Download .gz archive"
+msgstr "Download .gz-arkiv"
+
+msgid "Click to download .gz archive."
+msgstr "Klik for at downloade .gz-arkiv."
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "Filen easyconfig_statistics.json.gz blev ikke fundet."
+
+msgid "Download error"
+msgstr "Fejl ved download"
+
+msgid "Download .json file"
+msgstr "Download .json-fil"
+
+msgid "Click to download .json file."
+msgstr "Klik for at downloade .json-fil."
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "Download af easyconfig_statistics.json mislykkedes. Prøv venligst igen."
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "Fejl under udførelse af easyconfig_statistics.sh"
+
+msgid "Upload .gz archive"
+msgstr "Upload .gz-arkiv"
+
+msgid "Upload .json file"
+msgstr "Upload .json-fil"
+
+msgid "Save .gz file"
+msgstr "Gem .gz-fil"
+
+msgid "Save .json file"
+msgstr "Gem .json-fil"
+
+msgid "Copy .json file to external storage"
+msgstr "Kopier .json-fil til eksternt lager"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "Marker denne indstilling, hvis du vil oprette en kopi på et eksternt drev."
+
+msgid "Path to .json file"
+msgstr "Sti til .json-fil"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr "Indtast stien til den mappe, hvor en kopi af .json-filen skal gemmes."
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "Data i filen easyconfig_statistics.json er blevet nulstillet."
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "Succesfuld kopiering af easyconfig_statistics.json-filen til"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "Succesfuld kopiering af easyconfig_statistics.json-filen til /usr/lib/easyconfig."
+
+msgid "Auto data reset"
+msgstr "Automatisk nulstilling af data"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "Marker denne indstilling, hvis du ønsker at nulstille data ved det nye år."
+
+msgid "Monthly"
+msgstr "Månedlig"
+
+msgid "Last 12 months"
+msgstr "Sidste 12 måneder"
+
+msgid "Refreshing data…"
+msgstr "Opdaterer data…"
+
+msgid "Current period"
+msgstr "Nuværende periode"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "Præsentation af downloadet og uploadet data. Klik på Opdater for at opdatere diagrammerne."
+
+msgid "Jan"
+msgstr "Jan"
+
+msgid "Feb"
+msgstr "Feb"
+
+msgid "Mar"
+msgstr "Mar"
+
+msgid "Apr"
+msgstr "Apr"
+
+msgid "May"
+msgstr "Maj"
+
+msgid "Jun"
+msgstr "Jun"
+
+msgid "Jul"
+msgstr "Jul"
+
+msgid "Aug"
+msgstr "Aug"
+
+msgid "Sep"
+msgstr "Sep"
+
+msgid "Oct"
+msgstr "Okt"
+
+msgid "Nov"
+msgstr "Nov"
+
+msgid "Dec"
+msgstr "Dec"
+
+msgid "No data available"
+msgstr "Ingen data tilgængelige"
+
+msgid "Percentage"
+msgstr "Procentdel"
+
+msgid "Legend"
+msgstr "Forklaring"
+
+msgid "Select day"
+msgstr "Vælg dag"
+
+msgid "Select month"
+msgstr "Vælg måned"
+
+msgid "Select year"
+msgstr "Vælg år"
+
+msgid "Select period"
+msgstr "Vælg periode"
+
+msgid "Others"
+msgstr "Andre"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(Time-for-time dataforrugsdiagram for den valgte dag)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(Dagligt forrugsdiagram for en valgt måned)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(Dataforrugsdiagram for enkelte måneder)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(Dataforrugsdiagram for hver måned i året "
+
+msgid "Refreshing data..."
+msgstr "Opdaterer data..."
+
+msgid "Please wait..."
+msgstr "Vent venligst..."
+
+msgid "Statistics of data usage by clients."
+msgstr "Statistik over dataforrug fordelt på klienter."
+
+msgid "Clients"
+msgstr "Klienter"
+
+msgid "Statistics data cleared"
+msgstr "Statistikdata er slettet"
+
+msgid "No hourly data available for this day"
+msgstr "Ingen timedata tilgængelige for denne dag"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "Vil du vise en estimeret timefordeling baseret na de daglige totaler? (Dette er kun et estimat)"
+
+msgid "Yes, show estimate"
+msgstr "Ja, vis estimat"
+
+msgid "Size of .json file"
+msgstr "Størrelse på .json-fil"
+
+msgid "Size of .gz file"
+msgstr "Størrelse på .gz-fil"
+
+msgid "Client"
+msgstr "Klient"
+
+msgid "Date"
+msgstr "Dato"
+
+msgid "Statistics restored from external backup"
+msgstr "Statistik gendannet fra ekstern sikkerhedskopi"
+
+msgid "Please enter a hostname"
+msgstr "Indtast venligst et værtsnavn"
+
+msgid "Configuration error"
+msgstr "Konfigurationsfejl"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "Værtsnavn tilføjet med succes. Genindlæser..."
+
+msgid "Enter hostname"
+msgstr "Indtast værtsnavn"
+
+msgid "Hostname"
+msgstr "Værtsnavn"
+
+msgid "Hostname Settings"
+msgstr "Indstillinger for værtsnavn"
+
+msgid "hostname"
+msgstr "værtsnavn"

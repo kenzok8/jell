@@ -1,0 +1,513 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: nl\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+msgid "Transfer"
+msgstr "Overdracht"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "Gebruikersinterface voor easyconfig-scripts die het dataverbruik schatten. Meer informatie op het %seko.one.pl-forum%s."
+
+msgid "Estimated data usage"
+msgstr "Geschat dataverbruik"
+
+msgid "First Seen"
+msgstr "Eerste keer gezien"
+
+msgid "Last Seen"
+msgstr "Laatst gezien"
+
+msgid "Downloaded"
+msgstr "Gedownload"
+
+msgid "Uploaded"
+msgstr "Geüpload"
+
+msgid "Configuration - Transfer"
+msgstr "Configuratie - Overdracht"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "Configuratiepaneel van de applicatie die overdrachtsstatistieken berekent."
+
+msgid "Data reading period"
+msgstr "Data-afleesperiode"
+
+msgid "Data recording period"
+msgstr "Data-opnameperiode"
+
+msgid "Beginning of the billing period"
+msgstr "Begin van de factureringsperiode"
+
+msgid "Warning enabled"
+msgstr "Waarschuwing ingeschakeld"
+
+msgid "Transfer available"
+msgstr "Beschikbare datahoeveelheid"
+
+msgid "Warning level"
+msgstr "Waarschuwingsniveau"
+
+msgid "Warning cycle"
+msgstr "Waarschuwingscyclus"
+
+msgid "per period"
+msgstr "per periode"
+
+msgid "per day"
+msgstr "per dag"
+
+msgid "Days until the end of the billing period"
+msgstr "Dagen tot het einde van de factureringsperiode"
+
+msgid "Estimated remaining transfer"
+msgstr "Geschatte resterende data"
+
+msgid "approximately remains"
+msgstr "blijft ongeveer over"
+
+msgid "Summary"
+msgstr "Samenvatting"
+
+msgid "Today"
+msgstr "Vandaag"
+
+msgid "Yesterday"
+msgstr "Gisteren"
+
+msgid "Last 7 days"
+msgstr "Laatste 7 dagen"
+
+msgid "Last 30 days"
+msgstr "Laatste 30 dagen"
+
+msgid "Yearly"
+msgstr "Jaarlijks"
+
+msgid "Clients data usage"
+msgstr "Dataverbruik van clients"
+
+msgid "Total"
+msgstr "Totaal"
+
+msgid "Current billing period"
+msgstr "Huidige factureringsperiode"
+
+msgid "Expected data usage for the current period"
+msgstr "Verwacht dataverbruik voor de huidige periode"
+
+msgid "Previous billing period"
+msgstr "Vorige factureringsperiode"
+
+msgid "Transfer usage statistics"
+msgstr "Statistieken dataverbruik"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "Berekeningen kunnen afwijken van de opgaven van de provider"
+
+msgid "Make a copy of Database"
+msgstr "Maak een kopie van de database"
+
+msgid "Restore"
+msgstr "Herstellen"
+
+msgid "Make"
+msgstr "Maak"
+
+msgid "a backup"
+msgstr "een back-up"
+
+msgid "Make a backup"
+msgstr "Maak een back-up"
+
+msgid "Reset data"
+msgstr "Gegevens wissen"
+
+msgid "Main Settings"
+msgstr "Hoofdinstellingen"
+
+msgid "Traffic Settings"
+msgstr "Verkeersinstellingen"
+
+msgid "Hide MAC addresses"
+msgstr "MAC-adressen verbergen"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "Verberg MAC-adressen zonder overdrachtsinformatie."
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"Selecteer hoe vaak een gecomprimeerde kopie van de gegevens wordt gemaakt. <br />Archiefpad <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Belangrijk</b> <br />Houd "
+"er rekening mee dat frequente schrijfbewerkingen de levensduur van het geheugen verkorten."
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+msgstr ""
+"Schakel het verzamelen van overdrachtsgegevens in. <br />Gegevens worden opgeslagen in het bestand <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>Wat u moet weten</b> <br />Met "
+"flow offloading ingeschakeld, zullen de overdrachtsgegevens inconsistent zijn met de werkelijkheid of kunnen ze volledig onbeschikbaar zijn."
+
+msgid "1 minute"
+msgstr "1 minuut"
+
+msgid "3 minutes"
+msgstr "3 minuten"
+
+msgid "5 minutes"
+msgstr "5 minuten"
+
+msgid "10 minutes"
+msgstr "10 minuten"
+
+msgid "15 minutes"
+msgstr "15 minuten"
+
+msgid "30 minutes"
+msgstr "30 minuten"
+
+msgid "1 hour"
+msgstr "1 uur"
+
+msgid "3 hours"
+msgstr "3 uur"
+
+msgid "6 hours"
+msgstr "6 uur"
+
+msgid "12 hours"
+msgstr "12 uur"
+
+msgid "24 hours"
+msgstr "24 uur"
+
+msgid "Enter the starting day of the billing period."
+msgstr "Voer de begindag van de factureringsperiode in."
+
+msgid "Hide selected data in the table"
+msgstr "Verberg geselecteerde gegevens in de tabel"
+
+msgid "Select data that will be hidden."
+msgstr "Selecteer de gegevens die moeten worden verborgen."
+
+msgid "MAC addresses"
+msgstr "MAC-adressen"
+
+msgid "MAC addresses & Hostnames"
+msgstr "MAC-adressen & Hostnamen"
+
+msgid "Show wan in table"
+msgstr "Toon WAN in tabel"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "Vink deze optie aan als u wilt dat WAN zichtbaar is in de tabel."
+
+msgid "Enable data usage progress bar"
+msgstr "Voortgangsbalk voor dataverbruik inschakelen"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "Toon een visualisatie van het dataverbruik in de vorm van een voortgangsbalk."
+
+msgid "Enter the available transfer during the billing period."
+msgstr "Voer de beschikbare datahoeveelheid in voor de factureringsperiode."
+
+msgid "Unit of data size"
+msgstr "Eenheid van datagrootte"
+
+msgid "Data Count Cycle"
+msgstr "Cyclus voor datatelling"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "Geef het interval op voor datavisualisatie/-telling."
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "Vink deze optie aan als u gegevens wilt opslaan tijdens een geplande herstart van het apparaat."
+
+msgid "Backup at"
+msgstr "Back-up maken om"
+
+msgid "Restore backup at"
+msgstr "Back-up herstellen om"
+
+msgid "Backup Settings"
+msgstr "Back-upinstellingen"
+
+msgid "Move .json file"
+msgstr "Verplaats .json-bestand"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "Correct tijdsformaat <code>UU:MM</code>."
+
+msgid "Expected time is in HH:MM format"
+msgstr "Verwachte tijd is in UU:MM-formaat"
+
+msgid "Enter a numeric value"
+msgstr "Voer een numerieke waarde in"
+
+msgid "Add a hostname"
+msgstr "Voeg een hostnaam toe"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "Voer gegevens in als <code>MAC-adres;Hostnaam</code>."
+
+msgid "Transfer details"
+msgstr "Details overdracht"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "Voer het MAC-adres;Hostnaam in"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Wilt u de statistische gegevens van het dataverbruik wissen?"
+
+msgid "Transfer statistics"
+msgstr "Overdrachtsstatistieken"
+
+msgid "There are currently no data to show..."
+msgstr "Er zijn momenteel geen gegevens om weer te geven..."
+
+msgid "Additional settings"
+msgstr "Aanvullende instellingen"
+
+msgid "from"
+msgstr "van"
+
+msgid "out of"
+msgstr "van de"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "U heeft uw beschikbare datahoeveelheid overschreden met meer dan"
+
+msgid "Statistics from the current billing period."
+msgstr "Statistieken van de huidige factureringsperiode."
+
+msgid "Must be configured"
+msgstr "Moet worden geconfigureerd"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "Druk op Doorgaan om de back-up te herstellen, of op Annuleren om de bewerking af te breken."
+
+msgid "Restore .json file from archive"
+msgstr "Herstel .json-bestand uit archief"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "Optie stelt de gebruiker in staat om statistieken uit het archief te herstellen."
+
+msgid "Restore .json file"
+msgstr "Herstel .json-bestand"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "Optie stelt de gebruiker in staat om statistieken uit een .json-bestand te herstellen."
+
+msgid "Download .gz archive"
+msgstr "Download .gz-archief"
+
+msgid "Click to download .gz archive."
+msgstr "Klik om het .gz-archief te downloaden."
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "Bestand easyconfig_statistics.json.gz niet gevonden."
+
+msgid "Download error"
+msgstr "Downloadfout"
+
+msgid "Download .json file"
+msgstr "Download .json-bestand"
+
+msgid "Click to download .json file."
+msgstr "Klik om het .json-bestand te downloaden."
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "Downloaden van easyconfig_statistics.json mislukt. Probeer het opnieuw."
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "Fout bij het uitvoeren van easyconfig_statistics.sh"
+
+msgid "Upload .gz archive"
+msgstr "Upload .gz-archief"
+
+msgid "Upload .json file"
+msgstr "Upload .json-bestand"
+
+msgid "Save .gz file"
+msgstr "Sla .gz-bestand op"
+
+msgid "Save .json file"
+msgstr "Sla .json-bestand op"
+
+msgid "Copy .json file to external storage"
+msgstr "Kopieer .json-bestand naar externe opslag"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "Vink deze optie aan als u een kopie op een externe schijf wilt maken."
+
+msgid "Path to .json file"
+msgstr "Pad naar .json-bestand"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr "Voer het pad in naar de map waar een kopie van het .json-bestand wordt opgeslagen."
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "Gegevens in het bestand easyconfig_statistics.json zijn gereset."
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "Met succes easyconfig_statistics.json-bestand gekopieerd naar"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "Met succes easyconfig_statistics.json-bestand gekopieerd naar /usr/lib/easyconfig."
+
+msgid "Auto data reset"
+msgstr "Automatische data-reset"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "Vink deze optie aan als u de gegevens met het nieuwe jaar wilt resetten."
+
+msgid "Monthly"
+msgstr "Maandelijks"
+
+msgid "Last 12 months"
+msgstr "Laatste 12 maanden"
+
+msgid "Refreshing data…"
+msgstr "Gegevens vernieuwen…"
+
+msgid "Current period"
+msgstr "Huidige periode"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "Presentatie van gedownloade en geüploade gegevens. Klik op Vernieuwen om de grafieken bij te werken."
+
+msgid "Jan"
+msgstr "Jan"
+
+msgid "Feb"
+msgstr "Feb"
+
+msgid "Mar"
+msgstr "Mrt"
+
+msgid "Apr"
+msgstr "Apr"
+
+msgid "May"
+msgstr "Mei"
+
+msgid "Jun"
+msgstr "Jun"
+
+msgid "Jul"
+msgstr "Jul"
+
+msgid "Aug"
+msgstr "Aug"
+
+msgid "Sep"
+msgstr "Sep"
+
+msgid "Oct"
+msgstr "Okt"
+
+msgid "Nov"
+msgstr "Nov"
+
+msgid "Dec"
+msgstr "Dec"
+
+msgid "No data available"
+msgstr "Geen gegevens beschikbaar"
+
+msgid "Percentage"
+msgstr "Percentage"
+
+msgid "Legend"
+msgstr "Legenda"
+
+msgid "Select day"
+msgstr "Selecteer dag"
+
+msgid "Select month"
+msgstr "Selecteer maand"
+
+msgid "Select year"
+msgstr "Selecteer jaar"
+
+msgid "Select period"
+msgstr "Selecteer periode"
+
+msgid "Others"
+msgstr "Andere"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(Uur-tot-uur dataverbruiksdiagram voor de geselecteerde dag)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(Dagelijks dataverbruiksdiagram voor een geselecteerde maand)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(Dataverbruiksdiagram voor afzonderlijke maanden)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(Dataverbruiksdiagram for elke maand van het jaar "
+
+msgid "Refreshing data..."
+msgstr "Gegevens vernieuwen..."
+
+msgid "Please wait..."
+msgstr "Even geduld a.u.b...."
+
+msgid "Statistics of data usage by clients."
+msgstr "Statistieken van dataverbruik door clients."
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Statistics data cleared"
+msgstr "Statistiekgegevens gewist"
+
+msgid "No hourly data available for this day"
+msgstr "Geen uurgegevens beschikbaar voor deze dag"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "Wilt u een geschatte uurverdeling tonen op basis van de dagtotalen? (Dit is slechts een schatting)"
+
+msgid "Yes, show estimate"
+msgstr "Ja, toon schatting"
+
+msgid "Size of .json file"
+msgstr "Grootte van .json-bestand"
+
+msgid "Size of .gz file"
+msgstr "Grootte van .gz-bestand"
+
+msgid "Client"
+msgstr "Client"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Statistics restored from external backup"
+msgstr "Statistieken hersteld van externe back-up"
+
+msgid "Please enter a hostname"
+msgstr "Voer een hostnaam in"
+
+msgid "Configuration error"
+msgstr "Configuratiefout"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "Hostnaam succesvol toegevoegd. Vernieuwen..."
+
+msgid "Enter hostname"
+msgstr "Voer hostnaam in"
+
+msgid "Hostname"
+msgstr "Hostnaam"
+
+msgid "Hostname Settings"
+msgstr "Hostnaaminstellingen"
+
+msgid "hostname"
+msgstr "hostnaam"

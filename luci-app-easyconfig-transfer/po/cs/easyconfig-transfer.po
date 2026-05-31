@@ -1,0 +1,513 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: cs\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
+
+msgid "Transfer"
+msgstr "Přenos"
+
+msgid "User interface for easyconfig scripts estimating transfer consumption. More information on the %seko.one.pl forum%s."
+msgstr "Uživatelské rozhraní pro skripty easyconfig odhadující spotřebu dat. Více informací na fóru %seko.one.pl%s."
+
+msgid "Estimated data usage"
+msgstr "Odhadované využití dat"
+
+msgid "First Seen"
+msgstr "Poprvé viděn"
+
+msgid "Last Seen"
+msgstr "Naposledy viděn"
+
+msgid "Downloaded"
+msgstr "Staženo"
+
+msgid "Uploaded"
+msgstr "Odesláno"
+
+msgid "Configuration - Transfer"
+msgstr "Konfigurace - Přenos"
+
+msgid "Configuration panel of the application calculating transfer statistics."
+msgstr "Konfigurační panel aplikace počítající statistiky přenosu."
+
+msgid "Data reading period"
+msgstr "Období čtení dat"
+
+msgid "Data recording period"
+msgstr "Období zápisu dat"
+
+msgid "Beginning of the billing period"
+msgstr "Začátek zúčtovacího období"
+
+msgid "Warning enabled"
+msgstr "Varování zapnuto"
+
+msgid "Transfer available"
+msgstr "Dostupný přenos"
+
+msgid "Warning level"
+msgstr "Úroveň varování"
+
+msgid "Warning cycle"
+msgstr "Cyklus varování"
+
+msgid "per period"
+msgstr "za období"
+
+msgid "per day"
+msgstr "za den"
+
+msgid "Days until the end of the billing period"
+msgstr "Dní do konce zúčtovacího období"
+
+msgid "Estimated remaining transfer"
+msgstr "Odhadovaný zbývající přenos"
+
+msgid "approximately remains"
+msgstr "přibližně zbývá"
+
+msgid "Summary"
+msgstr "Přehled"
+
+msgid "Today"
+msgstr "Dnes"
+
+msgid "Yesterday"
+msgstr "Včera"
+
+msgid "Last 7 days"
+msgstr "Posledních 7 dní"
+
+msgid "Last 30 days"
+msgstr "Posledních 30 dní"
+
+msgid "Yearly"
+msgstr "Roční"
+
+msgid "Clients data usage"
+msgstr "Využití dat klienty"
+
+msgid "Total"
+msgstr "Celkem"
+
+msgid "Current billing period"
+msgstr "Aktuální zúčtovací období"
+
+msgid "Expected data usage for the current period"
+msgstr "Očekávané využití dat pro aktuální období"
+
+msgid "Previous billing period"
+msgstr "Předchozí zúčtovací období"
+
+msgid "Transfer usage statistics"
+msgstr "Statistiky využití přenosu"
+
+msgid "Calculations may differ from the operator indications"
+msgstr "Výpočty se mohou lišit od údajů operátora"
+
+msgid "Make a copy of Database"
+msgstr "Vytvořit kopii databáze"
+
+msgid "Restore"
+msgstr "Obnovit"
+
+msgid "Make"
+msgstr "Vytvořit"
+
+msgid "a backup"
+msgstr "zálohu"
+
+msgid "Make a backup"
+msgstr "Vytvořit zálohu"
+
+msgid "Reset data"
+msgstr "Resetovat data"
+
+msgid "Main Settings"
+msgstr "Hlavní nastavení"
+
+msgid "Traffic Settings"
+msgstr "Nastavení provozu"
+
+msgid "Hide MAC addresses"
+msgstr "Skrýt MAC adresy"
+
+msgid "Hide MAC addresses without transfer information."
+msgstr "Skrýt MAC adresy bez informací o přenosu."
+
+msgid ""
+"Select how often a compressed copy of the data will be made. <br />Archive path <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Important</b> <br />Please "
+"remember that frequent write operations shorten the life cycle of memory."
+msgstr ""
+"Vyberte, jak často se bude vytvářet komprimovaná kopie dat. <br />Cesta k archivu <code>/usr/lib/easyconfig/easyconfig_statistics.json.gz</code>. <br /><br /><b>Důležité</b> <br />Pamatujte, "
+"že časté operace zápisu zkracují životnost paměti."
+
+msgid ""
+"Enable transfer data collection. <br />Data is saved to file <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>What you should know</b> <br />With "
+"flow offloading enabled, transfer data will be inconsistent with reality or may be completely unavailable."
+msgstr ""
+"Povolit sběr dat o přenosu. <br />Data se ukládají do souboru <code>/tmp/easyconfig_statistics.json</code>. <br /><br /><b>Co byste měli vědět</b> <br />Při "
+"povoleném flow offloadingu budou data o přenosu v rozporu s realitou nebo mohou být zcela nedostupná."
+
+msgid "1 minute"
+msgstr "1 minuta"
+
+msgid "3 minutes"
+msgstr "3 minuty"
+
+msgid "5 minutes"
+msgstr "5 minut"
+
+msgid "10 minutes"
+msgstr "10 minut"
+
+msgid "15 minutes"
+msgstr "15 minut"
+
+msgid "30 minutes"
+msgstr "30 minut"
+
+msgid "1 hour"
+msgstr "1 hodina"
+
+msgid "3 hours"
+msgstr "3 hodiny"
+
+msgid "6 hours"
+msgstr "6 hodin"
+
+msgid "12 hours"
+msgstr "12 hodin"
+
+msgid "24 hours"
+msgstr "24 hodin"
+
+msgid "Enter the starting day of the billing period."
+msgstr "Zadejte počáteční den zúčtovacího období."
+
+msgid "Hide selected data in the table"
+msgstr "Skrýt vybraná data v tabulce"
+
+msgid "Select data that will be hidden."
+msgstr "Vyberte data, která budou skryta."
+
+msgid "MAC addresses"
+msgstr "MAC adresy"
+
+msgid "MAC addresses & Hostnames"
+msgstr "MAC adresy a názvy hostitelů"
+
+msgid "Show wan in table"
+msgstr "Zobrazit WAN v tabulce"
+
+msgid "Check this option if you want wan to be visible in the table."
+msgstr "Zaškrtněte tuto možnost, pokud chcete, aby byla WAN viditelná v tabulce."
+
+msgid "Enable data usage progress bar"
+msgstr "Povolit ukazatel průběhu využití dat"
+
+msgid "Show a visualization of transfer usage in the form of a progress bar."
+msgstr "Zobrazit vizualizaci využití přenosu ve formě ukazatele průběhu."
+
+msgid "Enter the available transfer during the billing period."
+msgstr "Zadejte dostupný přenos během zúčtovacího období."
+
+msgid "Unit of data size"
+msgstr "Jednotka velikosti dat"
+
+msgid "Data Count Cycle"
+msgstr "Cyklus počítání dat"
+
+msgid "Specify the data visualization/counting interval."
+msgstr "Určete interval vizualizace/počítání dat."
+
+msgid "Check this option if you want to save data during a scheduled device restart."
+msgstr "Zaškrtněte tuto možnost, pokud chcete uložit data během plánovaného restartu zařízení."
+
+msgid "Backup at"
+msgstr "Zálohovat v"
+
+msgid "Restore backup at"
+msgstr "Obnovit zálohu v"
+
+msgid "Backup Settings"
+msgstr "Nastavení zálohování"
+
+msgid "Move .json file"
+msgstr "Přesunout soubor .json"
+
+msgid "Correct time format <code>HH:MM</code>."
+msgstr "Správný formát času <code>HH:MM</code>."
+
+msgid "Expected time is in HH:MM format"
+msgstr "Očekávaný čas je ve formátu HH:MM"
+
+msgid "Enter a numeric value"
+msgstr "Zadejte číselnou hodnotu"
+
+msgid "Add a hostname"
+msgstr "Přidat název hostitele"
+
+msgid "Enter data as <code>MAC adress;Hostname</code>."
+msgstr "Zadejte data ve formátu <code>MAC adresa;Název hostitele</code>."
+
+msgid "Transfer details"
+msgstr "Podrobnosti o přenosu"
+
+msgid "Enter the MAC address;Hostname"
+msgstr "Zadejte MAC adresu;Název hostitele"
+
+msgid "Do you want to clear transfer statistics data?"
+msgstr "Chcete vymazat statistická data o přenosu?"
+
+msgid "Transfer statistics"
+msgstr "Statistiky přenosu"
+
+msgid "There are currently no data to show..."
+msgstr "Aktuálně nejsou k dispozici žádná data k zobrazení..."
+
+msgid "Additional settings"
+msgstr "Další nastavení"
+
+msgid "from"
+msgstr "z"
+
+msgid "out of"
+msgstr "z celkových"
+
+msgid "You have exceeded your available transfer by over"
+msgstr "Překročili jste svůj dostupný přenos o více než"
+
+msgid "Statistics from the current billing period."
+msgstr "Statistiky z aktuálního zúčtovacího období."
+
+msgid "Must be configured"
+msgstr "Musí být nakonfigurováno"
+
+msgid "Press Continue to restore the backup, or Cancel to abort the operation."
+msgstr "Stiskněte Pokračovat pro obnovení zálohy, nebo Zrušit pro přerušení operace."
+
+msgid "Restore .json file from archive"
+msgstr "Obnovit soubor .json z archivu"
+
+msgid "Option allows user to restore statistics from the archive."
+msgstr "Možnost umožňuje uživateli obnovit statistiky z archivu."
+
+msgid "Restore .json file"
+msgstr "Obnovit soubor .json"
+
+msgid "Option allows user to restore statistics from .json file."
+msgstr "Možnost umožňuje uživateli obnovit statistiky ze souboru .json."
+
+msgid "Download .gz archive"
+msgstr "Stáhnout archiv .gz"
+
+msgid "Click to download .gz archive."
+msgstr "Klikněte pro stažení archivu .gz."
+
+msgid "easyconfig_statistics.json.gz file not found."
+msgstr "Soubor easyconfig_statistics.json.gz nebyl nalezen."
+
+msgid "Download error"
+msgstr "Chyba stahování"
+
+msgid "Download .json file"
+msgstr "Stáhnout soubor .json"
+
+msgid "Click to download .json file."
+msgstr "Klikněte pro stažení souboru .json."
+
+msgid "Download of easyconfig_statistics.json failed. Please try again."
+msgstr "Stažení souboru easyconfig_statistics.json selhalo. Zkuste to prosím znovu."
+
+msgid "Error executing easyconfig_statistics.sh"
+msgstr "Chyba při provádění easyconfig_statistics.sh"
+
+msgid "Upload .gz archive"
+msgstr "Nahrát archiv .gz"
+
+msgid "Upload .json file"
+msgstr "Nahrát soubor .json"
+
+msgid "Save .gz file"
+msgstr "Uložit soubor .gz"
+
+msgid "Save .json file"
+msgstr "Uložit soubor .json"
+
+msgid "Copy .json file to external storage"
+msgstr "Zkopírovat soubor .json na externí úložiště"
+
+msgid "Check this option if you want to create a copy on an external drive."
+msgstr "Zaškrtněte tuto možnost, pokud chcete vytvořit kopii na externím disku."
+
+msgid "Path to .json file"
+msgstr "Cesta k souboru .json"
+
+msgid "Enter the path to the directory where a copy of the .json file will be saved."
+msgstr "Zadejte cestu k adresáři, kam bude uložena kopie souboru .json."
+
+msgid "Data in easyconfig_statistics.json file has been reset."
+msgstr "Data v souboru easyconfig_statistics.json byla resetována."
+
+msgid "Successfully copied easyconfig_statistics.json file to"
+msgstr "Soubor easyconfig_statistics.json byl úspěšně zkopírován do"
+
+msgid "Successfully copied easyconfig_statistics.json file to /usr/lib/easyconfig."
+msgstr "Soubor easyconfig_statistics.json byl úspěšně zkopírován do /usr/lib/easyconfig."
+
+msgid "Auto data reset"
+msgstr "Automatický reset dat"
+
+msgid "Check this option if you want reset data with the new year."
+msgstr "Zaškrtněte tuto možnost, pokud chcete data resetovat s novým rokem."
+
+msgid "Monthly"
+msgstr "Měsíční"
+
+msgid "Last 12 months"
+msgstr "Posledních 12 měsíců"
+
+msgid "Refreshing data…"
+msgstr "Obnovování dat…"
+
+msgid "Current period"
+msgstr "Aktuální období"
+
+msgid "Presentation of downloaded and uploaded data. Click Refresh to update the charts."
+msgstr "Prezentace stažených a odeslaných dat. Kliknutím na Obnovit aktualizujete grafy."
+
+msgid "Jan"
+msgstr "Led"
+
+msgid "Feb"
+msgstr "Úno"
+
+msgid "Mar"
+msgstr "Bře"
+
+msgid "Apr"
+msgstr "Dub"
+
+msgid "May"
+msgstr "Kvě"
+
+msgid "Jun"
+msgstr "Čer"
+
+msgid "Jul"
+msgstr "Čvc"
+
+msgid "Aug"
+msgstr "Srp"
+
+msgid "Sep"
+msgstr "Zář"
+
+msgid "Oct"
+msgstr "Říj"
+
+msgid "Nov"
+msgstr "Lis"
+
+msgid "Dec"
+msgstr "Pro"
+
+msgid "No data available"
+msgstr "Nejsou dostupná žádná data"
+
+msgid "Percentage"
+msgstr "Procentuálně"
+
+msgid "Legend"
+msgstr "Legenda"
+
+msgid "Select day"
+msgstr "Vybrat den"
+
+msgid "Select month"
+msgstr "Vybrat měsíc"
+
+msgid "Select year"
+msgstr "Vybrat rok"
+
+msgid "Select period"
+msgstr "Vybrat období"
+
+msgid "Others"
+msgstr "Ostatní"
+
+msgid "(Hour-by-hour data usage chart for selected day)"
+msgstr "(Graf využití dat hodinu po hodině pro vybraný den)"
+
+msgid "(Daily usage chart for a selected month)"
+msgstr "(Graf denního využití dat pro vybraný měsíc)"
+
+msgid "(Data usage chart for individual months)"
+msgstr "(Graf využití dat pro jednotlivé měsíce)"
+
+msgid "(Data usage chart for each month of the year "
+msgstr "(Graf využití dat pro každý měsíc v roce "
+
+msgid "Refreshing data..."
+msgstr "Obnovování dat..."
+
+msgid "Please wait..."
+msgstr "Prosím čekejte..."
+
+msgid "Statistics of data usage by clients."
+msgstr "Statistiky využití dat klienty."
+
+msgid "Clients"
+msgstr "Klienti"
+
+msgid "Statistics data cleared"
+msgstr "Statistická data byla vymazána"
+
+msgid "No hourly data available for this day"
+msgstr "Pro tento den nejsou k dispozici žádná hodinová data"
+
+msgid "Would you like to show an estimated hourly distribution based on daily totals? (This is only an approximation)"
+msgstr "Chcete zobrazit odhadované hodinové rozdělení na základě denních součtů? (Jedná se pouze o odhad)"
+
+msgid "Yes, show estimate"
+msgstr "Ano, zobrazit odhad"
+
+msgid "Size of .json file"
+msgstr "Velikost souboru .json"
+
+msgid "Size of .gz file"
+msgstr "Velikost souboru .gz"
+
+msgid "Client"
+msgstr "Klient"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Statistics restored from external backup"
+msgstr "Statistiky byly obnoveny z externí zálohy"
+
+msgid "Please enter a hostname"
+msgstr "Zadejte prosím název hostitele"
+
+msgid "Configuration error"
+msgstr "Chyba konfigurace"
+
+msgid "Hostname added successfully. Reloading..."
+msgstr "Název hostitele byl úspěšně přidán. Načítání znovu..."
+
+msgid "Enter hostname"
+msgstr "Zadejte název hostitele"
+
+msgid "Hostname"
+msgstr "Název hostitele"
+
+msgid "Hostname Settings"
+msgstr "Nastavení názvu hostitele"
+
+msgid "hostname"
+msgstr "název hostitele"
