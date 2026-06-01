@@ -12,9 +12,6 @@ TSIG_KEY=/etc/hickory-dns/update.key
 RUN_USER=nobody
 RUN_GROUP=nogroup
 
-STATE_DIR=/var/lib/hickory-dns
-LAN_JOURNAL="${STATE_DIR}/lan.jrnl"
-
 prepare_config_dir() {
     [ -d "$CONF_DIR" ] || mkdir -p "$CONF_DIR"
 
@@ -33,25 +30,9 @@ generate_tsig_key() {
     chmod 400 "$TSIG_KEY" 2>/dev/null || true
 }
 
-prepare_runtime_dirs() {
-    mkdir -p "$STATE_DIR"
-
-    chown "$RUN_USER:$RUN_GROUP" "$STATE_DIR" 2>/dev/null || true
-    chmod 755 "$STATE_DIR" 2>/dev/null || true
-}
-
-cleanup_stale_state() {
-    # Remove stale journal so hickory-dns always starts from the zone file.
-    # ipv6-neigh re-registers all dynamic entries on startup, so the journal
-    # has no durable value and may contain corrupt state after unclean shutdown.
-    rm -f "$LAN_JOURNAL"
-}
-
 start_service() {
     prepare_config_dir
     generate_tsig_key
-    prepare_runtime_dirs
-    cleanup_stale_state
 
     procd_open_instance hickory-dns
     procd_set_param command "$PROG" -c "$CONF" -q

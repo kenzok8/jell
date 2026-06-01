@@ -38,7 +38,7 @@ axfr_policy = "AllowAll"
 [zones.stores]
 type = "sqlite"
 zone_path = "/etc/hickory-dns/lan.zone"
-journal_path = "/var/lib/hickory-dns/lan.jrnl"
+journal_path = ":memory:"
 allow_update = true
 
 [[zones.stores.tsig_keys]]
