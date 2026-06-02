@@ -1,6 +1,6 @@
+use std::fmt::Write;
 use std::net::Ipv6Addr;
 use std::time::Instant;
-
 use netlink_packet_route::neighbour::{NeighbourAddress, NeighbourState};
 use netlink_packet_route::route::RouteType;
 
@@ -12,6 +12,17 @@ pub(crate) const fn nl_mgrp(group: u32) -> u32 {
         panic!("use netlink_sys::Socket::add_membership() for this group");
     }
     if group == 0 { 0 } else { 1 << (group - 1) }
+}
+
+/// Format raw MAC bytes as colon-separated hex string, e.g. "44:23:7c:dc:b7:5b".
+/// Shared across modules to avoid duplicate formatting logic.
+pub(crate) fn format_mac(mac: &[u8]) -> String {
+    let mut s = String::with_capacity(mac.len() * 3);
+    for (i, byte) in mac.iter().enumerate() {
+        if i > 0 { s.push(':'); }
+        write!(s, "{:02x}", byte).unwrap();
+    }
+    s
 }
 
 #[derive(Debug)]
@@ -41,7 +52,7 @@ pub(crate) struct GuaKeepaliveEntry {
     pub(crate) hostname: String,
     pub(crate) addr: Ipv6Addr,
     pub(crate) ifindex: u32,
-    /// When this GUA was first observed — used to select the "newest" address per host.
+    /// When this GUA was first observed -- used to select the "newest" address per host.
     pub(crate) first_seen: Instant,
     /// Last time this address was confirmed REACHABLE by the kernel.
     pub(crate) last_confirmed: Instant,

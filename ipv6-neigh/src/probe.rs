@@ -9,14 +9,6 @@ use tokio::time::Duration;
 
 use crate::types::{GuaKeepaliveEntry, RegisteredEntry};
 
-fn set_ipv6_unicast_if(socket: &Socket, ifindex: u32) -> std::io::Result<()> {
-    socket.bind_device_by_index_v6(NonZeroU32::new(ifindex))
-}
-
-fn set_ip_unicast_if(socket: &Socket, ifindex: u32) -> std::io::Result<()> {
-    socket.bind_device_by_index_v4(NonZeroU32::new(ifindex))
-}
-
 fn compute_icmpv4_checksum(packet: &mut [u8]) {
     packet[2] = 0;
     packet[3] = 0;
@@ -32,36 +24,54 @@ fn compute_icmpv4_checksum(packet: &mut [u8]) {
     packet[2..4].copy_from_slice(&checksum.to_be_bytes());
 }
 
-pub(crate) fn send_icmpv6_echo(addr: Ipv6Addr, ifindex: u32) -> std::io::Result<()> {
-    let socket = Socket::new(Domain::IPV6, Type::RAW, Some(Protocol::ICMPV6))?;
-    socket.set_nonblocking(true)?;
-    // Bind outgoing packet to the specific interface via IPV6_UNICAST_IF so the
-    // kernel NUD state machine updates the correct neighbour entry.
-    set_ipv6_unicast_if(&socket, ifindex)?;
-    // ICMPv6 Echo Request: type=128, code=0, checksum=0 (kernel computes for RAW ICMPV6), id=0, seq=1
-    let packet: [u8; 8] = [128, 0, 0, 0, 0, 0, 0, 1];
-    let dest = SockAddr::from(std::net::SocketAddrV6::new(addr, 0, 0, 0));
-    socket.send_to(&packet, &dest)?;
-    Ok(())
+/// Reusable ICMP probe sockets.  Created once at startup and shared across all
+/// probe call-sites, avoiding the overhead of creating and destroying a raw
+/// socket for every single probe packet.
+pub(crate) struct Prober {
+    v6: Socket,
+    v4: Socket,
 }
 
-pub(crate) fn send_icmpv4_echo(addr: Ipv4Addr, ifindex: u32) -> std::io::Result<()> {
-    let socket = Socket::new(Domain::IPV4, Type::RAW, Some(Protocol::ICMPV4))?;
-    socket.set_nonblocking(true)?;
-    // Bind outgoing packet to the specific interface via IP_UNICAST_IF.
-    set_ip_unicast_if(&socket, ifindex)?;
-    // ICMPv4 Echo Request: type=8, code=0, checksum (computed), id=0, seq=1
-    let mut packet: [u8; 8] = [8, 0, 0, 0, 0, 0, 0, 1];
-    compute_icmpv4_checksum(&mut packet);
-    let dest = SockAddr::from(std::net::SocketAddrV4::new(addr, 0));
-    socket.send_to(&packet, &dest)?;
-    Ok(())
+impl Prober {
+    pub fn new() -> std::io::Result<Self> {
+        let v6 = Socket::new(Domain::IPV6, Type::RAW, Some(Protocol::ICMPV6))?;
+        v6.set_nonblocking(true)?;
+
+        let v4 = Socket::new(Domain::IPV4, Type::RAW, Some(Protocol::ICMPV4))?;
+        v4.set_nonblocking(true)?;
+
+        Ok(Self { v6, v4 })
+    }
+
+    pub fn send_icmpv6_echo(&self, addr: Ipv6Addr, ifindex: u32) -> std::io::Result<()> {
+        // Re-bind outgoing interface before each send (lightweight setsockopt).
+        self.v6.bind_device_by_index_v6(NonZeroU32::new(ifindex))?;
+
+        // ICMPv6 Echo Request: type=128, code=0, checksum=0 (kernel computes), id=0, seq=1
+        let packet: [u8; 8] = [128, 0, 0, 0, 0, 0, 0, 1];
+        let dest = SockAddr::from(std::net::SocketAddrV6::new(addr, 0, 0, 0));
+        self.v6.send_to(&packet, &dest)?;
+        Ok(())
+    }
+
+    pub fn send_icmpv4_echo(&self, addr: Ipv4Addr, ifindex: u32) -> std::io::Result<()> {
+        // Re-bind outgoing interface before each send (lightweight setsockopt).
+        self.v4.bind_device_by_index_v4(NonZeroU32::new(ifindex))?;
+
+        // ICMPv4 Echo Request: type=8, code=0, checksum (computed), id=0, seq=1
+        let mut packet: [u8; 8] = [8, 0, 0, 0, 0, 0, 0, 1];
+        compute_icmpv4_checksum(&mut packet);
+        let dest = SockAddr::from(std::net::SocketAddrV4::new(addr, 0));
+        self.v4.send_to(&packet, &dest)?;
+        Ok(())
+    }
 }
 
 /// Send ICMPv6/ICMPv4 Echo Requests to all registered neighbours that haven't been
 /// confirmed recently.  This forces the kernel NUD state machine to verify reachability,
 /// generating NewNeighbour events with the resulting state (Reachable or Failed).
 pub(crate) async fn probe_registered_neighbours(
+    prober: &Prober,
     registered: &HashMap<(String, String), RegisteredEntry>,
 ) {
     let now = Instant::now();
@@ -71,11 +81,11 @@ pub(crate) async fn probe_registered_neighbours(
             continue;
         }
         if let Ok(addr) = ip_str.parse::<Ipv6Addr>() {
-            if let Err(e) = send_icmpv6_echo(addr, entry.ifindex) {
+            if let Err(e) = prober.send_icmpv6_echo(addr, entry.ifindex) {
                 debug!("probe failed for {}: {}", ip_str, e);
             }
         } else if let Ok(addr) = ip_str.parse::<Ipv4Addr>() {
-            if let Err(e) = send_icmpv4_echo(addr, entry.ifindex) {
+            if let Err(e) = prober.send_icmpv4_echo(addr, entry.ifindex) {
                 debug!("probe failed for {}: {}", ip_str, e);
             }
         }
@@ -86,6 +96,7 @@ pub(crate) async fn probe_registered_neighbours(
 /// Only the top `per_host` addresses (by most-recently-seen) are probed per MAC.
 /// This does NOT publish any records to DNS.
 pub(crate) fn probe_gua_keepalive(
+    prober: &Prober,
     gua_keepalive: &HashMap<String, Vec<GuaKeepaliveEntry>>,
     per_host: usize,
 ) {
@@ -101,7 +112,7 @@ pub(crate) fn probe_gua_keepalive(
             if now.duration_since(e.last_confirmed) < Duration::from_secs(30) {
                 continue;
             }
-            match send_icmpv6_echo(e.addr, e.ifindex) {
+            match prober.send_icmpv6_echo(e.addr, e.ifindex) {
                 Ok(()) => debug!("GUA keepalive probe: {} ({}) -> {}", e.hostname, mac, e.addr),
                 Err(err) => debug!("GUA keepalive probe failed for {}: {}", e.addr, err),
             }
@@ -109,7 +120,7 @@ pub(crate) fn probe_gua_keepalive(
     }
 }
 
-/// Remove GUA keepalive entries that haven't been confirmed REACHABLE within 3× the
+/// Remove GUA keepalive entries that haven't been confirmed REACHABLE within 3x the
 /// keepalive interval, and drop excess entries beyond `per_host` (oldest first).
 pub(crate) fn prune_gua_keepalive(
     gua_keepalive: &mut HashMap<String, Vec<GuaKeepaliveEntry>>,

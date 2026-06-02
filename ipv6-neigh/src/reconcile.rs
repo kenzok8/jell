@@ -7,7 +7,7 @@ use netlink_packet_route::neighbour::NeighbourAddress;
 
 use crate::db::DnsUpdater;
 use crate::filter::{if_ipv4_in_private_subnet, if_ipv6_in_private_subnet, ipv6_in_prefix, is_gua_ipv6};
-use crate::probe::{send_icmpv4_echo, send_icmpv6_echo};
+use crate::probe::Prober;
 use crate::types::{LanPrefix, Neigh, RegisteredEntry, DEFAULT_TTL};
 
 pub(crate) async fn process_new_neigh(
@@ -20,6 +20,7 @@ pub(crate) async fn process_new_neigh(
         debug!("no lease for mac {}, skipping DNS update", neigh.mac);
         return false;
     };
+
     // Guard: never publish GUA to DNS when private_subnet_v6 is set.
     if let NeighbourAddress::Inet6(addr) = &neigh.inet {
         if private_subnet_v6 && is_gua_ipv6(addr) {
@@ -27,11 +28,13 @@ pub(crate) async fn process_new_neigh(
             return false;
         }
     }
+
     let result = match &neigh.inet {
         NeighbourAddress::Inet6(addr) => updater.upsert_aaaa(hostname, *addr, DEFAULT_TTL).await,
         NeighbourAddress::Inet(addr) => updater.upsert_a(hostname, *addr, DEFAULT_TTL).await,
         _ => return false,
     };
+
     match result {
         Ok(()) => {
             info!("DNS update: added {} -> {:?}", hostname, neigh.inet);
@@ -63,6 +66,7 @@ pub(crate) async fn do_delete_dns(
         NeighbourAddress::Inet(addr) => updater.delete_a(hostname, *addr).await,
         _ => return true,
     };
+
     match result {
         Ok(()) => {
             info!("DNS update: removed {} -> {:?}", hostname, inet);
@@ -101,42 +105,40 @@ pub(crate) async fn prune_ula_for_host(
         .map(|(k, e)| (k.clone(), e.last_confirmed))
         .collect();
 
-    if ula_keys.len() < max {
-        return ula_keys.len();
+    let initial_count = ula_keys.len();
+    if initial_count < max {
+        return initial_count;
     }
 
     // Sort oldest first (by last_confirmed asc).
     ula_keys.sort_by_key(|(_, ts)| *ts);
 
     // Remove excess (keep the newest `max - 1` so there's room for the new one).
-    let to_remove = ula_keys.len() - (max.saturating_sub(1));
+    let to_remove = initial_count - (max.saturating_sub(1));
+    let mut actually_removed = 0;
     for (key, _) in ula_keys.into_iter().take(to_remove) {
         if let Some(entry) = registered.remove(&key) {
             let addr: Ipv6Addr = key.1.parse().unwrap();
             let inet = NeighbourAddress::Inet6(addr);
             do_delete_dns(&entry.hostname, &inet, updater).await;
             info!("ULA pruning: removed oldest {} -> {} for host {}", entry.hostname, key.1, host);
+            actually_removed += 1;
         }
     }
 
-    // Return count after pruning.
-    registered
-        .iter()
-        .filter(|((h, ip_str), _)| {
-            h == host && ip_str.parse::<Ipv6Addr>().map_or(false, |a| if_ipv6_in_private_subnet(&a))
-        })
-        .count()
+    // Return count after pruning (computed, no second scan needed).
+    initial_count - actually_removed
 }
 
 /// Reconcile the in-memory `registered` map against the live DNS zone obtained via AXFR.
 ///
 /// Two corrections are made on each call:
-/// 1. **DNS orphans** – records present in DNS but absent from `registered`.
+/// 1. **DNS orphans** -- records present in DNS but absent from `registered`.
 ///    These are either stale leftovers from a previous run or records from a prefix that
 ///    is no longer active.  Records that fail prefix/subnet filtering are deleted from DNS
 ///    immediately; records that pass filtering are probed with ICMP so the kernel NUD
 ///    state machine can confirm reachability and re-populate `registered` via the event loop.
-/// 2. **Registered orphans** – entries in `registered` that are missing from DNS (e.g.
+/// 2. **Registered orphans** -- entries in `registered` that are missing from DNS (e.g.
 ///    because hickory-dns restarted and lost its in-memory state).  These are re-pushed
 ///    via DNS UPDATE so the zone stays consistent.
 pub(crate) async fn reconcile_dns(
@@ -146,6 +148,7 @@ pub(crate) async fn reconcile_dns(
     active_prefixes: &[LanPrefix],
     private_subnet_v4: bool,
     private_subnet_v6: bool,
+    prober: &Prober,
 ) {
     use std::collections::{HashMap as Map, HashSet};
 
@@ -182,7 +185,7 @@ pub(crate) async fn reconcile_dns(
         if passes {
             dns_ips.insert(ip.to_string(), hostname.clone());
         } else {
-            // Stale record (wrong prefix / subnet) — remove from DNS.
+            // Stale record (wrong prefix / subnet) -- remove from DNS.
             let result = match ip {
                 IpAddr::V6(addr) => updater.delete_aaaa(hostname, *addr).await,
                 IpAddr::V4(addr) => updater.delete_a(hostname, *addr).await,
@@ -204,15 +207,12 @@ pub(crate) async fn reconcile_dns(
         registered.keys().map(|(_, ip)| ip.as_str()).collect();
 
     // --- DNS orphans (in DNS but not in registered) ---
-    // Delete the orphan immediately — DNS TTL only controls resolver caches, not
-    // authoritative record lifetime, so records do NOT auto-expire.
-    // After deletion we probe the address: if the device is still alive the kernel
-    // will emit a REACHABLE NewNeighbour event which re-registers it in DNS.
     for (ip_str, hostname) in &dns_ips {
         if registered_ips.contains(ip_str.as_str()) {
             continue;
         }
         info!("reconcile: DNS orphan {} -> {}, deleting and probing", hostname, ip_str);
+
         let del_result = match ip_str.parse::<IpAddr>() {
             Ok(IpAddr::V6(addr)) => updater.delete_aaaa(hostname, addr).await,
             Ok(IpAddr::V4(addr)) => updater.delete_a(hostname, addr).await,
@@ -229,15 +229,16 @@ pub(crate) async fn reconcile_dns(
             }
             Err(e) => warn!("reconcile: failed to delete orphan {} {}: {}", hostname, ip_str, e),
         }
+
         // Probe so alive devices trigger a REACHABLE event and re-register.
         match ip_str.parse::<IpAddr>() {
             Ok(IpAddr::V6(addr)) => {
-                if let Err(e) = send_icmpv6_echo(addr, 0) {
+                if let Err(e) = prober.send_icmpv6_echo(addr, 0) {
                     debug!("reconcile: probe failed for {}: {}", addr, e);
                 }
             }
             Ok(IpAddr::V4(addr)) => {
-                if let Err(e) = send_icmpv4_echo(addr, 0) {
+                if let Err(e) = prober.send_icmpv4_echo(addr, 0) {
                     debug!("reconcile: probe failed for {}: {}", addr, e);
                 }
             }
@@ -246,14 +247,13 @@ pub(crate) async fn reconcile_dns(
     }
 
     // --- Registered orphans (in registered but not in DNS) ---
-    // hickory-dns may have restarted and lost its journal; re-push the record.
-    // Use the hostname stored in the entry — independent of the current lease table.
     for ((_, ip_str), entry) in registered.iter_mut() {
         if dns_ips.contains_key(ip_str.as_str()) {
             continue;
         }
         let hostname = &entry.hostname;
         debug!("reconcile: registered orphan {} -> {}, re-pushing", hostname, ip_str);
+
         let result = match ip_str.parse::<IpAddr>() {
             Ok(IpAddr::V6(addr)) => updater.upsert_aaaa(hostname, addr, DEFAULT_TTL).await,
             Ok(IpAddr::V4(addr)) => updater.upsert_a(hostname, addr, DEFAULT_TTL).await,

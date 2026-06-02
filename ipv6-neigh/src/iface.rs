@@ -1,5 +1,4 @@
 use std::net::{IpAddr, SocketAddr};
-
 use futures::stream::TryStreamExt;
 use log::{info, warn};
 use netlink_packet_route::address::{AddressAttribute, AddressFlags, AddressHeaderFlags, AddressMessage};
@@ -7,6 +6,7 @@ use rtnetlink::Handle;
 use tokio::time::{self, Duration};
 
 use crate::db::DnsUpdater;
+use crate::filter::should_skip_v6;
 use crate::types::{DEFAULT_TTL, LanPrefix};
 
 /// Check whether an address message is deprecated (preferred lifetime expired).
@@ -24,6 +24,28 @@ pub(crate) fn is_addr_deprecated(msg: &AddressMessage) -> bool {
     false
 }
 
+/// Look up the interface index and collect all address messages for `iface`.
+/// Shared between `get_active_lan_prefixes` and `register_router_addresses`
+/// to avoid duplicating the link-lookup + address-enumeration boilerplate.
+async fn get_iface_addresses(
+    handle: Handle,
+    iface: &str,
+) -> Result<(u32, Vec<AddressMessage>), String> {
+    let mut links = handle.link().get().match_name(iface.to_owned()).execute();
+    let link = match links.try_next().await {
+        Ok(Some(l)) => l,
+        Ok(None) => return Err(format!("interface {} not found", iface)),
+        Err(e) => return Err(format!("failed to find interface {}: {}", iface, e)),
+    };
+    let ifindex = link.header.index;
+    let mut addr_stream = handle.address().get().set_link_index_filter(ifindex).execute();
+    let mut msgs = Vec::new();
+    while let Ok(Some(msg)) = addr_stream.try_next().await {
+        msgs.push(msg);
+    }
+    Ok((ifindex, msgs))
+}
+
 /// Enumerate non-link-local IPv6 prefixes currently assigned to `iface`.
 /// Used during startup to filter out neighbour entries from expired/old prefixes.
 pub(crate) async fn get_active_lan_prefixes(
@@ -31,29 +53,20 @@ pub(crate) async fn get_active_lan_prefixes(
     iface: &str,
     private_subnet_v6: bool,
 ) -> Vec<LanPrefix> {
-    let mut links = handle.link().get().match_name(iface.to_owned()).execute();
-    let link = match links.try_next().await {
-        Ok(Some(l)) => l,
-        _ => return vec![],
+    let (_ifindex, msgs) = match get_iface_addresses(handle, iface).await {
+        Ok(v) => v,
+        Err(_) => return vec![],
     };
-    let ifindex = link.header.index;
-    let mut addresses = handle.address().get().set_link_index_filter(ifindex).execute();
+
     let mut prefixes = Vec::new();
-    while let Ok(Some(msg)) = addresses.try_next().await {
+    for msg in &msgs {
         let prefix_len = msg.header.prefix_len;
-        // Skip deprecated addresses; they are no longer used for new connections
-        // and should not be treated as active LAN prefixes.
-        if is_addr_deprecated(&msg) {
+        if is_addr_deprecated(msg) {
             continue;
         }
         for attr in &msg.attributes {
             if let AddressAttribute::Address(IpAddr::V6(addr)) = attr {
-                // Skip link-local
-                if (addr.segments()[0] & 0xffc0) == 0xfe80 {
-                    continue;
-                }
-                let is_ula = (addr.segments()[0] & 0xfe00) == 0xfc00;
-                if private_subnet_v6 && !is_ula {
+                if should_skip_v6(addr, private_subnet_v6) {
                     continue;
                 }
                 prefixes.push(LanPrefix { addr: *addr, prefix_len });
@@ -72,22 +85,16 @@ pub(crate) async fn register_router_addresses(
     updater: &DnsUpdater,
     private_subnet_v6: bool,
 ) {
-    let mut links = handle.link().get().match_name(iface.to_owned()).execute();
-    let link = match links.try_next().await {
-        Ok(Some(l)) => l,
-        Ok(None) => {
-            warn!("interface {} not found, skipping router address registration", iface);
-            return;
-        }
+    let (_ifindex, msgs) = match get_iface_addresses(handle, iface).await {
+        Ok(v) => v,
         Err(e) => {
-            warn!("failed to find interface {}: {}", iface, e);
+            warn!("{}, skipping router address registration", e);
             return;
         }
     };
-    let ifindex = link.header.index;
-    let mut addresses = handle.address().get().set_link_index_filter(ifindex).execute();
-    while let Ok(Some(msg)) = addresses.try_next().await {
-        if is_addr_deprecated(&msg) {
+
+    for msg in &msgs {
+        if is_addr_deprecated(msg) {
             continue;
         }
         for attr in &msg.attributes {
@@ -97,13 +104,7 @@ pub(crate) async fn register_router_addresses(
             };
             match ip {
                 IpAddr::V6(addr) => {
-                    // Always skip link-local
-                    if (addr.segments()[0] & 0xffc0) == 0xfe80 {
-                        continue;
-                    }
-                    // Restrict to ULA only when private_subnet_v6 is set
-                    let is_ula = (addr.segments()[0] & 0xfe00) == 0xfc00;
-                    if private_subnet_v6 && !is_ula {
+                    if should_skip_v6(addr, private_subnet_v6) {
                         continue;
                     }
                     for name in std::iter::once(hostname).chain(extra_alias) {
