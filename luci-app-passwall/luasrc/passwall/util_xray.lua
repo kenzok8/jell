@@ -1422,7 +1422,8 @@ function gen_config(var)
 						}
 						domains = {}
 						string.gsub(e.domain_list, '[^' .. "\r\n" .. ']+', function(w)
-							if w:find("#") == 1 then return end
+							w = api.trim(w)
+							if w == "" or w:find("#") == 1 then return end
 							if w:find("rule-set:", 1, true) == 1 or w:find("rs:") == 1 then return end
 							table.insert(domains, w)
 							table.insert(domain_table.domain, w)
@@ -1430,16 +1431,17 @@ function gen_config(var)
 						if inner_fakedns == "1" and node[e[".name"] .. "_fakedns"] == "1" and #domains > 0 then
 							domain_table.fakedns = true
 						end
-						if outbound_tag then
+						if #domains == 0 then domains = nil end
+						if outbound_tag and domains then
 							table.insert(dns_domain_rules, api.clone(domain_table))
 						end
-						if #domains == 0 then domains = nil end
 					end
 					local ip = nil
 					if e.ip_list then
 						ip = {}
 						string.gsub(e.ip_list, '[^' .. "\r\n" .. ']+', function(w)
-							if w:find("#") == 1 then return end
+							w = api.trim(w)
+							if w == "" or w:find("#") == 1 then return end
 							if w:find("rule-set:", 1, true) == 1 or w:find("rs:") == 1 then return end
 							table.insert(ip, w)
 						end)
