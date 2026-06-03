@@ -46,8 +46,8 @@ struct Cli {
     #[clap(long)]
     publish_gua: bool,
 
-    /// hickory-dns server address for DNS updates (e.g. "[::1]:5335")
-    #[clap(short, long, default_value = "[::1]:5335")]
+    /// hickory-dns server address for DNS updates (e.g. "[::1]:53")
+    #[clap(short, long, default_value = "[::1]:53")]
     dns_server: StdSocketAddr,
 
     /// DNS zone to update (e.g. "lan")
