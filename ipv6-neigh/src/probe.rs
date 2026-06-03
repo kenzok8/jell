@@ -3,7 +3,7 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 use std::num::NonZeroU32;
 use std::time::Instant;
 
-use log::debug;
+use log::{trace, warn};
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use tokio::time::Duration;
 
@@ -82,11 +82,11 @@ pub(crate) async fn probe_registered_neighbours(
         }
         if let Ok(addr) = ip_str.parse::<Ipv6Addr>() {
             if let Err(e) = prober.send_icmpv6_echo(addr, entry.ifindex) {
-                debug!("probe failed for {}: {}", ip_str, e);
+                warn!("probe failed for {}: {}", ip_str, e);
             }
         } else if let Ok(addr) = ip_str.parse::<Ipv4Addr>() {
             if let Err(e) = prober.send_icmpv4_echo(addr, entry.ifindex) {
-                debug!("probe failed for {}: {}", ip_str, e);
+                warn!("probe failed for {}: {}", ip_str, e);
             }
         }
     }
@@ -113,8 +113,8 @@ pub(crate) fn probe_gua_keepalive(
                 continue;
             }
             match prober.send_icmpv6_echo(e.addr, e.ifindex) {
-                Ok(()) => debug!("GUA keepalive probe: {} ({}) -> {}", e.hostname, mac, e.addr),
-                Err(err) => debug!("GUA keepalive probe failed for {}: {}", e.addr, err),
+                Ok(()) => trace!("GUA keepalive probe: {} ({}) -> {}", e.hostname, mac, e.addr),
+                Err(err) => warn!("GUA keepalive probe failed for {}: {}", e.addr, err),
             }
         }
     }

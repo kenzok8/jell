@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -23,10 +22,6 @@ fn check_response(response: &Message, allowed: &[ResponseCode]) -> Result<(), Bo
 }
 
 /// DNS dynamic update client that sends RFC 2136 updates over TCP to the hickory-dns server.
-/// TCP connections are reused across calls to reduce syscall overhead.
-///
-/// Uses `RefCell` for interior mutability — safe because the entire program runs on a
-/// single-threaded tokio runtime (`current_thread`).
 pub(crate) struct DnsUpdater {
     server_addr: SocketAddr,
     zone: Name,
@@ -35,8 +30,6 @@ pub(crate) struct DnsUpdater {
     ipv4_ptr_zones: Vec<(u32, u8, Name)>,
     /// Reverse zone for ULA IPv6 (d.f.ip6.arpa)
     ula_ptr_zone: Option<Name>,
-    /// Reusable TCP connection (lazy connect + auto-reconnect on failure).
-    conn: RefCell<Option<TcpStream>>,
 }
 
 impl DnsUpdater {
@@ -47,7 +40,6 @@ impl DnsUpdater {
             signer,
             ipv4_ptr_zones: vec![],
             ula_ptr_zone: None,
-            conn: RefCell::new(None),
         }
     }
 
@@ -202,54 +194,26 @@ impl DnsUpdater {
             .map(|(_, _, name)| name)
     }
 
-    // -- TCP transport (connection-reusing) --
+    // -- TCP transport --
 
     /// Send a DNS message over TCP and read the response.
-    /// Reuses an existing connection when possible; reconnects automatically on failure.
+    /// Opens a fresh connection per call — simpler and avoids CLOSE_WAIT
+    /// leaks caused by server-side idle-timeout disconnects.
     async fn send_tcp(&self, mut msg: Message) -> Result<Message, Box<dyn std::error::Error>> {
         let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
         msg.finalize(&self.signer, now)?;
         let bytes = msg.to_vec()?;
         let len_bytes = u16::try_from(bytes.len())?.to_be_bytes();
 
-        // Try the existing connection first.
-        // Take it out of the RefCell so we don't hold the borrow across await.
-        let existing = self.conn.borrow_mut().take();
-        if let Some(mut stream) = existing {
-            match Self::do_send_recv(&mut stream, &len_bytes, &bytes, self.server_addr).await {
-                Ok(resp) => {
-                    // Put the connection back for reuse.
-                    *self.conn.borrow_mut() = Some(stream);
-                    return Ok(resp);
-                }
-                Err(_) => {
-                    // Connection broken — will reconnect below.
-                }
-            }
-        }
-
-        // Establish a new connection.
         let mut stream = timeout(TCP_TIMEOUT, TcpStream::connect(self.server_addr))
             .await
             .map_err(|_| -> Box<dyn std::error::Error> {
                 format!("DNS TCP connect timeout after {}s to {}", TCP_TIMEOUT.as_secs(), self.server_addr).into()
             })??;
 
-        let resp = Self::do_send_recv(&mut stream, &len_bytes, &bytes, self.server_addr).await?;
-        *self.conn.borrow_mut() = Some(stream);
-        Ok(resp)
-    }
-
-    /// Write a length-prefixed DNS message and read the response on an existing stream.
-    async fn do_send_recv(
-        stream: &mut TcpStream,
-        len_bytes: &[u8],
-        msg_bytes: &[u8],
-        server_addr: SocketAddr,
-    ) -> Result<Message, Box<dyn std::error::Error>> {
-        timeout(TCP_TIMEOUT, async {
-            stream.write_all(len_bytes).await?;
-            stream.write_all(msg_bytes).await?;
+        let result = timeout(TCP_TIMEOUT, async {
+            stream.write_all(&len_bytes).await?;
+            stream.write_all(&bytes).await?;
             stream.flush().await?;
             let resp_len = stream.read_u16().await? as usize;
             let mut resp_buf = vec![0u8; resp_len];
@@ -258,8 +222,10 @@ impl DnsUpdater {
         })
         .await
         .map_err(|_| -> Box<dyn std::error::Error> {
-            format!("DNS TCP timeout after {}s to {}", TCP_TIMEOUT.as_secs(), server_addr).into()
-        })?
+            format!("DNS TCP timeout after {}s to {}", TCP_TIMEOUT.as_secs(), self.server_addr).into()
+        })??;
+
+        Ok(result)
     }
 
     // -- AXFR (uses its own connection -- streaming protocol) --

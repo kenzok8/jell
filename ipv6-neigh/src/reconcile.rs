@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv6Addr};
 use std::time::Instant;
 
-use log::{debug, error, info, warn};
+use log::{debug, error, info, trace, warn};
 use netlink_packet_route::neighbour::NeighbourAddress;
 
 use crate::db::DnsUpdater;
@@ -17,7 +17,7 @@ pub(crate) async fn process_new_neigh(
     private_subnet_v6: bool,
 ) -> bool {
     let Some(hostname) = leases.get(&neigh.mac) else {
-        debug!("no lease for mac {}, skipping DNS update", neigh.mac);
+        trace!("no lease for mac {}, skipping DNS update", neigh.mac);
         return false;
     };
 
@@ -234,12 +234,12 @@ pub(crate) async fn reconcile_dns(
         match ip_str.parse::<IpAddr>() {
             Ok(IpAddr::V6(addr)) => {
                 if let Err(e) = prober.send_icmpv6_echo(addr, 0) {
-                    debug!("reconcile: probe failed for {}: {}", addr, e);
+                    warn!("reconcile: probe failed for {}: {}", addr, e);
                 }
             }
             Ok(IpAddr::V4(addr)) => {
                 if let Err(e) = prober.send_icmpv4_echo(addr, 0) {
-                    debug!("reconcile: probe failed for {}: {}", addr, e);
+                    warn!("reconcile: probe failed for {}: {}", addr, e);
                 }
             }
             _ => {}
@@ -252,7 +252,7 @@ pub(crate) async fn reconcile_dns(
             continue;
         }
         let hostname = &entry.hostname;
-        debug!("reconcile: registered orphan {} -> {}, re-pushing", hostname, ip_str);
+        trace!("reconcile: registered orphan {} -> {}, re-pushing", hostname, ip_str);
 
         let result = match ip_str.parse::<IpAddr>() {
             Ok(IpAddr::V6(addr)) => updater.upsert_aaaa(hostname, addr, DEFAULT_TTL).await,

@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use futures::stream::StreamExt;
 use futures::stream::TryStreamExt;
-use log::{debug, info, warn};
+use log::{debug, info, trace, warn};
 use netlink_packet_core::NetlinkPayload;
 use netlink_packet_route::RouteNetlinkMessage;
 use netlink_packet_route::neighbour::NeighbourMessage;
@@ -343,17 +343,17 @@ async fn main() -> Result<(), ()> {
     }
 
     // Dump existing neighbours
-    debug!("dumping neighbours");
+    trace!("dumping neighbours");
     if let Ok(neighbours) = dump_neighbours(handle.clone(), private_subnet_v4).await {
         for neigh in &neighbours {
-            debug!("{:?}", neigh);
+            trace!("{:?}", neigh);
             if should_skip_neigh(neigh) {
                 continue;
             }
 
             if let NeighbourAddress::Inet6(addr) = &neigh.inet {
                 if !active_prefixes.is_empty() && !active_prefixes.iter().any(|p| ipv6_in_prefix(*addr, p)) {
-                    debug!("init dump: skipping {} -- not in any active LAN prefix", addr);
+                    trace!("init dump: skipping {} -- not in any active LAN prefix", addr);
                     continue;
                 }
             }
@@ -374,13 +374,13 @@ async fn main() -> Result<(), ()> {
                                         first_seen: now,
                                         last_confirmed: now,
                                     });
-                                    debug!("init dump: GUA keepalive tracked {} -> {}", hostname, addr);
+                                    trace!("init dump: GUA keepalive tracked {} -> {}", hostname, addr);
                                 }
                             }
                         } else if matches!(neigh.state, NeighbourState::Stale | NeighbourState::Delay | NeighbourState::Probe) {
                             match prober.send_icmpv6_echo(*addr, neigh.ifindex) {
-                                Ok(()) => debug!("init dump: probing stale GUA {}", addr),
-                                Err(e) => debug!("init GUA probe failed for {}: {}", addr, e),
+                                Ok(()) => trace!("init dump: probing stale GUA {}", addr),
+                                Err(e) => warn!("init GUA probe failed for {}: {}", addr, e),
                             }
                         }
                     }
@@ -399,20 +399,20 @@ async fn main() -> Result<(), ()> {
                             try_register_neigh(neigh, hostname, &ip_str, &mut registered, &leases, &updater, max_ula_per_host, private_subnet_v6).await;
                         }
                     } else {
-                        debug!("no lease for mac {}, skipping DNS update", neigh.mac);
+                        trace!("no lease for mac {}, skipping DNS update", neigh.mac);
                     }
                 }
                 NeighbourState::Stale | NeighbourState::Delay | NeighbourState::Probe => {
                     match &neigh.inet {
                         NeighbourAddress::Inet6(addr) => {
                             match prober.send_icmpv6_echo(*addr, neigh.ifindex) {
-                                Ok(()) => debug!("init dump: probing stale neighbour {}", addr),
-                                Err(e) => debug!("init probe failed for {}: {}", addr, e),
+                                Ok(()) => trace!("init dump: probing stale neighbour {}", addr),
+                                Err(e) => warn!("init probe failed for {}: {}", addr, e),
                             }
                         }
                         NeighbourAddress::Inet(addr) => {
                             if let Err(e) = prober.send_icmpv4_echo(*addr, neigh.ifindex) {
-                                debug!("init probe failed for {}: {}", addr, e);
+                                warn!("init probe failed for {}: {}", addr, e);
                             }
                         }
                         _ => {}
@@ -460,7 +460,7 @@ async fn main() -> Result<(), ()> {
 
                             if let NeighbourAddress::Inet6(addr) = &neigh.inet {
                                 if !ipv6_passes_active_prefix(*addr, &active_prefixes) {
-                                    debug!("event: skipping {} -- not in any active LAN prefix", addr);
+                                    trace!("event: skipping {} -- not in any active LAN prefix", addr);
                                     let key = (neigh.mac.clone(), inet_to_string(&neigh.inet));
                                     if let Some(entry) = registered.remove(&key) {
                                         do_delete_dns(&entry.hostname, &neigh.inet, &updater).await;
@@ -479,7 +479,7 @@ async fn main() -> Result<(), ()> {
                                         if is_failed_state(neigh.state) {
                                             if let Some(entries) = gua_keepalive.get_mut(&neigh.mac) {
                                                 entries.retain(|e| e.addr != *addr);
-                                                debug!("GUA keepalive: removed failed {} for mac {}", addr, neigh.mac);
+                                                trace!("GUA keepalive: removed failed {} for mac {}", addr, neigh.mac);
                                             }
                                         } else if neigh.state == NeighbourState::Reachable {
                                             if let Some(hostname) = leases.get(&neigh.mac) {
@@ -496,7 +496,7 @@ async fn main() -> Result<(), ()> {
                                                         first_seen: now,
                                                         last_confirmed: now,
                                                     });
-                                                    debug!("GUA keepalive: tracking {} -> {}", hostname, addr);
+                                                    trace!("GUA keepalive: tracking {} -> {}", hostname, addr);
                                                 }
                                             }
                                         } else if matches!(neigh.state, NeighbourState::Stale | NeighbourState::Delay | NeighbourState::Probe) {
@@ -514,7 +514,7 @@ async fn main() -> Result<(), ()> {
                             let ip_str = inet_to_string(&neigh.inet);
 
                             if is_failed_state(neigh.state) {
-                                debug!("Neighbour failed: {:?}", neigh);
+                                trace!("Neighbour failed: {:?}", neigh);
                                 let key_opt: Option<(String, String)> = leases
                                     .get(&neigh.mac)
                                     .map(|h| (h.clone(), ip_str.clone()))
@@ -526,10 +526,10 @@ async fn main() -> Result<(), ()> {
                                             registered.insert(key, entry);
                                         }
                                     } else {
-                                        debug!("Neighbour failed: not in registered map, key={:?}", key);
+                                        warn!("Neighbour failed: not in registered map, key={:?}", key);
                                     }
                                 } else {
-                                    debug!("Neighbour failed: no registered key for ip={}", ip_str);
+                                    warn!("Neighbour failed: no registered key for ip={}", ip_str);
                                 }
                             } else if neigh.state == NeighbourState::Reachable {
                                 if let Some(hostname) = leases.get(&neigh.mac) {
@@ -538,11 +538,11 @@ async fn main() -> Result<(), ()> {
                                         entry.last_confirmed = Instant::now();
                                         entry.ifindex = neigh.ifindex;
                                     } else {
-                                        debug!("New neighbour: {:?}", neigh);
+                                        trace!("New neighbour: {:?}", neigh);
                                         try_register_neigh(&neigh, hostname, &ip_str, &mut registered, &leases, &updater, max_ula_per_host, private_subnet_v6).await;
                                     }
                                 } else {
-                                    debug!("no lease for mac {}, skipping DNS update", neigh.mac);
+                                    trace!("no lease for mac {}, skipping DNS update", neigh.mac);
                                 }
                             } else if matches!(neigh.state, NeighbourState::Stale | NeighbourState::Delay | NeighbourState::Probe) {
                                 if let Some(hostname) = leases.get(&neigh.mac) {
@@ -565,7 +565,7 @@ async fn main() -> Result<(), ()> {
                                 if is_gua_ipv6(addr) && keepalive_gua {
                                     if let Some(entries) = gua_keepalive.get_mut(&neigh.mac) {
                                         entries.retain(|e| e.addr != *addr);
-                                        debug!("GUA keepalive: removed deleted {} for mac {}", addr, neigh.mac);
+                                        trace!("GUA keepalive: removed deleted {} for mac {}", addr, neigh.mac);
                                     }
                                     if private_subnet_v6 {
                                         continue;
@@ -579,7 +579,7 @@ async fn main() -> Result<(), ()> {
                                 .map(|h| (h.clone(), ip_str.clone()))
                                 .or_else(|| registered.keys().find(|(_, ip)| ip == &ip_str).cloned());
 
-                            debug!("Del neighbour: {:?}", neigh);
+                            trace!("Del neighbour: {:?}", neigh);
                             if let Some(key) = key_opt {
                                 registered.remove(&key);
                                 do_delete_dns(&key.0, &neigh.inet, &updater).await;
@@ -628,7 +628,7 @@ async fn main() -> Result<(), ()> {
                                 });
                             if let Some(key) = key_opt {
                                 if let Some(entry) = registered.remove(&key) {
-                                    debug!("reconcile neigh: kernel FAILED {} -> {:?}", entry.hostname, neigh.inet);
+                                    info!("reconcile neigh: kernel FAILED {} -> {:?}", entry.hostname, neigh.inet);
                                     if !do_delete_dns(&entry.hostname, &neigh.inet, &updater).await {
                                         registered.insert(key, entry);
                                     }
@@ -658,7 +658,7 @@ async fn main() -> Result<(), ()> {
                             entry.last_confirmed = Instant::now();
                             entry.ifindex = neigh.ifindex;
                         } else {
-                            debug!("reconcile neigh: kernel orphan {} -> {:?}", hostname, neigh.inet);
+                            info!("reconcile neigh: kernel orphan {} -> {:?}", hostname, neigh.inet);
                             try_register_neigh(neigh, hostname, &ip_str, &mut registered, &leases, &updater, max_ula_per_host, private_subnet_v6).await;
                         }
                     }
@@ -684,7 +684,7 @@ async fn main() -> Result<(), ()> {
                                 registered.insert(key, entry);
                                 continue;
                             };
-                            debug!("reconcile neigh: evicted {} -> {}", entry.hostname, ip_str);
+                            warn!("reconcile neigh: evicted {} -> {}", entry.hostname, ip_str);
                             if !do_delete_dns(&entry.hostname, &inet, &updater).await {
                                 registered.insert(key, entry);
                             }
