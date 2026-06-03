@@ -531,7 +531,12 @@ jobs:
         ) &
 
         (
+        # Packages that self-manage PKG_VERSION/PKG_RELEASE (date~sha + manual release bump).
+        # Do NOT overwrite their PKG_RELEASE with jell's commit count.
+        SKIP_RELEASE_REWRITE='^(clashoo|luci-app-clashoo|nikki|luci-app-nikki|dae|daed|luci-app-dae|luci-app-daed|luci-app-daede)$'
         for pkg in $(ls -d */); do
+          name="${pkg%/}"
+          if [[ "$name" =~ $SKIP_RELEASE_REWRITE ]]; then continue; fi
           if [[ "$(grep "PKG_VERSION" $pkg/Makefile)" && ! "$(grep "PKG_RELEASE" $pkg/Makefile)" ]]; then
             sed -i "s/\(PKG_VERSION:=.*\)/\1\nPKG_RELEASE:=/" $pkg/Makefile || true
           fi
@@ -598,7 +603,9 @@ jobs:
        if git status --porcelain | grep .; then
         git add .
         git commit -am "update $(date '+%Y-%m-%d %H:%M:%S')"
+        SKIP_RELEASE_REWRITE='^(clashoo|luci-app-clashoo|nikki|luci-app-nikki|dae|daed|luci-app-dae|luci-app-daed|luci-app-daede)$'
         for pkg in $(git diff-tree --no-commit-id --name-only HEAD); do
+          if [[ "$pkg" =~ $SKIP_RELEASE_REWRITE ]]; then continue; fi
           if [ "$(grep "PKG_RELEASE" $pkg/Makefile)" ]; then
             sed -i "s/PKG_RELEASE:=.*/PKG_RELEASE:=$(git rev-list --count main $pkg)/" $pkg/Makefile || true
           fi
