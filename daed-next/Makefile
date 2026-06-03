@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=daed-next
 PKG_VERSION:=2023-12-02-102cb56
 CORE_VERSION:=core-$(shell date "+%Y-%m-%d")
-PKG_RELEASE:=15
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_PROTO:=git

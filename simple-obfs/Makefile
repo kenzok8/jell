@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=simple-obfs
 PKG_VERSION:=0.0.11
-PKG_RELEASE:=30
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/simple-obfs/tar.gz/v$(PKG_VERSION)?

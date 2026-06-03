@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=webdav2
 PKG_VERSION:=4.3.2
-PKG_RELEASE:=14
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/jjm2473/webdav/tar.gz/v$(PKG_VERSION)?

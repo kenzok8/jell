@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 PKG_LICENSE:=Apache-2.0
 PKG_NAME:=luci-app-ympd
 PKG_VERSION:=1.1
-PKG_RELEASE:=5
+PKG_RELEASE:=1
 PKG_MAINTAINER:=Douglas Orend <doug.orend2@gmail.com>
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)

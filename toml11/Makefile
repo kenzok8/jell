@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=toml11
 PKG_VERSION:=4.4.0
-PKG_RELEASE:=13
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/ToruNiina/toml11/tar.gz/v$(PKG_VERSION)?

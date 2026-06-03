@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dns2socks
 PKG_VERSION:=2.2
-PKG_RELEASE:=6
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/dns2socks/tar.gz/v$(PKG_VERSION)?

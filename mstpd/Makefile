@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mstpd
 PKG_VERSION:=0.2.0
-PKG_RELEASE:=5
+PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/mstpd/mstpd/tar.gz/$(PKG_VERSION)?

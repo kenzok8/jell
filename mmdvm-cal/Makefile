@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=mmdvm-cal
 PKG_REV:=149a235
 PKG_VERSION:=1.3.0
-PKG_RELEASE:=3
+PKG_RELEASE:=0
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=https://github.com/lazywalker/MMDVMCal

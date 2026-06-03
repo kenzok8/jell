@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sprd_pcie
 PKG_VERSION:=1.6
-PKG_RELEASE:=3
+PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk

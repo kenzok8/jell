@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=upx-static
 PKG_VERSION:=5.1.1
-PKG_RELEASE:=185
+PKG_RELEASE:=1
 PKG_SOURCE_VERSION:=93abc161af744df62197dd1fd5f7e20266bd2ab6
 
 # Map OpenWrt $(ARCH) to UPX pre-built binary arch name.

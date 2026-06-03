@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=naiveproxy
 PKG_REAL_VERSION:=148.0.7778.96-5
 PKG_VERSION:=$(subst -,.,$(PKG_REAL_VERSION))
-PKG_RELEASE:=96
+PKG_RELEASE:=1
 
 ARCH_PREBUILT:=$(ARCH_PACKAGES)
 ifeq ($(ARCH_PREBUILT),aarch64_cortex-a76)

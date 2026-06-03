@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gmediarender
 PKG_VERSION:=0.3.1
-PKG_RELEASE:=14
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/hzeller/gmrender-resurrect/tar.gz/v$(PKG_VERSION)?

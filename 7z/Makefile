@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=7z
 PKG_VERSION:=26.01
-PKG_RELEASE:=2
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)$(subst .,,$(PKG_VERSION))-src.tar.xz
 PKG_SOURCE_URL:=https://7-zip.org/a/

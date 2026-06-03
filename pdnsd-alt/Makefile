@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pdnsd
 PKG_VERSION:=1.3.2
-PKG_RELEASE:=19
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/kenzok8/pdnsd/tar.gz/$(PKG_VERSION)?

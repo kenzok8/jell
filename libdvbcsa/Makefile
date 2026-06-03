@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libdvbcsa
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE_VERSION:=bc6c0b164a87ce05e9925785cc6fb3f54c02b026
 PKG_HASH:=skip

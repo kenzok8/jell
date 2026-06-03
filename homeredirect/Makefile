@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=HomeRedirect
 PKG_VERSION:=1.4
-PKG_RELEASE:=7
+PKG_RELEASE:=1
 PKG_DATE:=20210226
 
 PKG_MAINTAINER:=xiaoqingfeng <xiaoqingfengatgm@gmail.com>

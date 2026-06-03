@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=upx
 PKG_VERSION:=5.1.1
-PKG_RELEASE:=47
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-src.tar.xz
 PKG_SOURCE_URL:=https://github.com/upx/upx/releases/download/v$(PKG_VERSION)

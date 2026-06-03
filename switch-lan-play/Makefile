@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=switch-lan-play
 PKG_VERSION:=0.2.3
-PKG_RELEASE:=16
+PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_VERSION:=1be20e1905f6ed2b2136f29f0c5aa66f2f8de04e

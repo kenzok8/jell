@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=vncrepeater
 PKG_VERSION:=0.14
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_MAINTAINER:=Jirka Spicak <robutek@gmail.com> 
 PKG_LICENSE:=GPL-2.0
 

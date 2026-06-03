@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-xray-status
 PKG_VERSION:=3.7.1
-PKG_RELEASE:=12
+PKG_RELEASE:=1
 
 PKG_LICENSE:=MPLv2
 PKG_LICENSE_FILES:=LICENSE

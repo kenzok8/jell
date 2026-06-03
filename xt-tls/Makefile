@@ -5,7 +5,7 @@ include $(INCLUDE_DIR)/kernel.mk
 # The name and version of your package are used to define the variable to point to the build directory of your package: $(PKG_BUILD_DIR)
 PKG_NAME:=xt_tls
 PKG_VERSION:=0.3.5
-PKG_RELEASE:=10
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Lochnair/xt_tls.git

@@ -2,7 +2,7 @@
 
 PKG_NAME:=fusiontunx
 PKG_VERSION:=1.0.3
-PKG_RELEASE:=149
+PKG_RELEASE:=4
 PKG_MAINTAINER:=BobbyUnknown
 PKG_DESC:=FusionTunX Core + Mihomo
 PKG_ARCH_AMD64:=amd64

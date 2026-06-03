@@ -11,7 +11,7 @@ PKG_ARCH_kai_session:=$(ARCH)
 
 PKG_NAME:=kai_session
 PKG_VERSION:=0.0.6
-PKG_RELEASE:=3
+PKG_RELEASE:=0
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/linkease/istore-packages/releases/download/prebuilt/
 PKG_HASH:=skip

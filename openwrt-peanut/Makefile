@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=peanut
 PKG_VERSION:=2.4
-PKG_RELEASE:=7
+PKG_RELEASE:=1
 PKG_LICENSE:=GPL-3.0-or-later
 PKG_MAINTAINER:=Douglas Orend <doug.orend2@gmail.com>
 
