@@ -1,0 +1,12 @@
+--- a/vendored/libfuse/Makefile
++++ b/vendored/libfuse/Makefile
+@@ -166,7 +166,7 @@ distclean: clean
+ .PHONY: strip
+ strip:
+-	$(STRIP) --strip-all $(BUILDDIR)/mount.mergerfs
+-	$(STRIP) --strip-all $(BUILDDIR)/mergerfs-fusermount
++#	$(STRIP) --strip-all $(BUILDDIR)/mount.mergerfs
++#	$(STRIP) --strip-all $(BUILDDIR)/mergerfs-fusermount
+
+ install-utils: mergerfs-fusermount mount.mergerfs strip
+ 	$(INSTALL) -D $(BUILDDIR)/mergerfs-fusermount "$(INSTALLBINDIR)/mergerfs-fusermount"
