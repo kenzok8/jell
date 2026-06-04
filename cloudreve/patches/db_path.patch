@@ -1,11 +1,19 @@
---- a/models/init.go
-+++ b/models/init.go
-@@ -41,7 +41,7 @@ func Init() {
- 		switch confDBType {
- 		case "UNSET", "sqlite":
- 			// 未指定数据库或者明确指定为 sqlite 时，使用 SQLite 数据库
--			db, err = gorm.Open("sqlite", util.RelativePath(conf.DatabaseConfig.DBFile))
-+			db, err = gorm.Open("sqlite", "/etc/cloudreve/" + conf.DatabaseConfig.DBFile)
- 		case "postgres":
- 			db, err = gorm.Open(confDBType, fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
- 				conf.DatabaseConfig.Host,
+--- a/pkg/conf/types.go
++++ b/pkg/conf/types.go
+@@ -1,7 +1,5 @@
+ package conf
+
+-import "github.com/cloudreve/Cloudreve/v4/pkg/util"
+-
+ type DBType string
+
+ const (
+@@ -104,7 +102,7 @@
+ // DatabaseConfig 数据库配置
+ var DatabaseConfig = &Database{
+ 	Charset:     "utf8mb4",
+-	DBFile:      util.DataPath("cloudreve.db"),
++	DBFile:      "/etc/cloudreve/cloudreve.db",
+ 	Port:        3306,
+ 	UnixSocket:  false,
+ 	DatabaseURL: "",
