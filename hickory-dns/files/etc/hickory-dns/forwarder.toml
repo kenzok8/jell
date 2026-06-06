@@ -12,7 +12,7 @@ file = "/etc/hickory-dns/localhost.zone"
 
 [[zones]]
 zone = "0.0.127.in-addr.arpa"
-zone_type = "Secondary"
+zone_type = "Primary"
 file = "/etc/hickory-dns/127.0.0.1.zone"
 
 [[zones]]
@@ -104,7 +104,21 @@ zone_type = "External"
 
 [[zones.stores]]
 type = "forward"
-options = { edns0 = true, ip_strategy = "Ipv6AndIpv4", cache_size = 8192, use_hosts_file = "Always", num_concurrent_reqs = 1, server_ordering_strategy = "RoundRobin" }
+
+[zones.stores.options]
+edns0 = true
+ip_strategy = "Ipv6AndIpv4"
+cache_size = 8192
+use_hosts_file = "Always"
+num_concurrent_reqs = 1
+server_ordering_strategy = "RoundRobin"
+timeout = 3
+attempts = 3
+positive_min_ttl = 60
+negative_min_ttl = 30
+negative_max_ttl = 300
+case_randomization = true
+edns_payload_len = 1232
 
 [[zones.stores.name_servers]]
 ip = "2400:3200:baba::1"
@@ -116,6 +130,22 @@ connections = [
 
 [[zones.stores.name_servers]]
 ip = "2400:3200::1"
+trust_negative_responses = true
+connections = [
+    { protocol = { type = "quic", server_name = "dns.alidns.com" } },
+    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } }
+]
+
+[[zones.stores.name_servers]]
+ip = "223.5.5.5"
+trust_negative_responses = true
+connections = [
+    { protocol = { type = "quic", server_name = "dns.alidns.com" } },
+    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } }
+]
+
+[[zones.stores.name_servers]]
+ip = "223.6.6.6"
 trust_negative_responses = true
 connections = [
     { protocol = { type = "quic", server_name = "dns.alidns.com" } },
