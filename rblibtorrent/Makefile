@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=rblibtorrent
-PKG_VERSION:=2.0.12
+PKG_VERSION:=2.0.13
 PKG_RELEASE:=1
 
 PKG_SOURCE:=libtorrent-$(PKG_VERSION).tar.gz
