@@ -529,7 +529,7 @@ async fn main() -> Result<(), ()> {
                                         warn!("Neighbour failed: not in registered map, key={:?}", key);
                                     }
                                 } else {
-                                    warn!("Neighbour failed: no registered key for ip={}", ip_str);
+                                    debug!("Neighbour failed: no registered key for ip={}", ip_str);
                                 }
                             } else if neigh.state == NeighbourState::Reachable {
                                 if let Some(hostname) = leases.get(&neigh.mac) {
