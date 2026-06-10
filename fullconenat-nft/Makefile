@@ -16,7 +16,7 @@ PKG_RELEASE:=3
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/fullcone-nat-nftables/nft-fullcone.git
 PKG_SOURCE_DATE:=2023-05-17
-PKG_SOURCE_VERSION:=07d93b626ce5ea885cd16f9ab07fac3213c355d9
+PKG_SOURCE_VERSION:=null
 PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=GPL-2.0-only

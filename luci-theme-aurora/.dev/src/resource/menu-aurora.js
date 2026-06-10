@@ -28,8 +28,18 @@ return baseclass.extend({
 
     if (!menuToggle || !overlay) return;
 
+    const desktop = window.matchMedia("(min-width: 768px)");
+
     menuToggle.addEventListener("click", (e) => {
       e.stopPropagation();
+
+      if (desktop.matches && document.body.dataset.navType === "sidebar") {
+        const collapsed = document.body.classList.toggle("sidebar-collapsed");
+        menuToggle.setAttribute("aria-expanded", !collapsed);
+        localStorage.setItem("aurora.sidebarCollapsed", collapsed);
+        return;
+      }
+
       const isOpen = overlay.classList.contains("mobile-menu-open");
 
       overlay.classList.toggle("mobile-menu-open", !isOpen);
@@ -216,7 +226,10 @@ return baseclass.extend({
     if (level === 0) {
       const navType = document.body?.dataset?.navType || "mega-menu";
 
-      if (navType === "mega-menu") {
+      if (navType === "sidebar") {
+        this.renderSidebar(children, url);
+        return ul;
+      } else if (navType === "mega-menu") {
         this.initMegaMenu(children, url, ul);
       } else {
         this.initBoxedDropdown(children, url, ul);
@@ -233,6 +246,54 @@ return baseclass.extend({
 
     ul.style.display = "";
     return ul;
+  },
+
+  renderSidebar(children, url) {
+    const list = document.querySelector("#sidebar-list");
+    const footer = document.querySelector("#sidebar-footer");
+
+    if (!list) return;
+
+    const link = (href, title) =>
+      E("a", { class: "sidebar-link", href }, [_(title)]);
+
+    children.forEach((child) => {
+      const submenu = ui.menu.getChildren(child);
+
+      if (child.name === "logout") {
+        (footer || list).appendChild(link(L.url(url, child.name), child.title));
+        return;
+      }
+
+      if (!submenu.length) {
+        const active = L.env.dispatchpath[1] === child.name;
+
+        list.appendChild(
+          E("li", { class: active ? "active" : "" }, [
+            link(L.url(url, child.name), child.title),
+          ]),
+        );
+        return;
+      }
+
+      list.appendChild(
+        E("li", {}, [
+          E("span", { class: "sidebar-category" }, [_(child.title)]),
+        ]),
+      );
+
+      submenu.forEach((item) => {
+        const active =
+          L.env.dispatchpath[1] === child.name &&
+          L.env.dispatchpath[2] === item.name;
+
+        list.appendChild(
+          E("li", { class: active ? "active" : "" }, [
+            link(L.url(url, child.name, item.name), item.title),
+          ]),
+        );
+      });
+    });
   },
 
   initMegaMenu(children, url, ul) {

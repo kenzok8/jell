@@ -175,10 +175,8 @@
 		{% if (!blank_page): %}
 		<header>
 			<div class="header-content">
-				<a class="brand" href="/">{{ striptags(boardinfo.hostname ?? '?') }}</a>
-				<ul class="nav" id="topmenu" style="display:none"></ul>
 				<div class="mobile-controls">
-					<div class="mobile-menu-toggle" id="mobile-menu-btn" title="{{ _('Menu') }}">
+					<div class="mobile-menu-toggle" id="mobile-menu-btn" title="{{ _('Menu') }}" role="button" aria-expanded="false">
 						<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
 							<path d="M195.75 162H767.25C771.41 161.987 775.532 162.99 779.38 164.954C783.227 166.917 786.726 169.802 789.674 173.442C792.623 177.083 794.964 181.409 796.564 186.172C798.164 190.935 798.992 196.043 799 201.204V208.667C798.992 213.333 798.164 218 796.564 222.667C794.964 227.333 792.623 231.067 789.674 234.707C786.726 238.347 783.227 241.24 779.38 243.2C775.532 245.16 771.41 246 767.25 246H195.75C191.59 246 187.468 245.16 183.62 243.2C179.773 241.24 176.275 238.347 173.326 234.707C170.378 231.067 168.036 227.333 166.436 222.667C164.836 218 164.008 213.333 164 208.667V201.204C164.008 196.043 164.836 190.935 166.436 186.172C168.036 181.409 170.378 177.083 173.326 173.442C176.275 169.802 179.773 166.917 183.62 164.954C187.468 162.99 191.59 161.987 195.75 162Z" fill="currentColor"/>
 							<path d="M354.733 458H767.267C771.424 457.987 775.544 459.001 779.39 460.987C783.235 462.972 786.732 465.888 789.679 469.57C792.626 473.25 794.966 477.624 796.565 482.441C798.164 487.256 798.992 492.421 799 497.639V504.252C798.992 508.971 798.164 513.689 796.565 518.408C794.966 523.126 792.626 526.901 789.679 530.581C786.732 534.262 783.235 537.187 779.39 539.169C775.544 541.151 771.424 542 767.267 542H354.733C350.577 542 346.459 541.151 342.615 539.169C338.771 537.187 335.276 534.262 332.328 530.581C329.382 526.901 327.041 523.126 325.441 518.408C323.841 513.689 323.011 508.971 323 504.252V497.639C323.008 492.421 323.836 487.256 325.435 482.441C327.034 477.624 329.375 473.25 332.321 469.57C335.269 465.888 338.765 462.972 342.61 460.987C346.456 459.001 350.576 457.987 354.733 458Z" fill="currentColor"/>
@@ -186,6 +184,8 @@
 						</svg>
 					</div>
 				</div>
+				<a class="brand" href="/">{{ striptags(boardinfo.hostname ?? '?') }}</a>
+				<ul class="nav" id="topmenu" style="display:none"></ul>
 				<div id="indicators" class="pull-right"></div>
 		</div>
 
@@ -196,6 +196,20 @@
 		<div class="desktop-menu-overlay"></div>
 		{% else %}
 		</header>
+		{% endif %}
+
+		{% if (nav_submenu_type == 'sidebar'): %}
+		<aside class="sidebar-panel" aria-label="{{ _('Navigation') }}">
+			<nav class="sidebar-panel-inner">
+				<ul class="sidebar-list" id="sidebar-list"></ul>
+				<div class="sidebar-footer" id="sidebar-footer"></div>
+			</nav>
+		</aside>
+		<script>
+			if (localStorage.getItem('aurora.sidebarCollapsed') === 'true') {
+				document.body.classList.add('sidebar-collapsed');
+			}
+		</script>
 		{% endif %}
 
 		<div class="mobile-menu-overlay" id="mobile-menu-overlay">

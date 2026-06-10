@@ -19,7 +19,7 @@ PKG_SOURCE_URL:=https://github.com/dreibh/tracebox.git
 PKG_MAINTAINER:=Ycarus <ycarus@zugaina.org>
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=4ad40ea43354038a04ad90aedae5874801c223e8
+PKG_SOURCE_VERSION:=null
 #v0.4.4
 
 PKG_LICENSE:=GPL-2.0-only

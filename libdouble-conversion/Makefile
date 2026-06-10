@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libdouble-conversion
-PKG_VERSION:=3.4.0
+PKG_VERSION:=3.3.1
 PKG_RELEASE:=1
 
 PKG_SOURCE:=double-conversion-$(PKG_VERSION).tar.gz
