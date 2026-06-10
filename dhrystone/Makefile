@@ -13,7 +13,7 @@ PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/siasjack/dhrystone4OP.git
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=cce98c52c3d8b2676ca68cab075c6e89fc9988d2
 PKG_MIRROR_HASH:=skip
 
 MAKE_PATH:=src

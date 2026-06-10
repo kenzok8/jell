@@ -13,7 +13,7 @@ PKG_VERSION:=1.5_beta7
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=3772409867b3c5591c50d69f0abacf780c3a555f
 PKG_SOURCE_URL:=https://github.com/mct/tcptraceroute.git
 
 include $(INCLUDE_DIR)/package.mk

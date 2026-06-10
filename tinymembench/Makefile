@@ -13,7 +13,7 @@ PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/ssvb/tinymembench.git
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=a2cf6d7e382e3aea1eb39173174d9fa28cad15f3
 PKG_MIRROR_HASH:=skip
 
 include $(INCLUDE_DIR)/package.mk

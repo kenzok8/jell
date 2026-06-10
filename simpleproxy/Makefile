@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=simpleproxy
 PKG_VERSION:=3.5
-PKG_RELEASE:=39
+PKG_RELEASE:=40
 
 PKG_MAINTAINER:=Konstantine Shevlakov <shevlakov@132lan.ru>
 PKG_LICENSE:=GPLv2
@@ -10,7 +10,7 @@ PKG_LICENSE_FILES:=LICENSE
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/vzaliva/simpleproxy.git
-PKG_SOURCE_VERSION:=null
+PKG_SOURCE_VERSION:=6f56aa69f3d3fcdd2cd4559e9165e953ff1e0371
 
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
