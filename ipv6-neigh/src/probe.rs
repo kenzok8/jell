@@ -8,8 +8,10 @@ use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 
 use crate::types::GuaKeepaliveEntry;
 
-/// Maximum ICMP probes the scheduler may send per 1-second tick.
-pub(crate) const MAX_PROBES_PER_TICK: usize = 2;
+/// Maximum registered (ULA/DNS-published) probes per 1-second tick.
+pub(crate) const MAX_REGISTERED_PROBES_PER_TICK: usize = 1;
+/// Maximum GUA keepalive probes per 1-second tick.
+pub(crate) const MAX_GUA_PROBES_PER_TICK: usize = 1;
 
 fn compute_icmpv4_checksum(packet: &mut [u8]) {
     packet[2] = 0;
@@ -30,9 +32,16 @@ fn compute_icmpv4_checksum(packet: &mut [u8]) {
 /// probe call-sites, avoiding the overhead of creating and destroying a raw
 /// socket for every single probe packet.
 ///
-/// Uses a process-specific ICMP id and an atomic sequence counter (suggestion #6)
+/// Uses a process-specific ICMP id and an atomic sequence counter
 /// so that Echo Replies can be correlated back to this daemon if reply-matching
 /// is added in the future.
+///
+/// **Serial-use only.**  `send_icmpv6_echo` / `send_icmpv4_echo` mutate the
+/// socket's bound-device state via `bind_device_by_index_*()` before each
+/// `send_to()`.  Concurrent sends from multiple tasks would race on this shared
+/// socket state.  The current single-threaded `select!` loop honours this
+/// constraint; if the daemon is ever parallelized, wrap `Prober` in a `Mutex`
+/// or switch to per-ifindex sockets.
 pub(crate) struct Prober {
     v6: Socket,
     v4: Socket,
@@ -44,9 +53,13 @@ impl Prober {
     pub fn new() -> std::io::Result<Self> {
         let v6 = Socket::new(Domain::IPV6, Type::RAW, Some(Protocol::ICMPV6))?;
         v6.set_nonblocking(true)?;
+        // Sizing up the receive buffer reduces the chance of dropping echo replies
+        // during probe bursts.  Best-effort: capped by net.core.rmem_max on Linux.
+        let _ = v6.set_recv_buffer_size(1024 * 1024);
 
         let v4 = Socket::new(Domain::IPV4, Type::RAW, Some(Protocol::ICMPV4))?;
         v4.set_nonblocking(true)?;
+        let _ = v4.set_recv_buffer_size(1024 * 1024);
 
         let icmp_id = (std::process::id() & 0xFFFF) as u16;
 
@@ -109,18 +122,17 @@ impl Prober {
         Ok(seq)
     }
 
-    /// Drain pending ICMP Echo Replies from the raw socket receive queues
-    /// (suggestion #5).  Call this periodically (e.g. on each scheduler tick)
-    /// to prevent kernel receive-buffer accumulation from unread replies.
+    /// Drain pending ICMP Echo Replies from the raw socket receive queues.
+    /// Call this periodically (e.g. on each scheduler tick) to prevent kernel
+    /// receive-buffer accumulation from unread replies.
     pub fn drain_replies(&self, max: usize) {
-        use std::mem::MaybeUninit;
-        // SAFETY: we never read from buf; recv_from writes into it and we
-        // discard the contents.  The uninit array is sound here.
-        let mut buf: [MaybeUninit<u8>; 256] = unsafe { MaybeUninit::uninit().assume_init() };
+        // 2048-byte buffer is large enough for any ICMP payload plus possible IP headers.
+        let mut buf = [std::mem::MaybeUninit::<u8>::uninit(); 2048];
         for _ in 0..max {
             match self.v6.recv_from(&mut buf) {
                 Ok(_) => {}
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
+                Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
                 Err(_) => break,
             }
         }
@@ -128,22 +140,22 @@ impl Prober {
             match self.v4.recv_from(&mut buf) {
                 Ok(_) => {}
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
+                Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
                 Err(_) => break,
             }
         }
     }
 }
 
-// ---- scheduler ----
-
 /// Run one tick of the per-IP stable-jitter probe scheduler.
 ///
 /// Iterates both registered (ULA/DNS-published) and GUA-keepalive entries,
-/// sending at most `MAX_PROBES_PER_TICK` probes to entries whose
-/// `next_probe_due` has elapsed.  After sending, `next_probe_due` is advanced
-/// by the entry's interval to preserve the stable phase.
+/// sending at most `MAX_REGISTERED_PROBES_PER_TICK` and `MAX_GUA_PROBES_PER_TICK`
+/// probes respectively to entries whose `next_probe_due` has elapsed.
+/// After sending, `next_probe_due` is advanced by the entry's interval
+/// (preserving the stable phase where possible).
 ///
-/// Returns the number of probes actually sent.
+/// Returns the total number of probes sent (registered + GUA).
 pub(crate) fn run_probe_scheduler(
     prober: &Prober,
     registered: &mut HashMap<(String, String), crate::types::RegisteredEntry>,
@@ -151,19 +163,21 @@ pub(crate) fn run_probe_scheduler(
     probe_interval: u64,
     keepalive_interval: u64,
     keepalive_enabled: bool,
+    keepalive_gua_per_host: usize,
 ) -> usize {
     let now = Instant::now();
-    let mut sent = 0;
+    let mut sent_total = 0;
 
     // --- registered (ULA / DNS-published) entries ---
+    // Sort due entries by next_probe_due so the most urgent are served
+    // first, avoiding HashMap iteration-order starvation.
     if probe_interval > 0 {
-        for ((_hostname, ip_str), entry) in registered.iter_mut() {
-            if sent >= MAX_PROBES_PER_TICK {
-                break;
-            }
-            if entry.next_probe_due > now {
-                continue;
-            }
+        let mut due: Vec<_> = registered
+            .iter_mut()
+            .filter(|(_, e)| e.next_probe_due <= now)
+            .collect();
+        due.sort_by_key(|(_, e)| e.next_probe_due);
+        for ((_hostname, ip_str), entry) in due.into_iter().take(MAX_REGISTERED_PROBES_PER_TICK) {
             let ok = match ip_str.parse::<Ipv6Addr>() {
                 Ok(addr) => prober.send_icmpv6_echo(addr, entry.ifindex).is_ok(),
                 Err(_) => match ip_str.parse::<Ipv4Addr>() {
@@ -173,8 +187,18 @@ pub(crate) fn run_probe_scheduler(
             };
             if ok {
                 entry.last_probe_sent = now;
-                entry.next_probe_due = now + Duration::from_secs(probe_interval);
-                sent += 1;
+                // Preserve stable phase: advance from original due time.
+                // If the entry is severely overdue (e.g. daemon blocked),
+                // reset to now to avoid a long catch-up while loop.
+                let interval = Duration::from_secs(probe_interval);
+                if now.duration_since(entry.next_probe_due) > interval.saturating_mul(4) {
+                    entry.next_probe_due = now + interval;
+                } else {
+                    while entry.next_probe_due <= now {
+                        entry.next_probe_due += interval;
+                    }
+                }
+                sent_total += 1;
             } else {
                 // Send failed — back off briefly so one unreachable entry
                 // doesn't burn a probe slot every tick.
@@ -184,37 +208,50 @@ pub(crate) fn run_probe_scheduler(
     }
 
     // --- GUA keepalive entries ---
+    // Collect due entries across hosts, sort by urgency to avoid starvation.
     if keepalive_enabled && keepalive_interval > 0 {
-        for (_mac, entries) in gua_keepalive.iter_mut() {
-            if sent >= MAX_PROBES_PER_TICK {
-                break;
+        let mut due_gua: Vec<(String, usize, Instant)> = Vec::new();
+        for (mac, entries) in gua_keepalive.iter() {
+            for (i, entry) in entries.iter().enumerate().take(keepalive_gua_per_host) {
+                if entry.next_probe_due <= now {
+                    due_gua.push((mac.clone(), i, entry.next_probe_due));
+                }
             }
-            for entry in entries.iter_mut() {
-                if sent >= MAX_PROBES_PER_TICK {
-                    break;
-                }
-                if entry.next_probe_due > now {
-                    continue;
-                }
-                if prober.send_icmpv6_echo(entry.addr, entry.ifindex).is_ok() {
-                    entry.last_probe_sent = now;
-                    entry.next_probe_due = now + Duration::from_secs(keepalive_interval);
-                    sent += 1;
-                } else {
-                    // Send failed — back off briefly.
-                    entry.next_probe_due = now + Duration::from_secs(5);
+        }
+        due_gua.sort_by_key(|(_, _, t)| *t);
+        due_gua.truncate(MAX_GUA_PROBES_PER_TICK);
+
+        for (mac, idx, _) in &due_gua {
+            if let Some(entries) = gua_keepalive.get_mut(mac.as_str()) {
+                if let Some(entry) = entries.get_mut(*idx) {
+                    if prober.send_icmpv6_echo(entry.addr, entry.ifindex).is_ok() {
+                        entry.last_probe_sent = now;
+                        let interval = Duration::from_secs(keepalive_interval);
+                        if now.duration_since(entry.next_probe_due) > interval.saturating_mul(4) {
+                            entry.next_probe_due = now + interval;
+                        } else {
+                            while entry.next_probe_due <= now {
+                                entry.next_probe_due += interval;
+                            }
+                        }
+                        sent_total += 1;
+                    } else {
+                        // Send failed — back off briefly.
+                        entry.next_probe_due = now + Duration::from_secs(5);
+                    }
                 }
             }
         }
     }
 
-    sent
+    sent_total
 }
-
-// ---- pruning (still timer-driven, not scheduler-driven) ----
 
 /// Remove GUA keepalive entries that haven't been confirmed REACHABLE within 3x the
 /// keepalive interval, and drop excess entries beyond `per_host` (oldest first).
+///
+/// This runs on a timer tick, not the per-IP probe scheduler — it does batch cleanup
+/// across all hosts at once.
 pub(crate) fn prune_gua_keepalive(
     gua_keepalive: &mut HashMap<String, Vec<GuaKeepaliveEntry>>,
     keepalive_interval: u64,
@@ -225,9 +262,8 @@ pub(crate) fn prune_gua_keepalive(
     gua_keepalive.retain(|_, entries| {
         // Remove timed-out entries first.
         entries.retain(|e| now.duration_since(e.last_confirmed) < timeout);
-        // Then keep only the newest `per_host` entries (by first_seen desc).
+        // Keep only the newest `per_host` entries (first_seen desc; maintained by insert order).
         if entries.len() > per_host {
-            entries.sort_by_key(|b| std::cmp::Reverse(b.first_seen));
             entries.truncate(per_host);
         }
         !entries.is_empty()

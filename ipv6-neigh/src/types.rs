@@ -44,7 +44,7 @@ pub(crate) struct LanPrefix {
 
 /// State tracked for each (hostname, ip) pair that has been successfully registered in DNS.
 ///
-/// Timestamp semantics (split per suggestion #7):
+/// Timestamp semantics:
 /// - `last_confirmed`: updated ONLY by netlink Reachable events — true reachability signal
 /// - `last_dns_synced`: updated on DNS push / re-push success — DNS consistency, not reachability
 /// - `last_probe_sent`: updated when an ICMP probe is sent by the scheduler
@@ -76,7 +76,7 @@ pub(crate) struct GuaKeepaliveEntry {
 /// Uses a deterministic hash so the phase is preserved across daemon restarts.
 ///
 /// `interval_secs` must be > 0; passing 0 will panic (the caller is expected to
-/// guard this via `scheduler_interval()` which maps 0 to a sentinel value).
+/// guard this via `initial_next_probe_due()` which returns a far-future sentinel).
 pub(crate) fn stable_jitter_offset(mac: &str, ip: &str, interval_secs: u64) -> Duration {
     assert!(
         interval_secs > 0,

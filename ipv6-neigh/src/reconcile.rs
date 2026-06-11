@@ -127,12 +127,16 @@ pub(crate) async fn prune_ula_for_host(
         if let Some(entry) = registered.remove(&key) {
             let addr: Ipv6Addr = key.1.parse().unwrap();
             let inet = NeighbourAddress::Inet6(addr);
-            do_delete_dns(&entry.hostname, &inet, updater).await;
-            info!(
-                "ULA pruning: removed oldest {} -> {} for host {}",
-                entry.hostname, key.1, host
-            );
-            actually_removed += 1;
+            if do_delete_dns(&entry.hostname, &inet, updater).await {
+                info!(
+                    "ULA pruning: removed oldest {} -> {} for host {}",
+                    entry.hostname, key.1, host
+                );
+                actually_removed += 1;
+            } else {
+                // DNS delete failed — reinsert so we don't leak an orphan.
+                registered.insert(key, entry);
+            }
         }
     }
 
@@ -147,7 +151,7 @@ pub(crate) async fn prune_ula_for_host(
 ///    immediately (they belong to a prefix that is no longer active on the router).
 /// 2. **DNS orphans** -- records present in DNS but absent from `registered`.
 ///    These are probed first; only deleted after a grace period (2× probe_interval)
-///    of persistent absence, avoiding transient DNS churn (suggestion #10).
+///    of persistent absence, avoiding transient DNS churn.
 /// 3. **Registered orphans** -- entries in `registered` that are missing from DNS (e.g.
 ///    because hickory-dns restarted and lost its in-memory state).  These are re-pushed
 ///    via DNS UPDATE so the zone stays consistent.
@@ -162,6 +166,7 @@ pub(crate) async fn reconcile_dns(
     router_ifindex: u32,
     orphan_since: &mut HashMap<(String, String), Instant>,
     grace_period: Duration,
+    last_axfr_hostnames: &mut std::collections::HashSet<String>,
 ) {
     use std::collections::HashSet;
 
@@ -175,13 +180,19 @@ pub(crate) async fn reconcile_dns(
         }
     };
 
+    // Cache hostnames seen in AXFR for lease cleanup cross-reference.
+    last_axfr_hostnames.clear();
+    for (hostname, _) in &dns_records {
+        last_axfr_hostnames.insert(hostname.clone());
+    }
+
     // Only consider records whose hostname appears in the lease table; this avoids
     // accidentally touching manually-added records or the router's own addresses.
     let lease_hostnames: HashSet<&str> = leases.values().map(String::as_str).collect();
 
     // Set of (hostname, ip_str) tuples for DNS records that pass all filters.
-    // Uses (hostname, ip) as the key (suggestion #11) to avoid shadowing when
-    // two different hostnames share the same IP.
+    // Uses (hostname, ip) as the key to avoid shadowing when two different
+    // hostnames share the same IP.
     let mut dns_keys: HashSet<(String, String)> = HashSet::new();
 
     for (hostname, ip) in &dns_records {
@@ -225,9 +236,15 @@ pub(crate) async fn reconcile_dns(
     }
 
     // --- DNS orphans (in DNS but not in registered) ---
-    // Two-pass: first-time orphans are probed and tracked; only deleted after
-    // the grace period expires (suggestion #10). Previously-tracked orphans that
-    // have since been registered are cleared from orphan tracking.
+    // Two-pass with limited repeat-probing during grace:
+    //  - First time: probe and start tracking.
+    //  - Within grace: up to MAX_ORPHAN_PROBES_PER_RECONCILE tracked orphans
+    //    are re-probed each reconcile run so a single dropped probe doesn't
+    //    cause premature deletion.
+    //  - Grace expired and still not registered: delete from DNS.
+    const MAX_ORPHAN_PROBES_PER_RECONCILE: usize = 2;
+    let mut orphan_probe_sent = 0usize;
+
     for (hostname, ip_str) in &dns_keys {
         let key = (hostname.clone(), ip_str.clone());
         if registered.contains_key(&key) {
@@ -258,6 +275,24 @@ pub(crate) async fn reconcile_dns(
 
         // Already tracked — check if grace period expired.
         if now.duration_since(first_seen) < grace_period {
+            // Within grace: re-probe a limited number of tracked orphans per run
+            // so a single lost probe doesn't cause spurious deletion.
+            if orphan_probe_sent < MAX_ORPHAN_PROBES_PER_RECONCILE && router_ifindex != 0 {
+                match ip_str.parse::<IpAddr>() {
+                    Ok(IpAddr::V6(addr)) => {
+                        let _ = prober.send_icmpv6_echo(addr, router_ifindex);
+                    }
+                    Ok(IpAddr::V4(addr)) => {
+                        let _ = prober.send_icmpv4_echo(addr, router_ifindex);
+                    }
+                    _ => {}
+                }
+                orphan_probe_sent += 1;
+                trace!(
+                    "reconcile: re-probed DNS orphan {} -> {} during grace",
+                    hostname, ip_str
+                );
+            }
             continue;
         }
 
@@ -294,7 +329,7 @@ pub(crate) async fn reconcile_dns(
     // (e.g. deleted externally or the hostname fell out of the lease table).
     // Without this, orphan_since would leak small entries indefinitely.
     orphan_since
-        .retain(|(hostname, ip_str), _| dns_keys.contains(&(hostname.clone(), ip_str.clone())));
+        .retain(|key, _| dns_keys.contains(key));
 
     // --- Registered orphans (in registered but not in DNS) ---
     for ((hostname, ip_str), entry) in registered.iter_mut() {
@@ -321,7 +356,7 @@ pub(crate) async fn reconcile_dns(
                             hostname, ip_str, e
                         );
                     }
-                // DNS sync success — update last_dns_synced, NOT last_confirmed (suggestion #7).
+                // DNS sync success — update last_dns_synced, NOT last_confirmed.
                 entry.last_dns_synced = Instant::now();
             }
             Err(e) => warn!(

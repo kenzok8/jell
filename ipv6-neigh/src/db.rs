@@ -110,8 +110,6 @@ impl DnsUpdater {
         Ok(())
     }
 
-    // -- public A / AAAA wrappers --
-
     /// Create or append a AAAA record.
     pub async fn upsert_aaaa(
         &self,
@@ -153,8 +151,6 @@ impl DnsUpdater {
         self.delete_record(hostname, RecordType::A, RData::A(addr.into()))
             .await
     }
-
-    // -- PTR --
 
     /// Upsert a PTR record. Silently skips IPs with no configured reverse zone.
     pub async fn upsert_ptr(
@@ -231,8 +227,6 @@ impl DnsUpdater {
             .max_by_key(|(_, prefix_len, _)| *prefix_len)
             .map(|(_, _, name)| name)
     }
-
-    // -- TCP transport --
 
     /// Send a DNS message over TCP and read the response.
     /// Opens a fresh connection per call — simpler and avoids CLOSE_WAIT
