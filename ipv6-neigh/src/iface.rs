@@ -1,8 +1,10 @@
-use std::net::{IpAddr, SocketAddr};
 use futures::stream::TryStreamExt;
 use log::{info, warn};
-use netlink_packet_route::address::{AddressAttribute, AddressFlags, AddressHeaderFlags, AddressMessage};
+use netlink_packet_route::address::{
+    AddressAttribute, AddressFlags, AddressHeaderFlags, AddressMessage,
+};
 use rtnetlink::Handle;
+use std::net::{IpAddr, SocketAddr};
 use tokio::time::{self, Duration};
 
 use crate::db::DnsUpdater;
@@ -38,12 +40,27 @@ async fn get_iface_addresses(
         Err(e) => return Err(format!("failed to find interface {}: {}", iface, e)),
     };
     let ifindex = link.header.index;
-    let mut addr_stream = handle.address().get().set_link_index_filter(ifindex).execute();
+    let mut addr_stream = handle
+        .address()
+        .get()
+        .set_link_index_filter(ifindex)
+        .execute();
     let mut msgs = Vec::new();
     while let Ok(Some(msg)) = addr_stream.try_next().await {
         msgs.push(msg);
     }
     Ok((ifindex, msgs))
+}
+
+/// Look up the interface index for `iface` without collecting addresses.
+/// Used to obtain a fallback ifindex for DNS-orphan probes in `reconcile_dns`.
+pub(crate) async fn get_iface_index(handle: Handle, iface: &str) -> Result<u32, String> {
+    let mut links = handle.link().get().match_name(iface.to_owned()).execute();
+    match links.try_next().await {
+        Ok(Some(l)) => Ok(l.header.index),
+        Ok(None) => Err(format!("interface {} not found", iface)),
+        Err(e) => Err(format!("failed to find interface {}: {}", iface, e)),
+    }
 }
 
 /// Enumerate non-link-local IPv6 prefixes currently assigned to `iface`.
@@ -69,7 +86,10 @@ pub(crate) async fn get_active_lan_prefixes(
                 if should_skip_v6(addr, private_subnet_v6) {
                     continue;
                 }
-                prefixes.push(LanPrefix { addr: *addr, prefix_len });
+                prefixes.push(LanPrefix {
+                    addr: *addr,
+                    prefix_len,
+                });
             }
         }
     }
@@ -110,10 +130,16 @@ pub(crate) async fn register_router_addresses(
                     for name in std::iter::once(hostname).chain(extra_alias) {
                         match updater.upsert_aaaa(name, *addr, DEFAULT_TTL).await {
                             Ok(()) => info!("registered router {} AAAA {}", name, addr),
-                            Err(e) => warn!("failed to register router AAAA {} for {}: {}", addr, name, e),
+                            Err(e) => warn!(
+                                "failed to register router AAAA {} for {}: {}",
+                                addr, name, e
+                            ),
                         }
                     }
-                    if let Err(e) = updater.upsert_ptr(IpAddr::V6(*addr), hostname, DEFAULT_TTL).await {
+                    if let Err(e) = updater
+                        .upsert_ptr(IpAddr::V6(*addr), hostname, DEFAULT_TTL)
+                        .await
+                    {
                         warn!("failed to register router PTR for {}: {}", addr, e);
                     }
                 }
@@ -121,10 +147,15 @@ pub(crate) async fn register_router_addresses(
                     for name in std::iter::once(hostname).chain(extra_alias) {
                         match updater.upsert_a(name, *addr, DEFAULT_TTL).await {
                             Ok(()) => info!("registered router {} A {}", name, addr),
-                            Err(e) => warn!("failed to register router A {} for {}: {}", addr, name, e),
+                            Err(e) => {
+                                warn!("failed to register router A {} for {}: {}", addr, name, e)
+                            }
                         }
                     }
-                    if let Err(e) = updater.upsert_ptr(IpAddr::V4(*addr), hostname, DEFAULT_TTL).await {
+                    if let Err(e) = updater
+                        .upsert_ptr(IpAddr::V4(*addr), hostname, DEFAULT_TTL)
+                        .await
+                    {
                         warn!("failed to register router PTR for {}: {}", addr, e);
                     }
                 }
@@ -144,7 +175,10 @@ pub(crate) async fn wait_for_dns_server(addr: SocketAddr) {
                 return;
             }
             Err(e) => {
-                warn!("DNS server at {} not ready ({}), retrying in 2s...", addr, e);
+                warn!(
+                    "DNS server at {} not ready ({}), retrying in 2s...",
+                    addr, e
+                );
                 time::sleep(Duration::from_secs(2)).await;
             }
         }

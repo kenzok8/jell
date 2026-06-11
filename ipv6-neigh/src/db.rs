@@ -2,8 +2,8 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use hickory_proto::op::{Message, Query, ResponseCode, update_message};
-use hickory_proto::rr::{Name, RData, Record, RecordSet, RecordType, TSigner};
 use hickory_proto::rr::rdata::PTR as PtrRData;
+use hickory_proto::rr::{Name, RData, Record, RecordSet, RecordType, TSigner};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 use tokio::time::timeout;
@@ -12,7 +12,10 @@ use crate::filter::if_ipv6_in_private_subnet;
 
 const TCP_TIMEOUT: Duration = Duration::from_secs(5);
 
-fn check_response(response: &Message, allowed: &[ResponseCode]) -> Result<(), Box<dyn std::error::Error>> {
+fn check_response(
+    response: &Message,
+    allowed: &[ResponseCode],
+) -> Result<(), Box<dyn std::error::Error>> {
     let code = response.metadata.response_code;
     if code == ResponseCode::NoError || allowed.contains(&code) {
         Ok(())
@@ -49,7 +52,13 @@ impl DnsUpdater {
     pub fn with_ptr_zones(mut self, ipv4_subnets: &[(Ipv4Addr, u8)], ula: bool) -> Self {
         self.ipv4_ptr_zones = ipv4_subnets
             .iter()
-            .map(|(net, prefix_len)| (u32::from(*net), *prefix_len, ipv4_zone_name(*net, *prefix_len)))
+            .map(|(net, prefix_len)| {
+                (
+                    u32::from(*net),
+                    *prefix_len,
+                    ipv4_zone_name(*net, *prefix_len),
+                )
+            })
             .collect();
         if ula {
             self.ula_ptr_zone = Some(Name::from_ascii("d.f.ip6.arpa.").expect("always valid"));
@@ -104,23 +113,45 @@ impl DnsUpdater {
     // -- public A / AAAA wrappers --
 
     /// Create or append a AAAA record.
-    pub async fn upsert_aaaa(&self, hostname: &str, addr: Ipv6Addr, ttl: u32) -> Result<(), Box<dyn std::error::Error>> {
-        self.upsert_record(hostname, RecordType::AAAA, RData::AAAA(addr.into()), ttl).await
+    pub async fn upsert_aaaa(
+        &self,
+        hostname: &str,
+        addr: Ipv6Addr,
+        ttl: u32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        self.upsert_record(hostname, RecordType::AAAA, RData::AAAA(addr.into()), ttl)
+            .await
     }
 
     /// Create or append an A record.
-    pub async fn upsert_a(&self, hostname: &str, addr: Ipv4Addr, ttl: u32) -> Result<(), Box<dyn std::error::Error>> {
-        self.upsert_record(hostname, RecordType::A, RData::A(addr.into()), ttl).await
+    pub async fn upsert_a(
+        &self,
+        hostname: &str,
+        addr: Ipv4Addr,
+        ttl: u32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        self.upsert_record(hostname, RecordType::A, RData::A(addr.into()), ttl)
+            .await
     }
 
     /// Delete a specific AAAA record.
-    pub async fn delete_aaaa(&self, hostname: &str, addr: Ipv6Addr) -> Result<(), Box<dyn std::error::Error>> {
-        self.delete_record(hostname, RecordType::AAAA, RData::AAAA(addr.into())).await
+    pub async fn delete_aaaa(
+        &self,
+        hostname: &str,
+        addr: Ipv6Addr,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        self.delete_record(hostname, RecordType::AAAA, RData::AAAA(addr.into()))
+            .await
     }
 
     /// Delete a specific A record.
-    pub async fn delete_a(&self, hostname: &str, addr: Ipv4Addr) -> Result<(), Box<dyn std::error::Error>> {
-        self.delete_record(hostname, RecordType::A, RData::A(addr.into())).await
+    pub async fn delete_a(
+        &self,
+        hostname: &str,
+        addr: Ipv4Addr,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        self.delete_record(hostname, RecordType::A, RData::A(addr.into()))
+            .await
     }
 
     // -- PTR --
@@ -134,11 +165,15 @@ impl DnsUpdater {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let (ptr_name, rev_zone) = match addr {
             IpAddr::V4(ip) => {
-                let Some(zone) = self.find_ipv4_ptr_zone(ip).cloned() else { return Ok(()) };
+                let Some(zone) = self.find_ipv4_ptr_zone(ip).cloned() else {
+                    return Ok(());
+                };
                 (ipv4_ptr_name(ip), zone)
             }
             IpAddr::V6(ip) if if_ipv6_in_private_subnet(&ip) => {
-                let Some(zone) = self.ula_ptr_zone.clone() else { return Ok(()) };
+                let Some(zone) = self.ula_ptr_zone.clone() else {
+                    return Ok(());
+                };
                 (ipv6_ptr_name(ip), zone)
             }
             _ => return Ok(()),
@@ -159,17 +194,18 @@ impl DnsUpdater {
     }
 
     /// Delete a PTR record. Silently skips IPs with no configured reverse zone.
-    pub async fn delete_ptr(
-        &self,
-        addr: IpAddr,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn delete_ptr(&self, addr: IpAddr) -> Result<(), Box<dyn std::error::Error>> {
         let (ptr_name, rev_zone) = match addr {
             IpAddr::V4(ip) => {
-                let Some(zone) = self.find_ipv4_ptr_zone(ip).cloned() else { return Ok(()) };
+                let Some(zone) = self.find_ipv4_ptr_zone(ip).cloned() else {
+                    return Ok(());
+                };
                 (ipv4_ptr_name(ip), zone)
             }
             IpAddr::V6(ip) if if_ipv6_in_private_subnet(&ip) => {
-                let Some(zone) = self.ula_ptr_zone.clone() else { return Ok(()) };
+                let Some(zone) = self.ula_ptr_zone.clone() else {
+                    return Ok(());
+                };
                 (ipv6_ptr_name(ip), zone)
             }
             _ => return Ok(()),
@@ -186,7 +222,9 @@ impl DnsUpdater {
         self.ipv4_ptr_zones
             .iter()
             .filter(|(net, prefix_len, _)| {
-                if *prefix_len == 0 { return true; }
+                if *prefix_len == 0 {
+                    return true;
+                }
                 let shift = 32u8.saturating_sub(*prefix_len);
                 (addr_u32 >> shift) == (net >> shift)
             })
@@ -208,7 +246,12 @@ impl DnsUpdater {
         let mut stream = timeout(TCP_TIMEOUT, TcpStream::connect(self.server_addr))
             .await
             .map_err(|_| -> Box<dyn std::error::Error> {
-                format!("DNS TCP connect timeout after {}s to {}", TCP_TIMEOUT.as_secs(), self.server_addr).into()
+                format!(
+                    "DNS TCP connect timeout after {}s to {}",
+                    TCP_TIMEOUT.as_secs(),
+                    self.server_addr
+                )
+                .into()
             })??;
 
         let result = timeout(TCP_TIMEOUT, async {
@@ -222,7 +265,12 @@ impl DnsUpdater {
         })
         .await
         .map_err(|_| -> Box<dyn std::error::Error> {
-            format!("DNS TCP timeout after {}s to {}", TCP_TIMEOUT.as_secs(), self.server_addr).into()
+            format!(
+                "DNS TCP timeout after {}s to {}",
+                TCP_TIMEOUT.as_secs(),
+                self.server_addr
+            )
+            .into()
         })??;
 
         Ok(result)
@@ -295,7 +343,12 @@ impl DnsUpdater {
         })
         .await
         .map_err(|_| -> Box<dyn std::error::Error> {
-            format!("AXFR timeout after {}s connecting to {}", AXFR_TIMEOUT.as_secs(), self.server_addr).into()
+            format!(
+                "AXFR timeout after {}s connecting to {}",
+                AXFR_TIMEOUT.as_secs(),
+                self.server_addr
+            )
+            .into()
         })??;
         Ok(records)
     }
@@ -305,8 +358,11 @@ impl DnsUpdater {
 /// e.g. 192.168.3.5 -> `5.3.168.192.in-addr.arpa.`
 fn ipv4_ptr_name(addr: Ipv4Addr) -> Name {
     let o = addr.octets();
-    Name::from_ascii(&format!("{}.{}.{}.{}.in-addr.arpa.", o[3], o[2], o[1], o[0]))
-        .expect("always valid")
+    Name::from_ascii(format!(
+        "{}.{}.{}.{}.in-addr.arpa.",
+        o[3], o[2], o[1], o[0]
+    ))
+    .expect("always valid")
 }
 
 /// Build the PTR owner name for an IPv6 address (nibble-reversed).
@@ -321,7 +377,7 @@ fn ipv6_ptr_name(addr: Ipv6Addr) -> Name {
             [lo, '.', hi, '.']
         })
         .collect();
-    Name::from_ascii(&format!("{}ip6.arpa.", nibbles)).expect("always valid")
+    Name::from_ascii(format!("{}ip6.arpa.", nibbles)).expect("always valid")
 }
 
 /// Derive the reverse zone name for an IPv4 subnet (only /8, /16, /24 boundaries).
@@ -330,8 +386,8 @@ fn ipv4_zone_name(net: Ipv4Addr, prefix_len: u8) -> Name {
     let s = match prefix_len {
         24..=32 => format!("{}.{}.{}.in-addr.arpa.", o[2], o[1], o[0]),
         16..=23 => format!("{}.{}.in-addr.arpa.", o[1], o[0]),
-        8..=15  => format!("{}.in-addr.arpa.", o[0]),
-        _       => "in-addr.arpa.".to_string(),
+        8..=15 => format!("{}.in-addr.arpa.", o[0]),
+        _ => "in-addr.arpa.".to_string(),
     };
     Name::from_ascii(&s).expect("always valid")
 }

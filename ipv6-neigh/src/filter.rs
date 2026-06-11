@@ -1,5 +1,5 @@
-use std::net::{Ipv4Addr, Ipv6Addr};
 use crate::types::LanPrefix;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
 /// Returns true if `addr` is link-local (fe80::/10).
 /// Centralised here so every module uses the same check.
