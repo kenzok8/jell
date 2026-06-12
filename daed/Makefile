@@ -3,7 +3,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=daed
-PKG_VERSION:=2026.06.12
+PKG_VERSION:=2026.06.12.3
 PKG_RELEASE:=1
 
 PKG_SOURCE:=daed-src-$(PKG_VERSION).tar.gz

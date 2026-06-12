@@ -483,18 +483,34 @@ async fn main() -> anyhow::Result<()> {
                     if let Some(hostname) = leases.get(&neigh.mac) {
                         let key = (hostname.clone(), ip_str.clone());
                         if !registered.contains_key(&key) {
-                            try_register_neigh(
-                                neigh,
-                                hostname,
-                                &ip_str,
-                                &mut registered,
-                                &leases,
-                                &updater,
-                                max_ula_per_host,
-                                private_subnet_v6,
-                                probe_interval,
-                            )
-                            .await;
+                            // Same ULA-limit guard as the event-driven path: if the host
+                            // already has max_ula_per_host ULA entries from an earlier
+                            // iteration of this dump, don't prune+replace.
+                            let at_ula_limit = max_ula_per_host > 0
+                                && matches!(&neigh.inet, NeighbourAddress::Inet6(a) if if_ipv6_in_private_subnet(a))
+                                && registered
+                                    .keys()
+                                    .filter(|(h, ip)| {
+                                        h == hostname
+                                            && ip.parse::<std::net::Ipv6Addr>()
+                                                .is_ok_and(|a| if_ipv6_in_private_subnet(&a))
+                                    })
+                                    .count()
+                                    >= max_ula_per_host;
+                            if !at_ula_limit {
+                                try_register_neigh(
+                                    neigh,
+                                    hostname,
+                                    &ip_str,
+                                    &mut registered,
+                                    &leases,
+                                    &updater,
+                                    max_ula_per_host,
+                                    private_subnet_v6,
+                                    probe_interval,
+                                )
+                                .await;
+                            }
                         }
                     } else {
                         trace!("no lease for mac {}, skipping DNS update", neigh.mac);
@@ -660,7 +676,29 @@ async fn main() -> anyhow::Result<()> {
                                         entry.ifindex = neigh.ifindex;
                                     } else {
                                         trace!("New neighbour: {:?}", neigh);
-                                        try_register_neigh(&neigh, hostname, &ip_str, &mut registered, &leases, &updater, max_ula_per_host, private_subnet_v6, probe_interval).await;
+                                        // If the host is already at the ULA limit, don't prune+add.
+                                        // Both addresses are live in the kernel; evicting the
+                                        // registered one would cause them to swap every NUD
+                                        // refresh cycle (~30s) as REACHABLE events alternate.
+                                        let at_ula_limit = max_ula_per_host > 0
+                                            && matches!(&neigh.inet, NeighbourAddress::Inet6(a) if if_ipv6_in_private_subnet(a))
+                                            && registered
+                                                .keys()
+                                                .filter(|(h, ip)| {
+                                                    h == hostname
+                                                        && ip.parse::<std::net::Ipv6Addr>()
+                                                            .is_ok_and(|a| if_ipv6_in_private_subnet(&a))
+                                                })
+                                                .count()
+                                                >= max_ula_per_host;
+                                        if at_ula_limit {
+                                            trace!(
+                                                "event: host {} already at ULA limit ({}), keeping registered address over {}",
+                                                hostname, max_ula_per_host, ip_str
+                                            );
+                                        } else {
+                                            try_register_neigh(&neigh, hostname, &ip_str, &mut registered, &leases, &updater, max_ula_per_host, private_subnet_v6, probe_interval).await;
+                                        }
                                     }
                                 } else {
                                     trace!("no lease for mac {}, skipping DNS update", neigh.mac);
@@ -796,8 +834,31 @@ async fn main() -> anyhow::Result<()> {
                             entry.last_confirmed = Instant::now();
                             entry.ifindex = neigh.ifindex;
                         } else {
-                            info!("reconcile neigh: kernel orphan {} -> {:?}", hostname, neigh.inet);
-                            try_register_neigh(neigh, hostname, &ip_str, &mut registered, &leases, &updater, max_ula_per_host, private_subnet_v6, probe_interval).await;
+                            // If this is a ULA address and the host already has max_ula_per_host
+                            // ULA entries registered, skip rather than prune+add. Both addresses
+                            // are live in the kernel; evicting the registered one here would just
+                            // cause the two to swap every reconcile cycle (flip-flop churn).
+                            let at_ula_limit = max_ula_per_host > 0
+                                && matches!(&neigh.inet, NeighbourAddress::Inet6(a) if if_ipv6_in_private_subnet(a))
+                                && registered
+                                    .keys()
+                                    .filter(|(h, ip)| {
+                                        h == hostname
+                                            && ip
+                                                .parse::<std::net::Ipv6Addr>()
+                                                .is_ok_and(|a| if_ipv6_in_private_subnet(&a))
+                                    })
+                                    .count()
+                                    >= max_ula_per_host;
+                            if at_ula_limit {
+                                trace!(
+                                    "reconcile neigh: host {} already at ULA limit ({}), keeping registered address over {}",
+                                    hostname, max_ula_per_host, ip_str
+                                );
+                            } else {
+                                info!("reconcile neigh: kernel orphan {} -> {:?}", hostname, neigh.inet);
+                                try_register_neigh(neigh, hostname, &ip_str, &mut registered, &leases, &updater, max_ula_per_host, private_subnet_v6, probe_interval).await;
+                            }
                         }
                     }
 
