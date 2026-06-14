@@ -542,7 +542,11 @@ runtime_run_health_check() {
 	fi
 
 	detail="dns:${dns_state};explicit:${explicit_state};transparent:${transparent_state}"
-	if [ "$explicit_state" = "ok" ] && [ "$transparent_state" = "ok" ]; then
+	# Pass on explicit (local mixed-port) reachability alone. The transparent
+	# probe tests the router's OWN output-redirect path, which is unreliable on
+	# some stacks (PPPoE/GL.iNet, issue #25) yet does not reflect LAN-client
+	# proxying — keep it informational in `detail`, not a pass gate.
+	if [ "$explicit_state" = "ok" ]; then
 		if [ "$require_fakeip" = "0" ] || [ "$dns_state" = "ok" ] || [ "$dns_state" = "compat" ] || [ "$dns_state" = "na" ]; then
 			runtime_state_accepts_health_update || return 1
 			runtime_state_record_health "pass" "$detail"
@@ -1275,8 +1279,42 @@ _prepare_geo_bootstrap_mode() {
 		sed -i "/^[[:space:]]*-[[:space:]]*[\"']\{0,1\}geosite:/d" "$CONFIG_YAML" 2>/dev/null
 	fi
 
-	_start_geoip_update_async
-	log_msg "Geo data missing, start in bootstrap mode and update in background" "Geo 数据缺失，已切换为引导模式并后台更新"
+	# Defer the geo download until the core is up: a fresh box has no working
+	# proxy yet, so fetching now would hit the (likely blocked) mirrors and fail.
+	# Record what was missing so the post-start watcher can fetch geo through the
+	# live proxy and only reload once geo is complete. See _finish_geo_bootstrap.
+	printf '%s %s\n' "$needs_mmdb" "$needs_geosite" > /var/run/clashoo_bootstrap_pending 2>/dev/null
+	log_msg "Geo data missing, started in bootstrap mode; will fetch geo via proxy then reload" "Geo 数据缺失，已切换为引导模式；待代理可用后自动补全并重载"
+}
+
+# After the core is up in bootstrap mode, fetch the missing geo data through the
+# now-working proxy and, once it is complete, reload the full (un-stripped)
+# config so geo rules take effect. Loop-safe: only reloads when the geo that was
+# actually missing is now valid, so the next start won't re-enter bootstrap.
+_finish_geo_bootstrap() {
+	local need_mmdb need_geosite still
+	[ -f /var/run/clashoo_bootstrap_pending ] || return 0
+	# core-only never strips, so a flag there would be stale — clear and skip.
+	if [ "$(uci -q get clashoo.config.core_only 2>/dev/null)" = "1" ]; then
+		rm -f /var/run/clashoo_bootstrap_pending >/dev/null 2>&1
+		return 0
+	fi
+	read need_mmdb need_geosite < /var/run/clashoo_bootstrap_pending 2>/dev/null
+
+	log_msg "Bootstrap: fetching geo data via proxy" "引导模式：正在通过代理补全 Geo 数据"
+	/usr/share/clashoo/update/geoip.sh >/dev/null 2>&1
+
+	still=0
+	[ "$need_mmdb" = "1" ] && ! _has_valid_local_mmdb && still=1
+	[ "$need_geosite" = "1" ] && ! _has_valid_local_geosite && still=1
+	if [ "$still" = "1" ]; then
+		log_msg "Bootstrap: geo fetch incomplete, will retry on next update" "引导模式：Geo 补全未完成，将在下次更新时重试"
+		return 0
+	fi
+
+	rm -f /var/run/clashoo_bootstrap_pending >/dev/null 2>&1
+	log_msg "Bootstrap: geo ready, reloading full config" "引导模式：Geo 数据已就绪，正在重载完整配置"
+	/etc/init.d/clashoo restart >/dev/null 2>&1
 }
 
 
@@ -1500,6 +1538,8 @@ _start_launch_core() {
 				runtime_run_health_check >/dev/null 2>&1
 				# kick access check immediately so panel shows current state (daemon polls every 5-20s)
 				/usr/share/clashoo/net/access_check_cache.sh >/dev/null 2>&1 &
+				# bootstrap mode: now that the proxy is up, fetch geo + reload full config
+				_finish_geo_bootstrap
 				exit 0
 			fi
 			bg_wait=$((bg_wait + 1))
