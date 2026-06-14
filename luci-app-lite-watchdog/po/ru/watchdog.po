@@ -1,0 +1,401 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: ru\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Connection Monitor"
+msgstr "Монитор подключения"
+
+msgid "Connection monitor settings"
+msgstr "Настройки монитора подключения"
+
+msgid "Configuration lite-watchdog"
+msgstr "Конфигурация lite-watchdog"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "Панель настройки для приложения lite-watchdog и графического интерфейса."
+
+msgid "Interface"
+msgstr "Интерфейс"
+
+msgid "Network interface for Internet access."
+msgstr "Сетевой интерфейс для доступа в Интернет."
+
+msgid "Port for communication with the modem"
+msgstr "Порт для связи с модемом"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Выберите один из доступных портов ttyUSBX."
+
+msgid "Please select a port"
+msgstr "Выберите порт"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "Выполните перезапуск модема перед возобновлением соединения."
+
+msgid "Restart modem with AT command"
+msgstr "Перезапустить модем с помощью команды AT"
+
+msgid "AT command to restart the modem."
+msgstr "Команда AT для перезапуска модема."
+
+msgid "AT command"
+msgstr "Команда AT"
+
+msgid "total checks"
+msgstr "всего проверок"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Конфигурация монитора подключения из пакета easyconfig. Дополнительная информация на %sфоруме eko.one.pl%s."
+
+msgid "eko.one.pl forum"
+msgstr "форум eko.one.pl"
+
+msgid "Enable a connection monitor."
+msgstr "Включить монитор подключения."
+
+msgid "System startup delay"
+msgstr "Задержка запуска системы"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1 - 59] минут(ы)"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "Ожидается десятичное значение от одного до пятидесяти девяти"
+
+msgid "Address or name"
+msgstr "Адрес или имя"
+
+msgid "Verification period"
+msgstr "Период проверки"
+
+msgid "Number of failed checks"
+msgstr "Количество неудачных проверок"
+
+msgid "Action"
+msgstr "Действие"
+
+msgid "Connection restart"
+msgstr "Перезапуск соединения"
+
+msgid "Modem restart"
+msgstr "Перезапуск модема"
+
+msgid "Reboot"
+msgstr "Перезагрузка"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "Изменения сохранены. Монитор подключения запущен."
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "Изменения сохранены. Монитор подключения не работает."
+
+msgid "Last check"
+msgstr "Последняя проверка"
+
+msgid "minimum"
+msgstr "минимум"
+
+msgid "average"
+msgstr "среднее"
+
+msgid "maximum"
+msgstr "максимум"
+
+msgid "Information"
+msgstr "Информация"
+
+msgid "Basic settings"
+msgstr "Основные настройки"
+
+msgid "failed"
+msgstr "неудачных"
+
+msgid "Failed"
+msgstr "Неудачных"
+
+msgid "out of"
+msgstr "из"
+
+msgid "Activity log"
+msgstr "Журнал активности"
+
+msgid "Wrong regular expression"
+msgstr "Неверное регулярное выражение"
+
+msgid "No matches..."
+msgstr "Совпадений не найдено..."
+
+msgid "Clear connection monitor log?"
+msgstr "Очистить журнал монитора подключения?"
+
+msgid "Download error"
+msgstr "Ошибка загрузки"
+
+msgid "Unable to load log data:"
+msgstr "Не удаётся загрузить данные журнала:"
+
+msgid "Entries filter"
+msgstr "Фильтр записей"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "Фильтровать записи с помощью регулярного выражения, нажмите [Delete] для удаления всего текста"
+
+msgid "Refresh"
+msgstr "Обновить"
+
+msgid "Connection monitor activity log"
+msgstr "Журнал активности монитора подключения"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Журнал активности монитора подключения из пакета easyconfig. Дополнительная информация на %sфоруме eko.one.pl%s."
+
+msgid "Show only the last entries"
+msgstr "Показать только последние записи"
+
+msgid "Message filter"
+msgstr "Фильтр сообщений"
+
+msgid "Refresh log"
+msgstr "Обновить журнал"
+
+msgid "Clear log"
+msgstr "Очистить журнал"
+
+msgid "Download log"
+msgstr "Скачать журнал"
+
+msgid "Upload log file"
+msgstr "Загрузить файл журнала"
+
+msgid "Type of messages"
+msgstr "Тип сообщений"
+
+msgid "All actions"
+msgstr "Все действия"
+
+msgid "Only connection problems"
+msgstr "Только проблемы с подключением"
+
+msgid "LED settings"
+msgstr "Настройки светодиода"
+
+msgid "The LED shows the internet connection status."
+msgstr "Светодиод показывает состояние интернет-соединения."
+
+msgid "Select the status LED."
+msgstr "Выбрать индикаторный светодиод."
+
+msgid "Edit user script"
+msgstr "Редактировать пользовательский скрипт"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "Перед выполнением действия система вызывает скрипт, в котором пользователь может разместить собственные команды."
+
+msgid "Edit user script"
+msgstr "Редактировать пользовательский скрипт"
+
+msgid "User script"
+msgstr "Пользовательский скрипт"
+
+msgid "User-defined commands."
+msgstr "Команды, определённые пользователем."
+
+msgid "Contents have been saved"
+msgstr "Содержимое сохранено"
+
+msgid "Unable to save the contents"
+msgstr "Не удаётся сохранить содержимое"
+
+msgid "Unable to read the contents"
+msgstr "Не удаётся прочитать содержимое"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "ONLINE"
+msgstr "ОНЛАЙН"
+
+msgid "OFFLINE"
+msgstr "ОФЛАЙН"
+
+msgid "Action"
+msgstr "Действие"
+
+msgid "Restarting interface"
+msgstr "Перезапуск интерфейса"
+
+msgid "Reboot"
+msgstr "Перезагрузка"
+
+msgid "At command was sent to modem"
+msgstr "Команда AT отправлена модему"
+
+msgid "January"
+msgstr "Январь"
+
+msgid "February"
+msgstr "Февраль"
+
+msgid "March"
+msgstr "Март"
+
+msgid "April"
+msgstr "Апрель"
+
+msgid "May"
+msgstr "Май"
+
+msgid "June"
+msgstr "Июнь"
+
+msgid "July"
+msgstr "Июль"
+
+msgid "August"
+msgstr "Август"
+
+msgid "September"
+msgstr "Сентябрь"
+
+msgid "October"
+msgstr "Октябрь"
+
+msgid "November"
+msgstr "Ноябрь"
+
+msgid "December"
+msgstr "Декабрь"
+
+msgid "Monday"
+msgstr "Понедельник"
+
+msgid "Tuesday"
+msgstr "Вторник"
+
+msgid "Wednesday"
+msgstr "Среда"
+
+msgid "Thursday"
+msgstr "Четверг"
+
+msgid "Friday"
+msgstr "Пятница"
+
+msgid "Saturday"
+msgstr "Суббота"
+
+msgid "Sunday"
+msgstr "Воскресенье"
+
+msgid "User Script Wizard"
+msgstr "Мастер пользовательских скриптов"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "Подсказка: Вам не нужно ничего сохранять в настройках. Выберите действия и нажмите кнопку Генерировать."
+
+msgid "modem restart"
+msgstr "перезапуск модема"
+
+msgid "reboot"
+msgstr "перезагрузка"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "Перезапустите модем, если перезапуск интерфейсов не восстановил доступ в Интернет."
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "Перезагрузка маршрутизатора, если перезапуск интерфейсов не восстановил доступ в Интернет."
+
+msgid "Actions in script"
+msgstr "Действия в скрипте"
+
+msgid "Modem actions"
+msgstr "Действия с модемом"
+
+msgid "Restart modem using at commands"
+msgstr "Перезапустить модем с помощью команд AT"
+
+msgid "effect depends on modem"
+msgstr "эффект зависит от модема"
+
+msgid "Some at commands can also restart the router."
+msgstr "Некоторые команды AT могут также перезапустить маршрутизатор."
+
+msgid "soft restart"
+msgstr "мягкая перезагрузка"
+
+msgid "hard restart"
+msgstr "жёсткая перезагрузка"
+
+msgid "Restart modem via GPIO."
+msgstr "Перезапустить модем через GPIO."
+
+msgid "Restart modem using GPIO"
+msgstr "Перезапустить модем через GPIO"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "Выбрать GPIO, связанный с модемом 4G/5G."
+
+msgid "Generate a script"
+msgstr "Создать скрипт"
+
+msgid "Generate user script"
+msgstr "Создать пользовательский скрипт"
+
+msgid "Generate and save the prepared script."
+msgstr "Создать и сохранить подготовленный скрипт."
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "Пользователь может добавить свой скрипт или создать новый из параметров выбора."
+
+msgid "Set test address (only one recommended)."
+msgstr "Задать тестовый адрес (рекомендуется только один)."
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "Доступные параметры зависят от ранее определённого основного действия (перезапуск интерфейса или маршрутизатора)."
+
+msgid "user code"
+msgstr "пользовательский код"
+
+msgid "Add custom commands before restarting the device."
+msgstr "Добавить пользовательские команды перед перезапуском устройства."
+
+msgid "from script:"
+msgstr "из скрипта:"
+
+msgid "USER-SCRIPT:"
+msgstr "ПОЛЬЗОВАТЕЛЬСКИЙ-СКРИПТ:"
+
+msgid "Soft modem restart"
+msgstr "Мягкий перезапуск модема"
+
+msgid "Hard modem restart"
+msgstr "Жёсткий перезапуск модема"
+
+msgid "Space for user actions"
+msgstr "Место для пользовательских действий"
+
+msgid "Commands before main action"
+msgstr "Команды перед основным действием"
+
+msgid "Commands after main action"
+msgstr "Команды после основного действия"
+
+msgid "Loading..."
+msgstr "Загрузка..."
+
+msgid "Waiting for ping command execution..."
+msgstr "Ожидание выполнения команды ping..."
+
+msgid "Watchdog initialized"
+msgstr "Watchdog инициализирован"
+
+msgid "uptime"
+msgstr "время работы"
+
+msgid "hosts"
+msgstr "хосты"

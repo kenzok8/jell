@@ -1,0 +1,400 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: nl\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+msgid "Connection Monitor"
+msgstr "Verbindingsmonitor"
+
+msgid "Connection monitor settings"
+msgstr "Instellingen verbindingsmonitor"
+
+msgid "Configuration lite-watchdog"
+msgstr "Configuratie lite-watchdog"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "Configuratiepaneel voor lite-watchdog en GUI-applicatie."
+
+msgid "Interface"
+msgstr "Interface"
+
+msgid "Network interface for Internet access."
+msgstr "Netwerkinterface voor internettoegang."
+
+msgid "Port for communication with the modem"
+msgstr "Poort voor communicatie met de modem"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Selecteer een van de beschikbare ttyUSBX-poorten."
+
+msgid "Please select a port"
+msgstr "Selecteer alstublieft een poort"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "Voer een modemherstartuit alvorens de verbinding te hervatten."
+
+msgid "Restart modem with AT command"
+msgstr "Modem herstarten met AT-commando"
+
+msgid "AT command to restart the modem."
+msgstr "AT-commando om de modem opnieuw te starten."
+
+msgid "AT command"
+msgstr "AT-commando"
+
+msgid "total checks"
+msgstr "totale controles"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Configuratie van de verbindingsmonitor bekend uit het easyconfig-pakket. Meer informatie op het %seko.one.pl-forum%s."
+
+msgid "eko.one.pl forum"
+msgstr "eko.one.pl-forum"
+
+msgid "Enable a connection monitor."
+msgstr "Schakel een verbindingsmonitor in."
+
+msgid "System startup delay"
+msgstr "Systeemstartvertraging"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1 - 59] minuten"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "Verwacht een decimale waarde tussen een en negenenvijftig"
+
+msgid "Address or name"
+msgstr "Adres of naam"
+
+msgid "Verification period"
+msgstr "Verificatieperiode"
+
+msgid "Number of failed checks"
+msgstr "Aantal mislukte controles"
+
+msgid "Action"
+msgstr "Actie"
+
+msgid "Connection restart"
+msgstr "Verbinding opnieuw starten"
+
+msgid "Modem restart"
+msgstr "Modem herstarten"
+
+msgid "Reboot"
+msgstr "Apparaat opnieuw starten"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "Wijzigingen zijn opgeslagen. Verbindingsmonitor is gestart."
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "Wijzigingen zijn opgeslagen. Verbindingsmonitor wordt niet uitgevoerd."
+
+msgid "Last check"
+msgstr "Laatste controle"
+
+msgid "minimum"
+msgstr "minimum"
+
+msgid "average"
+msgstr "gemiddelde"
+
+msgid "maximum"
+msgstr "maximum"
+
+msgid "Information"
+msgstr "Informatie"
+
+msgid "Basic settings"
+msgstr "Basisinstellingen"
+
+msgid "failed"
+msgstr "mislukt"
+
+msgid "Failed"
+msgstr "Mislukt"
+
+msgid "out of"
+msgstr "van"
+
+msgid "Activity log"
+msgstr "Activiteitenlogboek"
+
+msgid "Wrong regular expression"
+msgstr "Onjuiste reguliere expressie"
+
+msgid "No matches..."
+msgstr "Geen resultaten..."
+
+msgid "Clear connection monitor log?"
+msgstr "Verbindingsmonitorlog wissen?"
+
+msgid "Download error"
+msgstr "Downloadfout"
+
+msgid "Unable to load log data:"
+msgstr "Kan loggegevens niet laden:"
+
+msgid "Entries filter"
+msgstr "Invoerfilter"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "Filter invoeren met behulp van regexp, druk [Delete] om alle tekst te verwijderen"
+
+msgid "Refresh"
+msgstr "Vernieuwen"
+
+msgid "Connection monitor activity log"
+msgstr "Verbindingsmonitor activiteitenlogboek"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Verbindingsmonitor activiteitenlogboek bekend uit het easyconfig-pakket. Meer informatie op het %seko.one.pl-forum%s."
+
+msgid "Show only the last entries"
+msgstr "Alleen de laatste invoeren weergeven"
+
+msgid "Message filter"
+msgstr "Berichtfilter"
+
+msgid "Refresh log"
+msgstr "Logboek vernieuwen"
+
+msgid "Clear log"
+msgstr "Logboek wissen"
+
+msgid "Download log"
+msgstr "Logboek downloaden"
+
+msgid "Upload log file"
+msgstr "Logbestand uploaden"
+
+msgid "Type of messages"
+msgstr "Type berichten"
+
+msgid "All actions"
+msgstr "Alle acties"
+
+msgid "Only connection problems"
+msgstr "Alleen verbindingsproblemen"
+
+msgid "LED settings"
+msgstr "LED-instellingen"
+
+msgid "The LED shows the internet connection status."
+msgstr "De LED geeft de status van de internetverbinding aan."
+
+msgid "Select the status LED."
+msgstr "Selecteer de status-LED."
+
+msgid "Edit user script"
+msgstr "Gebruikersscript bewerken"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "Alvorens de actie uit te voeren, roept het systeem een script aan waarin de gebruiker zijn eigen commando's kan plaatsen."
+
+msgid "Edit user script"
+msgstr "Gebruikersscript bewerken"
+
+msgid "User script"
+msgstr "Gebruikersscript"
+
+msgid "User-defined commands."
+msgstr "Door gebruiker gedefinieerde commando's."
+
+msgid "Contents have been saved"
+msgstr "Inhoud is opgeslagen"
+
+msgid "Unable to save the contents"
+msgstr "Kan inhoud niet opslaan"
+
+msgid "Unable to read the contents"
+msgstr "Kan inhoud niet lezen"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "ONLINE"
+msgstr "ONLINE"
+
+msgid "OFFLINE"
+msgstr "OFFLINE"
+
+msgid "Action"
+msgstr "Actie"
+
+msgid "Restarting interface"
+msgstr "Verbinding opnieuw starten"
+
+msgid "Reboot"
+msgstr "Apparaat opnieuw starten"
+
+msgid "At command was sent to modem"
+msgstr "AT-commando is naar modem verzonden"
+
+msgid "January"
+msgstr "Januari"
+
+msgid "February"
+msgstr "Februari"
+
+msgid "March"
+msgstr "Maart"
+
+msgid "April"
+msgstr "April"
+
+msgid "May"
+msgstr "Mei"
+
+msgid "June"
+msgstr "Juni"
+
+msgid "July"
+msgstr "Juli"
+
+msgid "August"
+msgstr "Augustus"
+
+msgid "September"
+msgstr "September"
+
+msgid "October"
+msgstr "Oktober"
+
+msgid "November"
+msgstr "November"
+
+msgid "December"
+msgstr "December"
+
+msgid "Monday"
+msgstr "Maandag"
+
+msgid "Tuesday"
+msgstr "Dinsdag"
+
+msgid "Wednesday"
+msgstr "Woensdag"
+
+msgid "Thursday"
+msgstr "Donderdag"
+
+msgid "Friday"
+msgstr "Vrijdag"
+
+msgid "Saturday"
+msgstr "Zaterdag"
+
+msgid "Sunday"
+msgstr "Zondag"
+
+msgid "User Script Wizard"
+msgstr "Wizard gebruikersscript"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "Hint: U hoeft niets in de instellingen op te slaan. Selecteer de acties en klik op de knop Genereren."
+
+msgid "modem restart"
+msgstr "modem herstarten"
+
+msgid "reboot"
+msgstr "apparaat opnieuw starten"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "Start de modem opnieuw op als het herstarten van de interfaces internettoegangnie heeft hersteld."
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "Als het herstarten van de interfaces internettoegangnie heeft hersteld, start u de router opnieuw op."
+
+msgid "Actions in script"
+msgstr "Acties in script"
+
+msgid "Modem actions"
+msgstr "Modemacties"
+
+msgid "Restart modem using at commands"
+msgstr "Start modem opnieuw op met AT-commando's."
+
+msgid "effect depends on modem"
+msgstr "effect is afhankelijk van modem"
+
+msgid "Some at commands can also restart the router."
+msgstr "Sommige AT-commando's kunnen ook de router opnieuw starten."
+
+msgid "soft restart"
+msgstr "zachte herstart"
+
+msgid "hard restart"
+msgstr "harde herstart"
+
+msgid "Restart modem via GPIO."
+msgstr "Modem herstarten via GPIO."
+
+msgid "Restart modem using GPIO"
+msgstr "Start modem opnieuw op met behulp van GPIO"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "Selecteer de GPIO met betrekking tot 4G/5G-modem."
+
+msgid "Generate a script"
+msgstr "Een script genereren"
+
+msgid "Generate user script"
+msgstr "Gebruikersscript genereren"
+
+msgid "Generate and save the prepared script."
+msgstr "Genereer en sla het voorbereide script op."
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "Gebruiker kan zijn script toevoegen of een nieuw genereren uit de selectieopties."
+
+msgid "Set test address (only one recommended)."
+msgstr "Stel testadres in (slechts één aanbevolen)."
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "De beschikbare opties zijn afhankelijk van de eerder gedefinieerde hoofdactie (interface- of routerherstarten)."
+
+msgid "user code"
+msgstr "gebruikerscode"
+
+msgid "Add custom commands before restarting the device."
+msgstr "Voeg aangepaste commando's toe alvorens het apparaat opnieuw te starten."
+
+msgid "from script:"
+msgstr "uit script:"
+
+msgid "USER-SCRIPT:"
+msgstr "GEBRUIKERSSCRIPT:"
+
+msgid "Soft modem restart"
+msgstr "Zachte modemherstart"
+
+msgid "Hard modem restart"
+msgstr "Harde modemherstart"
+
+msgid "Space for user actions"
+msgstr "Ruimte voor gebruikersacties"
+
+msgid "Commands before main action"
+msgstr "Commando's vóór hoofdactie"
+
+msgid "Commands after main action"
+msgstr "Commando's na hoofdactie"
+
+msgid "Loading..."
+msgstr "Laden..."
+
+msgid "Waiting for ping command execution..."
+msgstr "Wachten op uitvoering van ping-commando..."
+
+msgid "Watchdog initialized"
+msgstr "Watchdog geïnitialiseerd"
+
+msgid "uptime"
+msgstr "uptime"
+
+msgid "hosts"
+msgstr "hosts"

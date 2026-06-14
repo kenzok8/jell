@@ -1,0 +1,400 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: cs\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
+
+msgid "Connection Monitor"
+msgstr "Monitor připojení"
+
+msgid "Connection monitor settings"
+msgstr "Nastavení monitoru připojení"
+
+msgid "Configuration lite-watchdog"
+msgstr "Konfigurace lite-watchdog"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "Panel nastavení pro aplikaci lite-watchdog a uživatelské rozhraní."
+
+msgid "Interface"
+msgstr "Rozhraní"
+
+msgid "Network interface for Internet access."
+msgstr "Síťové rozhraní pro přístup na Internet."
+
+msgid "Port for communication with the modem"
+msgstr "Port pro komunikaci s modemem"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Vyberte jeden z dostupných portů ttyUSBX."
+
+msgid "Please select a port"
+msgstr "Vyberte port"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "Proveďte restartování modemu před obnovením připojení."
+
+msgid "Restart modem with AT command"
+msgstr "Restartování modemu příkazem AT"
+
+msgid "AT command to restart the modem."
+msgstr "Příkaz AT pro restartování modemu."
+
+msgid "AT command"
+msgstr "Příkaz AT"
+
+msgid "total checks"
+msgstr "celkem kontrol"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Konfigurace monitoru připojení známého z balíčku easyconfig. Více informací na %sfóru eko.one.pl%s."
+
+msgid "eko.one.pl forum"
+msgstr "fórum eko.one.pl"
+
+msgid "Enable a connection monitor."
+msgstr "Povolte monitor připojení."
+
+msgid "System startup delay"
+msgstr "Zpoždění při spuštění systému"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1 - 59] minut(-y)"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "Očekávána je desítková hodnota mezi jednou a padesáti devíti"
+
+msgid "Address or name"
+msgstr "Adresa nebo název"
+
+msgid "Verification period"
+msgstr "Období ověření"
+
+msgid "Number of failed checks"
+msgstr "Počet neúspěšných kontrol"
+
+msgid "Action"
+msgstr "Akce"
+
+msgid "Connection restart"
+msgstr "Restartování připojení k internetu"
+
+msgid "Modem restart"
+msgstr "Restartování modemu"
+
+msgid "Reboot"
+msgstr "Restartování zařízení"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "Změny byly uloženy. Monitor připojení byl spuštěn."
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "Změny byly uloženy. Monitor připojení není spuštěn."
+
+msgid "Last check"
+msgstr "Poslední kontrola"
+
+msgid "minimum"
+msgstr "minimum"
+
+msgid "average"
+msgstr "průměr"
+
+msgid "maximum"
+msgstr "maximum"
+
+msgid "Information"
+msgstr "Informace"
+
+msgid "Basic settings"
+msgstr "Základní nastavení"
+
+msgid "failed"
+msgstr "neúspěšných"
+
+msgid "Failed"
+msgstr "Neúspěšných"
+
+msgid "out of"
+msgstr "z"
+
+msgid "Activity log"
+msgstr "Protokol aktivit"
+
+msgid "Wrong regular expression"
+msgstr "Nesprávný regulární výraz"
+
+msgid "No matches..."
+msgstr "Žádné výsledky..."
+
+msgid "Clear connection monitor log?"
+msgstr "Vymazat protokol monitoru připojení?"
+
+msgid "Download error"
+msgstr "Chyba stahování"
+
+msgid "Unable to load log data:"
+msgstr "Nelze načíst data protokolu:"
+
+msgid "Entries filter"
+msgstr "Filtr položek"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "Filtrujte položky pomocí regulárního výrazu, stiskněte [Delete] pro smazání veškerého textu"
+
+msgid "Refresh"
+msgstr "Obnovit"
+
+msgid "Connection monitor activity log"
+msgstr "Protokol aktivit monitoru připojení"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Protokol aktivit monitoru připojení známý z balíčku easyconfig. Více informací na %sfóru eko.one.pl%s."
+
+msgid "Show only the last entries"
+msgstr "Zobrazit pouze poslední položky"
+
+msgid "Message filter"
+msgstr "Filtr zpráv"
+
+msgid "Refresh log"
+msgstr "Obnovit protokol"
+
+msgid "Clear log"
+msgstr "Vymazat protokol"
+
+msgid "Download log"
+msgstr "Stáhnout protokol"
+
+msgid "Upload log file"
+msgstr "Nahrát soubor protokolu"
+
+msgid "Type of messages"
+msgstr "Typ zpráv"
+
+msgid "All actions"
+msgstr "Všechny akce"
+
+msgid "Only connection problems"
+msgstr "Pouze problémy s připojením"
+
+msgid "LED settings"
+msgstr "Nastavení LED"
+
+msgid "The LED shows the internet connection status."
+msgstr "LED indikátor zobrazuje stav připojení na Internet."
+
+msgid "Select the status LED."
+msgstr "Vyberte LED indikátor stavu."
+
+msgid "Edit user script"
+msgstr "Upravit uživatelský skript"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "Před provedením akce systém zavolá skript, do kterého může uživatel umístit své vlastní příkazy."
+
+msgid "Edit user script"
+msgstr "Upravit uživatelský skript"
+
+msgid "User script"
+msgstr "Uživatelský skript"
+
+msgid "User-defined commands."
+msgstr "Příkazy definované uživatelem."
+
+msgid "Contents have been saved"
+msgstr "Obsah byl uložen"
+
+msgid "Unable to save the contents"
+msgstr "Obsah nelze uložit"
+
+msgid "Unable to read the contents"
+msgstr "Obsah nelze načíst"
+
+msgid "Status"
+msgstr "Stav"
+
+msgid "ONLINE"
+msgstr "ONLINE"
+
+msgid "OFFLINE"
+msgstr "OFFLINE"
+
+msgid "Action"
+msgstr "Akce"
+
+msgid "Restarting interface"
+msgstr "Restartování připojení k internetu"
+
+msgid "Reboot"
+msgstr "Restartování zařízení"
+
+msgid "At command was sent to modem"
+msgstr "Příkaz AT byl poslán do modemu"
+
+msgid "January"
+msgstr "Leden"
+
+msgid "February"
+msgstr "Únor"
+
+msgid "March"
+msgstr "Březen"
+
+msgid "April"
+msgstr "Duben"
+
+msgid "May"
+msgstr "Květen"
+
+msgid "June"
+msgstr "Červen"
+
+msgid "July"
+msgstr "Červenec"
+
+msgid "August"
+msgstr "Srpen"
+
+msgid "September"
+msgstr "Září"
+
+msgid "October"
+msgstr "Říjen"
+
+msgid "November"
+msgstr "Listopad"
+
+msgid "December"
+msgstr "Prosinec"
+
+msgid "Monday"
+msgstr "Pondělí"
+
+msgid "Tuesday"
+msgstr "Úterý"
+
+msgid "Wednesday"
+msgstr "Středa"
+
+msgid "Thursday"
+msgstr "Čtvrtek"
+
+msgid "Friday"
+msgstr "Pátek"
+
+msgid "Saturday"
+msgstr "Sobota"
+
+msgid "Sunday"
+msgstr "Neděle"
+
+msgid "User Script Wizard"
+msgstr "Průvodce uživatelským skriptem"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "Tip: Nemusíte nic ukládat v nastavení. Vyberte akce a klikněte na tlačítko Generovat."
+
+msgid "modem restart"
+msgstr "restartování modemu"
+
+msgid "reboot"
+msgstr "restartování zařízení"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "Restartujte modem, pokud restartování rozhraní neobnovilo přístup na Internet."
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "Pokud restartování rozhraní neobnovilo přístup na Internet, restartujte router."
+
+msgid "Actions in script"
+msgstr "Akce ve skriptu"
+
+msgid "Modem actions"
+msgstr "Akce s modemem"
+
+msgid "Restart modem using at commands"
+msgstr "Restartujte modem pomocí příkazů AT."
+
+msgid "effect depends on modem"
+msgstr "efekt závisí na modemu"
+
+msgid "Some at commands can also restart the router."
+msgstr "Některé příkazy AT mohou také restartovat router."
+
+msgid "soft restart"
+msgstr "měkký restart"
+
+msgid "hard restart"
+msgstr "tvrdý restart"
+
+msgid "Restart modem via GPIO."
+msgstr "Restartování modemu přes GPIO."
+
+msgid "Restart modem using GPIO"
+msgstr "Restartujte modem pomocí GPIO"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "Vyberte GPIO související s modemem 4G/5G."
+
+msgid "Generate a script"
+msgstr "Vygenerujte skript"
+
+msgid "Generate user script"
+msgstr "Vygenerujte uživatelský skript"
+
+msgid "Generate and save the prepared script."
+msgstr "Vygenerujte a uložte připravený skript."
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "Uživatel může přidat svůj skript nebo vygenerovat nový z možností výběru."
+
+msgid "Set test address (only one recommended)."
+msgstr "Nastavte testovací adresu (doporučuje se pouze jedna)."
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "Dostupné možnosti závisí na dříve definované hlavní akci (restart rozhraní nebo routeru)."
+
+msgid "user code"
+msgstr "uživatelský kód"
+
+msgid "Add custom commands before restarting the device."
+msgstr "Před restartováním zařízení přidejte vlastní příkazy."
+
+msgid "from script:"
+msgstr "ze skriptu:"
+
+msgid "USER-SCRIPT:"
+msgstr "Uživatelský skript:"
+
+msgid "Soft modem restart"
+msgstr "Měkký restart modemu"
+
+msgid "Hard modem restart"
+msgstr "Tvrdý restart modemu"
+
+msgid "Space for user actions"
+msgstr "Prostor pro uživatelské akce"
+
+msgid "Commands before main action"
+msgstr "Příkazy před hlavní akcí"
+
+msgid "Commands after main action"
+msgstr "Příkazy po hlavní akci"
+
+msgid "Loading..."
+msgstr "Načítání..."
+
+msgid "Waiting for ping command execution..."
+msgstr "Čekání na provedení příkazu ping..."
+
+msgid "Watchdog initialized"
+msgstr "Watchdog inicializován"
+
+msgid "uptime"
+msgstr "doba provozu"
+
+msgid "hosts"
+msgstr "hostitele"

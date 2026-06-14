@@ -1,0 +1,401 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: lt\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"(n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Connection Monitor"
+msgstr "Monitor connessione"
+
+msgid "Connection monitor settings"
+msgstr "Impostazioni monitor connessione"
+
+msgid "Configuration lite-watchdog"
+msgstr "Configurazione lite-watchdog"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "Pannello di configurazione per l'applicazione lite-watchdog e GUI."
+
+msgid "Interface"
+msgstr "Interfaccia"
+
+msgid "Network interface for Internet access."
+msgstr "Interfaccia di rete per l'accesso a Internet."
+
+msgid "Port for communication with the modem"
+msgstr "Porta per la comunicazione con il modem"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Selezionare una delle porte ttyUSBX disponibili."
+
+msgid "Please select a port"
+msgstr "Selezionare una porta"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "Eseguire un riavvio del modem prima di riprendere la connessione."
+
+msgid "Restart modem with AT command"
+msgstr "Riavvia il modem con il comando AT"
+
+msgid "AT command to restart the modem."
+msgstr "Comando AT per riavviare il modem."
+
+msgid "AT command"
+msgstr "Comando AT"
+
+msgid "total checks"
+msgstr "verifiche totali"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Configurazione del monitor di connessione del pacchetto easyconfig. Ulteriori informazioni nel %sforum eko.one.pl%s."
+
+msgid "eko.one.pl forum"
+msgstr "forum eko.one.pl"
+
+msgid "Enable a connection monitor."
+msgstr "Attiva un monitor di connessione."
+
+msgid "System startup delay"
+msgstr "Ritardo di avvio del sistema"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1 - 59] minuto/i"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "Si attende un valore decimale tra uno e cinquantanove"
+
+msgid "Address or name"
+msgstr "Indirizzo o nome"
+
+msgid "Verification period"
+msgstr "Periodo di verifica"
+
+msgid "Number of failed checks"
+msgstr "Numero di verifiche fallite"
+
+msgid "Action"
+msgstr "Azione"
+
+msgid "Connection restart"
+msgstr "Riavvio connessione"
+
+msgid "Modem restart"
+msgstr "Riavvio modem"
+
+msgid "Reboot"
+msgstr "Riavvio"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "Le modifiche sono state salvate. Il monitor di connessione è stato avviato."
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "Le modifiche sono state salvate. Il monitor di connessione non è in esecuzione."
+
+msgid "Last check"
+msgstr "Ultima verifica"
+
+msgid "minimum"
+msgstr "minimo"
+
+msgid "average"
+msgstr "media"
+
+msgid "maximum"
+msgstr "massimo"
+
+msgid "Information"
+msgstr "Informazioni"
+
+msgid "Basic settings"
+msgstr "Impostazioni di base"
+
+msgid "failed"
+msgstr "fallite"
+
+msgid "Failed"
+msgstr "Fallite"
+
+msgid "out of"
+msgstr "su"
+
+msgid "Activity log"
+msgstr "Registro attività"
+
+msgid "Wrong regular expression"
+msgstr "Espressione regolare errata"
+
+msgid "No matches..."
+msgstr "Nessun risultato..."
+
+msgid "Clear connection monitor log?"
+msgstr "Cancellare il registro del monitor di connessione?"
+
+msgid "Download error"
+msgstr "Errore di download"
+
+msgid "Unable to load log data:"
+msgstr "Impossibile caricare i dati del registro:"
+
+msgid "Entries filter"
+msgstr "Filtro voci"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "Filtrare le voci con espressione regolare, premere [Canc] per eliminare tutto il testo"
+
+msgid "Refresh"
+msgstr "Aggiorna"
+
+msgid "Connection monitor activity log"
+msgstr "Registro attività monitor connessione"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Registro attività del monitor di connessione del pacchetto easyconfig. Ulteriori informazioni nel %sforum eko.one.pl%s."
+
+msgid "Show only the last entries"
+msgstr "Mostra solo le ultime voci"
+
+msgid "Message filter"
+msgstr "Filtro messaggi"
+
+msgid "Refresh log"
+msgstr "Aggiorna registro"
+
+msgid "Clear log"
+msgstr "Cancella registro"
+
+msgid "Download log"
+msgstr "Scarica registro"
+
+msgid "Upload log file"
+msgstr "Carica file registro"
+
+msgid "Type of messages"
+msgstr "Tipo di messaggi"
+
+msgid "All actions"
+msgstr "Tutte le azioni"
+
+msgid "Only connection problems"
+msgstr "Solo problemi di connessione"
+
+msgid "LED settings"
+msgstr "Impostazioni LED"
+
+msgid "The LED shows the internet connection status."
+msgstr "Il LED mostra lo stato della connessione Internet."
+
+msgid "Select the status LED."
+msgstr "Selezionare il LED di stato."
+
+msgid "Edit user script"
+msgstr "Modifica script utente"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "Prima di eseguire l'azione, il sistema chiama uno script in cui l'utente può inserire i propri comandi."
+
+msgid "Edit user script"
+msgstr "Modifica script utente"
+
+msgid "User script"
+msgstr "Script utente"
+
+msgid "User-defined commands."
+msgstr "Comandi definiti dall'utente."
+
+msgid "Contents have been saved"
+msgstr "Il contenuto è stato salvato"
+
+msgid "Unable to save the contents"
+msgstr "Impossibile salvare il contenuto"
+
+msgid "Unable to read the contents"
+msgstr "Impossibile leggere il contenuto"
+
+msgid "Status"
+msgstr "Stato"
+
+msgid "ONLINE"
+msgstr "ONLINE"
+
+msgid "OFFLINE"
+msgstr "OFFLINE"
+
+msgid "Action"
+msgstr "Azione"
+
+msgid "Restarting interface"
+msgstr "Riavvio interfaccia"
+
+msgid "Reboot"
+msgstr "Riavvio"
+
+msgid "At command was sent to modem"
+msgstr "Il comando AT è stato inviato al modem"
+
+msgid "January"
+msgstr "Gennaio"
+
+msgid "February"
+msgstr "Febbraio"
+
+msgid "March"
+msgstr "Marzo"
+
+msgid "April"
+msgstr "Aprile"
+
+msgid "May"
+msgstr "Maggio"
+
+msgid "June"
+msgstr "Giugno"
+
+msgid "July"
+msgstr "Luglio"
+
+msgid "August"
+msgstr "Agosto"
+
+msgid "September"
+msgstr "Settembre"
+
+msgid "October"
+msgstr "Ottobre"
+
+msgid "November"
+msgstr "Novembre"
+
+msgid "December"
+msgstr "Dicembre"
+
+msgid "Monday"
+msgstr "Lunedì"
+
+msgid "Tuesday"
+msgstr "Martedì"
+
+msgid "Wednesday"
+msgstr "Mercoledì"
+
+msgid "Thursday"
+msgstr "Giovedì"
+
+msgid "Friday"
+msgstr "Venerdì"
+
+msgid "Saturday"
+msgstr "Sabato"
+
+msgid "Sunday"
+msgstr "Domenica"
+
+msgid "User Script Wizard"
+msgstr "Procedura guidata script utente"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "Suggerimento: Non è necessario salvare nulla nelle impostazioni. Selezionare le azioni e fare clic sul pulsante Genera."
+
+msgid "modem restart"
+msgstr "riavvio modem"
+
+msgid "reboot"
+msgstr "riavvio"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "Riavviare il modem se il riavvio delle interfacce non ha ripristinato l'accesso a Internet."
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "Riavvio del router se il riavvio delle interfacce non ha ripristinato l'accesso a Internet."
+
+msgid "Actions in script"
+msgstr "Azioni nello script"
+
+msgid "Modem actions"
+msgstr "Azioni modem"
+
+msgid "Restart modem using at commands"
+msgstr "Riavvia il modem con i comandi AT"
+
+msgid "effect depends on modem"
+msgstr "l'effetto dipende dal modem"
+
+msgid "Some at commands can also restart the router."
+msgstr "Alcuni comandi AT possono anche riavviare il router."
+
+msgid "soft restart"
+msgstr "riavvio software"
+
+msgid "hard restart"
+msgstr "riavvio hardware"
+
+msgid "Restart modem via GPIO."
+msgstr "Riavvia il modem tramite GPIO."
+
+msgid "Restart modem using GPIO"
+msgstr "Riavvia il modem tramite GPIO"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "Selezionare il GPIO relativo al modem 4G/5G."
+
+msgid "Generate a script"
+msgstr "Genera uno script"
+
+msgid "Generate user script"
+msgstr "Genera script utente"
+
+msgid "Generate and save the prepared script."
+msgstr "Genera e salva lo script preparato."
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "L'utente può aggiungere il proprio script o generarne uno nuovo dalle opzioni di selezione."
+
+msgid "Set test address (only one recommended)."
+msgstr "Impostare l'indirizzo di test (si consiglia solo uno)."
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "Le opzioni disponibili dipendono dall'azione principale definita in precedenza (riavvio dell'interfaccia o del router)."
+
+msgid "user code"
+msgstr "codice utente"
+
+msgid "Add custom commands before restarting the device."
+msgstr "Aggiungere comandi personalizzati prima di riavviare il dispositivo."
+
+msgid "from script:"
+msgstr "dallo script:"
+
+msgid "USER-SCRIPT:"
+msgstr "SCRIPT-UTENTE:"
+
+msgid "Soft modem restart"
+msgstr "Riavvio software del modem"
+
+msgid "Hard modem restart"
+msgstr "Riavvio hardware del modem"
+
+msgid "Space for user actions"
+msgstr "Spazio per le azioni utente"
+
+msgid "Commands before main action"
+msgstr "Comandi prima dell'azione principale"
+
+msgid "Commands after main action"
+msgstr "Comandi dopo l'azione principale"
+
+msgid "Loading..."
+msgstr "Caricamento..."
+
+msgid "Waiting for ping command execution..."
+msgstr "In attesa dell'esecuzione del comando ping..."
+
+msgid "Watchdog initialized"
+msgstr "Watchdog inizializzato"
+
+msgid "uptime"
+msgstr "disponibilità"
+
+msgid "hosts"
+msgstr "host"

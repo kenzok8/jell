@@ -1,0 +1,399 @@
+msgid ""
+msgstr ""
+"Language: ko\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Connection Monitor"
+msgstr "연결 모니터"
+
+msgid "Connection monitor settings"
+msgstr "연결 모니터 설정"
+
+msgid "Configuration lite-watchdog"
+msgstr "lite-watchdog 설정"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "lite-watchdog 및 GUI 응용 프로그램의 설정 패널입니다."
+
+msgid "Interface"
+msgstr "인터페이스"
+
+msgid "Network interface for Internet access."
+msgstr "인터넷 접속용 네트워크 인터페이스."
+
+msgid "Port for communication with the modem"
+msgstr "모뎀과의 통신용 포트"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "사용 가능한 ttyUSBX 포트 중 하나를 선택하세요."
+
+msgid "Please select a port"
+msgstr "포트를 선택하세요"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "연결을 재개하기 전에 모뎀을 다시 시작합니다."
+
+msgid "Restart modem with AT command"
+msgstr "AT 명령으로 모뎀 다시 시작"
+
+msgid "AT command to restart the modem."
+msgstr "모뎀을 다시 시작하는 AT 명령입니다."
+
+msgid "AT command"
+msgstr "AT 명령"
+
+msgid "total checks"
+msgstr "총 검사"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "easyconfig 패키지에서 알려진 연결 모니터 구성입니다. %seko.one.pl 포럼%s에서 자세한 정보를 확인하세요."
+
+msgid "eko.one.pl forum"
+msgstr "eko.one.pl 포럼"
+
+msgid "Enable a connection monitor."
+msgstr "연결 모니터를 활성화합니다."
+
+msgid "System startup delay"
+msgstr "시스템 시작 지연"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1～59]분"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "1에서 59 사이의 10진수 값을 입력하세요"
+
+msgid "Address or name"
+msgstr "주소 또는 이름"
+
+msgid "Verification period"
+msgstr "검증 기간"
+
+msgid "Number of failed checks"
+msgstr "실패한 검사 수"
+
+msgid "Action"
+msgstr "작업"
+
+msgid "Connection restart"
+msgstr "연결 재시작"
+
+msgid "Modem restart"
+msgstr "모뎀 재시작"
+
+msgid "Reboot"
+msgstr "다시 시작"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "변경 사항이 저장되었습니다. 연결 모니터가 시작되었습니다."
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "변경 사항이 저장되었습니다. 연결 모니터가 실행되지 않습니다."
+
+msgid "Last check"
+msgstr "마지막 검사"
+
+msgid "minimum"
+msgstr "최소"
+
+msgid "average"
+msgstr "평균"
+
+msgid "maximum"
+msgstr "최대"
+
+msgid "Information"
+msgstr "정보"
+
+msgid "Basic settings"
+msgstr "기본 설정"
+
+msgid "failed"
+msgstr "실패"
+
+msgid "Failed"
+msgstr "실패"
+
+msgid "out of"
+msgstr "～의"
+
+msgid "Activity log"
+msgstr "활동 로그"
+
+msgid "Wrong regular expression"
+msgstr "정규식이 잘못되었습니다"
+
+msgid "No matches..."
+msgstr "일치하는 항목이 없습니다..."
+
+msgid "Clear connection monitor log?"
+msgstr "연결 모니터 로그를 삭제하시겠습니까?"
+
+msgid "Download error"
+msgstr "다운로드 오류"
+
+msgid "Unable to load log data:"
+msgstr "로그 데이터를 로드할 수 없습니다:"
+
+msgid "Entries filter"
+msgstr "항목 필터"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "정규식을 사용하여 항목을 필터링하고, [삭제]를 눌러 모든 텍스트 삭제"
+
+msgid "Refresh"
+msgstr "새로고침"
+
+msgid "Connection monitor activity log"
+msgstr "연결 모니터 활동 로그"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "easyconfig 패키지에서 알려진 연결 모니터 활동 로그입니다. %seko.one.pl 포럼%s에서 자세한 정보를 확인하세요."
+
+msgid "Show only the last entries"
+msgstr "마지막 항목만 표시"
+
+msgid "Message filter"
+msgstr "메시지 필터"
+
+msgid "Refresh log"
+msgstr "로그 새로고침"
+
+msgid "Clear log"
+msgstr "로그 삭제"
+
+msgid "Download log"
+msgstr "로그 다운로드"
+
+msgid "Upload log file"
+msgstr "로그 파일 업로드"
+
+msgid "Type of messages"
+msgstr "메시지 유형"
+
+msgid "All actions"
+msgstr "모든 작업"
+
+msgid "Only connection problems"
+msgstr "연결 문제만"
+
+msgid "LED settings"
+msgstr "LED 설정"
+
+msgid "The LED shows the internet connection status."
+msgstr "LED는 인터넷 연결 상태를 표시합니다."
+
+msgid "Select the status LED."
+msgstr "상태 LED를 선택합니다."
+
+msgid "Edit user script"
+msgstr "사용자 스크립트 편집"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "작업 실행 전에 시스템이 사용자가 고유한 명령을 배치할 수 있는 스크립트를 호출합니다."
+
+msgid "Edit user script"
+msgstr "사용자 스크립트 편집"
+
+msgid "User script"
+msgstr "사용자 스크립트"
+
+msgid "User-defined commands."
+msgstr "사용자 정의 명령."
+
+msgid "Contents have been saved"
+msgstr "콘텐츠가 저장되었습니다"
+
+msgid "Unable to save the contents"
+msgstr "콘텐츠를 저장할 수 없습니다"
+
+msgid "Unable to read the contents"
+msgstr "콘텐츠를 읽을 수 없습니다"
+
+msgid "Status"
+msgstr "상태"
+
+msgid "ONLINE"
+msgstr "온라인"
+
+msgid "OFFLINE"
+msgstr "오프라인"
+
+msgid "Action"
+msgstr "작업"
+
+msgid "Restarting interface"
+msgstr "인터페이스 재시작 중"
+
+msgid "Reboot"
+msgstr "다시 시작"
+
+msgid "At command was sent to modem"
+msgstr "AT 명령이 모뎀으로 전송되었습니다"
+
+msgid "January"
+msgstr "1월"
+
+msgid "February"
+msgstr "2월"
+
+msgid "March"
+msgstr "3월"
+
+msgid "April"
+msgstr "4월"
+
+msgid "May"
+msgstr "5월"
+
+msgid "June"
+msgstr "6월"
+
+msgid "July"
+msgstr "7월"
+
+msgid "August"
+msgstr "8월"
+
+msgid "September"
+msgstr "9월"
+
+msgid "October"
+msgstr "10월"
+
+msgid "November"
+msgstr "11월"
+
+msgid "December"
+msgstr "12월"
+
+msgid "Monday"
+msgstr "월요일"
+
+msgid "Tuesday"
+msgstr "화요일"
+
+msgid "Wednesday"
+msgstr "수요일"
+
+msgid "Thursday"
+msgstr "목요일"
+
+msgid "Friday"
+msgstr "금요일"
+
+msgid "Saturday"
+msgstr "토요일"
+
+msgid "Sunday"
+msgstr "일요일"
+
+msgid "User Script Wizard"
+msgstr "사용자 스크립트 마법사"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "힌트: 설정에 아무것도 저장할 필요가 없습니다. 작업을 선택하고 [생성] 버튼을 클릭합니다."
+
+msgid "modem restart"
+msgstr "모뎀 재시작"
+
+msgid "reboot"
+msgstr "재시작"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "인터페이스 재시작이 인터넷 액세스를 복구하지 못한 경우 모뎀을 재시작합니다."
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "인터페이스 재시작이 인터넷 액세스를 복구하지 못한 경우 라우터를 재시작합니다."
+
+msgid "Actions in script"
+msgstr "스크립트의 작업"
+
+msgid "Modem actions"
+msgstr "모뎀 작업"
+
+msgid "Restart modem using at commands"
+msgstr "AT 명령을 사용하여 모뎀 재시작"
+
+msgid "effect depends on modem"
+msgstr "효과는 모뎀에 따라 다릅니다"
+
+msgid "Some at commands can also restart the router."
+msgstr "일부 AT 명령은 라우터도 재시작할 수 있습니다."
+
+msgid "soft restart"
+msgstr "소프트 재시작"
+
+msgid "hard restart"
+msgstr "하드 재시작"
+
+msgid "Restart modem via GPIO."
+msgstr "GPIO를 통해 모뎀을 재시작합니다."
+
+msgid "Restart modem using GPIO"
+msgstr "GPIO를 사용하여 모뎀 재시작"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "4G/5G 모뎀과 관련된 GPIO를 선택합니다."
+
+msgid "Generate a script"
+msgstr "스크립트 생성"
+
+msgid "Generate user script"
+msgstr "사용자 스크립트 생성"
+
+msgid "Generate and save the prepared script."
+msgstr "준비된 스크립트를 생성하고 저장합니다."
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "사용자는 고유한 스크립트를 추가하거나 선택 옵션에서 새 스크립트를 생성할 수 있습니다."
+
+msgid "Set test address (only one recommended)."
+msgstr "테스트 주소 설정(1개만 권장)."
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "사용 가능한 옵션은 이전에 정의된 주요 작업(인터페이스 또는 라우터 재시작)에 따라 다릅니다."
+
+msgid "user code"
+msgstr "사용자 코드"
+
+msgid "Add custom commands before restarting the device."
+msgstr "장치를 재시작하기 전에 사용자 정의 명령을 추가합니다."
+
+msgid "from script:"
+msgstr "스크립트에서:"
+
+msgid "USER-SCRIPT:"
+msgstr "사용자 스크립트:"
+
+msgid "Soft modem restart"
+msgstr "모뎀 소프트 재시작"
+
+msgid "Hard modem restart"
+msgstr "모뎀 하드 재시작"
+
+msgid "Space for user actions"
+msgstr "사용자 작업 공간"
+
+msgid "Commands before main action"
+msgstr "주요 작업 전 명령"
+
+msgid "Commands after main action"
+msgstr "주요 작업 후 명령"
+
+msgid "Loading..."
+msgstr "로드 중..."
+
+msgid "Waiting for ping command execution..."
+msgstr "ping 명령 실행 대기 중..."
+
+msgid "Watchdog initialized"
+msgstr "워치도그가 초기화되었습니다"
+
+msgid "uptime"
+msgstr "가동 시간"
+
+msgid "hosts"
+msgstr "호스트"

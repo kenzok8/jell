@@ -1,0 +1,400 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: vi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Connection Monitor"
+msgstr "Giám sát kết nối"
+
+msgid "Connection monitor settings"
+msgstr "Cài đặt giám sát kết nối"
+
+msgid "Configuration lite-watchdog"
+msgstr "Cấu hình lite-watchdog"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "Bảng cấu hình cho ứng dụng lite-watchdog và giao diện đồ họa."
+
+msgid "Interface"
+msgstr "Giao diện mạng"
+
+msgid "Network interface for Internet access."
+msgstr "Giao diện mạng để truy cập Internet."
+
+msgid "Port for communication with the modem"
+msgstr "Cổng giao tiếp với modem"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "Chọn một trong các cổng ttyUSBX có sẵn."
+
+msgid "Please select a port"
+msgstr "Vui lòng chọn một cổng"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "Thực hiện khởi động lại modem trước khi tiếp tục kết nối."
+
+msgid "Restart modem with AT command"
+msgstr "Khởi động lại modem bằng lệnh AT"
+
+msgid "AT command to restart the modem."
+msgstr "Lệnh AT để khởi động lại modem."
+
+msgid "AT command"
+msgstr "Lệnh AT"
+
+msgid "total checks"
+msgstr "tổng số lần kiểm tra"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Cấu hình giám sát kết nối từ gói easyconfig. Thông tin thêm trên %sdiễn đàn eko.one.pl%s."
+
+msgid "eko.one.pl forum"
+msgstr "diễn đàn eko.one.pl"
+
+msgid "Enable a connection monitor."
+msgstr "Bật giám sát kết nối."
+
+msgid "System startup delay"
+msgstr "Độ trễ khởi động hệ thống"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1 - 59] phút"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "Yêu cầu giá trị thập phân từ một đến năm mươi chín"
+
+msgid "Address or name"
+msgstr "Địa chỉ hoặc tên"
+
+msgid "Verification period"
+msgstr "Khoảng thời gian kiểm tra"
+
+msgid "Number of failed checks"
+msgstr "Số lần kiểm tra thất bại"
+
+msgid "Action"
+msgstr "Hành động"
+
+msgid "Connection restart"
+msgstr "Khởi động lại kết nối"
+
+msgid "Modem restart"
+msgstr "Khởi động lại modem"
+
+msgid "Reboot"
+msgstr "Khởi động lại thiết bị"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "Các thay đổi đã được lưu. Giám sát kết nối đã bắt đầu."
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "Các thay đổi đã được lưu. Giám sát kết nối không hoạt động."
+
+msgid "Last check"
+msgstr "Lần kiểm tra cuối"
+
+msgid "minimum"
+msgstr "tối thiểu"
+
+msgid "average"
+msgstr "trung bình"
+
+msgid "maximum"
+msgstr "tối đa"
+
+msgid "Information"
+msgstr "Thông tin"
+
+msgid "Basic settings"
+msgstr "Cài đặt cơ bản"
+
+msgid "failed"
+msgstr "thất bại"
+
+msgid "Failed"
+msgstr "Thất bại"
+
+msgid "out of"
+msgstr "trong"
+
+msgid "Activity log"
+msgstr "Nhật ký hoạt động"
+
+msgid "Wrong regular expression"
+msgstr "Biểu thức chính quy không hợp lệ"
+
+msgid "No matches..."
+msgstr "Không có kết quả..."
+
+msgid "Clear connection monitor log?"
+msgstr "Xóa nhật ký giám sát kết nối?"
+
+msgid "Download error"
+msgstr "Lỗi tải xuống"
+
+msgid "Unable to load log data:"
+msgstr "Không thể tải dữ liệu nhật ký:"
+
+msgid "Entries filter"
+msgstr "Bộ lọc mục"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "Lọc mục bằng biểu thức chính quy, nhấn [Delete] để xóa tất cả văn bản"
+
+msgid "Refresh"
+msgstr "Làm mới"
+
+msgid "Connection monitor activity log"
+msgstr "Nhật ký hoạt động giám sát kết nối"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "Nhật ký hoạt động giám sát kết nối từ gói easyconfig. Thông tin thêm trên %sdiễn đàn eko.one.pl%s."
+
+msgid "Show only the last entries"
+msgstr "Chỉ hiển thị các mục cuối cùng"
+
+msgid "Message filter"
+msgstr "Bộ lọc thông báo"
+
+msgid "Refresh log"
+msgstr "Làm mới nhật ký"
+
+msgid "Clear log"
+msgstr "Xóa nhật ký"
+
+msgid "Download log"
+msgstr "Tải nhật ký"
+
+msgid "Upload log file"
+msgstr "Tải lên tệp nhật ký"
+
+msgid "Type of messages"
+msgstr "Loại thông báo"
+
+msgid "All actions"
+msgstr "Tất cả hành động"
+
+msgid "Only connection problems"
+msgstr "Chỉ sự cố kết nối"
+
+msgid "LED settings"
+msgstr "Cài đặt đèn LED"
+
+msgid "The LED shows the internet connection status."
+msgstr "Đèn LED hiển thị trạng thái kết nối Internet."
+
+msgid "Select the status LED."
+msgstr "Chọn đèn LED trạng thái."
+
+msgid "Edit user script"
+msgstr "Chỉnh sửa tập lệnh người dùng"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "Trước khi thực hiện hành động, hệ thống gọi một tập lệnh mà người dùng có thể đặt các lệnh của riêng mình."
+
+msgid "Edit user script"
+msgstr "Chỉnh sửa tập lệnh người dùng"
+
+msgid "User script"
+msgstr "Tập lệnh người dùng"
+
+msgid "User-defined commands."
+msgstr "Các lệnh do người dùng định nghĩa."
+
+msgid "Contents have been saved"
+msgstr "Nội dung đã được lưu"
+
+msgid "Unable to save the contents"
+msgstr "Không thể lưu nội dung"
+
+msgid "Unable to read the contents"
+msgstr "Không thể đọc nội dung"
+
+msgid "Status"
+msgstr "Trạng thái"
+
+msgid "ONLINE"
+msgstr "TRỰC TUYẾN"
+
+msgid "OFFLINE"
+msgstr "NGOẠI TUYẾN"
+
+msgid "Action"
+msgstr "Hành động"
+
+msgid "Restarting interface"
+msgstr "Khởi động lại giao diện mạng"
+
+msgid "Reboot"
+msgstr "Khởi động lại thiết bị"
+
+msgid "At command was sent to modem"
+msgstr "Lệnh AT đã được gửi đến modem"
+
+msgid "January"
+msgstr "Tháng Một"
+
+msgid "February"
+msgstr "Tháng Hai"
+
+msgid "March"
+msgstr "Tháng Ba"
+
+msgid "April"
+msgstr "Tháng Tư"
+
+msgid "May"
+msgstr "Tháng Năm"
+
+msgid "June"
+msgstr "Tháng Sáu"
+
+msgid "July"
+msgstr "Tháng Bảy"
+
+msgid "August"
+msgstr "Tháng Tám"
+
+msgid "September"
+msgstr "Tháng Chín"
+
+msgid "October"
+msgstr "Tháng Mười"
+
+msgid "November"
+msgstr "Tháng Mười Một"
+
+msgid "December"
+msgstr "Tháng Mười Hai"
+
+msgid "Monday"
+msgstr "Thứ Hai"
+
+msgid "Tuesday"
+msgstr "Thứ Ba"
+
+msgid "Wednesday"
+msgstr "Thứ Tư"
+
+msgid "Thursday"
+msgstr "Thứ Năm"
+
+msgid "Friday"
+msgstr "Thứ Sáu"
+
+msgid "Saturday"
+msgstr "Thứ Bảy"
+
+msgid "Sunday"
+msgstr "Chủ Nhật"
+
+msgid "User Script Wizard"
+msgstr "Trình hướng dẫn tập lệnh người dùng"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "Gợi ý: Bạn không cần lưu bất cứ điều gì trong cài đặt. Chọn các hành động và nhấp vào nút Tạo."
+
+msgid "modem restart"
+msgstr "khởi động lại modem"
+
+msgid "reboot"
+msgstr "khởi động lại thiết bị"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "Khởi động lại modem nếu khởi động lại giao diện không khôi phục được truy cập Internet."
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "Khởi động lại bộ định tuyến nếu khởi động lại giao diện không khôi phục được truy cập Internet."
+
+msgid "Actions in script"
+msgstr "Hành động trong tập lệnh"
+
+msgid "Modem actions"
+msgstr "Hành động modem"
+
+msgid "Restart modem using at commands"
+msgstr "Khởi động lại modem bằng lệnh AT"
+
+msgid "effect depends on modem"
+msgstr "hiệu quả phụ thuộc vào modem"
+
+msgid "Some at commands can also restart the router."
+msgstr "Một số lệnh AT cũng có thể khởi động lại bộ định tuyến."
+
+msgid "soft restart"
+msgstr "khởi động lại mềm"
+
+msgid "hard restart"
+msgstr "khởi động lại cứng"
+
+msgid "Restart modem via GPIO."
+msgstr "Khởi động lại modem qua GPIO."
+
+msgid "Restart modem using GPIO"
+msgstr "Khởi động lại modem qua GPIO"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "Chọn GPIO liên quan đến modem 4G/5G."
+
+msgid "Generate a script"
+msgstr "Tạo tập lệnh"
+
+msgid "Generate user script"
+msgstr "Tạo tập lệnh người dùng"
+
+msgid "Generate and save the prepared script."
+msgstr "Tạo và lưu tập lệnh đã chuẩn bị."
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "Người dùng có thể thêm tập lệnh của mình hoặc tạo tập lệnh mới từ các tùy chọn."
+
+msgid "Set test address (only one recommended)."
+msgstr "Đặt địa chỉ kiểm tra (chỉ khuyến nghị một địa chỉ)."
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "Các tùy chọn có sẵn phụ thuộc vào hành động chính đã định nghĩa trước (khởi động lại giao diện hoặc bộ định tuyến)."
+
+msgid "user code"
+msgstr "mã người dùng"
+
+msgid "Add custom commands before restarting the device."
+msgstr "Thêm các lệnh tùy chỉnh trước khi khởi động lại thiết bị."
+
+msgid "from script:"
+msgstr "từ tập lệnh:"
+
+msgid "USER-SCRIPT:"
+msgstr "TẬP-LỆNH-NGƯỜI-DÙNG:"
+
+msgid "Soft modem restart"
+msgstr "Khởi động lại modem mềm"
+
+msgid "Hard modem restart"
+msgstr "Khởi động lại modem cứng"
+
+msgid "Space for user actions"
+msgstr "Không gian cho hành động người dùng"
+
+msgid "Commands before main action"
+msgstr "Lệnh trước hành động chính"
+
+msgid "Commands after main action"
+msgstr "Lệnh sau hành động chính"
+
+msgid "Loading..."
+msgstr "Đang tải..."
+
+msgid "Waiting for ping command execution..."
+msgstr "Đang chờ thực thi lệnh ping..."
+
+msgid "Watchdog initialized"
+msgstr "Watchdog đã khởi tạo"
+
+msgid "uptime"
+msgstr "thời gian hoạt động"
+
+msgid "hosts"
+msgstr "máy chủ"

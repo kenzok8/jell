@@ -1,0 +1,399 @@
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Connection Monitor"
+msgstr "接続モニター"
+
+msgid "Connection monitor settings"
+msgstr "接続モニター設定"
+
+msgid "Configuration lite-watchdog"
+msgstr "lite-watchdog設定"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "lite-watchdogおよびGUIアプリケーションの設定パネル。"
+
+msgid "Interface"
+msgstr "インターフェース"
+
+msgid "Network interface for Internet access."
+msgstr "インターネットアクセス用ネットワークインターフェース。"
+
+msgid "Port for communication with the modem"
+msgstr "モデムとの通信用ポート"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "利用可能なttyUSBXポートから1つを選択してください。"
+
+msgid "Please select a port"
+msgstr "ポートを選択してください"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "接続を再開する前にモデムを再起動します。"
+
+msgid "Restart modem with AT command"
+msgstr "ATコマンドでモデムを再起動"
+
+msgid "AT command to restart the modem."
+msgstr "モデムを再起動するATコマンド。"
+
+msgid "AT command"
+msgstr "ATコマンド"
+
+msgid "total checks"
+msgstr "合計チェック数"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "easyconfigパッケージで知られている接続モニターの設定。詳しくは%seko.one.plフォーラム%sを参照。"
+
+msgid "eko.one.pl forum"
+msgstr "eko.one.plフォーラム"
+
+msgid "Enable a connection monitor."
+msgstr "接続モニターを有効にします。"
+
+msgid "System startup delay"
+msgstr "システム起動遅延"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1～59]分"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "1から59までの10進値を指定してください"
+
+msgid "Address or name"
+msgstr "アドレスまたは名前"
+
+msgid "Verification period"
+msgstr "検証期間"
+
+msgid "Number of failed checks"
+msgstr "失敗したチェック数"
+
+msgid "Action"
+msgstr "アクション"
+
+msgid "Connection restart"
+msgstr "接続再起動"
+
+msgid "Modem restart"
+msgstr "モデム再起動"
+
+msgid "Reboot"
+msgstr "再起動"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "変更が保存されました。接続モニターが開始されました。"
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "変更が保存されました。接続モニターは実行されていません。"
+
+msgid "Last check"
+msgstr "最後のチェック"
+
+msgid "minimum"
+msgstr "最小"
+
+msgid "average"
+msgstr "平均"
+
+msgid "maximum"
+msgstr "最大"
+
+msgid "Information"
+msgstr "情報"
+
+msgid "Basic settings"
+msgstr "基本設定"
+
+msgid "failed"
+msgstr "失敗"
+
+msgid "Failed"
+msgstr "失敗"
+
+msgid "out of"
+msgstr "～の中"
+
+msgid "Activity log"
+msgstr "アクティビティログ"
+
+msgid "Wrong regular expression"
+msgstr "正規表現が間違っています"
+
+msgid "No matches..."
+msgstr "マッチしませんでした..."
+
+msgid "Clear connection monitor log?"
+msgstr "接続モニターログをクリアしますか？"
+
+msgid "Download error"
+msgstr "ダウンロードエラー"
+
+msgid "Unable to load log data:"
+msgstr "ログデータを読み込めません:"
+
+msgid "Entries filter"
+msgstr "エントリフィルター"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "正規表現を使用してエントリをフィルター処理し、[削除]を押して全テキストを削除"
+
+msgid "Refresh"
+msgstr "更新"
+
+msgid "Connection monitor activity log"
+msgstr "接続モニターアクティビティログ"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "easyconfigパッケージで知られている接続モニターアクティビティログ。詳しくは%seko.one.plフォーラム%sを参照。"
+
+msgid "Show only the last entries"
+msgstr "最後のエントリのみ表示"
+
+msgid "Message filter"
+msgstr "メッセージフィルター"
+
+msgid "Refresh log"
+msgstr "ログを更新"
+
+msgid "Clear log"
+msgstr "ログをクリア"
+
+msgid "Download log"
+msgstr "ログをダウンロード"
+
+msgid "Upload log file"
+msgstr "ログファイルをアップロード"
+
+msgid "Type of messages"
+msgstr "メッセージの種類"
+
+msgid "All actions"
+msgstr "すべてのアクション"
+
+msgid "Only connection problems"
+msgstr "接続の問題のみ"
+
+msgid "LED settings"
+msgstr "LED設定"
+
+msgid "The LED shows the internet connection status."
+msgstr "LEDはインターネット接続ステータスを表示します。"
+
+msgid "Select the status LED."
+msgstr "ステータスLEDを選択します。"
+
+msgid "Edit user script"
+msgstr "ユーザースクリプトを編集"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "アクション実行前にシステムがスクリプトを呼び出し、ユーザーが独自のコマンドを配置できます。"
+
+msgid "Edit user script"
+msgstr "ユーザースクリプトを編集"
+
+msgid "User script"
+msgstr "ユーザースクリプト"
+
+msgid "User-defined commands."
+msgstr "ユーザー定義コマンド。"
+
+msgid "Contents have been saved"
+msgstr "コンテンツが保存されました"
+
+msgid "Unable to save the contents"
+msgstr "コンテンツを保存できません"
+
+msgid "Unable to read the contents"
+msgstr "コンテンツを読み込めません"
+
+msgid "Status"
+msgstr "ステータス"
+
+msgid "ONLINE"
+msgstr "オンライン"
+
+msgid "OFFLINE"
+msgstr "オフライン"
+
+msgid "Action"
+msgstr "アクション"
+
+msgid "Restarting interface"
+msgstr "インターフェースを再起動中"
+
+msgid "Reboot"
+msgstr "再起動"
+
+msgid "At command was sent to modem"
+msgstr "ATコマンドがモデムに送信されました"
+
+msgid "January"
+msgstr "1月"
+
+msgid "February"
+msgstr "2月"
+
+msgid "March"
+msgstr "3月"
+
+msgid "April"
+msgstr "4月"
+
+msgid "May"
+msgstr "5月"
+
+msgid "June"
+msgstr "6月"
+
+msgid "July"
+msgstr "7月"
+
+msgid "August"
+msgstr "8月"
+
+msgid "September"
+msgstr "9月"
+
+msgid "October"
+msgstr "10月"
+
+msgid "November"
+msgstr "11月"
+
+msgid "December"
+msgstr "12月"
+
+msgid "Monday"
+msgstr "月曜日"
+
+msgid "Tuesday"
+msgstr "火曜日"
+
+msgid "Wednesday"
+msgstr "水曜日"
+
+msgid "Thursday"
+msgstr "木曜日"
+
+msgid "Friday"
+msgstr "金曜日"
+
+msgid "Saturday"
+msgstr "土曜日"
+
+msgid "Sunday"
+msgstr "日曜日"
+
+msgid "User Script Wizard"
+msgstr "ユーザースクリプトウィザード"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "ヒント:設定に何も保存する必要はありません。アクションを選択して[生成]ボタンをクリックします。"
+
+msgid "modem restart"
+msgstr "モデム再起動"
+
+msgid "reboot"
+msgstr "再起動"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "インターフェースの再起動がインターネットアクセスを復元しなかった場合、モデムを再起動します。"
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "インターフェースの再起動がインターネットアクセスを復元しなかった場合、ルーターを再起動します。"
+
+msgid "Actions in script"
+msgstr "スクリプト内のアクション"
+
+msgid "Modem actions"
+msgstr "モデムアクション"
+
+msgid "Restart modem using at commands"
+msgstr "ATコマンドを使用してモデムを再起動"
+
+msgid "effect depends on modem"
+msgstr "効果はモデムに依存します"
+
+msgid "Some at commands can also restart the router."
+msgstr "一部のATコマンドはルーターの再起動も可能です。"
+
+msgid "soft restart"
+msgstr "ソフト再起動"
+
+msgid "hard restart"
+msgstr "ハード再起動"
+
+msgid "Restart modem via GPIO."
+msgstr "GPIOを介してモデムを再起動します。"
+
+msgid "Restart modem using GPIO"
+msgstr "GPIOを使用してモデムを再起動"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "4G/5Gモデムに関連するGPIOを選択します。"
+
+msgid "Generate a script"
+msgstr "スクリプトを生成"
+
+msgid "Generate user script"
+msgstr "ユーザースクリプトを生成"
+
+msgid "Generate and save the prepared script."
+msgstr "準備されたスクリプトを生成して保存します。"
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "ユーザーは独自のスクリプトを追加するか、選択オプションから新しいスクリプトを生成できます。"
+
+msgid "Set test address (only one recommended)."
+msgstr "テストアドレスを設定(1つのみ推奨)。"
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "利用可能なオプションは、以前に定義されたメインアクション(インターフェースまたはルーター再起動)に依存します。"
+
+msgid "user code"
+msgstr "ユーザーコード"
+
+msgid "Add custom commands before restarting the device."
+msgstr "デバイスを再起動する前にカスタムコマンドを追加します。"
+
+msgid "from script:"
+msgstr "スクリプトから:"
+
+msgid "USER-SCRIPT:"
+msgstr "ユーザースクリプト:"
+
+msgid "Soft modem restart"
+msgstr "モデムソフト再起動"
+
+msgid "Hard modem restart"
+msgstr "モデムハード再起動"
+
+msgid "Space for user actions"
+msgstr "ユーザーアクションのスペース"
+
+msgid "Commands before main action"
+msgstr "メインアクション前のコマンド"
+
+msgid "Commands after main action"
+msgstr "メインアクション後のコマンド"
+
+msgid "Loading..."
+msgstr "読み込み中..."
+
+msgid "Waiting for ping command execution..."
+msgstr "pingコマンド実行を待機中..."
+
+msgid "Watchdog initialized"
+msgstr "ウォッチドッグが初期化されました"
+
+msgid "uptime"
+msgstr "アップタイム"
+
+msgid "hosts"
+msgstr "ホスト"

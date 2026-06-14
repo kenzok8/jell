@@ -9,10 +9,39 @@
 'require tools.widgets as widgets';
 
 /*
-	Copyright 2022-2024 Rafał Wabik - IceG - From eko.one.pl forum
+	Copyright 2022-2026 Rafał Wabik - IceG - From eko.one.pl forum
 
  	MIT License
 */
+
+function pop(a, message, severity) {
+	ui.addNotification(a, message, severity)
+}
+
+function popTimeout(a, message, timeout, severity) {
+	ui.addTimeLimitedNotification(a, message, timeout, severity)
+}
+
+function setSpinner(id) {
+	var el = document.getElementById(id);
+	if (!el) return;
+	el.innerHTML = '';
+	el.appendChild(E('span', { 'class': 'spinning', 'style': 'font-size: inherit;' }, _('Loading...')));
+}
+
+function setText(id, value) {
+	var el = document.getElementById(id);
+	if (!el) return;
+	el.innerHTML = '';
+	el.textContent = value || '-';
+}
+
+function setHTML(id, value) {
+	var el = document.getElementById(id);
+	if (!el) return;
+	el.innerHTML = '';
+	el.innerHTML = (value || '-').trim();
+}
 
 return view.extend({
 	formdata: { watchdog: {} },
@@ -25,112 +54,97 @@ return view.extend({
 	render: function(data) {
 		var m, s, o;
 
-		if (data != null){
-		try {
 
-		var json = JSON.parse(data);
+		var spinEl = E('span', { 'class': 'spinning', 'style': 'font-size: inherit;' }, _('Loading...'));
+		var testtime = spinEl;
+		var min      = E('span', { 'class': 'spinning', 'style': 'font-size: inherit;' }, _('Loading...'));
+		var avg      = E('span', { 'class': 'spinning', 'style': 'font-size: inherit;' }, _('Loading...'));
+		var max      = E('span', { 'class': 'spinning', 'style': 'font-size: inherit;' }, _('Loading...'));
 
-		if (!("error" in json)) {
+		var onoff = '1', dest = '', delay = 3, period = '1', count = 10, allcount = 10, action = 'wan';
+		var json = null;
 
-		var testtime = json.testtime;
-		var min = json.min;
-		var avg = json.avg;
-		var max = json.max;
+		if (data != null) {
+			try {
+				json = JSON.parse(data);
 
-		if (min != '') {
-			if (!min.includes('ms')) { 	
-			min = min + " ms";
-			}
-			if (!avg.includes('ms')) { 	
-			avg = avg + " ms";
-			}
-			if (!max.includes('ms')) { 	
-			max = max + " ms";
+				if (!("error" in json)) {
+					testtime = json.testtime || '-';
+					min      = json.min      || '--.---';
+					avg      = json.avg      || '--.---';
+					max      = json.max      || '--.---';
+
+					if (min !== '--.---' && !min.includes('ms')) min = min + ' ms';
+					if (avg !== '--.---' && !avg.includes('ms')) avg = avg + ' ms';
+					if (max !== '--.---' && !max.includes('ms')) max = max + ' ms';
+
+					onoff    = json.enable;
+					dest     = json.dest;
+					var countdest = dest.split(',');
+					delay    = parseInt(json.delay) / 60;
+					period   = json.period;
+					count    = parseInt(json.count);
+					allcount = parseInt(json.count) * countdest.length;
+					action   = json.action;
+				}
+			} catch (err) {
+				console.log('Error parsing initial data: ', err.message);
 			}
 		}
 
-		var onoff = json.enable;
-		var dest = json.dest;
-		var delay = parseInt(json.delay)/60;
-		var period = json.period;
-		var count = json.count;
-		var action = json.action;
-		
-		pollData: poll.add(function() {
+		poll.add(function() {
+			setSpinner('testtime');
+			setSpinner('min');
+			setSpinner('avg');
+			setSpinner('max');
+
 			return L.resolveDefault(fs.exec_direct('/usr/bin/lite-watchdog-data.sh', [ 'json' ]))
 			.then(function(res) {
-				var json = JSON.parse(res);
-
-				if ( json != null ) { 
-
-				var view = document.getElementById("testtime");
-				var view2 = document.getElementById("min");
-				var view3 = document.getElementById("avg");
-				var view4 = document.getElementById("max");
-
-				var min = json.min.toString();
-
-				var ttime = json.testtime.toString();
-				var countz = json.now_count.toString();
-				if (countz != '-1') {
-				var renderHTML = "";
-				renderHTML = ttime + ' (' + _('failed') + ' ' + countz + ' ' + _('out of') + ' ' + count + ')';
-				view.innerHTML  = '';
-  				view.innerHTML  = renderHTML.trim();
+				if (!res) {
+					setText('testtime', '-');
+					setText('min', '-');
+					setText('avg', '-');
+					setText('max', '-');
+					return;
 				}
 
-				if (min == '') {
-				view2.textContent = '-';
-				view3.textContent = '-';
-				view4.textContent = '-';
-				}
-				else {
-				var ttime = json.testtime.toString();
-				var countz = json.now_count.toString();
-				var testz = json.now_count.toString();
-				var renderHTML = "";
-				renderHTML = ttime + ' (' + _('failed') + ' ' + countz + ' ' + _('out of') + ' ' + count + ')';
-				view.innerHTML  = '';
-  				view.innerHTML  = renderHTML.trim();
+				var pjson;
+				try { pjson = JSON.parse(res); } catch(e) { return; }
+				if (!pjson) return;
 
-				var renderHTML2 = "";
-					if (!min.includes('ms')) { 	
-					min = min + " ms";
-					}
-				renderHTML2 = min;
-				view2.innerHTML  = '';
-  				view2.innerHTML  = renderHTML2.trim();
+				var pmin    = (pjson.min    || '').toString();
+				var pavg    = (pjson.avg    || '').toString();
+				var pmax    = (pjson.max    || '').toString();
+				var ttime   = (pjson.testtime  || '').toString();
+				var countz  = (pjson.now_count || '0').toString();
 
-				var renderHTML3 = "";
-				var avg = json.avg.toString();
-					if (!avg.includes('ms')) { 	
-					avg = avg + " ms";
-					}
-				renderHTML3 = avg;
-				view3.innerHTML  = '';
-  				view3.innerHTML  = renderHTML3.trim();
+				if (countz === '' || parseInt(countz) < 0) countz = '0';
 
-				var max = json.max.toString();
-				var renderHTML4 = "";
-					if (!max.includes('ms')) { 	
-					max = max + " ms";
-					}
-				renderHTML4 = max;
-				view4.innerHTML  = '';
-  				view4.innerHTML  = renderHTML4.trim();
+				if (pmin !== '' && !pmin.includes('ms')) pmin = pmin + ' ms';
+				if (pavg !== '' && !pavg.includes('ms')) pavg = pavg + ' ms';
+				if (pmax !== '' && !pmax.includes('ms')) pmax = pmax + ' ms';
 
+				if (ttime === '' || ttime === '-') {
+					var waitingHTML = '<span class="spinning" style="font-size: inherit;"></span> ' + _('Waiting for ping command execution...');
+					setHTML('testtime', waitingHTML);
+				} else {
+					var timeHTML = ttime + ' (' + _('failed') + ' ' + countz + ' ' + _('out of') + ' ' + count + ')';
+					setHTML('testtime', timeHTML);
 				}
 
+				if (pmin === '' || pmin === '--.--- ms') {
+					setText('min', '-');
+					setText('avg', '-');
+					setText('max', '-');
+				} else {
+					setText('min', pmin);
+					setText('avg', pavg);
+					setText('max', pmax);
 				}
 			});
-		});
-		}		
-			} catch (err) {
-  				console.log('Error: ', err.message);
-			}
-		}
-		
-		var info = _('Configuration of the connection monitor, which is a conversion of the monitor known from the easyconfig package. More information on the %seko.one.pl forum%s.').format('<a href="https://eko.one.pl/?p=easyconfig" target="_blank">', '</a>');
+		}, 60);
+
+		var info = _('Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s.').format('<a href="https://eko.one.pl/?p=easyconfig" target="_blank">', '</a>');
 
 		m = new form.JSONMap(this.formdata, _('Connection monitor settings'), info);
 
@@ -140,24 +154,22 @@ return view.extend({
 		s.render = L.bind(function(view, section_id) {
 			return E('div', { 'class': 'cbi-section' }, [
 				E('h3', _('Information')),
-					E('table', { 'class': 'table' }, [
-						E('tr', { 'class': 'tr' }, [
-						E('td', { 'class': 'td left', 'width': '33%' }, [ _('Last check')]),
-						E('td', { 'class': 'td left', 'id': 'testtime' }, [ testtime || '-' ]),
+				E('table', { 'class': 'table' }, [
+					E('tr', { 'class': 'tr' }, [
+						E('td', { 'class': 'td left', 'width': '33%' }, [ _('Last check') ]),
+						E('td', { 'class': 'td left', 'id': 'testtime' }, [ testtime ]),
 					]),
-
-						E('tr', { 'class': 'tr' }, [
-						E('td', { 'class': 'td left', 'width': '33%' }, [ _('minimum')]),
-						E('td', { 'class': 'td left', 'id': 'min' }, [ min || '-' ]),
+					E('tr', { 'class': 'tr' }, [
+						E('td', { 'class': 'td left', 'width': '33%' }, [ _('minimum') ]),
+						E('td', { 'class': 'td left', 'id': 'min' }, [ min ]),
 					]),
-
-						E('tr', { 'class': 'tr' }, [
-						E('td', { 'class': 'td left', 'width': '33%' }, [ _('average')]),
-						E('td', { 'class': 'td left', 'id': 'avg' }, [ avg || '-' ]),
+					E('tr', { 'class': 'tr' }, [
+						E('td', { 'class': 'td left', 'width': '33%' }, [ _('average') ]),
+						E('td', { 'class': 'td left', 'id': 'avg' }, [ avg ]),
 					]),
-						E('tr', { 'class': 'tr' }, [
-						E('td', { 'class': 'td left', 'width': '33%' }, [ _('maximum')]),
-						E('td', { 'class': 'td left', 'id': 'max' }, [ max || '-' ]),
+					E('tr', { 'class': 'tr' }, [
+						E('td', { 'class': 'td left', 'width': '33%' }, [ _('maximum') ]),
+						E('td', { 'class': 'td left', 'id': 'max' }, [ max ]),
 					]),
 				])
 			]);
@@ -167,126 +179,117 @@ return view.extend({
 		s.anonymous = true;
 		s.addremove = false;
 
-		if(!("error" in json)) {
-		s.tab('basic', _('Basic settings'));
+		if (json && !("error" in json)) {
+			s.tab('basic', _('Basic settings'));
 
-		o = s.taboption('basic', form.Flag, 'enabled',	_('Enabled'),
-		_('Enable a connection monitor.')
-		);
-		o.rmempty = false;
-		o.default = onoff;
+			o = s.taboption('basic', form.Flag, 'enabled', _('Enabled'),
+				_('Enable a connection monitor.')
+			);
+			o.rmempty = false;
+			o.default = onoff;
 
-		o = s.taboption('basic', form.Value, 'delay', _('System startup delay'),
-		_('[1 - 59] minute(s)')
-		);
-		o.default = delay || "3";
-		o.rmempty = false;
-		o.validate = function(section_id, value) {
+			o = s.taboption('basic', form.Value, 'delay', _('System startup delay'),
+				_('[1 - 59] minute(s)')
+			);
+			o.default = delay || "3";
+			o.rmempty = false;
+			o.validate = function(section_id, value) {
+				if (value.match(/^[0-9]+(?:\.[0-9]+)?$/) && +value >= 1 && +value < 60)
+					return true;
+				return _('Expect a decimal value between one and fifty-nine');
+			};
+			o.datatype = 'range(1, 59)';
 
-			if (value.match(/^[0-9]+(?:\.[0-9]+)?$/) && +value >= 1 && +value < 60)
+			o = s.taboption('basic', form.DynamicList, 'dest', _('Address or name'), _('Set test address (only one recommended).'));
+			o.default = dest ? dest.split(',') : "google.com";
+			o.rmempty = false;
+			o.datatype = 'host';
+			o.max = 3;
+
+			o.validate = function(section_id, value) {
+				if (Array.isArray(value) && value.length > 3) {
+					return _('You can add up to 2 destinations.');
+				}
 				return true;
+			};
 
-			return _('Expect a decimal value between one and fifty-nine');
-		};
-		o.datatype = 'range(1, 59)';
+			o = s.taboption('basic', form.Value, 'period', _('Verification period'),
+				_('[1 - 59] minute(s)')
+			);
+			o.default = period || "1";
+			o.rmempty = false;
+			o.validate = function(section_id, value) {
+				if (value.match(/^[0-9]+(?:\.[0-9]+)?$/) && +value >= 1 && +value < 60)
+					return true;
+				return _('Expect a decimal value between one and fifty-nine');
+			};
+			o.datatype = 'range(1, 59)';
 
-		o = s.taboption('basic', form.Value, 'dest', _('Address or name'),
-		_('')
-		);
-		o.default = dest || "google.com";
-		o.rmempty = false;
+			o = s.taboption('basic', form.Value, 'period_count', _('Number of failed checks'),
+				_('[1 - 59]')
+			);
+			o.default = count || "10";
+			o.rmempty = false;
+			o.validate = function(section_id, value) {
+				if (value.match(/^[0-9]+(?:\.[0-9]+)?$/) && +value >= 1 && +value < 60)
+					return true;
+				return _('Expect a decimal value between one and fifty-nine');
+			};
+			o.datatype = 'range(1, 59)';
 
-		o = s.taboption('basic', form.Value, 'period', _('Verification period'),
-		_('[1 - 59] minute(s)')
-		);
-		o.default = period || "1";
-		o.rmempty = false;
-		o.validate = function(section_id, value) {
-
-			if (value.match(/^[0-9]+(?:\.[0-9]+)?$/) && +value >= 1 && +value < 60)
-				return true;
-
-			return _('Expect a decimal value between one and fifty-nine');
-		};
-		o.datatype = 'range(1, 59)';
-
-		o = s.taboption('basic', form.Value, 'period_count', _('Number of failed checks'),
-		_('[1 - 59]')
-		);
-		o.default = count || "10";
-		o.rmempty = false;
-		o.validate = function(section_id, value) {
-
-			if (value.match(/^[0-9]+(?:\.[0-9]+)?$/) && +value >= 1 && +value < 60)
-				return true;
-
-			return _('Expect a decimal value between one and fifty-nine');
-		};
-		o.datatype = 'range(1, 59)';
-
-		o = s.taboption('basic', form.ListValue, 'action', _('Action'));
-		o.value('wan', _('Connection restart'));
-		o.value('reboot', _('Reboot')); 
-		o.default = action || "wan";
-
+			o = s.taboption('basic', form.ListValue, 'action', _('Action'));
+			o.value('wan', _('Connection restart'));
+			o.value('reboot', _('Reboot'));
+			o.default = action || "wan";
 		}
 
 		return m.render();
 	},
 
 	handleWATCHDOGSETup: function(ev) {
-		var map = document.querySelector('#maincontent .cbi-map'),
+		var map  = document.querySelector('#maincontent .cbi-map'),
 		    data = this.formdata;
 
 		return dom.callClassMethod(map, 'save').then(function() {
-			var args = [];
-			args.push(data.watchdog.enabled);
-			var ax = args.toString();
-
-			if ( ax == "1" ) {
-			ui.addNotification(null, E('p', _('Changes have been saved. Connection Monitor has started.') ), 'info');
-			}
-			else {
-			ui.addNotification(null, E('p', _('Changes have been saved. Connection Monitor is not running.') ), 'info');
-			}
-
-			var args2 = [];
-			args2.push(data.watchdog.delay);
-			var ax2 = parseInt(args2)*60;
-
-			var args3 = [];
-			args3.push(data.watchdog.dest);
-			var ax3 = args3.toString();
-
-			var args4 = [];
-			args4.push(data.watchdog.period);
-			var ax4 = args4.toString();
-
-			var args5 = [];
-			args5.push(data.watchdog.period_count);
-			var ax5 = args5.toString();
-
-			var args6 = [];
-			args6.push(data.watchdog.action);
-			var ax6 = args6.toString();
+			var ax  = (data.watchdog.enabled     || '').toString();
+			var ax2 = parseInt(data.watchdog.delay || 0) * 60;
+			var ax3 = (data.watchdog.dest          || '').toString();
+			var ax4 = (data.watchdog.period        || '').toString();
+			var ax5 = (data.watchdog.period_count  || '').toString();
+			var ax6 = (data.watchdog.action        || '').toString();
 
 			return uci.load('watchdog').then(function() {
-				uci.set('watchdog', '@watchdog[0]', 'enabled', ax.toString());
-				uci.set('watchdog', '@watchdog[0]', 'delay', ax2.toString());
-				uci.set('watchdog', '@watchdog[0]', 'dest', ax3.toString());
-				uci.set('watchdog', '@watchdog[0]', 'period', ax4.toString());
-				uci.set('watchdog', '@watchdog[0]', 'period_count', ax5.toString());
-				uci.set('watchdog', '@watchdog[0]', 'action', ax6.toString());
+				uci.set('watchdog', '@watchdog[0]', 'enabled',      ax);
+				uci.set('watchdog', '@watchdog[0]', 'delay',        ax2.toString());
+				uci.set('watchdog', '@watchdog[0]', 'dest',         ax3);
+				uci.set('watchdog', '@watchdog[0]', 'period',       ax4);
+				uci.set('watchdog', '@watchdog[0]', 'period_count', ax5);
+				uci.set('watchdog', '@watchdog[0]', 'action',       ax6);
 				uci.save();
 				uci.apply();
-			fs.exec_direct('/sbin/watchdog2cron.sh');
 
-			if ( ax == "1" ) {
-				fs.exec('sleep 2');
-				fs.exec_direct('/sbin/refresh2cron.sh');
-			}
-				
-    			});
+			}).then(function() {
+				return L.resolveDefault(fs.read('/etc/crontabs/root'), '');
+			}).then(function(crontab) {
+				var lines = (crontab || '').replace(/\r\n/g, '\n').split('\n');
+				var filtered = lines.filter(function(l) {
+					return l.trim() !== '' && !l.includes('watchdog');
+				});
+
+				if (ax === '1') {
+					filtered.push('*/' + ax4 + ' * * * * /usr/bin/lite_watchdog.sh ' + ax2 + ' 3 "' + ax3 + '" ' + ax5 + ' ' + ax6);
+				}
+
+				return fs.write('/etc/crontabs/root', filtered.join('\n') + '\n');
+			}).then(function() {
+				return fs.exec('/etc/init.d/cron', ['restart']);
+			}).then(function() {
+				if (ax === '1') {
+					popTimeout(null, E('p', _('Changes have been saved. Connection Monitor has started.')), 5000, 'info');
+				} else {
+					popTimeout(null, E('p', _('Changes have been saved. Connection Monitor is not running.')), 5000, 'info');
+				}
+			});
 		});
 	},
 
@@ -300,4 +303,3 @@ return view.extend({
 	}
 
 });
-

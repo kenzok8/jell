@@ -1,0 +1,400 @@
+msgid ""
+msgstr ""
+"Language-Team: Rafał Wabik (IceG)\n"
+"Language: zh_Hant\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Connection Monitor"
+msgstr "連線監控器"
+
+msgid "Connection monitor settings"
+msgstr "連線監控器設定"
+
+msgid "Configuration lite-watchdog"
+msgstr "lite-watchdog 設定"
+
+msgid "Configuration panel for lite-watchdog and gui application."
+msgstr "lite-watchdog 及圖形介面應用程式的設定面板。"
+
+msgid "Interface"
+msgstr "網路介面"
+
+msgid "Network interface for Internet access."
+msgstr "用於存取網際網路的網路介面。"
+
+msgid "Port for communication with the modem"
+msgstr "與數據機通訊的連接埠"
+
+msgid "Select one of the available ttyUSBX ports."
+msgstr "選擇一個可用的 ttyUSBX 連接埠。"
+
+msgid "Please select a port"
+msgstr "請選擇一個連接埠"
+
+msgid "Perform a modem restart before resuming the connection."
+msgstr "恢復連線前請重新啟動數據機。"
+
+msgid "Restart modem with AT command"
+msgstr "使用 AT 命令重新啟動數據機"
+
+msgid "AT command to restart the modem."
+msgstr "用於重新啟動數據機的 AT 命令。"
+
+msgid "AT command"
+msgstr "AT 命令"
+
+msgid "total checks"
+msgstr "檢查總次數"
+
+msgid "Configuration of the connection monitor known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "來自 easyconfig 套件的連線監控器設定。更多資訊請訪問 %seko.one.pl 論壇%s。"
+
+msgid "eko.one.pl forum"
+msgstr "eko.one.pl 論壇"
+
+msgid "Enable a connection monitor."
+msgstr "啟用連線監控器。"
+
+msgid "System startup delay"
+msgstr "系統啟動延遲"
+
+msgid "[1 - 59] minute(s)"
+msgstr "[1 - 59] 分鐘"
+
+msgid "Expect a decimal value between one and fifty-nine"
+msgstr "請輸入 1 到 59 之間的整數值"
+
+msgid "Address or name"
+msgstr "位址或名稱"
+
+msgid "Verification period"
+msgstr "檢查週期"
+
+msgid "Number of failed checks"
+msgstr "失敗檢查次數"
+
+msgid "Action"
+msgstr "操作"
+
+msgid "Connection restart"
+msgstr "重新啟動連線"
+
+msgid "Modem restart"
+msgstr "重新啟動數據機"
+
+msgid "Reboot"
+msgstr "重新啟動裝置"
+
+msgid "Changes have been saved. Connection Monitor has started."
+msgstr "變更已儲存。連線監控器已啟動。"
+
+msgid "Changes have been saved. Connection Monitor is not running."
+msgstr "變更已儲存。連線監控器未執行。"
+
+msgid "Last check"
+msgstr "上次檢查"
+
+msgid "minimum"
+msgstr "最小值"
+
+msgid "average"
+msgstr "平均值"
+
+msgid "maximum"
+msgstr "最大值"
+
+msgid "Information"
+msgstr "資訊"
+
+msgid "Basic settings"
+msgstr "基本設定"
+
+msgid "failed"
+msgstr "失敗"
+
+msgid "Failed"
+msgstr "失敗"
+
+msgid "out of"
+msgstr "共"
+
+msgid "Activity log"
+msgstr "活動記錄"
+
+msgid "Wrong regular expression"
+msgstr "正規表示式錯誤"
+
+msgid "No matches..."
+msgstr "無符合結果..."
+
+msgid "Clear connection monitor log?"
+msgstr "清除連線監控器記錄？"
+
+msgid "Download error"
+msgstr "下載錯誤"
+
+msgid "Unable to load log data:"
+msgstr "無法載入記錄資料："
+
+msgid "Entries filter"
+msgstr "項目篩選器"
+
+msgid "Filter entries using regexp, press [Delete] to delete all text"
+msgstr "使用正規表示式篩選項目，按 [Delete] 刪除所有文字"
+
+msgid "Refresh"
+msgstr "重新整理"
+
+msgid "Connection monitor activity log"
+msgstr "連線監控器活動記錄"
+
+msgid "Connection monitor activity log known from the easyconfig package. More information on the %seko.one.pl forum%s."
+msgstr "來自 easyconfig 套件的連線監控器活動記錄。更多資訊請訪問 %seko.one.pl 論壇%s。"
+
+msgid "Show only the last entries"
+msgstr "僅顯示最新項目"
+
+msgid "Message filter"
+msgstr "訊息篩選器"
+
+msgid "Refresh log"
+msgstr "重新整理記錄"
+
+msgid "Clear log"
+msgstr "清除記錄"
+
+msgid "Download log"
+msgstr "下載記錄"
+
+msgid "Upload log file"
+msgstr "上傳記錄檔案"
+
+msgid "Type of messages"
+msgstr "訊息類型"
+
+msgid "All actions"
+msgstr "所有操作"
+
+msgid "Only connection problems"
+msgstr "僅連線問題"
+
+msgid "LED settings"
+msgstr "LED 設定"
+
+msgid "The LED shows the internet connection status."
+msgstr "LED 顯示網際網路連線狀態。"
+
+msgid "Select the status LED."
+msgstr "選擇狀態 LED。"
+
+msgid "Edit user script"
+msgstr "編輯使用者指令碼"
+
+msgid "Before executing the action, system calls a script in which user can place his own commands."
+msgstr "執行操作前，系統呼叫一個指令碼，使用者可在其中放置自訂命令。"
+
+msgid "Edit user script"
+msgstr "編輯使用者指令碼"
+
+msgid "User script"
+msgstr "使用者指令碼"
+
+msgid "User-defined commands."
+msgstr "使用者自訂命令。"
+
+msgid "Contents have been saved"
+msgstr "內容已儲存"
+
+msgid "Unable to save the contents"
+msgstr "無法儲存內容"
+
+msgid "Unable to read the contents"
+msgstr "無法讀取內容"
+
+msgid "Status"
+msgstr "狀態"
+
+msgid "ONLINE"
+msgstr "線上"
+
+msgid "OFFLINE"
+msgstr "離線"
+
+msgid "Action"
+msgstr "操作"
+
+msgid "Restarting interface"
+msgstr "正在重新啟動網路介面"
+
+msgid "Reboot"
+msgstr "重新啟動裝置"
+
+msgid "At command was sent to modem"
+msgstr "AT 命令已傳送至數據機"
+
+msgid "January"
+msgstr "一月"
+
+msgid "February"
+msgstr "二月"
+
+msgid "March"
+msgstr "三月"
+
+msgid "April"
+msgstr "四月"
+
+msgid "May"
+msgstr "五月"
+
+msgid "June"
+msgstr "六月"
+
+msgid "July"
+msgstr "七月"
+
+msgid "August"
+msgstr "八月"
+
+msgid "September"
+msgstr "九月"
+
+msgid "October"
+msgstr "十月"
+
+msgid "November"
+msgstr "十一月"
+
+msgid "December"
+msgstr "十二月"
+
+msgid "Monday"
+msgstr "星期一"
+
+msgid "Tuesday"
+msgstr "星期二"
+
+msgid "Wednesday"
+msgstr "星期三"
+
+msgid "Thursday"
+msgstr "星期四"
+
+msgid "Friday"
+msgstr "星期五"
+
+msgid "Saturday"
+msgstr "星期六"
+
+msgid "Sunday"
+msgstr "星期日"
+
+msgid "User Script Wizard"
+msgstr "使用者指令碼精靈"
+
+msgid "Hint: You do not need to save anything in the settings. Select the actions and click the Generate button."
+msgstr "提示：無需在設定中儲存任何內容。選擇操作並點擊產生按鈕。"
+
+msgid "modem restart"
+msgstr "重新啟動數據機"
+
+msgid "reboot"
+msgstr "重新啟動裝置"
+
+msgid "Restart modem if restarting the interfaces did not restore internet access."
+msgstr "如果重新啟動介面未能恢復網際網路存取，請重新啟動數據機。"
+
+msgid "Router reboot if restarting the interfaces did not restore internet access."
+msgstr "如果重新啟動介面未能恢復網際網路存取，請重新啟動路由器。"
+
+msgid "Actions in script"
+msgstr "指令碼中的操作"
+
+msgid "Modem actions"
+msgstr "數據機操作"
+
+msgid "Restart modem using at commands"
+msgstr "使用 AT 命令重新啟動數據機"
+
+msgid "effect depends on modem"
+msgstr "效果取決於數據機"
+
+msgid "Some at commands can also restart the router."
+msgstr "某些 AT 命令也可以重新啟動路由器。"
+
+msgid "soft restart"
+msgstr "軟重啟"
+
+msgid "hard restart"
+msgstr "硬重啟"
+
+msgid "Restart modem via GPIO."
+msgstr "透過 GPIO 重新啟動數據機。"
+
+msgid "Restart modem using GPIO"
+msgstr "透過 GPIO 重新啟動數據機"
+
+msgid "Select the GPIO related to 4G/5G modem."
+msgstr "選擇與 4G/5G 數據機相關的 GPIO。"
+
+msgid "Generate a script"
+msgstr "產生指令碼"
+
+msgid "Generate user script"
+msgstr "產生使用者指令碼"
+
+msgid "Generate and save the prepared script."
+msgstr "產生並儲存準備好的指令碼。"
+
+msgid "User can add his script or generate a new one from the selection options."
+msgstr "使用者可以新增自己的指令碼或從選項中產生新指令碼。"
+
+msgid "Set test address (only one recommended)."
+msgstr "設定測試位址（建議僅設定一個）。"
+
+msgid "The available options depend on the previously defined main action (interface or router restart)."
+msgstr "可用選項取決於之前定義的主操作（介面或路由器重新啟動）。"
+
+msgid "user code"
+msgstr "使用者程式碼"
+
+msgid "Add custom commands before restarting the device."
+msgstr "在重新啟動裝置前新增自訂命令。"
+
+msgid "from script:"
+msgstr "來自指令碼："
+
+msgid "USER-SCRIPT:"
+msgstr "使用者指令碼："
+
+msgid "Soft modem restart"
+msgstr "數據機軟重啟"
+
+msgid "Hard modem restart"
+msgstr "數據機硬重啟"
+
+msgid "Space for user actions"
+msgstr "使用者操作空間"
+
+msgid "Commands before main action"
+msgstr "主操作前的命令"
+
+msgid "Commands after main action"
+msgstr "主操作後的命令"
+
+msgid "Loading..."
+msgstr "正在載入..."
+
+msgid "Waiting for ping command execution..."
+msgstr "等待執行 ping 命令..."
+
+msgid "Watchdog initialized"
+msgstr "看門狗已初始化"
+
+msgid "uptime"
+msgstr "運行時間"
+
+msgid "hosts"
+msgstr "主機"
