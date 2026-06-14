@@ -293,10 +293,19 @@ start_singbox_service() {
 		return 1
 	fi
 	prepare_singbox_runtime || return 1
-	# preflight dry-run: bail on bad config without touching firewall/dnsmasq
-	if ! /usr/bin/sing-box -c /etc/sing-box/config.json check >> "$CORE_LOG_PATH" 2>&1; then
-		log_msg "sing-box config dry-run failed; firewall/DNS untouched" "sing-box 配置预检失败，未应用防火墙与 DNS 改动"
-		runtime_state_record_health "fail" "preflight:singbox_dry_run_failed"
+	# preflight dry-run with watchdog: bail on bad config without touching
+	# firewall/dnsmasq, and never let a hung check freeze startup/UI.
+	_run_with_timeout 15 /usr/bin/sing-box -c /etc/sing-box/config.json check >> "$CORE_LOG_PATH" 2>&1
+	_pf_rc=$?
+	if [ "$_pf_rc" -ne 0 ]; then
+		_pf_reason="$(_preflight_reason)"
+		if [ "$_pf_rc" -eq 124 ]; then
+			log_msg "sing-box config preflight timed out, retry shortly. ${_pf_reason}" "sing-box 配置预检超时，稍后自动重试。${_pf_reason}"
+			runtime_state_record_health "fail" "preflight:singbox_timeout"
+		else
+			log_msg "sing-box config dry-run failed; firewall/DNS untouched. ${_pf_reason}" "sing-box 配置预检失败，未应用防火墙与 DNS 改动。${_pf_reason}"
+			runtime_state_record_health "fail" "preflight:singbox_dry_run_failed"
+		fi
 		return 1
 	fi
 	/etc/init.d/sing-box start >/dev/null 2>&1
@@ -322,6 +331,38 @@ _log_runtime_error() {
 	local message="$1"
 	echo "$message" > "$REAL_LOG"
 	echo "  $(date "+%Y-%m-%d %H:%M:%S") - $message" >> /usr/share/clashoo/clashoo.txt
+}
+
+# Run a command with a self-watchdog timeout. busybox has no `timeout` binary,
+# so poll the backgrounded pid and kill it on overrun. Returns the command's
+# exit status, or 124 when the watchdog fired (timed out).
+_run_with_timeout() {
+	local _to="$1"; shift
+	local _pid _i=0
+	"$@" &
+	_pid=$!
+	while [ "$_i" -lt "$_to" ]; do
+		kill -0 "$_pid" 2>/dev/null || { wait "$_pid"; return $?; }
+		sleep 1
+		_i=$((_i + 1))
+	done
+	kill -TERM "$_pid" 2>/dev/null
+	sleep 1
+	kill -KILL "$_pid" 2>/dev/null
+	wait "$_pid" 2>/dev/null
+	return 124
+}
+
+# Pull a concise failure reason out of the core log so users see the real error
+# (e.g. "can't download MMDB") instead of only "preflight failed".
+_preflight_reason() {
+	local line
+	line="$(grep -E 'level=(error|fatal)' "$CORE_LOG_PATH" 2>/dev/null | tail -1)"
+	[ -n "$line" ] || line="$(tail -1 "$CORE_LOG_PATH" 2>/dev/null)"
+	case "$line" in
+		*'msg="'*) line="$(printf '%s' "$line" | sed -n 's/.*msg="\([^"]*\)".*/\1/p')" ;;
+	esac
+	printf '%s' "$line"
 }
 
 log_msg() {
@@ -1400,10 +1441,21 @@ _start_launch_core() {
 	# in core-only the user is explicitly trusting their own config.
 	[ "$_core_only" = "1" ] && export SAFE_PATHS="/"
 
-	# preflight dry-run: bail on bad config without touching firewall/dnsmasq
-	if ! "$CLASH" -d "$CLASH_CONFIG" -t >> "$CORE_LOG_PATH" 2>&1; then
-		log_msg "Config dry-run failed; firewall/DNS untouched" "配置预检失败，未应用防火墙与 DNS 改动"
-		runtime_state_record_health "fail" "preflight:config_dry_run_failed"
+	# preflight dry-run with watchdog: bail on bad config without touching
+	# firewall/dnsmasq, and never let a geo auto-download (mihomo blocks ~90s on
+	# a missing GeoIP/GeoSite when GitHub is unreachable) freeze startup/UI.
+	_run_with_timeout 15 "$CLASH" -d "$CLASH_CONFIG" -t >> "$CORE_LOG_PATH" 2>&1
+	_pf_rc=$?
+	if [ "$_pf_rc" -ne 0 ]; then
+		_pf_reason="$(_preflight_reason)"
+		if [ "$_pf_rc" -eq 124 ]; then
+			log_msg "Config preflight timed out (likely downloading geo data), retry shortly. ${_pf_reason}" "配置预检超时（可能正在下载 Geo 数据），稍后自动重试。${_pf_reason}"
+			runtime_state_record_health "fail" "preflight:timeout"
+			_start_geoip_update_async
+		else
+			log_msg "Config dry-run failed; firewall/DNS untouched. ${_pf_reason}" "配置预检失败，未应用防火墙与 DNS 改动。${_pf_reason}"
+			runtime_state_record_health "fail" "preflight:config_dry_run_failed"
+		fi
 		echo "Clashoo" > "$REAL_LOG"
 		return 1
 	fi
