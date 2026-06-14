@@ -945,3 +945,9 @@ msgstr "该指示灯仅用于此类通知"
 
 msgid "Select 'No' in case the router has only one LED or if the LED is multi-tasking. <br /><br /><b>Important</b> <br />This option requires LED to be defined in the system (if possible) to work properly. This requirement applies when the diode supports multiple tasks."
 msgstr "如果路由器只有一个 LED 或 LED 是多功能的，请选择“否”。<br /><br /><b>重要提示</b> <br />此选项要求在系统中定义 LED（如果可能）才能正常工作。当指示灯支持多个任务时，此要求适用。"
+
+msgid "Call Log Settings"
+msgstr "通话记录设置"
+
+msgid "Background process to log incoming and missed calls. <br /><br /><b>Important</b> <br />Option dedicated to Qualcomm modems that do not have internal call history memory and do not support the standard AT+CPBR command. Enabling this option adds a new tab. If dedicated tab does not appear, clear your browser cache and restart the router."
+msgstr "用于记录来电和未接来电的后台进程。<br /><br /><b>重要</b> <br />此选项专为没有内部通话记录内存且不支持标准AT+CPBR命令的高通调制解调器而设计。启用此选项将添加新标签页。如果专用标签页未出现，请清除浏览器缓存并重启路由器。"

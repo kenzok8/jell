@@ -1197,42 +1197,6 @@ return view.extend({
 				});
 			}
 		};
-		
-		o = s.taboption('smstab' , form.Value, 'callport', _('Call log reading port'),
-			_('Select one of the available ttyUSBX ports.'));
-		devs.sort((a, b) => a.name > b.name);
-		devs.forEach(dev => o.value('/dev/' + dev.name));
-
-		o.placeholder = _('Please select a port');
-		o.rmempty = false;
-		
-        o = s.taboption('smstab', form.Flag, 'calllog_enabled', _('Enable call log daemon'),
-	        _('Background process to log incoming and missed calls.'));
-        o.rmempty = false;
-        o.default = '0';
-        o.write = function(section_id, value) {
-	        return uci.load('sms_tool_js').then(function() {
-		        if (value == '1') {
-			        uci.set('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled', '1');
-			        return uci.save().then(function() {
-				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['enable']);
-			        }).then(function() {
-				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['start']);
-			        });
-		        }
-		        
-		        if (value == '0') {
-			        uci.set('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled', '0');
-			        return uci.save().then(function() {
-				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['stop']);
-			        }).then(function() {
-				        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['disable']);
-			        });
-		        }
-	        }.bind(this)).then(function() {
-		        return form.Flag.prototype.write.apply(this, [section_id, value]);
-	        }.bind(this));
-        };
 
 		o = s.taboption('smstab', form.Value, 'sendport', _('SMS sending port'), 
 			_("Select one of the available ttyUSBX ports."));
@@ -1603,6 +1567,51 @@ return view.extend({
 			let dialog = new atCommandsManagerDialog(_('Manage User AT Commands'));
 			dialog.show();
 		};
+		
+        //TAB CALL LOG
+
+		s.tab('calllogtab', _('Call Log Settings'));
+
+		o = s.taboption('calllogtab' , form.Value, 'callport', _('Call log reading port'),
+			_('Select one of the available ttyUSBX ports.'));
+		devs.sort((a, b) => a.name > b.name);
+		devs.forEach(dev => o.value('/dev/' + dev.name));
+
+		o.placeholder = _('Please select a port');
+		o.rmempty = false;
+		
+        o = s.taboption('calllogtab', form.Flag, 'calllog_enabled', _('Enable call log daemon'),
+			_('Background process to log incoming and missed calls. \
+			<br /><br /><b>Important</b> \
+			<br />Option dedicated to Qualcomm modems that do not have internal call history memory and do not support the standard AT+CPBR command. \
+			Enabling this option adds a new tab. If dedicated tab does not appear, clear your browser cache and restart the router.'));
+        o.rmempty = false;
+        o.default = '0';
+        o.write = function(section_id, value) {
+            return uci.load('sms_tool_js').then(function() {
+                if (value == '1') {
+                    uci.set('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled', '1');
+                    return uci.save().then(function() {
+                        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['enable']);
+                    }).then(function() {
+                        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['start']);
+                    });
+                }
+                
+                if (value == '0') {
+                    uci.set('sms_tool_js', '@sms_tool_js[0]', 'calllog_enabled', '0');
+                    return uci.save().then(function() {
+                        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['stop']);
+                    }).then(function() {
+                        return fs.exec_direct('/etc/init.d/sms_tool_calllogd', ['disable']);
+                    }).then(function() {
+                        return fs.exec_direct('/bin/rm', ['-f', '/tmp/sms_tool_call_log.json']);
+                    });
+                }
+            }.bind(this)).then(function() {
+                return form.Flag.prototype.write.apply(this, [section_id, value]);
+            }.bind(this));
+        };
 
 		//TAB INFO
 
@@ -1750,3 +1759,4 @@ return view.extend({
 		return m.render();
 	}
 });
+
