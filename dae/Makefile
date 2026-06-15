@@ -3,7 +3,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dae
-PKG_VERSION:=2026.06.15.3
+PKG_VERSION:=2026.06.16
 PKG_RELEASE:=1
 
 PKG_SOURCE:=dae-src-2026.06.14-fa89ea7197a5.tar.gz
