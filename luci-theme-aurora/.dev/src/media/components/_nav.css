@@ -11,12 +11,14 @@
   @apply text-text hover:bg-hover-faint block rounded-xl px-3 py-1.5 no-underline transition-all duration-150;
 }
 
-/* Mode-agnostic active state: brand text + weight only. The selected-pill
-   background is a sidebar affordance (set in _layout.css); the mobile drawer
-   deliberately omits it and uses an accent indicator bar instead (_overlay.css).
-   Repeats text-brand on hover so the base link's hover color never bleeds through. */
-.nav-link-active {
-  @apply text-brand hover:text-brand font-medium;
+.navigation-direct {
+  @apply text-text hover:text-text;
+}
+
+/* Direct destinations use the same selected state in both navigation modes:
+   a filled brand pill, matching the active sublink. */
+.navigation-direct.is-active-page {
+  @apply text-brand hover:text-brand bg-brand-subtle font-medium;
 }
 
 /* Category rows are group labels, not buttons: no hover surface, just a
@@ -25,25 +27,50 @@
    <button> chrome (_button.css), which would otherwise box every row. */
 .nav-category {
   @apply text-text-muted hover:text-text focus-visible:ring-focus-ring flex w-full cursor-pointer appearance-none items-center gap-2 rounded-lg border-0 bg-transparent px-3 py-2 text-left text-lg font-semibold tracking-wide shadow-none transition-colors duration-150 select-none focus-visible:ring-2 focus-visible:outline-none;
+}
 
-  /* Trailing chevron shares arrow-right.svg with the collapsible cards:
-     points right when closed, rotates to point down when open. */
-  @apply after:size-3.5 after:shrink-0 after:bg-current after:opacity-55 after:transition-[transform,opacity] after:duration-150 after:content-[''] after:[mask:url('@assets/icons/arrow-right.svg')_center/cover_no-repeat] hover:after:opacity-100;
+.navigation-group-toggle {
+  @apply after:size-3.5 after:shrink-0 after:bg-current after:opacity-55 after:transition-[transform,opacity] after:duration-[250ms] after:content-[''] after:[mask:url('@assets/icons/arrow-right.svg')_center/cover_no-repeat] hover:after:opacity-100;
 }
 
 .nav-category-label {
   @apply min-w-0 flex-1 truncate;
 }
 
-/* Open group: label darkens to foreground; the active child's pill is the
-   sole location anchor, so no primary tint on the label itself. */
-.sidebar-group-open > .nav-category {
-  @apply text-text after:rotate-90;
+/* An expanded group's label turns brand and its arrow rotates open. */
+.navigation-group.is-expanded > .navigation-group-toggle {
+  @apply text-brand after:rotate-90;
 }
 
-/* The desktop sidebar no longer uses previews; the mobile drawer is the
-   sole consumer and sets its own px/text-size (_overlay.css), so the base
-   only carries the mode-agnostic bits. */
+/* The active group keeps its brand label even when the user manually
+   collapses it — otherwise the active-page pill is hidden inside the inert
+   region and no "you are here" marker survives. No arrow rotation here: a
+   collapsed group's arrow must still point right. */
+.navigation-group.is-active-group > .navigation-group-toggle {
+  @apply text-brand;
+}
+
+.navigation-group-region {
+  @apply grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-[250ms] ease-out;
+}
+
+.navigation-group.is-expanded > .navigation-group-region {
+  @apply grid-rows-[1fr] opacity-100;
+}
+
+.navigation-submenu-list {
+  @apply min-h-0 list-none overflow-hidden;
+}
+
+.navigation-sublink {
+  @apply text-text-muted hover:bg-hover-faint hover:text-text relative flex rounded-lg font-medium no-underline transition-colors duration-150;
+}
+
+/* Active page: a filled brand pill, shared by the sidebar and the drawer. */
+.navigation-sublink.is-active-page {
+  @apply text-brand hover:text-brand bg-brand-subtle font-semibold;
+}
+
 .nav-category-preview {
   @apply text-text-subtle truncate pb-1;
 
