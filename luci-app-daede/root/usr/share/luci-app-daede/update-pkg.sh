@@ -38,15 +38,22 @@ fi
 	echo "$(date '+%F %T') begin upgrade: $PKG"
 
 	if command -v apk >/dev/null 2>&1; then
-		# Serialize with the view's background index refresh (shared apk lock) so
-		# we never hit "Unable to lock database".
-		echo "--- apk update + add $PKG ---"
-		# Target only $PKG (not `apk upgrade`, which re-solves the whole world).
-		flock /tmp/luci-app-daede.apk.lock sh -c 'apk update 2>&1; apk add "$1" 2>&1' _ "$PKG"
-		# Don't trust apk's exit code: apk-tools 3 returns non-zero whenever ANY
-		# unrelated installed package has an unavailable .apk in the configured
-		# feeds, even when $PKG itself upgraded fine. Judge success by state —
-		# $PKG must be installed and have no pending upgrade left.
+		# shared apk lock with the bg index refresh (avoid "Unable to lock database")
+		(
+			flock 9
+			apk update 2>&1
+			# pin exact latest version + --force-broken-world so unrelated broken
+			# packages can't block this upgrade (cf. clashoo component_update)
+			ver=$(apk list "$PKG" 2>/dev/null | awk -v p="$PKG" '$1 ~ "^" p "-[0-9]" { v=$1; sub("^" p "-", "", v); print v }' | sort -V | tail -1)
+			if [ -n "$ver" ]; then
+				echo "--- apk add $PKG=$ver ---"
+				apk add "$PKG=$ver" --force-broken-world 2>&1
+			else
+				echo "--- apk add $PKG ---"
+				apk add "$PKG" --force-broken-world 2>&1
+			fi
+		) 9>/tmp/luci-app-daede.apk.lock
+		# apk's exit code is unreliable (broken-world noise); judge by state instead
 		if ! apk list --installed 2>/dev/null | grep -q "^${PKG}-"; then
 			echo "result: $PKG is not installed"
 			rc=1
