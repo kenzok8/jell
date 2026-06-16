@@ -89,18 +89,17 @@ return baseclass.extend({
 	},
 
 	getConditionalMenuStamp: function() {
-		var googleFuMode = !!document.querySelector('.navbar a[href*="/admin/services/openclash"]');
-
 		return Promise.all([
 			this.getFileListStamp('/usr/share/luci/menu.d', '.json'),
 			this.getFileListStamp('/usr/share/rpcd/acl.d', '.json'),
-			L.resolveDefault(fs.stat('/etc/config/wireless'), null)
+			L.resolveDefault(fs.stat('/etc/config/wireless'), null),
+			L.resolveDefault(fs.stat('/etc/config/google_fu_mode'), null)
 		]).then(function(stamps) {
 			return JSON.stringify({
-				google_fu_mode: googleFuMode,
 				menu_definitions: stamps[0],
 				acl_definitions: stamps[1],
-				wireless_config: stamps[2] ? [ stamps[2].mtime || 0, stamps[2].size || 0 ].join(':') : 'absent'
+				wireless_config: stamps[2] ? [ stamps[2].mtime || 0, stamps[2].size || 0 ].join(':') : 'absent',
+				google_fu_mode: stamps[3] ? [ stamps[3].mtime || 0, stamps[3].size || 0 ].join(':') : 'absent'
 			});
 		});
 	},
