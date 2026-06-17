@@ -19,7 +19,7 @@ PKG_RELEASE:=1
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/shadowsocks/shadowsocks-libev.git
 PKG_SOURCE_DATE:=2026-02-09
-PKG_SOURCE_VERSION:=19e681fd8c23c365532dd2a24e645311e94058b0
+PKG_SOURCE_VERSION:=fc8750f3295fc0eaee400ef5a0e86216510dec44
 PKG_MIRROR_HASH:=skip
 
 PKG_MAINTAINER:=Yousong Zhou <yszhou4tech@gmail.com>
