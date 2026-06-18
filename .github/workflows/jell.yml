@@ -335,7 +335,7 @@ jobs:
         (
         git_clone https://github.com/kenzok78/luci-theme-argone
         git_clone https://github.com/kenzok78/luci-app-argone-config
-        git_clone https://github.com/kenzok8/vmlinux-btf vmlinux_temp && cp -rf vmlinux_temp/vmlinux-btf/* ./ && rm -rf vmlinux_temp
+        git_clone https://github.com/kenzok8/vmlinux-btf vmlinux_temp && cp -rf vmlinux_temp/vmlinux-btf ./ && rm -rf vmlinux_temp
         git_clone https://github.com/kenzok8/wall && cp -rf wall/* ./ ; rm -rf wall
         git_clone --depth 1 -b js https://github.com/kenzok78/luci-theme-design
         git_clone https://github.com/kenzok78/luci-theme-design luci-theme-design_new
