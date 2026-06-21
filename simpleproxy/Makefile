@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=simpleproxy
 PKG_VERSION:=3.5
-PKG_RELEASE:=124
+PKG_RELEASE:=125
 
 PKG_MAINTAINER:=Konstantine Shevlakov <shevlakov@132lan.ru>
 PKG_LICENSE:=GPLv2
