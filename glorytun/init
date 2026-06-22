@@ -89,6 +89,9 @@ start_instance() {
 	}
 
 	[ "${enable}" = "1" ] || return 1
+
+	apply_sysctl_optimizations
+
 	[ "${proto}" = "tcp" ] || return 1
 	[ -n "${key}" ] || {
 		_err "Key empty"
@@ -163,9 +166,6 @@ start_instance() {
 }
 
 start_service() {
-	# Apply system optimizations before starting instances
-	apply_sysctl_optimizations
-	
 	config_load glorytun
 	config_foreach start_instance glorytun
 }
