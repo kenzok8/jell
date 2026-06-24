@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=upx-static
 PKG_VERSION:=5.2.0
 PKG_RELEASE:=1
-PKG_SOURCE_VERSION:=3c220cc3fc43c91f01c8a16b4e378a9fc7f1b91c
+PKG_SOURCE_VERSION:=d16c774e61611f8376a7adf21b09e9d9325c9595
 
 # Map OpenWrt $(ARCH) to UPX pre-built binary arch name.
 # NOTE: OpenWrt uses "aarch64", UPX tarball uses "arm64".
