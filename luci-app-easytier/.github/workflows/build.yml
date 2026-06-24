@@ -95,6 +95,129 @@ jobs:
           MAKEFLAGS: -j$(nproc)
           V: s
 
+      - name: Generate package guide
+        run: |
+          PKG_DIR="bin/packages/${{ matrix.arch }}/packages_ci"
+          EASYTIER_VERSION="$(awk -F= '/^EASYTIER_VERSION=/{print $2}' version.mk)"
+          mkdir -p "$PKG_DIR"
+          cat > "$PKG_DIR/README_PACKAGE.md" << EOF
+          # EasyTier OpenWrt Packages / EasyTier OpenWrt 安装包说明
+
+          Build target / 构建目标: \`${{ matrix.arch }}-${{ matrix.sdk }}\`
+          EasyTier version / EasyTier 版本: \`${EASYTIER_VERSION:-unknown}\`
+
+          ## Package types / 包格式
+
+          - \`*.ipk\`: OpenWrt 22.03.x and other opkg-based firmware package. / 适用于 OpenWrt 22.03.x 等使用 opkg 的固件。
+          - \`*.apk\`: OpenWrt SNAPSHOT and newer apk-based firmware package. / 适用于 OpenWrt SNAPSHOT 等使用 apk 的新版固件。
+
+          Use packages that match your device architecture and firmware package manager. Do not mix \`ipk\` and \`apk\` on the same system.
+          请下载与设备 CPU 架构和固件包管理器匹配的包，不要在同一系统中混用 \`ipk\` 和 \`apk\`。
+
+          ## What each package does / 每个包的作用
+
+          - \`easytier\`: EasyTier core binaries installed to \`/usr/bin\`, including \`easytier-core\`, \`easytier-cli\`, and the embedded web console binary when supported by the architecture. / EasyTier 核心程序包，安装到 \`/usr/bin\`，包含 \`easytier-core\`、\`easytier-cli\`，并在架构支持时集成自建 Web 控制台程序。
+          - \`easytier-noweb\`: EasyTier core binaries installed to \`/usr/bin\`, without the embedded web console. Use this on devices with limited storage or when you do not need the self-hosted web console. / 不包含自建 Web 控制台的核心程序包，同样安装到 \`/usr/bin\`。适合存储空间不足或不需要自建 Web 控制台的设备。
+          - \`luci-app-easytier\`: LuCI web interface, init script, UCI config, upload/download tools, and service management pages. / LuCI 管理界面，包含启动脚本、UCI 配置、上传/下载工具和服务管理页面。
+          - \`luci-i18n-easytier-zh-cn\`: Simplified Chinese translation for the LuCI interface. / LuCI 界面的简体中文语言包。
+
+          ## Recommended install order / 推荐安装顺序
+
+          1. Install one core package: \`easytier\` or \`easytier-noweb\`. / 先安装一个核心包：\`easytier\` 或 \`easytier-noweb\`。
+          2. Install \`luci-app-easytier\`. / 再安装 \`luci-app-easytier\`。
+          3. Install \`luci-i18n-easytier-zh-cn\` if you need Simplified Chinese. / 如需中文界面，再安装 \`luci-i18n-easytier-zh-cn\`。
+
+          If you need the EasyTier binaries in a custom directory, do not install \`easytier\` or \`easytier-noweb\`. Install only \`luci-app-easytier\` and the language package, then open LuCI -> VPN -> EasyTier -> Upload Program, set the program directory, save it, and upload the official EasyTier release files manually.
+          如果需要把 EasyTier 程序安装到自定义目录，不要安装 \`easytier\` 或 \`easytier-noweb\`。只安装 \`luci-app-easytier\` 和语言包，然后进入 LuCI -> VPN -> EasyTier -> 上传程序，设置程序目录并保存，再手动上传官方 EasyTier Release 中的程序文件。
+
+          You can also use the online download function on the Upload Program page. This requires network access to GitHub. If GitHub access is slow or unavailable, configure acceleration mirror URLs before downloading.
+          也可以在“上传程序”页面使用在线下载功能。该功能需要设备能正常访问 GitHub；如果访问慢或无法访问，请先配置加速镜像地址。
+
+          ## IPK installation / IPK 安装方法
+
+          Upload the packages to \`/tmp\` on your OpenWrt device, then run:
+          将安装包上传到 OpenWrt 设备的 \`/tmp\` 目录，然后执行：
+
+          \`\`\`sh
+          opkg update
+          opkg install /tmp/easytier_*.ipk
+          opkg install /tmp/luci-app-easytier_*.ipk
+          opkg install /tmp/luci-i18n-easytier-zh-cn_*.ipk
+          \`\`\`
+
+          For the no-web core package:
+          如果安装不含 Web 控制台的核心包：
+
+          \`\`\`sh
+          opkg update
+          opkg install /tmp/easytier-noweb_*.ipk
+          opkg install /tmp/luci-app-easytier_*.ipk
+          opkg install /tmp/luci-i18n-easytier-zh-cn_*.ipk
+          \`\`\`
+
+          ## APK installation / APK 安装方法
+
+          Upload the packages to \`/tmp\` on your OpenWrt device, then run:
+          将安装包上传到 OpenWrt 设备的 \`/tmp\` 目录，然后执行：
+
+          \`\`\`sh
+          apk add --allow-untrusted /tmp/easytier_*.apk
+          apk add --allow-untrusted /tmp/luci-app-easytier_*.apk
+          apk add --allow-untrusted /tmp/luci-i18n-easytier-zh-cn_*.apk
+          \`\`\`
+
+          For the no-web core package:
+          如果安装不含 Web 控制台的核心包：
+
+          \`\`\`sh
+          apk add --allow-untrusted /tmp/easytier-noweb_*.apk
+          apk add --allow-untrusted /tmp/luci-app-easytier_*.apk
+          apk add --allow-untrusted /tmp/luci-i18n-easytier-zh-cn_*.apk
+          \`\`\`
+
+          ## Install LuCI only and upload binaries manually / 只安装 LuCI 并手动上传程序
+
+          IPK:
+
+          \`\`\`sh
+          opkg update
+          opkg install /tmp/luci-app-easytier_*.ipk
+          opkg install /tmp/luci-i18n-easytier-zh-cn_*.ipk
+          \`\`\`
+
+          APK:
+
+          \`\`\`sh
+          apk add --allow-untrusted /tmp/luci-app-easytier_*.apk
+          apk add --allow-untrusted /tmp/luci-i18n-easytier-zh-cn_*.apk
+          \`\`\`
+
+          Then download the matching EasyTier Linux release from:
+          然后从以下地址下载匹配架构的 EasyTier Linux 官方 Release 包：
+
+          https://github.com/EasyTier/EasyTier/releases
+
+          In LuCI, go to VPN -> EasyTier -> Upload Program, set the program directory, save it, and upload \`easytier-core\`, \`easytier-cli\`, and optionally \`easytier-web-embed\`.
+          在 LuCI 中进入 VPN -> EasyTier -> 上传程序，设置程序目录并保存，然后上传 \`easytier-core\`、\`easytier-cli\`，以及可选的 \`easytier-web-embed\`。
+
+          ## After installation / 安装后
+
+          - Refresh LuCI or log in again. / 刷新 LuCI 页面或重新登录。
+          - Open VPN -> EasyTier. / 打开 VPN -> EasyTier。
+          - Configure network name, network secret, peers, and other options, then enable the service. / 配置网络名称、网络密钥、节点等参数，然后启用服务。
+          - Check logs on the EasyTier log page or by running \`logread | grep -i easytier\`. / 可在 EasyTier 日志页面查看日志，或执行 \`logread | grep -i easytier\`。
+
+          ## Troubleshooting / 问题处理
+
+          - Wrong architecture or package format: download the zip that matches your device architecture and firmware version. / 架构或包格式错误：请下载与设备架构和固件版本匹配的压缩包。
+          - Missing TUN support: install or enable \`kmod-tun\`. / 缺少 TUN 支持：安装或启用 \`kmod-tun\`。
+          - LuCI menu not visible: refresh the browser, clear LuCI cache, or run \`rm -f /tmp/luci-indexcache /tmp/luci-modulecache/*\` and re-login. / LuCI 菜单不显示：刷新浏览器、清理 LuCI 缓存，或执行 \`rm -f /tmp/luci-indexcache /tmp/luci-modulecache/*\` 后重新登录。
+          - Online download fails: check DNS, gateway, and GitHub connectivity; configure acceleration mirror URLs or upload files manually. / 在线下载失败：检查 DNS、网关和 GitHub 连通性；配置加速镜像地址或手动上传程序。
+          - Not enough storage: install \`easytier-noweb\`, or install only LuCI and upload binaries to a larger custom directory. / 存储空间不足：安装 \`easytier-noweb\`，或只安装 LuCI 并把程序上传到容量更大的自定义目录。
+          - Service does not start: verify the program path, executable permission, and configuration; then restart with \`/etc/init.d/easytier restart\`. / 服务无法启动：检查程序路径、可执行权限和配置，然后执行 \`/etc/init.d/easytier restart\`。
+
+          EOF
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -117,9 +240,13 @@ jobs:
         run: |
           sudo timedatectl set-timezone "Asia/Shanghai"
           mkdir -p release
+          shopt -s nullglob
           for dir in artifacts/*; do
             name=$(basename "$dir")
-            zip -j "release/EasyTier-${{ env.TAG }}-${name}.zip" "$dir"/*.ipk "$dir"/*.apk 2>/dev/null || true
+            files=("$dir"/*.ipk "$dir"/*.apk "$dir"/*.md)
+            if [ ${#files[@]} -gt 0 ]; then
+              zip -j "release/EasyTier-${{ env.TAG }}-${name}.zip" "${files[@]}"
+            fi
           done
           echo "build_time=$(TZ=UTC-8 date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
 
@@ -136,9 +263,10 @@ jobs:
              - **`*.apk` 是OpenWrt新版的APK包** 对于apk包跳过证书命令
              `apk add --allow-untrusted luci-app-easytier.apk`
 
+             - 每个压缩包内包含 **`README_PACKAGE.md`** 中英双语说明，包含各包作用、安装顺序、IPK/APK安装方法和常见问题处理
+
              ${{ github.event.inputs.text }}
            
             tag_name: ${{ env.TAG }}
             files: release/*.zip
  
-
