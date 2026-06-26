@@ -6,7 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=redsocks2
-PKG_VERSION:=0.73
+PKG_VERSION:=0.73.1
 PKG_RELEASE:=1
 
 PKG_SOURCE:=redsocks-$(PKG_VERSION).tar.gz
