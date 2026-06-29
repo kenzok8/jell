@@ -6,12 +6,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=caddy
-PKG_VERSION:=2.11.4
+PKG_VERSION:=2.11.4.1
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/caddyserver/caddy.git
-PKG_SOURCE_DATE:=2026-05-23
+PKG_SOURCE_DATE:=2026-06-22
 PKG_SOURCE_VERSION:=13a4c3f43c79ca04064457ab9cf95b376c294141
 PKG_MIRROR_HASH:=skip
 
@@ -46,7 +46,10 @@ endef
 
 define Build/Compile
 	$(call GoPackage/Build/Compile)
-	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/caddy
+	if ! grep -q "UPX!" $(GO_PKG_BUILD_BIN_DIR)/caddy; then \
+	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/caddy; \
+	fi
+	
 endef
 
 define Package/caddy/install

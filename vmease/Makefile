@@ -11,7 +11,7 @@ PKG_ARCH_VMEASE:=$(ARCH)
 
 PKG_NAME:=vmease
 PKG_VERSION:=0.8.7
-PKG_RELEASE:=$(PKG_ARCH_VMEASE)-1
+PKG_RELEASE:=2
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://fw0.koolcenter.com/binary/vmease/
 PKG_HASH:=skip
@@ -28,7 +28,6 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Network
 	SUBMENU:=Web Servers/Proxies
 	TITLE:=VmEase - webvirtcloud helper
-	PKGARCH:=all
 	URL:=https://doc.linkease.com/zh/guide/istoreos/software/webvirtcloud.html
 endef
 
