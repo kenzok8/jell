@@ -18,12 +18,12 @@ const parseProxyGroupYaml = hm.parseYaml.extend({
 			id: this.id,
 			label: this.label,
 			type: cfg.type,
-			groups: cfg.proxies ? cfg.proxies.map((grop) => hm.preset_outbound.full.map(([key, label]) => key).includes(grop) ? grop : this.calcID(hm.glossary["proxy_group"].field, grop)) : null, // array
+			groups: cfg.proxies ? cfg.proxies.map((grop) => hm.preset_outbound.proxy.map(([key, label]) => key).includes(grop) ? grop : this.calcID(hm.glossary["proxy_group"].field, grop)) : null, // array
 			use: cfg.use ? cfg.use.map((prov) => this.calcID(hm.glossary["provider"].field, prov)) : null, // array
 			include_all: this.bool2str(cfg["include-all"]), // bool
 			include_all_proxies: this.bool2str(cfg["include-all-proxies"]), // bool
 			include_all_providers: this.bool2str(cfg["include-all-providers"]), // bool
-			empty_fallback: cfg["empty-fallback"] ? hm.preset_outbound.full.map(([key, label]) => key).includes(cfg["empty-fallback"]) ? cfg["empty-fallback"] : this.calcID(hm.glossary["proxy_group"].field, cfg["empty-fallback"]) : null, // string
+			empty_fallback: cfg["empty-fallback"] ? hm.preset_outbound.proxy.map(([key, label]) => key).includes(cfg["empty-fallback"]) ? cfg["empty-fallback"] : this.calcID(hm.glossary["proxy_group"].field, cfg["empty-fallback"]) : null, // string
 			// Url-test fields
 			tolerance: cfg.tolerance,
 			// Load-balance fields
@@ -255,7 +255,7 @@ const parseDNSYaml = hm.parseYaml.extend({
 
 		let detour = addr.parseParam('detour');
 		if (detour)
-			addr.setParam('detour', hm.preset_outbound.full.map(([key, label]) => key).includes(detour) ? detour : this.calcID(hm.glossary["proxy_group"].field, detour));
+			addr.setParam('detour', hm.preset_outbound.dns.map(([key, label]) => key).includes(detour) ? detour : detour === 'RULES' ? '' : this.calcID(hm.glossary["proxy_group"].field, detour));
 
 		// key mapping // 2026/01/17
 		let config = {
@@ -1057,20 +1057,22 @@ return view.extend({
 			so.value.apply(so, res);
 		})
 
-		so = ss.taboption('field_general', form.MultiValue, 'groups', _('Group'));
-		hm.preset_outbound.full.forEach((res) => {
+		so = ss.taboption('field_general', hm.MultiValue, 'groups', _('Group')); // @pr8758_merged
+		hm.preset_outbound.proxy.forEach((res) => {
 			so.value.apply(so, res);
 		})
+		so.keep_order = true;
 		so.load = function(section_id) {
 			return hm.loadLabel.call(this, [
-				...hm.preset_outbound.full,
+				...hm.preset_outbound.proxy,
 				...hm.loadLabelValues(this.config, 'proxy_group')
 			], section_id);
 		}
 		so.editable = true;
 
-		so = ss.taboption('field_general', form.MultiValue, 'proxies', _('Node'));
+		so = ss.taboption('field_general', hm.MultiValue, 'proxies', _('Node')); // @pr8758_merged
 		so.value('', _('-- Please choose --'));
+		so.keep_order = true;
 		so.load = function(section_id) {
 			return hm.loadLabel.call(this, [
 				['', _('-- Please choose --')],
@@ -1088,8 +1090,9 @@ return view.extend({
 		}
 		so.editable = true;
 
-		so = ss.taboption('field_general', form.MultiValue, 'use', _('Provider'));
+		so = ss.taboption('field_general', hm.MultiValue, 'use', _('Provider')); // @pr8758_merged
 		so.value('', _('-- Please choose --'));
+		so.keep_order = true;
 		so.load = function(section_id) {
 			return hm.loadLabel.call(this, [
 				['', _('-- Please choose --')],
@@ -1133,7 +1136,7 @@ return view.extend({
 				...hm.loadLabelValues(this.config, 'node')
 			], section_id);
 		}
-		so.modalonly = true;
+		so.textvalue = hm.textvalue2Value;
 
 		/* Override fields */
 		so = ss.taboption('field_override', form.Flag, 'disable_udp', _('Disable UDP'));
