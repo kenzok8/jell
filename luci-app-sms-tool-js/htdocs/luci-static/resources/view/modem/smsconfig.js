@@ -1112,25 +1112,34 @@ return view.extend({
 		o.value('SM', _('SIM card'));
 		o.value('ME', _('Modem memory'));
 		o.default = 'SM';
+		o.rmempty = false;
 
 		o = s.taboption('smstab', form.Flag, 'mergesms', _('Merge split messages'),
 		_('Checking this option will make it easier to read the messages, but it will cause a discrepancy in the number of messages shown and received.')
 		);
 		o.rmempty = false;
 
-		o = s.taboption('smstab' , form.ListValue, 'algorithm', _('Merge algorithm'),
-			_(''));
-		o.value('Simple', _('Simple (merge without sorting)'));
-		o.value('Advanced', _('Advanced (merges with sorting)'));
-		o.default = 'Advanced';
-		o.depends('mergesms', '1');
+        o = s.taboption('smstab', form.ListValue, 'algorithm', _('Merge algorithm'), _(''));
+        o.value('Simple', _('Simple (merge without sorting)'));
+        o.value('Advanced', _('Advanced (merges with sorting)'));
+        o.depends('mergesms', '1');
+        o.default = 'Simple';
+        o.rmempty = false;
+        o.write = function(section_id, value) {
+	        if (value != 'Simple' && value != 'Advanced') {
+		        value = this.default;
+	        }
+
+	        return form.ListValue.prototype.write.apply(this, [section_id, value]);
+        };
 
 		o = s.taboption('smstab' , form.ListValue, 'direction', _('Direction of message merging'),
 			_(''));
 		o.value('Start', _('From beginning to end'));
 		o.value('End', _('From end to beginning'));
-		o.default = 'Start';
 		o.depends('algorithm', 'Advanced');
+		o.default = 'Start';
+		o.rmempty = false;
 
 		o = s.taboption('smstab', form.Value, 'bnumber', _('Phone number to be blurred'),
 		_('The last 5 digits of this number will be blurred.')
@@ -1759,4 +1768,3 @@ return view.extend({
 		return m.render();
 	}
 });
-

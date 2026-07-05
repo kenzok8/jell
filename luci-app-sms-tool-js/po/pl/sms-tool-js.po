@@ -760,7 +760,7 @@ msgid "Modem"
 msgstr "Modem"
 
 msgid "Modems"
-msgstr "Modem(-y)"
+msgstr "Modemy"
 
 msgid "Signal Quality"
 msgstr "Jakość sygnału"

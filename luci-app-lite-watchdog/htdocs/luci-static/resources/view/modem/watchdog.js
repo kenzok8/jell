@@ -241,6 +241,7 @@ return view.extend({
 			o.value('wan', _('Connection restart'));
 			o.value('reboot', _('Reboot'));
 			o.default = action || "wan";
+			o.rmempty = false;
 		}
 
 		return m.render();
