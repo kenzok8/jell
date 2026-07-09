@@ -1,5 +1,5 @@
 # 
-# Copyright 2018-2025 Nick Peng <pymumu@gmail.com>
+# Copyright 2018-2026 Nick Peng <pymumu@gmail.com>
 # Licensed to the public under the GPL V3 License.
 
 include $(TOPDIR)/rules.mk
