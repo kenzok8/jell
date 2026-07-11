@@ -1,0 +1,9 @@
+include $(TOPDIR)/rules.mk
+
+LUCI_TITLE:=Web UI for QEMU Virtual Machine Simple (VMS)
+LUCI_DEPENDS:=+qemu-vms +ttyd +usbutils +pciutils
+PKG_LICENSE:=GPLv3
+
+include $(TOPDIR)/feeds/luci/luci.mk
+
+# call BuildPackage - OpenWrt buildroot signature
