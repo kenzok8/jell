@@ -17,8 +17,8 @@ def cmd(s):
   print("")
   print(s)
   print("-------------------------------------")
-  r = os.system(s)
-  if r != 0: 
+  r = subprocess.run(s, shell=True)
+  if r.returncode != 0: 
     print("Exit build due to previous error")
     exit(-1)
 
