@@ -1146,9 +1146,9 @@ return view.extend({
 					case 'snell':
 						def_alpn = ['h2', 'http/1.1']; // when plugin === 'shadow-tls'
 						break;
+					case 'tuic':
 					case 'hysteria':
 					case 'hysteria2':
-					case 'tuic':
 						def_alpn = ['h3'];
 						break;
 					case 'vmess':

@@ -622,6 +622,7 @@ function renderListeners(s, uciconfig, isClient) {
 	if (isClient) {
 		o = s.taboption('field_general', form.Value, 'routing_mark', _('Routing mark (Fwmark)'));
 		o.datatype = 'uinteger';
+		o.modalonly = false;
 		o.editable = true;
 
 		o = s.taboption('field_general', hm.ListValue, 'rule', _('Sub rule'),
@@ -633,6 +634,7 @@ function renderListeners(s, uciconfig, isClient) {
 				...hm.loadLabelValues(this.config, 'subrule-group')
 			], section_id);
 		}
+		o.modalonly = false;
 		o.editable = true;
 
 		o = s.taboption('field_general', hm.ListValue, 'proxy', _('Proxy group'),
@@ -647,6 +649,7 @@ function renderListeners(s, uciconfig, isClient) {
 				...hm.loadLabelValues(this.config, 'proxy_group')
 			], section_id);
 		}
+		o.modalonly = false;
 		o.editable = true;
 	}
 
@@ -947,8 +950,8 @@ function renderListeners(s, uciconfig, isClient) {
 			let def_alpn;
 
 			switch (type) {
-				case 'hysteria2':
 				case 'tuic':
+				case 'hysteria2':
 					def_alpn = ['h3'];
 					break;
 				case 'hysteria2-realm':
