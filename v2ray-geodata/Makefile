@@ -21,7 +21,7 @@ define Download/geoip
   HASH:=skip
 endef
 
-GEOSITE_VER:=20260712115932
+GEOSITE_VER:=20260713024410
 GEOSITE_FILE:=dlc.dat.$(GEOSITE_VER)
 define Download/geosite
   URL:=https://github.com/v2fly/domain-list-community/releases/download/$(GEOSITE_VER)/
@@ -30,7 +30,7 @@ define Download/geosite
   HASH:=skip
 endef
 
-GEOSITE_IRAN_VER:=202607060129
+GEOSITE_IRAN_VER:=202607130116
 GEOSITE_IRAN_FILE:=iran.dat.$(GEOSITE_IRAN_VER)
 define Download/geosite-ir
   URL:=https://github.com/bootmortis/iran-hosted-domains/releases/download/$(GEOSITE_IRAN_VER)/
