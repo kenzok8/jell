@@ -222,10 +222,10 @@ export function parseListener(cfg) {
 		rule: cfg.rule,
 		proxy: cfg.proxy, // raw data need post-processing
 
-		/* HTTP / SOCKS / Mieru / VMess / VLESS / Trojan / AnyTLS / Tuic / Hysteria2 / ShadowQUIC / TrustTunnel */
-		users: (cfg.type in ['http', 'socks', 'mixed', 'vmess', 'vless', 'trojan', 'shadowquic', 'trusttunnel']) ? [
+		/* HTTP / SOCKS / Mieru / VMess / VLESS / Trojan / AnyTLS / Tuic / Hysteria2 / TrustTunnel */
+		users: (cfg.type in ['http', 'socks', 'mixed', 'vmess', 'vless', 'trojan', 'trusttunnel']) ? [
 			(cfg.username || cfg.vmess_uuid) ? {
-				/* HTTP / SOCKS / Trojan / ShadowQUIC / TrustTunnel */
+				/* HTTP / SOCKS / Trojan / TrustTunnel */
 				username: cfg.username,
 				password: cfg.password,
 
@@ -326,11 +326,19 @@ export function parseListener(cfg) {
 		"realm-name-pattern": cfg.hysteria2_realmserver_realm_name_pattern,
 
 		/* ShadowQUIC */
+		...(cfg.type === 'shadowquic' ? {
+			users: [
+				{
+					username: cfg.plugin_opts_thetlsusername,
+					password: cfg.plugin_opts_thetlspassword
+				}
+			]
+		} : {}),
 		"quic-versions": cfg.shadowquic_quic_versions,
 		"zero-rtt": strToBool(cfg.shadowquic_zero_rtt),
 		"jls-upstream": cfg.type === 'shadowquic' ? {
 			addr: cfg.plugin_opts_handshake_dest,
-			sni: cfg.tls_sni,
+			sni: cfg.plugin_opts_host,
 			proxy: cfg.plugin_opts_dest_proxy, // raw data need post-processing
 			"rate-limit": strToInt(cfg.plugin_opts_rate_limit),
 			"quic-version-probe": strToBool(cfg.plugin_opts_quic_version_probe)
@@ -397,7 +405,8 @@ export function parseListener(cfg) {
 					password: cfg.plugin_opts_thetlspassword,
 					"restls-script": cfg.plugin_opts_restls_script,
 					//"min-record-len": 0,
-					proxy: cfg.plugin_opts_dest_proxy // raw data need post-processing
+					proxy: cfg.plugin_opts_dest_proxy, // raw data need post-processing
+					"rate-limit": strToInt(cfg.plugin_opts_rate_limit)
 				}
 			} : cfg.plugin_type === 'jls' ? {
 			// jls
@@ -410,7 +419,7 @@ export function parseListener(cfg) {
 						}
 					],
 					dest: cfg.plugin_opts_handshake_dest,
-					sni: cfg.tls_sni,
+					sni: cfg.plugin_opts_host,
 					alpn: cfg.tls_alpn,
 					proxy: cfg.plugin_opts_dest_proxy, // raw data need post-processing
 					"rate-limit": strToInt(cfg.plugin_opts_rate_limit)
