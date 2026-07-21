@@ -5,12 +5,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=rustdesk-server
-PKG_VERSION:=1.1.15
+PKG_VERSION:=1.1.16
 PKG_RELEASE:=5
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/rustdesk/rustdesk-server.git
-PKG_SOURCE_VERSION:=9bae9f2f39d92c4b4ba2e28e089da5071897b22e
+PKG_SOURCE_VERSION:=73523b31cfd25d77dee862e6fc9f5e1fb5e485ef
 PKG_MIRROR_HASH:=skip
 
 PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
