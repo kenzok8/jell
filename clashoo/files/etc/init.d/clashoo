@@ -2060,7 +2060,7 @@ stop_service(){
 		runtime_state_set "updated_at" "$(date +%s)"
 
 		# kick access check on stop (proxy_listening fast-paths to down; UI reflects stop within 5s)
-		/usr/share/clashoo/net/access_check_cache.sh >/dev/null 2>&1 &
+		(exec 1000>&-; /usr/share/clashoo/net/access_check_cache.sh >/dev/null 2>&1) &
 
 #===========================================================================================================================
 }
