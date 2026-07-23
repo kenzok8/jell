@@ -548,6 +548,7 @@ a = s:taboption("disturb", DynamicList, "MAC_offline_list", translate("任意离
 a.rmempty = true
 a:depends({macmechanism2="MAC_offline"})
 
+
 -- 高级设置
 
 b=s:taboption("advanced", Value,"up_timeout",translate('设备上线检测超时（s）'))
@@ -600,7 +601,7 @@ if nixio.fs.access("/tmp/pushbot/soc_tmp") then
 	e.rows=2
 	e.readonly=true
 	e.cfgvalue = function()
-		return luci.sys.exec("cat /tmp/pushbot/soc_tmp && rm -f /tmp/pushbot/soc_tmp")
+		return luci.sys.exec("cat /tmp/pushbot/soc_tmp 2>/dev/null || true")
 	end
 end
 

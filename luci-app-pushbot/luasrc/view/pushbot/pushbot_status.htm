@@ -50,6 +50,32 @@ nt.mac_hints(function(mac, name)
 end)
 %>
 <script type="text/javascript">var PUSHBOT_MAC_HINTS=[<% for i,h in ipairs(mac_hints) do if i>1 then %>,<% end %>{m:"<%=pcdata(h.mac)%>",n:"<%=pcdata(h.name)%>"}<% end %>];</script>
+
+<%
+-- inject advanced settings UCI values
+local function uci_g(opt) local v=uci:get("pushbot","pushbot",opt) return (v~=nil and v~="") and v or nil end
+local function uci_b(opt) return (uci:get("pushbot","pushbot",opt)=="1") end
+local adv_err_aliases = get_list_vals("pushbot","pushbot","err_device_aliases")
+%>
+<script type="text/javascript">
+var ADV_ERR_ENABLE=<%=uci_b("err_enable") and "true" or "false"%>;
+var ADV_ERR_SHEEP=<%=uci_b("err_sheep_enable") and "true" or "false"%>;
+var ADV_SOC_CODE='<%=pcdata(uci_g("soc_code") or "")%>';
+var ADV_PVE_HOST='<%=pcdata(uci_g("pve_host") or "10.0.0.2")%>';
+var ADV_PVE_PORT='<%=pcdata(uci_g("pve_port") or "22")%>';
+var ADV_UP_TIMEOUT='<%=pcdata(uci_g("up_timeout") or "2")%>';
+var ADV_DOWN_TIMEOUT='<%=pcdata(uci_g("down_timeout") or "20")%>';
+var ADV_TIMEOUT_RETRY='<%=pcdata(uci_g("timeout_retry_count") or "2")%>';
+var ADV_THREAD_NUM='<%=pcdata(uci_g("thread_num") or "3")%>';
+var ADV_NET_ERR='<%=pcdata(uci_g("network_err_event") or "")%>';
+var ADV_SYS_TIME='<%=pcdata(uci_g("system_time_event") or "")%>';
+var ADV_AUTOREBOOT='<%=pcdata(uci_g("autoreboot_time") or "24")%>';
+var ADV_NETRESTART='<%=pcdata(uci_g("network_restart_time") or "24")%>';
+var ADV_PUBLIC_IP=<%=uci_b("public_ip_event") and "true" or "false"%>;
+var ADV_PUBLIC_RETRY='<%=pcdata(uci_g("public_ip_retry_count") or "10")%>';
+var ADV_ERR_DEVICES=[<% for i,v in ipairs(adv_err_aliases) do if i>1 then %>,<% end %>"<%=pcdata(v)%>"<% end %>];
+</script>
+
 <script type="text/javascript">//<![CDATA[
 (function() {
 	/* hidden container preserves form elements for UCI submission — must be inside <form> */
@@ -1664,6 +1690,353 @@ end)
 	}, 700);
 })();
 
+function initMonitorCard() {
+	if (document.getElementById('pushbot_monitor_card_container')) return;
+	var pane = document.getElementById('pushbot_pane_monitor');
+	if (!pane) return;
+
+	var hb = document.getElementById('mon_hidden_fields') || (function(){
+		var d=document.createElement('div'); d.id='mon_hidden_fields'; d.style.display='none';
+		(document.querySelector('form')||document.body).appendChild(d); return d;
+	})();
+
+	function mkHidden(name, val) {
+		var i = document.createElement('input'); i.type = 'hidden';
+		i.name = 'cbid.pushbot.pushbot.' + name; i.value = val;
+		hb.appendChild(i); return i;
+	}
+	function mkText(name, label, val, desc) {
+		var w = document.createElement('div'); w.className = 'pushbot-inline-field'; w.style.cssText = 'margin:4px 0';
+		var t = document.createElement('div'); t.className = 'pushbot-inline-title';
+		t.style.cssText = 'margin:0 0 4px 2px;text-transform:none;font-size:13px;font-weight:600;color:inherit';
+		t.textContent = label; w.appendChild(t);
+		var b = document.createElement('div'); b.className = 'pushbot-inline-body';
+		var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'cbi-input-text';
+		inp.value = val;
+		inp.style.cssText = 'width:100%;padding:7px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.3);font-size:13px;box-sizing:border-box;background:rgba(255,255,255,0.7);color:inherit';
+		var hi = mkHidden(name, val);
+		inp.addEventListener('change', function() { hi.value = this.value; });
+		b.appendChild(inp);
+		if (desc) { var d = document.createElement('div'); d.className = 'pushbot-inline-description'; d.innerHTML = desc; b.appendChild(d); }
+		w.appendChild(b); return w;
+	}
+	function mkToggle(label, isOn, onToggle) {
+		var b = document.createElement('button'); b.type = 'button';
+		b.className = 'pushbot-choice-button ' + (isOn ? 'is-on' : 'is-off');
+		b.innerHTML = '<span>' + label + '</span>';
+		b.addEventListener('click', function(e) {
+			e.preventDefault();
+			var newOn = !isOn; isOn = newOn;
+			b.className = 'pushbot-choice-button ' + (newOn ? 'is-on' : 'is-off');
+			if (onToggle) onToggle(newOn);
+		});
+		return b;
+	}
+	function mkChoiceList(opts, curVal, onChange) {
+		var c = document.createElement('div'); c.className = 'pushbot-choice-list';
+		var btns = [];
+		opts.forEach(function(o) {
+			var b = document.createElement('button'); b.type = 'button'; b.className = 'pushbot-choice-button';
+			b.textContent = o.l; b.setAttribute('data-v', o.v);
+			if (o.v === curVal) b.className += ' is-on';
+			b.addEventListener('click', function(e) {
+				e.preventDefault(); curVal = o.v;
+				btns.forEach(function(b2) { b2.className = 'pushbot-choice-button' + (b2.getAttribute('data-v') === curVal ? ' is-on' : ''); });
+				if (onChange) onChange(curVal);
+			});
+			btns.push(b); c.appendChild(b);
+		});
+		return c;
+	}
+
+	var container = document.createElement('div'); container.id = 'pushbot_monitor_card_container';
+
+	/* ═══ CARD 1: 设备监测 ═══ */
+	var c1 = document.createElement('div'); c1.className = 'pushbot-mode-card';
+	c1.innerHTML = '<div class="pushbot-card-top"><span class="pushbot-card-title">设备监测</span></div>';
+	var b1 = document.createElement('div'); b1.style.cssText = 'margin-top:6px';
+	var r1 = document.createElement('div'); r1.style.cssText = 'display:flex;gap:12px';
+	var c1a = document.createElement('div'); c1a.style.cssText = 'flex:1;min-width:0';
+	c1a.appendChild(mkText('up_timeout', '设备上线检测超时（s）', ADV_UP_TIMEOUT));
+	r1.appendChild(c1a);
+	var c1b = document.createElement('div'); c1b.style.cssText = 'flex:1;min-width:0';
+	c1b.appendChild(mkText('thread_num', '最大并发进程数', ADV_THREAD_NUM));
+	r1.appendChild(c1b);
+	b1.appendChild(r1);
+	var r2 = document.createElement('div'); r2.style.cssText = 'display:flex;gap:12px';
+	var c2a = document.createElement('div'); c2a.style.cssText = 'flex:1;min-width:0';
+	c2a.appendChild(mkText('down_timeout', '设备离线检测超时（s）', ADV_DOWN_TIMEOUT));
+	r2.appendChild(c2a);
+	var c2b = document.createElement('div'); c2b.style.cssText = 'flex:1;min-width:0';
+	c2b.appendChild(mkText('timeout_retry_count', '离线检测次数', ADV_TIMEOUT_RETRY,
+		'若无二级路由设备，信号强度良好，可以减少以上数值<br/>因夜间 wifi 休眠较为玄学，遇到设备频繁推送断开，烦请自行调整参数<br/>..╮(\u2570_\u2570)\uff0d..'));
+	r2.appendChild(c2b);
+	b1.appendChild(r2); c1.appendChild(b1); container.appendChild(c1);
+
+	/* ═══ CARD 2: 温度监测 ═══ */
+	var c2 = document.createElement('div'); c2.className = 'pushbot-mode-card';
+	c2.innerHTML = '<div class="pushbot-card-top"><span class="pushbot-card-title">温度监测</span></div>';
+	var b2 = document.createElement('div'); b2.style.cssText = 'margin-top:6px';
+
+	var socCur = ADV_SOC_CODE, socPVE = (socCur === 'pve'), socCust = (socCur !== '' && socCur !== 'pve');
+	var socHi = mkHidden('soc_code', socCur);
+
+	var sf = document.createElement('div'); sf.className = 'pushbot-inline-field'; sf.style.cssText = 'margin:4px 0';
+	var st = document.createElement('div'); st.className = 'pushbot-inline-title';
+	st.style.cssText = 'margin:0 0 4px 2px;text-transform:none;font-size:13px;font-weight:600;color:inherit';
+	st.textContent = '自定义温度读取命令'; sf.appendChild(st);
+	var sb = document.createElement('div'); sb.className = 'pushbot-inline-body';
+	var ss = document.createElement('select'); ss.className = 'cbi-input-select';
+	ss.style.cssText = 'width:100%;padding:6px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.3);font-size:13px;background:rgba(255,255,255,0.7);color:inherit';
+	[{v:'',l:'默认'},{v:'pve',l:'PVE\u00a0虚拟机'},{v:'__custom__',l:'自定义命令'}].forEach(function(o) {
+		var op = document.createElement('option'); op.value = o.v; op.textContent = o.l;
+		if (o.v === socCur || (socCust && o.v === '__custom__')) op.selected = true;
+		ss.appendChild(op);
+	});
+	var ci = document.createElement('input'); ci.type='text'; ci.className='cbi-input-text';
+	ci.placeholder = '输入自定义温度读取命令'; ci.value = socCust ? socCur : '';
+	ci.style.cssText = 'width:100%;padding:7px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.3);font-size:13px;box-sizing:border-box;background:rgba(255,255,255,0.7);color:inherit;margin-top:6px;display:'+(socCust?'block':'none');
+	function syncSoc() {
+		var v = ss.value==='__custom__' ? ci.value : ss.value;
+		socHi.value = v; togPVE();
+	}
+	ss.addEventListener('change', function() {
+		if (this.value==='__custom__') { ci.style.display='block'; ci.focus(); syncSoc(); }
+		else { ci.style.display='none'; ci.value=''; syncSoc(); }
+	});
+	ci.addEventListener('change', syncSoc);
+	var socDesc = '请尽量避免使用特殊符号，如双引号、$、!等，执行结果需为数字，用于温度对比';
+	var sd = document.createElement('div'); sd.className='pushbot-inline-description'; sd.innerHTML=socDesc; sb.appendChild(sd);
+	sb.appendChild(ss); sb.appendChild(ci); sf.appendChild(sb); b2.appendChild(sf);
+
+	/* PVE fields */
+	var pveDescHost = '请确认已经设置好密钥登陆，否则会引起脚本无法正常运行等错误！<br/>PVE 安装 sensors 命令自行百度<br/>密钥登陆例：<br/>opkg update #更新列表<br/>opkg install openssh-client openssh-keygen #安装openssh客户端<br/>ssh-keygen -t rsa # 生成密钥文件（自行设定密码等信息）<br/>ssh root@10.0.0.2 \"tee -a ~/.ssh/id_rsa.pub\" < ~/.ssh/id_rsa.pub # 传送公钥到 PVE<br/>ssh -i ~/.ssh/id_rsa root@10.0.0.2 sensors # 测试温度命令';
+	var pveDescPort = '默认为22，如有自定义，请填写自定义SSH端口';
+	var pc = document.createElement('div'); pc.id='mon_pve_fields'; pc.style.cssText='margin-top:6px';
+	var pvg = document.createElement('div'); pvg.style.cssText='display:flex;gap:12px';
+	pvg.appendChild(mkText('pve_host', '宿主机地址', ADV_PVE_HOST, pveDescHost));
+	pvg.appendChild(mkText('pve_port', 'SSH端口', ADV_PVE_PORT, pveDescPort));
+	pc.appendChild(pvg); b2.appendChild(pc);
+	function togPVE() { pc.style.display = ((socHi && socHi.value) === 'pve') ? 'block' : 'none'; }
+	togPVE();
+
+	/* Test button */
+	var tr = document.createElement('div'); tr.style.cssText='display:flex;align-items:center;gap:12px;margin-top:10px';
+	var tb = document.createElement('a'); tb.className='cbi-button cbi-input-apply';
+	tb.href='<%=url([[admin]],[[services]],[[pushbot]],[[soc_test]])%>'; tb.textContent='测试温度';
+	tb.style.cssText='white-space:nowrap;padding:6px 16px;text-decoration:none';
+	tr.appendChild(tb);
+	var rl = document.createElement('span'); rl.style.cssText='font-size:13px;font-weight:600'; rl.textContent='温度结果:';
+	tr.appendChild(rl);
+	var ro = document.createElement('span'); ro.style.cssText='padding:4px 10px;background:rgba(148,163,184,0.08);border-radius:6px;font-family:Menlo,Consolas,monospace;font-size:12px';
+	ro.textContent = '加载中...';
+	(function(){
+		var x = new XMLHttpRequest();
+		x.open('GET', '<%=url([[admin]], [[services]], [[pushbot]], [[soc_result]])%>?_=' + Date.now(), true);
+		x.onload = function() { ro.textContent = x.responseText || '无输出'; };
+		x.onerror = function() { ro.textContent = '无输出'; };
+		x.send();
+	})();
+	tr.appendChild(ro);
+	b2.appendChild(tr);
+	c2.appendChild(b2); container.appendChild(c2);
+
+	/* ═══ CARD 3: 无人值守 ═══ */
+	var c3 = document.createElement('div'); c3.className = 'pushbot-mode-card';
+
+	/* Find original err_enable CBI checkbox for proper Flag form submission */
+	var errOrig = document.querySelector('[name$=".err_enable"][type="checkbox"]');
+	var errOn = errOrig ? errOrig.checked : ADV_ERR_ENABLE;
+	var errDesc = '请确认脚本可以正常运行，否则可能造成频繁重启等错误！';
+	var errToggle = mkToggle('无人值守任务', errOn, function(on) {
+		if (errOrig) errOrig.checked = on;
+		var ec = document.getElementById('mon_err_content');
+		if (ec) ec.style.display = on ? 'block' : 'none';
+	});
+	c3.appendChild(errToggle);
+	var dDesc = document.createElement('div'); dDesc.className = 'pushbot-inline-description'; dDesc.innerHTML = errDesc;
+	c3.appendChild(dDesc);
+
+	var ec = document.createElement('div'); ec.id = 'mon_err_content'; ec.style.cssText = 'margin-top:10px';
+	ec.style.display = errOn ? 'block' : 'none';
+	c3.appendChild(ec);
+
+	/* err_sheep_enable */
+	(function(){
+		var d = document.createElement('div'); d.className = 'pushbot-inline-description';
+		d.innerHTML = '避免白天重拨 ddns 域名等待解析，此功能不影响断网检测<br/>因夜间跑流量问题，该功能可能不稳定';
+		ec.appendChild(d);
+		/* find original CBI checkbox */
+		var shOrig = document.querySelector('[name$=".err_sheep_enable"][type="checkbox"]');
+		var shOn = shOrig ? shOrig.checked : ADV_ERR_SHEEP;
+		var shTog = mkToggle('仅在免打扰时段重拨', shOn, function(on) {
+			if (shOrig) shOrig.checked = on;
+		});
+		ec.appendChild(shTog);
+	})();
+	ec.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid rgba(148,163,184,0.2);margin:10px 0';
+
+	/* network_err_event */
+	(function(){
+		var nl = document.createElement('div'); nl.className = 'pushbot-inline-title';
+		nl.style.cssText = 'margin:0 0 4px 2px;text-transform:none;font-size:13px;font-weight:600;color:inherit';
+		nl.textContent = '网络断开时'; ec.appendChild(nl);
+		var netHi = mkHidden('network_err_event', ADV_NET_ERR);
+		var netL = [
+			{v:'',l:'无操作'},
+			{v:'1',l:'重启路由器'},
+			{v:'2',l:'重新拨号'},
+			{v:'3',l:'修改相关设置项，尝试自动修复网络'}
+		];
+		ec.appendChild(mkChoiceList(netL, ADV_NET_ERR, function(v) { netHi.value = v; }));
+		var netDesc = '选项 1 选项 2 不会修改设置，并最多尝试 2 次。<br/>选项 3 会将设置项备份于 /usr/bin/pushbot/configbak 目录，并在失败后还原。<br/>【！！无法保证兼容性！！】不熟悉系统设置项，不会救砖请勿使用';
+		var nd = document.createElement('div'); nd.className = 'pushbot-inline-description'; nd.innerHTML = netDesc; ec.appendChild(nd);
+	})();
+	ec.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid rgba(148,163,184,0.2);margin:10px 0';
+
+	/* err_device_aliases */
+	(function(){
+		var dl = document.createElement('div'); dl.className = 'pushbot-inline-title';
+		dl.style.cssText = 'margin:0 0 4px 2px;text-transform:none;font-size:13px;font-weight:600;color:inherit';
+		dl.textContent = '关注列表'; ec.appendChild(dl);
+		var dc = document.createElement('div'); dc.style.cssText = 'margin:4px 0';
+		var tl = document.createElement('div'); tl.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px';
+		var ir = document.createElement('div'); ir.style.cssText = 'display:flex;gap:4px';
+		var inp = document.createElement('input'); inp.type='text'; inp.className='cbi-input-text';
+		inp.placeholder = 'XX:XX:XX:XX:XX:XX';
+		inp.style.cssText = 'flex:1;padding:7px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.3);font-size:13px;background:rgba(255,255,255,0.7);color:inherit';
+		/* datalist for MAC hints - same style as 免打扰 MAC filter */
+		var listId = 'mh_err_device';
+		inp.setAttribute('list', listId);
+		var dlist = document.createElement('datalist');
+		dlist.id = listId;
+		if (typeof PUSHBOT_MAC_HINTS !== 'undefined') {
+			PUSHBOT_MAC_HINTS.forEach(function(h) {
+				var o = document.createElement('option');
+				o.value = h.m;
+				o.textContent = h.n ? h.m + ' (' + h.n + ')' : h.m;
+				dlist.appendChild(o);
+			});
+		}
+		var addB = document.createElement('button'); addB.type='button'; addB.className='pushbot-choice-button is-on';
+		addB.textContent = '添加';
+		ir.appendChild(inp); ir.appendChild(dlist); ir.appendChild(addB);
+		dc.appendChild(tl); dc.appendChild(ir); ec.appendChild(dc);
+
+		var curVals = ADV_ERR_DEVICES.slice();
+		function renderTags(){
+			tl.innerHTML='';
+			curVals.forEach(function(v){if(!v)return;
+				var t=document.createElement('span');
+				t.style.cssText='display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(148,163,184,0.12);border-radius:4px;font-size:12px';
+				t.textContent=v;
+				var x=document.createElement('span');x.textContent='\u00d7';
+				x.style.cssText='cursor:pointer;font-weight:bold;margin-left:2px;opacity:0.6';
+				x.addEventListener('click',function(){var idx=curVals.indexOf(v);if(idx>=0){curVals.splice(idx,1);renderTags();syncH();}});
+				t.appendChild(x);tl.appendChild(t);
+			});
+		}
+		function syncH(){
+			/* remove old hidden inputs */
+			var ex=hb.querySelectorAll('input[name$=".err_device_aliases"]');
+			ex.forEach(function(el){el.remove();});
+			curVals.forEach(function(v){if(!v)return;
+				var i2=document.createElement('input');i2.type='hidden';i2.name='cbid.pushbot.pushbot.err_device_aliases';i2.value=v;
+				hb.appendChild(i2);
+			});
+		}
+		function addTag(v){v=v.trim().toUpperCase();if(!v||curVals.indexOf(v)>=0)return;curVals.push(v);renderTags();syncH();}
+		addB.addEventListener('click',function(){addTag(inp.value);inp.value='';inp.focus();});
+		inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addTag(inp.value);inp.value='';}});
+		renderTags();
+		syncH();
+
+		var devDesc = '只会在列表中设备都不在线时才会执行<br/>免打扰时段一小时后，关注设备五分钟低流量（约100kb/m）将视为离线';
+		var d2 = document.createElement('div'); d2.className = 'pushbot-inline-description'; d2.innerHTML = devDesc; ec.appendChild(d2);
+	})();
+	ec.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid rgba(148,163,184,0.2);margin:10px 0';
+
+	/* system_time_event */
+	(function(){
+		var sl = document.createElement('div'); sl.className = 'pushbot-inline-title';
+		sl.style.cssText = 'margin:0 0 4px 2px;text-transform:none;font-size:13px;font-weight:600;color:inherit';
+		sl.textContent = '定时重启'; ec.appendChild(sl);
+		var sysHi = mkHidden('system_time_event', ADV_SYS_TIME);
+		var sysL = [{v:'',l:'无操作'},{v:'1',l:'重启路由器'},{v:'2',l:'重新拨号'}];
+		ec.appendChild(mkChoiceList(sysL, ADV_SYS_TIME, function(v) {
+			sysHi.value = v;
+			var rf=document.getElementById('mon_autoreboot');
+			var nrf=document.getElementById('mon_netrestart');
+			if(rf)rf.style.display=(v==='1')?'block':'none';
+			if(nrf)nrf.style.display=(v==='2')?'block':'none';
+		}));
+		var stc = document.createElement('div'); stc.style.cssText = 'margin-top:6px';
+		var ar = document.createElement('div'); ar.id = 'mon_autoreboot';
+		ar.style.display = (ADV_SYS_TIME === '1') ? 'block' : 'none';
+		ar.appendChild(mkText('autoreboot_time', '系统运行时间大于', ADV_AUTOREBOOT, '单位为小时'));
+		stc.appendChild(ar);
+		var nr = document.createElement('div'); nr.id = 'mon_netrestart';
+		nr.style.display = (ADV_SYS_TIME === '2') ? 'block' : 'none';
+		nr.appendChild(mkText('network_restart_time', '网络在线时间大于', ADV_NETRESTART, '单位为小时'));
+		stc.appendChild(nr);
+		ec.appendChild(stc);
+	})();
+	ec.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid rgba(148,163,184,0.2);margin:10px 0';
+
+	/* public_ip_event */
+	(function(){
+		var pubDesc = '重拨时不会推送 ip 变动通知，并会导致你的域名无法及时更新 ip 地址<br/>请确认你可以通过重拨获取公网 ip，否则这不仅徒劳无功还会引起频繁断网<br/>移动等大内网你就别挣扎了！！';
+		var pd = document.createElement('div'); pd.className = 'pushbot-inline-description'; pd.innerHTML = pubDesc; ec.appendChild(pd);
+		/* find original CBI checkbox */
+		var pubOrig = document.querySelector('[name$=".public_ip_event"][type="checkbox"]');
+		var pubOn = pubOrig ? pubOrig.checked : ADV_PUBLIC_IP;
+		var pubRow = document.createElement('div'); pubRow.style.cssText = 'display:flex;align-items:center;gap:12px;margin-top:6px';
+		var pubToggle = mkToggle('重拨尝试获取公网 ip', pubOn, function(on) {
+			if (pubOrig) pubOrig.checked = on;
+			var prc = document.getElementById('mon_pubretry');
+			if (prc) prc.style.display = on ? 'flex' : 'none';
+		});
+		pubRow.appendChild(pubToggle);
+		var prc = document.createElement('div'); prc.id = 'mon_pubretry';
+		prc.style.cssText = 'display:'+(pubOn?'flex':'none')+';align-items:center;gap:12px;flex:1';
+		prc.appendChild(mkText('public_ip_retry_count', '当天最大重试次数', ADV_PUBLIC_RETRY));
+		pubRow.appendChild(prc);
+		ec.appendChild(pubRow);
+	})();
+
+	container.appendChild(c3);
+	pane.innerHTML = '';
+	pane.appendChild(container);
+
+		/* Disable old advanced tab CBI elements to prevent duplicate submission */
+		var monHidden = document.getElementById('mon_hidden_fields');
+		var advFields = [
+			'up_timeout','down_timeout','timeout_retry_count','thread_num',
+			'soc_code','pve_host','pve_port',
+			'err_device_aliases',
+			'network_err_event','system_time_event','autoreboot_time',
+			'network_restart_time','public_ip_retry_count'
+		];
+		if (monHidden) {
+			advFields.forEach(function(name) {
+				/* match both exact name and DynamicList '[]' suffix */
+				document.querySelectorAll('[name$="' + name + '"]').forEach(function(el) {
+					if (!monHidden.contains(el)) el.name = '';
+				});
+				document.querySelectorAll('input').forEach(function(el) {
+					if (el.name && el.name.indexOf('.' + name + '[]') >= 0 && !monHidden.contains(el)) {
+						el.name = '';
+					}
+				});
+			});
+		}
+	}
+
+/* pre-load monitor card content */
+setTimeout(function() {
+	try { initMonitorCard(); } catch(e) {}
+}, 800);
+
 function initModernTabs() {
 	if (document.getElementById('pushbot_modern_tabs')) return;
 
@@ -1684,6 +2057,7 @@ function initModernTabs() {
 		'<button type="button" class="pushbot-tab is-active" data-tab="basic">基本设置</button>' +
 		'<button type="button" class="pushbot-tab" data-tab="content">推送内容</button>' +
 		'<button type="button" class="pushbot-tab" data-tab="scheduled">定时推送</button>' +
+		'<button type="button" class="pushbot-tab" data-tab="monitor">高级设置</button>' +
 		'<button type="button" class="pushbot-tab" data-tab="client">在线设备</button>' +
 		'<button type="button" class="pushbot-tab" data-tab="log">日志</button>';
 
@@ -1703,6 +2077,11 @@ function initModernTabs() {
 	scheduledPane.id = 'pushbot_pane_scheduled';
 	scheduledPane.className = 'pushbot-tab-pane';
 	scheduledPane.innerHTML = '<div class="pushbot-mode-card" style="padding:32px;text-align:center;color:#94a3b8;font-size:14px">加载中...</div>';
+
+	var monitorPane = document.createElement('div');
+	monitorPane.id = 'pushbot_pane_monitor';
+	monitorPane.className = 'pushbot-tab-pane';
+	monitorPane.innerHTML = '<div class="pushbot-mode-card" style="padding:32px;text-align:center;color:#94a3b8;font-size:14px">加载中...</div>';
 
 	var clientPane = document.createElement('div');
 	clientPane.id = 'pushbot_pane_client';
@@ -1733,23 +2112,26 @@ function initModernTabs() {
 	tabBar.parentNode.insertBefore(basicPane, tabBar.nextSibling);
 	tabBar.parentNode.insertBefore(contentPane, basicPane.nextSibling);
 	tabBar.parentNode.insertBefore(scheduledPane, contentPane.nextSibling);
-	tabBar.parentNode.insertBefore(clientPane, scheduledPane.nextSibling);
+	tabBar.parentNode.insertBefore(monitorPane, scheduledPane.nextSibling);
+	tabBar.parentNode.insertBefore(clientPane, monitorPane.nextSibling);
 	tabBar.parentNode.insertBefore(logPane, clientPane.nextSibling);
 
 	/* move cards (运行控制 + 推送模式 + 终端信息) into basic pane */
 	var runCard = document.getElementById('pushbot_mode_card');
 	var pushCard = document.getElementById('pushbot_pushmode_card');
 	var termCard = document.getElementById('pushbot_terminal_card');
+	var distCard = document.getElementById('pushbot_disturb_card');
 	if (runCard) basicPane.appendChild(runCard);
 	if (pushCard) basicPane.appendChild(pushCard);
 	if (termCard) basicPane.appendChild(termCard);
+	if (distCard) basicPane.appendChild(distCard);
 
 	/* hide old "基本设置" and "日志" LuCI tabs, switch to "推送内容" */
 	var oldTabMenu = document.querySelector('.cbi-tabmenu');
 	if (oldTabMenu) {
 		var links = oldTabMenu.querySelectorAll('a');
 		links.forEach(function(a) {
-			if (a.textContent.indexOf('基本设置') >= 0 || a.textContent.indexOf('日志') >= 0 || a.textContent.indexOf('免打扰') >= 0 || a.textContent.indexOf('在线设备') >= 0 || a.textContent.indexOf('定时推送') >= 0) {
+			if (a.textContent.indexOf('基本设置') >= 0 || a.textContent.indexOf('日志') >= 0 || a.textContent.indexOf('免打扰') >= 0 || a.textContent.indexOf('在线设备') >= 0 || a.textContent.indexOf('定时推送') >= 0 || a.textContent.indexOf('高级设置') >= 0) {
 				var li = a.parentNode;
 				if (li) li.style.display = 'none';
 			}
@@ -1772,8 +2154,10 @@ function initModernTabs() {
 		document.getElementById('pushbot_pane_basic').classList.toggle('is-visible', name === 'basic');
 		document.getElementById('pushbot_pane_content').classList.toggle('is-visible', name === 'content');
 		document.getElementById('pushbot_pane_scheduled').classList.toggle('is-visible', name === 'scheduled');
+		document.getElementById('pushbot_pane_monitor').classList.toggle('is-visible', name === 'monitor');
 		document.getElementById('pushbot_pane_client').classList.toggle('is-visible', name === 'client');
 		document.getElementById('pushbot_pane_log').classList.toggle('is-visible', name === 'log');
+		if (name === 'monitor') initMonitorCard();
 		if (name === 'log') loadLog();
 		if (name === 'client') loadClients();
 		});
