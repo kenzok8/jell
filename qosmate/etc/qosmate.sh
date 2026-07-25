@@ -25,15 +25,21 @@ error_out() { log_msg -err "${@}"; }
 
 # prints each argument to a separate line
 print_msg() {
-    local _arg msgs_dest="/dev/stdout" msgs_prefix=''
+    # Write to the inherited descriptors instead of redirecting to /dev/stdout: that re-opens the
+    # target, and when stdout is a regular file '>' truncates it.
+    local _arg to_stderr='' msgs_prefix=''
     for _arg in "$@"
     do
         case "${_arg}" in
-            -err) msgs_dest="/dev/stderr" msgs_prefix="Error: " ;;
-            -warn) msgs_dest="/dev/stderr" msgs_prefix="Warning: " ;;
+            -err) to_stderr=1 msgs_prefix="Error: " ;;
+            -warn) to_stderr=1 msgs_prefix="Warning: " ;;
             '') printf '\n' ;; # print out empty lines
             *)
-                printf '%s\n' "${msgs_prefix}${_arg}" > "$msgs_dest"
+                if [ -n "$to_stderr" ]; then
+                    printf '%s\n' "${msgs_prefix}${_arg}" >&2
+                else
+                    printf '%s\n' "${msgs_prefix}${_arg}"
+                fi
                 msgs_prefix=''
         esac
     done
@@ -43,7 +49,7 @@ print_msg() {
 # logs each argument separately and prints to a separate line
 # optional arguments: '-err', '-warn' to set logged error level
 log_msg() {
-    local msgs_prefix='' _arg err_l=info msgs_dest
+    local msgs_prefix='' _arg err_l=info
 
     local IFS="$DEFAULT_IFS"
     for _arg in "$@"
@@ -54,10 +60,9 @@ log_msg() {
             '') printf '\n' ;; # print out empty lines
             *)
                 case "$err_l" in
-                    err|warn) msgs_dest="/dev/stderr" ;;
-                    *) msgs_dest="/dev/stdout"
+                    err|warn) printf '%s\n' "${msgs_prefix}${_arg}" >&2 ;;
+                    *) printf '%s\n' "${msgs_prefix}${_arg}"
                 esac
-                printf '%s\n' "${msgs_prefix}${_arg}" > "$msgs_dest"
                 logger -t qosmate -p user."$err_l" "${msgs_prefix}${_arg}"
                 msgs_prefix=''
         esac

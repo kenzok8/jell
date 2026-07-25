@@ -199,7 +199,7 @@ print_msg() {
 # logs each argument separately and prints to a separate line
 # optional arguments: '-err', '-warn' to set logged error level
 log_msg() {
-    local msgs_prefix='' _arg err_l=info msgs_dest
+    local msgs_prefix='' _arg err_l=info
 
     local IFS="$DEFAULT_IFS"
     for _arg in "$@"
@@ -209,11 +209,12 @@ log_msg() {
             "-warn") err_l=warn msgs_prefix="Warning: " ;;
             '') printf '\n' ;; # print out empty lines
             *)
+                # Write to the inherited descriptors instead of redirecting to /dev/stdout: that
+                # re-opens the target, and when stdout is a regular file '>' truncates it.
                 case "$err_l" in
-                    err|warn) msgs_dest="/dev/stderr" ;;
-                    *) msgs_dest="/dev/stdout"
+                    err|warn) printf '%s\n' "${msgs_prefix}${_arg}" >&2 ;;
+                    *) printf '%s\n' "${msgs_prefix}${_arg}"
                 esac
-                printf '%s\n' "${msgs_prefix}${_arg}" > "$msgs_dest"
                 logger -t qosmate -p user."$err_l" "${msgs_prefix}${_arg}"
                 msgs_prefix=''
         esac
@@ -2535,13 +2536,17 @@ try_auto_setup() {
 
 auto_setup_noninteractive() {
     local auto_setup_rv
+    # Truncate up front and append afterwards. Truncating while a writer already holds an offset
+    # leaves a gap that the kernel fills with NUL bytes, and ubus file.read stops at the first NUL,
+    # so a polling caller would only ever see the beginning of the file.
+    : > "$QOSMATE_AUTO_SETUP_OUTPUT"
     {
         echo "Starting qosmate non-interactive auto-setup..."
         auto_setup -n "$1" 2>&1
         auto_setup_rv=$?
         # lets callers polling this file tell a finished run from a partial or stale one
         echo "AUTO_SETUP_DONE rv=$auto_setup_rv"
-    } > "$QOSMATE_AUTO_SETUP_OUTPUT"
+    } >> "$QOSMATE_AUTO_SETUP_OUTPUT"
     echo "$QOSMATE_AUTO_SETUP_OUTPUT"
     return $auto_setup_rv
 }
@@ -2555,7 +2560,9 @@ auto_setup_detached() {
     # A new session is required, not just a background job: ash waits for children of the same
     # session in a command substitution, which is how callers read this function's output.
     if check_util setsid; then
-        setsid "$QOSMATE_SERVICE_PATH" auto_setup_noninteractive "$1" >/dev/null 2>&1 &
+        # stdin is closed as well, otherwise the run keeps the caller's pipe open - for a request
+        # from the web UI that blocks the connection the UI then polls on
+        setsid "$QOSMATE_SERVICE_PATH" auto_setup_noninteractive "$1" >/dev/null 2>&1 <&- &
     else
         log_msg -warn "setsid is not available, running the auto-setup in the foreground."
         auto_setup_noninteractive "$1" >/dev/null 2>&1

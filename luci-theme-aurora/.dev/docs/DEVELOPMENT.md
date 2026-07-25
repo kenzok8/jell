@@ -173,6 +173,22 @@ Two rules of thumb that follow from prefix matching:
 
 > Unlike the `_`-prefixed partials (which are `@import`-only fragments), patch filenames have no `_` prefix — each is a real build entry that ships to `htdocs/`.
 
+### Mock Pages
+
+Style a third-party app's page — write or adjust its `patches/*.css`, or check a `main.css`/component change against it — **without having the app (or a device) installed**. Save the page's rendered HTML once, then develop against it with the theme live and hot-reloading.
+
+- **Where snapshots live:** `.dev/mocks/*.html` (git-ignored — snapshots are large, device/fork-specific and go stale, so they stay local). The directory need not exist in a fresh clone; it's created on first capture.
+- **Capture one:** with the dev server proxying a device that has the page, open the page through the proxy and press <kbd>Alt/Option+Shift+S</kbd> (or call `__auroraMockCapture()` in the console). The injected `scripts/mock-capture.client.js` helper POSTs the live DOM to `/mocks/__save`, which writes `.dev/mocks/<data-page>.html` — named after the page's `data-page`, doctype included, dev-only script tags stripped. (The endpoint only accepts requests carrying the helper's custom header, which cross-origin pages can't send without a CORS preflight this server never approves.) Manual capture still works: run `copy(document.documentElement.outerHTML)` in the DevTools console and save the paste as `.dev/mocks/<name>.html` — the filename is free; the page's real identity is the `data-page` attribute already in its `<body>`, which patch selectors match.
+- **Capture it from a device running _this_ theme — snapshots are not portable between themes.** A snapshot is a verbatim copy of a rendered page, so it hard-codes the theme that rendered it in three places: the stylesheet links (`/luci-static/aurora/main.css` plus that page's patch), the device's stored UCI token overrides in an inline `<style>`, and the theme's own header/nav markup. Drop a snapshot captured under `luci-theme-shadcn` in here (or vice versa) and the page renders **completely unstyled**, because a dev server only serves its own `/luci-static/<theme>/` prefix. The giveaway is a terminal line naming the other theme's stylesheet:
+  ```
+  [Mocks] miss /luci-static/shadcn/main.css → 404 (mirror it at .dev/mocks/static/… to serve it)
+  ```
+  Mirroring, which that generic hint suggests, is the wrong fix here — re-capture the page from a device running this theme. If you must reuse a foreign snapshot anyway, only the app's own content region means anything: point its stylesheet links at this theme, and delete the inline `<style>` block, or the captured device's colors override this checkout's tokens.
+- **View:** `pnpm dev`, then open <http://localhost:5173/mocks/> — an auto-generated index lists every snapshot with its `data-page` and age. The `mock-pages-plugin` (in `vite.config.ts`) serves each page with the Vite HMR client injected, so editing any theme source (`main.css`, a component, a `patches/*.css`, or served JS) triggers the usual full reload (see [Live Reload Behavior](#live-reload-behavior)). The snapshot keeps its absolute `/luci-static/…` links; theme CSS/JS, fonts and images resolve locally and compile on the fly. Serving prepends the `<!doctype html>` that `outerHTML` captures drop, so mocks render in standards mode exactly like the real page.
+- **Navigate between snapshots in place:** `scripts/mock-nav.client.js` (injected into every mock) resolves clicks on the snapshot's own LuCI links (`/cgi-bin/luci/…`) against the captured snapshots by `data-page` (exact match) and jumps straight to the matching mock — an app's tab bar or the sidebar works just like on the device. Uncaptured targets are blocked with a hint naming the missing snapshot instead of falling through to the proxy. A floating switcher (bottom-left) lists every snapshot, cycles with <kbd>[</kbd>/<kbd>]</kbd> (or its ‹/› buttons), and links back to the index.
+- **Third-party assets:** an app's own css/js the snapshot references (e.g. `qmodem-next.css`, or a device-only custom logo) isn't in this repo. To serve it, mirror its URL under `.dev/mocks/static/` (e.g. `.dev/mocks/static/luci-static/resources/qmodem/qmodem-next.css`); files there are served as-is (no HMR). Misses requested by a mock page 404 immediately — never proxied to the router, so mocks stay fully offline-capable — and each miss prints a one-time terminal hint with the exact mirror path. (CSS-initiated requests, e.g. nav icons, carry the stylesheet's URL as referer and can't be attributed to the mock page; any `/luci-static` request that falls through to the proxy is therefore bounded to 5s and answers 504 when the router is unreachable.) The theme still applies without them.
+- **No auth, no runtime:** a snapshot is static DOM, so `mock-pages-plugin` strips LuCI's runtime scripts (`luci.js`/`cbi.js`/`xhr.js` and `/cgi-bin/` endpoints) and injects a no-op `L`/`LuCI`/`XHR` stub before serving. Without this, LuCI boots, polls the backend, gets 403 (no session) and pops the "Session expired" modal. The trade-off: framework-dependent theme JS (e.g. `menu-aurora`) no-ops in mocks — the captured DOM is already rendered, so it still looks right. The theme's own inline scripts (dark mode, toolbar state) and any `src/media/` JS still run.
+
 ### Design Tokens
 
 `src/media/_tokens.css` is **generated** — its header says "DO NOT EDIT". The source of truth is the standalone [`@eamonxg/aurora-tokens`](https://github.com/eamonxg/aurora-tokens) npm package, consumed here as a devDependency:
@@ -284,12 +300,15 @@ luci-theme-aurora/
 ├── .dev/                           # Development environment
 │   ├── docs/                       # Project documentation
 │   │   └── DEVELOPMENT.md          # Development guide (this file)
+│   ├── mocks/                      # Local page snapshots for /mocks/ (git-ignored, see Mock Pages)
 │   ├── public/aurora/              # Public static assets
 │   │   ├── fonts/                  # Web fonts (Lato)
 │   │   └── images/                 # Theme images + PWA icons
-│   ├── scripts/                    # Build scripts
+│   ├── scripts/                    # Build scripts + dev-server client helpers
 │   │   ├── clean.js                # Build cleanup utility
 │   │   ├── gen-tokens.js           # Regenerates src/media/_tokens.css from @eamonxg/aurora-tokens
+│   │   ├── mock-capture.client.js  # Injected into proxied device pages — hotkey capture to /mocks/__save
+│   │   ├── mock-nav.client.js      # Injected into /mocks/ pages — link takeover + floating switcher
 │   │   └── setup.js                # pnpm setup:router — .env wizard + passwordless SSH to the router
 │   ├── src/                        # Source code
 │   │   ├── assets/icons/           # SVG icons

@@ -17,3 +17,6 @@ docs/superpowers/
 
 # On-device perf baselines — record device model and LAN address; keep local
 /.claude/skills/aurora-performance/baselines/
+
+# Local page snapshots for the dev /mocks/ route — see .dev/docs/DEVELOPMENT.md
+/.dev/mocks/
