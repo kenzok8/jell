@@ -134,7 +134,7 @@ header {
             @apply m-0 list-none;
 
             & > a {
-              @apply text-text hover:bg-hover-faint block w-fit rounded-lg px-3 py-2 text-sm whitespace-nowrap no-underline transition-colors duration-150;
+              @apply text-text hover:bg-hover-faint block w-fit rounded-xl px-3 py-2 text-sm whitespace-nowrap no-underline transition-colors duration-150;
 
               &.is-active-page {
                 @apply bg-brand-subtle text-brand font-medium;
@@ -266,9 +266,11 @@ header {
       @apply md:flex;
     }
 
-    /* D1 底线呼吸：展开态沿用短底线汉堡；折叠后底线伸满（三线齐整 =
-       侧栏收纳完毕）。dasharray 只改可见长度，线帽形状不受影响。 */
-    [data-nav-type="sidebar"].sidebar-collapsed
+    /* D1 底线呼吸（2026-07 反转）：展开后底线伸满 —— 三线齐整 = 内容
+       全部亮出；折叠态回落到短底线 = 还有内容收着，缺口招手可展开。
+       与耦合滑动同向：侧栏进场线补齐，退场线让位。dasharray 只改可见
+       长度，线帽形状不受影响。 */
+    [data-nav-type="sidebar"]:not(.sidebar-collapsed)
       &
       .navigation-toggle-line-bottom {
       @apply md:[stroke-dasharray:15_15];
@@ -284,6 +286,12 @@ header {
       & .navigation-toggle-line {
         transform-box: fill-box;
         @apply origin-center transition-[transform,opacity,stroke-dasharray] duration-150 ease-in-out;
+
+        /* Desktop sidebar: the dasharray breath runs in step with the
+           250ms coupled slide (the mobile X morph keeps its snappy 150). */
+        [data-nav-type="sidebar"] & {
+          @apply md:duration-[250ms];
+        }
       }
 
       /* Tabler menu-2 geometry: all three lines are full-length equals.
@@ -356,8 +364,11 @@ body[data-nav-type="sidebar"] {
      overflow-x-clip keeps the sliding sidebar out of horizontal overflow. */
 
   /* Single source of truth for the sidebar column, so collapsing only has to
-     zero this one value instead of restating the grid template. */
-  --sidebar-w: 17rem;
+     zero this one value instead of restating the grid template.
+     --sidebar-w-full stays constant: the inner panel width and the slide
+     keyframes read it, and must not see the zeroed collapsed value. */
+  --sidebar-w-full: 17rem;
+  --sidebar-w: var(--sidebar-w-full);
 
   @apply md:grid md:grid-cols-[var(--sidebar-w)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:overflow-x-clip;
 
@@ -410,29 +421,60 @@ body[data-nav-type="sidebar"] {
   }
 
   & .sidebar-panel {
-    @apply border-hairline sticky top-0 hidden h-dvh w-full overflow-hidden rounded-none border-r transition-[visibility] duration-[250ms] md:block;
+    @apply sticky top-0 hidden h-dvh w-full overflow-hidden rounded-none md:block;
   }
 
-  /* The grid column snaps closed to avoid a full-page layout animation.
-     Visibility removes collapsed controls from the tab order; on expansion,
-     the inner panel still enters via compositor-only translate + opacity. */
+  /* The grid column still snaps (one reflow, never a per-frame layout
+     animation); visibility removes collapsed controls from the tab order.
+     The hairline lives on the inner panel, not the frame, so it tracks the
+     sliding edge during the run animations below. */
   &.sidebar-collapsed .sidebar-panel {
     @apply invisible;
   }
 
   & .sidebar-panel-inner {
-    @apply bg-bg flex h-full w-68 flex-col overflow-hidden transition-[translate,opacity] duration-[250ms];
+    @apply bg-bg border-hairline flex h-full w-(--sidebar-w-full) flex-col overflow-hidden border-r;
   }
 
   &.sidebar-collapsed .sidebar-panel-inner {
-    @apply -translate-x-full opacity-0;
+    @apply -translate-x-full;
+  }
+
+  /* Coupled slide: the column width snaps in the same frame the
+     sidebar-anim-* class lands, then the sidebar and the whole content
+     column (header + #maincontent) slide the same 17rem with the same
+     curve — compositor-only, so the seam moves as one wall with zero
+     per-frame reflow. menu-aurora.js swaps the class per direction
+     (distinct animation-names restart cleanly on rapid toggles) and
+     clears it after the run. */
+  &.sidebar-anim-open > header,
+  &.sidebar-anim-open > #maincontent,
+  &.sidebar-anim-open .sidebar-panel-inner {
+    @apply md:animate-[sidebar-run-in_250ms_var(--ease-in-out)_both];
+  }
+
+  &.sidebar-anim-close > header,
+  &.sidebar-anim-close > #maincontent {
+    @apply md:animate-[sidebar-run-back_250ms_var(--ease-in-out)_both];
+  }
+
+  /* Closing: the column is already zero, so the panel holds its old spot
+     as a fixed overlay for one run while its content slides off. */
+  &.sidebar-anim-close .sidebar-panel {
+    @apply md:visible md:fixed md:top-0 md:left-0 md:w-(--sidebar-w-full);
+  }
+
+  &.sidebar-anim-close .sidebar-panel-inner {
+    @apply md:animate-[sidebar-run-out_250ms_var(--ease-in-out)_both];
   }
 
   /* Sidebar head: logo + hostname. h-14 matches the header row so its
      bottom hairline continues the header's border in one unbroken line
-     across the viewport. */
+     across the viewport. box-content: the header is auto-height (56px
+     content + border OUTSIDE), so this border must sit outside its 56px
+     too — border-box would paint it one pixel higher than the header's. */
   & .sidebar-head {
-    @apply border-hairline flex h-14 shrink-0 items-center gap-2.5 border-b px-4;
+    @apply border-hairline box-content flex h-14 shrink-0 items-center gap-2.5 border-b px-4;
 
     & .sidebar-logo {
       @apply size-5 shrink-0 rounded-md;
@@ -472,6 +514,26 @@ body[data-nav-type="sidebar"] {
     & .nav-link {
       @apply text-text-muted hover:text-text;
     }
+  }
+}
+
+/* Shared travel distance for the coupled sidebar slide: content column and
+   panel move the same 17rem, so the seam between them never separates. */
+@keyframes sidebar-run-in {
+  from {
+    translate: calc(-1 * var(--sidebar-w-full)) 0;
+  }
+}
+
+@keyframes sidebar-run-back {
+  from {
+    translate: var(--sidebar-w-full) 0;
+  }
+}
+
+@keyframes sidebar-run-out {
+  to {
+    translate: calc(-1 * var(--sidebar-w-full)) 0;
   }
 }
 

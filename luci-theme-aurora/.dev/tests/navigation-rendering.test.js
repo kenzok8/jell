@@ -729,7 +729,7 @@ test("renders sidebar items, logout, and translated crumbs without duplication",
   assert.equal(crumb.children.length, 3);
   assert.deepEqual(
     crumb.children.map((child) => textContent(child)),
-    ["translated:Network", "›", "translated:Wireless"],
+    ["translated:Network", "/", "translated:Wireless"],
   );
   assert.equal(crumb.children[2].getAttribute("class"), "current");
   assert.equal(list.dataset.accordionBound, "true");

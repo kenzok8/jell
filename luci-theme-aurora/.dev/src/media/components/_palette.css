@@ -94,7 +94,7 @@
     @apply max-md:max-h-none max-md:flex-1 max-md:overscroll-contain;
 
     & .cmdk-row {
-      @apply text-text flex items-center gap-3 rounded-lg px-3 py-2 text-sm no-underline;
+      @apply text-text flex items-center gap-3 rounded-xl px-3 py-2 text-sm no-underline;
 
       & .cmdk-title {
         @apply min-w-0 truncate;

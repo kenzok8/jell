@@ -33,7 +33,9 @@
 }
 
 .navigation-group-toggle {
-  @apply after:size-3.5 after:shrink-0 after:bg-current after:opacity-55 after:transition-[transform,opacity] after:duration-[250ms] after:content-[''] after:[mask:var(--icon-arrow-right)_center/cover_no-repeat] hover:after:opacity-100;
+  /* size-4.5 ≈ the row's text height — 3.5 read as undersized next to the
+     text-lg category labels, on desktop and in the mobile drawer alike. */
+  @apply after:size-4.5 after:shrink-0 after:bg-current after:opacity-55 after:transition-[transform,opacity] after:duration-[250ms] after:content-[''] after:[mask:var(--icon-arrow-right)_center/cover_no-repeat] hover:after:opacity-100;
 }
 
 .nav-category-label {
@@ -66,7 +68,7 @@
 }
 
 .navigation-sublink {
-  @apply text-text-muted hover:bg-hover-faint hover:text-text relative flex rounded-lg font-medium no-underline transition-colors duration-150;
+  @apply text-text-muted hover:bg-hover-faint hover:text-text relative flex rounded-xl font-medium no-underline transition-colors duration-150;
 }
 
 /* Active page: a filled brand pill, shared by the sidebar and the drawer. */

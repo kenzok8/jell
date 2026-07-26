@@ -83,7 +83,7 @@ test("shared navigation styles define active and expanded states", () => {
   assertIncludesUtilities(sublink, [
     "font-medium",
     "hover:bg-hover-faint",
-    "rounded-lg",
+    "rounded-xl",
   ]);
   assertIncludesUtilities(activeSublink, [
     "text-brand",
