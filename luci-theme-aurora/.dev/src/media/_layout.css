@@ -354,10 +354,15 @@ body[data-nav-type="sidebar"] {
      so collapsing the sidebar never stretches it — lets the sidebar column
      collapse to zero, and lets #maincontent reclaim the freed space.
      overflow-x-clip keeps the sliding sidebar out of horizontal overflow. */
-  @apply md:grid md:grid-cols-[17rem_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:overflow-x-clip;
+
+  /* Single source of truth for the sidebar column, so collapsing only has to
+     zero this one value instead of restating the grid template. */
+  --sidebar-w: 17rem;
+
+  @apply md:grid md:grid-cols-[var(--sidebar-w)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:overflow-x-clip;
 
   &.sidebar-collapsed {
-    @apply md:grid-cols-[0_minmax(0,1fr)];
+    @apply md:[--sidebar-w:0rem];
   }
 
   & > header {
@@ -370,6 +375,15 @@ body[data-nav-type="sidebar"] {
 
   & > #maincontent {
     @apply md:col-start-2 md:row-start-2 md:min-w-0 md:pt-2;
+
+    /* This shell runs full-width and reads no width cap. Honouring
+       --content-width-centered here would shrink content twice — viewport
+       minus the sidebar, then clamped to 80rem and re-centred in what's left,
+       which puts the page visibly right-of-centre on a wide display. The
+       sidebar column is the margin; content fills the rest. Desktop only —
+       below md the sidebar is a drawer and the base rule's
+       max-md:w-full/px-3 still applies. */
+    @apply md:w-full md:max-w-none md:px-8;
   }
 
   & .header-crumb {
@@ -462,7 +476,10 @@ body[data-nav-type="sidebar"] {
 }
 
 #maincontent {
-  @apply max-w-max-width mx-auto min-h-[calc(100vh-4rem)] w-23/24 px-4 max-md:w-full max-md:px-3;
+  /* Centred shells (top-bar navigation) clamp here and gutter the remainder.
+     The sidebar shell overrides this — it caps the shell instead, see
+     body[data-nav-type="sidebar"] above. */
+  @apply max-w-(--content-width-centered) mx-auto min-h-[calc(100vh-4rem)] w-23/24 px-4 max-md:w-full max-md:px-3;
 
   #view {
     @apply mx-0 w-full bg-transparent p-0 shadow-none empty:hidden md:p-0;

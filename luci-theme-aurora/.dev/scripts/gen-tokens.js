@@ -1,6 +1,11 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { resolveMode, FIXED } from "@eamonxg/aurora-tokens";
+import {
+  resolveMode,
+  FIXED,
+  STRUCTURE,
+  THEME_STRUCTURE,
+} from "@eamonxg/aurora-tokens";
 
 const kebab = (s) => s.replace(/_/g, "-");
 
@@ -18,13 +23,12 @@ function block(selector, colors, fixed) {
 const light = resolveMode("light");
 const dark = resolveMode("dark");
 
-const STRUCTURE = `
-  --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
-  --spacing: 0.25rem;
-  --container-max-width: 80rem;
-  --radius-base: 0.5rem;
-`;
+// Structural tokens and their @theme mappings come from the shared package,
+// same as the colours — so spacing, content widths and the radius base have a
+// single definition instead of one per theme generator.
+const STRUCTURE_CSS = Object.entries(STRUCTURE)
+  .map(([k, v]) => `  --${kebab(k)}: ${v};`)
+  .join("\n");
 
 const THEME = `@theme inline {
 ${Object.keys(light)
@@ -37,19 +41,9 @@ ${Object.keys(light)
   --shadow-xl: var(--app-shadow-lg);
   --shadow-2xl: var(--app-shadow-lg);
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --spacing: var(--spacing);
-  --container-max-width: var(--container-max-width);
-
-  --radius-sm: calc(var(--radius-base) * 0.25);
-  --radius: calc(var(--radius-base) * 0.5);
-  --radius-md: calc(var(--radius-base) * 0.75);
-  --radius-lg: var(--radius-base);
-  --radius-xl: calc(var(--radius-base) * 1.5);
-  --radius-2xl: calc(var(--radius-base) * 2);
-  --radius-3xl: calc(var(--radius-base) * 3);
-  --radius-4xl: calc(var(--radius-base) * 4);
+${Object.entries(THEME_STRUCTURE)
+  .map(([k, v]) => `  --${k}: ${v};`)
+  .join("\n")}
 }
 `;
 
@@ -65,8 +59,8 @@ const css =
   HEADER +
   "\n" +
   block(":root", light, FIXED.light) +
-  STRUCTURE +
-  "}\n\n" +
+  STRUCTURE_CSS +
+  "\n}\n\n" +
   block('[data-darkmode="true"]', dark, FIXED.dark) +
   "}\n\n" +
   THEME;

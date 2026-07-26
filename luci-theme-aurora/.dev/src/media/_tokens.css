@@ -41,11 +41,10 @@
   --app-shadow-md: 0 4px 16px oklch(0 0 0 / 0.08), 0 1px 3px oklch(0 0 0 / 0.04);
   --app-shadow-lg: 0 12px 32px oklch(0 0 0 / 0.12);
   --app-opacity-disabled: 0.4;
-
   --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
   --spacing: 0.25rem;
-  --container-max-width: 80rem;
+  --content-width-centered: 80rem;
   --radius-base: 0.5rem;
 }
 
@@ -129,8 +128,6 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --spacing: var(--spacing);
-  --container-max-width: var(--container-max-width);
-
   --radius-sm: calc(var(--radius-base) * 0.25);
   --radius: calc(var(--radius-base) * 0.5);
   --radius-md: calc(var(--radius-base) * 0.75);
