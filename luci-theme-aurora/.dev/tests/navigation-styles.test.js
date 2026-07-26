@@ -212,6 +212,20 @@ test("mega-menu reveal and retract share the page-top origin", () => {
   assert.doesNotMatch(headerLift ?? "", /bg-mega-menu-bg/);
 });
 
+test("theme flips repaint the bar in the same frame as the page", () => {
+  const headerDeclaration = layoutStyles.match(
+    /^header \{\s*@apply ([^;]+);/m,
+  )?.[1];
+
+  assert.ok(headerDeclaration, "Missing header root declaration");
+  assertIncludesUtilities(headerDeclaration, ["bg-bg", "sticky"]);
+  // A colour transition on the bar itself would ease its bg/text over
+  // --mega-menu-duration on every data-darkmode flip, lagging the bar behind
+  // the untransitioned page in all three nav modes. The mega-menu wipe colour
+  // lives on .desktop-menu-sheet, which carries its own transition.
+  assert.doesNotMatch(headerDeclaration, /\btransition/);
+});
+
 test("mega-menu category masks use Tailwind arbitrary utilities", () => {
   const title = getBlock(layoutStyles, "& .desktop-nav-title");
   const icon = getBlock(title, "&::before");

@@ -113,7 +113,7 @@ Third-party compatibility patches are **not** bundled into `main.css` — they a
 - New UI component → create `components/_<name>.css` and add an `@import` line to `main.css`. Each file is its own organizational unit — don't add `@layer` wrappers: theme partials stay unlayered, so they outrank Tailwind's layered base/utilities regardless of specificity.
 - Compatibility fix for a third-party LuCI app/page → add a new file under `media/patches/` (see below).
 
-All rules use `@apply` with Tailwind utilities and CSS Nesting — no raw CSS properties.
+All rules use `@apply` with Tailwind utilities and CSS Nesting — no raw CSS properties. The one deliberate exception is `media/patches/*.css`, which is plain native CSS by design (see below).
 
 ### On-Demand Third-Party Patches
 
@@ -123,9 +123,23 @@ Some third-party LuCI apps ship markup that doesn't adapt to the theme and needs
 
 1. **One file per page, named by `data-page`.** Each patch lives at `media/patches/<page>.css`, where `<page>` is the value of `<body data-page="…">` for the target page — i.e. the request path segments joined by `-` (e.g. `admin-services-openclash-config`). `header.ut` computes the same string at render time from `ctx.request_path`, falling back to `ctx.path` when `request_path` is empty (`join('-', length(ctx.request_path) ? ctx.request_path : ctx.path)`) so default landings reached without an explicit path still resolve their patch.
 2. **Build splits, not bundles.** `vite.config.ts` adds every `media/patches/*.css` as its own Rollup entry, so each compiles to `htdocs/luci-static/aurora/patches/<page>.css`. They are no longer part of `main.css`.
-3. **`@reference`, not `@import`.** Every patch file starts with `@reference "../main.css";`. This loads the theme context (tokens, custom utilities like `bg-surface`, the `dark:` variant) so `@apply` resolves — **without** re-emitting `main.css` into the patch output. Using `@import` here would inline all of `main.css` into every patch (hundreds of KB); `@reference` keeps each patch to just its own rules.
+3. **Plain CSS, not `@apply`.** Patches are the one place that writes native declarations instead of Tailwind utilities. Each patch is its own build entry, and the old `@reference "../main.css";` + `@apply` setup made every file carry its own `@property`/helper boilerplate. Rewriting the *same rules* natively — measured on the v1.1.7 → v1.1.8 conversion, built output, identical selectors and values:
+
+   | patch | `@reference` + `@apply` | native CSS | saved |
+   | --- | ---: | ---: | ---: |
+   | admin-dashboard | 6,940 B | 2,639 B | −62% |
+   | admin-modem-modemdata-modempreview | 162 B | 96 B | −41% |
+   | admin-modem-qmodem | 9,483 B | 4,497 B | −53% |
+   | admin-network-network | 160 B | 86 B | −46% |
+   | admin-services-openclash-config | 187 B | 87 B | −53% |
+   | admin-services-openclash-settings | 638 B | 509 B | −20% |
+   | admin-statistics-graphs | 1,609 B | 110 B | −93% |
+   | admin-system-filemanager | 576 B | 184 B | −68% |
+   | **total** | **19,755 B** | **8,208 B** | **−58%** |
+
+   The overhead is per-entry and fixed-ish (`@property` registrations, `--tw-*` helper chains), so the smaller the patch, the worse the ratio — the two-rule statistics patch paid 15× its own weight. uhttpd serves identity bytes (no gzip), so raw size is wire size. Note the runtime `:root` exposes the raw color tokens plus `--radius-base` and `--app-shadow-*` — the `--radius-3xl`-style names only exist inside the Tailwind build, so a patch writes `calc(var(--radius-base) * 3)` for radii, never `var(--radius-3xl)`. The old Tailwind mode is still *supported* for theme-repo patches — a file starting with `@reference "../main.css";` and using `@apply` continues to compile — and it has real upsides worth weighing against the table above: **build-time validation** (a typo'd utility or color name fails the build, while a typo'd `var()` fails silently at runtime — exactly how the `--radius-3xl` regression slipped into the native rewrite), the **same vocabulary** as the component partials with the `dark:`/`md:`/`hover:` variant shorthands, and **automatic tracking** when the theme remaps a utility (a radius-chain or shadow-token change recompiles into Tailwind patches for free; native patches need a hand edit). Native is the default convention for the size numbers, not a hard gate. App-shipped patches (installed straight into the device's `patches/` directory) have never had a choice: they bypass the build entirely, so `@apply` would reach the browser as dead text — plain CSS only, as always. It also means third-party patch authors need no Tailwind knowledge. Reach theme values through the `:root` custom properties (`var(--surface-sunken)`, `var(--hairline)`, `var(--radius-3xl)`, `var(--shadow-lg)`, …) rather than hardcoding colors or radii; the dark variant is a plain selector (`[data-darkmode="true"] & { … }`), breakpoints are plain media queries (`@media (width < 48rem)`), and CSS Nesting still works — the build (lightningcss) minifies and lowers it for the supported browsers.
 4. **`header.ut` discovers patches at render time.** On each (non-login) page render, `header.ut` lists `/www/luci-static/aurora/patches/` with ucode's `fs.lsdir()` (a readdir of a dozen entries — microseconds, dwarfed by the template's existing `ubus` call) and matches the installed `*.css` filenames against the **cumulative path-segment prefixes** of the request: a patch matches its exact page and any subpage, but only on real segment boundaries — `admin-services-wol.css` covers `admin/services/wol/plus`, yet never a sibling app whose own segment merely starts the same way (`admin/services/wol-plus`). Every matching patch is linked right after `main.css`, in lexical order — so a general patch loads before a more specific one and the specific one cascades on top. Pages with no match get nothing — no extra request, no 404. If the directory is missing or unreadable, the list is empty and the page renders unpatched.
-5. **The patches directory is a drop-in extension point.** Because discovery is at render time, patches don't have to ship with the theme: **any package may install a `<page-prefix>.css` into `/www/luci-static/aurora/patches/`** and the theme will load it on matching pages. Install/uninstall lifecycle is automatic — the file appears and disappears with the package, no registration or allow-list rebuild. (Patches shipped this way are plain CSS served as-is; the theme's own patches additionally go through the Tailwind build below.)
+5. **The patches directory is a drop-in extension point.** Because discovery is at render time, patches don't have to ship with the theme: **any package may install a `<page-prefix>.css` into `/www/luci-static/aurora/patches/`** and the theme will load it on matching pages. Install/uninstall lifecycle is automatic — the file appears and disappears with the package, no registration or allow-list rebuild. (Patches shipped this way are plain CSS served as-is; the theme's own patches are written the same way and only pass through the build for minification.)
 6. **Dynamically generated pages are covered by their fixed prefix.** Some apps mint a page per entity — e.g. QModem's SMS conversations render as `admin-modem-qmodem-sms-conversation-<contact>`. Name the patch after the fixed prefix (`admin-modem-qmodem-sms-conversation.css`) and the prefix match loads it for every conversation page, regardless of the contact name. No wildcard syntax is needed (and `*` in a filename is not supported).
 
 **Adding a patch:**
@@ -134,14 +148,14 @@ Some third-party LuCI apps ship markup that doesn't adapt to the theme and needs
 2. Create `media/patches/<that-string>.css`:
    ```css
    /* PATCH: <page> (luci-app-foo) */
-   @reference "../main.css";
 
    [data-page="<page>"] {
-     /* narrow, selector-scoped overrides using @apply + CSS Nesting */
+     /* narrow, selector-scoped overrides — native CSS + CSS Nesting,
+        theme values via var(--surface), var(--hairline), … */
    }
    ```
 3. Run `pnpm build`. There is no allow-list to regenerate — the loader discovers whatever `.css` files are installed under `patches/` at render time.
-4. Verify `htdocs/luci-static/aurora/patches/<page>.css` is small (just your rules, not a copy of `main.css`).
+4. Verify `htdocs/luci-static/aurora/patches/<page>.css` is small (just your rules).
 
 > Removing a patch is symmetric: delete the file and rebuild — the loader stops linking it because it no longer exists.
 
@@ -171,7 +185,11 @@ Two rules of thumb that follow from prefix matching:
 - **A patch applies to its page and all subpages by default.** `admin-services-foo.css` loads on every page under `admin/services/foo/…`. When you need finer targeting, narrow it in either of two ways: scope individual rules inside the file (`[data-page="admin-services-foo-general"] { … }` only affects that one page), or ship an additional, longer-named file (`admin-services-foo-rules.css`) for page-specific rules — on a page matching both, **both load**, shorter name first, so the more specific file wins the cascade.
 - **Matching respects path-segment boundaries**, so a prefix never leaks onto a lookalike sibling: `admin-services-wol.css` covers `admin/services/wol/plus` but not a different app at `admin/services/wol-plus`. The one unavoidable collision is two paths joining to the same `data-page` string (`wol/plus` vs `wol-plus`) — such a patch loads on both pages. If that matters, key rules to your app's own class names/ids so an accidental load matches nothing.
 
-> Unlike the `_`-prefixed partials (which are `@import`-only fragments), patch filenames have no `_` prefix — each is a real build entry that ships to `htdocs/`.
+> Unlike the `_`-prefixed partials (which are `@import`-only fragments), patch filenames have no `_` prefix — each is a real build entry that ships to `htdocs/`. This also holds inside `media/patches/` itself: a `_`-prefixed file there is a shared fragment for other patches to `@import`, skipped by the entry scan and never shipped.
+
+**JS payloads.** The mechanism is not CSS-specific: the same `lsdir()` sweep also collects `patches/<page>.js` files, emitted as `<script defer src>` right after the patch stylesheet links — same per-page prefix matching, same drop-in lifecycle for third-party packages (ship a plain script; it must not assume LuCI modules are loadable via `L.require` at parse time — run after DOM ready or poll for your target element). Theme-owned JS patches live at `src/resource/patches/<page>.js` and build through the same Terser pass as other resource JS, but land under `aurora/patches/` so one directory listing serves both payload types. First user: the log-viewer enhancement on `admin-status-logs` (parses the read-only `#syslog` textarea into a colored, column-aligned view, with a parse-success gate that falls back to the stock textarea on unknown log formats; the one prefix covers the System Log tab, the Kernel Log tab and the bare `/logs` alias on every supported release). Its CSS is deliberately **not** a patch: the log pages are stock LuCI, so their styling lives in `components/_syslog.css` inside `main.css`, where the full Tailwind token pipeline (reactive radii, shadows, config-app overrides) applies — patches/ stays reserved for third-party compatibility.
+
+**Aliases — one payload, several pages.** When two unrelated page names need the same payload, naming the file after their shared prefix would over-match (an `admin-status` patch would load on *every* status subpage, including the busiest overview page). For that case `PATCH_ALIASES` in `vite.config.ts` duplicates the built output (CSS and JS) under each alias name, and the dev server resolves alias requests to the shared source. Duplicate CSS *entries* would not work as an alternative: Rollup deduplicates identical-content assets into a single file, so one of the two names would silently never ship. (The map is currently empty — the log viewer turned out to need only `admin-status-logs`, since every supported release mounts both log pages under `admin/status/logs/*`.)
 
 ### Mock Pages
 

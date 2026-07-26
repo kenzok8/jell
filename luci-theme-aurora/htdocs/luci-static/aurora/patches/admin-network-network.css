@@ -1,2 +1,1 @@
-/*! tailwindcss v4.3.2 | MIT License | https://tailwindcss.com */
-@media not all and (min-width:48rem){[data-name=bridge-vlan]>div{overflow:visible!important}}
+@media not (min-width:48rem){[data-name=bridge-vlan]>div{overflow:visible!important}}

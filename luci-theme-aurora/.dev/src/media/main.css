@@ -33,6 +33,7 @@
 @import "./components/_modal.css";
 @import "./components/_overlay.css";
 @import "./components/_table.css";
+@import "./components/_syslog.css";
 @import "./components/_form.css";
 @import "./components/_segmented.css";
 @import "./components/_tab.css";

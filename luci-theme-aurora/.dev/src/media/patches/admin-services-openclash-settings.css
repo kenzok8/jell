@@ -1,20 +1,34 @@
 /*
   PATCH: admin-services-openclash-settings (luci-app-openclash)
   Loaded on-demand by header.ut only when data-page matches this filename.
-  @reference makes @apply / theme utilities resolvable without re-emitting main.css.
+  Native declarations keep this standalone patch free of Tailwind helper output;
+  theme values come through the :root custom properties.
 */
-@reference "../main.css";
 
 [data-page="admin-services-openclash-settings"] {
-  .cbi-value-field {
-    & .cbi-input-select {
-      @apply max-md:w-full!;
+  @media (width < 48rem) {
+    .cbi-value-field .cbi-input-select {
+      width: 100% !important;
     }
   }
+
   .diag-style {
-    @apply max-md:grid max-md:grid-cols-1 max-md:gap-4;
     & > div {
-      @apply flex flex-col items-center gap-2 max-md:w-full! max-md:gap-1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @media (width < 48rem) {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 1rem;
+
+      & > div {
+        width: 100% !important;
+        gap: 0.25rem;
+      }
     }
   }
 }

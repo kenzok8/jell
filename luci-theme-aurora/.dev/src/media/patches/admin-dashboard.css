@@ -1,71 +1,117 @@
 /*
   PATCH: admin-dashboard (luci-mod-dashboard)
   Loaded on-demand by header.ut only when data-page matches this filename.
-  @reference makes @apply / theme utilities resolvable without re-emitting main.css.
+  Native declarations keep this standalone patch free of Tailwind helper output;
+  theme values come through the :root custom properties.
 */
-@reference "../main.css";
 
 [data-page="admin-dashboard"] {
   .Dashboard {
     & > .section-content {
       & .dashboard-bg {
+        background: var(--surface-overlay);
+
         &.tr {
-          @apply rounded-none;
+          border-radius: 0;
         }
-        @apply bg-surface-overlay not-[.tr]:border-hairline not-[.tr]:hover:border-hairline max-md:bg-surface-overlay not-[.tr]:max-md:border-hairline not-[.tr]:border not-[.tr]:shadow-lg not-[.tr]:hover:shadow-xl not-[.tr]:max-md:border;
+
+        &:not(.tr) {
+          border: 1px solid var(--hairline);
+          box-shadow: var(--app-shadow-lg);
+
+          &:hover {
+            border-color: var(--hairline);
+            /* The theme maps the xl utility onto --app-shadow-md. */
+            box-shadow: var(--app-shadow-md);
+          }
+        }
 
         /* Dark mode: override custom.css hardcoded light-mode colors on all text nodes */
-        & span {
-          @apply dark:text-text!;
-        }
-        & td {
-          @apply dark:text-text!;
-        }
+        & span,
+        & td,
         & th {
-          @apply dark:text-text!;
+          [data-darkmode="true"] & {
+            color: var(--text) !important;
+          }
         }
 
         img[src*=".svg"] {
-          @apply dark:invert;
+          [data-darkmode="true"] & {
+            filter: invert(100%);
+          }
         }
 
         /* Compact spacing for assoclist cells (carry .td/.th classes) */
         & .td {
-          @apply py-2 max-md:py-1;
+          padding-block: 0.5rem;
+
+          @media (width < 48rem) {
+            padding-block: 0.25rem;
+          }
         }
         & .th {
-          @apply py-2;
+          padding-block: 0.5rem;
         }
 
         /* Inline info tables (e.g. DNS): strip card decoration, restore table layout */
         & .table:not(.assoclist) {
-          @apply mb-0 rounded-none border-0 bg-transparent shadow-none;
+          margin-bottom: 0;
+          border-radius: 0;
+          border: 0;
+          background: transparent;
+          box-shadow: none;
+
           & tr {
-            @apply hover:bg-transparent max-md:table-row max-md:border-0 max-md:px-0 max-md:py-0;
+            &:hover {
+              background: transparent;
+            }
+
+            @media (width < 48rem) {
+              display: table-row;
+              border: 0;
+              padding: 0;
+            }
           }
+
           & td {
-            @apply border-0 px-0 py-0.5 max-md:table-cell;
+            border: 0;
+            padding: 0.125rem 0;
+
+            @media (width < 48rem) {
+              display: table-cell;
+            }
+
             &:first-child {
-              @apply pr-2 whitespace-nowrap opacity-70;
+              padding-right: 0.5rem;
+              white-space: nowrap;
+              opacity: 0.7;
             }
           }
         }
       }
 
-      .title {
-        h3 {
-          @apply text-text border-0 pb-4 max-md:mx-0 max-md:pb-2;
+      .title h3 {
+        color: var(--text);
+        border: 0;
+        padding-bottom: 1rem;
+
+        @media (width < 48rem) {
+          margin-inline: 0;
+          padding-bottom: 0.5rem;
         }
       }
 
       .router-status-wifi {
-        .wifi-info {
-          .devices-info {
-            .tr {
-              .td {
-                @apply nth-3:relative nth-3:top-0 nth-3:w-full nth-3:px-0 max-md:flex-[1_1_50%];
-              }
-            }
+        .wifi-info .devices-info .tr .td {
+          &:nth-child(3) {
+            position: relative;
+            top: 0;
+            width: 100%;
+            padding-inline: 0;
+          }
+
+          @media (width < 48rem) {
+            flex: 1 1 50%;
           }
         }
       }

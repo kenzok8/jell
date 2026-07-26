@@ -2,48 +2,64 @@
   PATCH: admin-modem-qmodem (luci-app-qmodem)
   Unified per-application patch — loaded on all admin/modem/qmodem/* pages.
   Prefix-matched by header.ut: admin-modem-qmodem(-overview|-sms|…).
+  Native declarations keep this standalone patch free of Tailwind helper output;
+  theme values come through the :root custom properties.
 */
-@reference "../main.css";
 
 [data-page^="admin-modem-qmodem"] {
   .copyright-section {
-    @apply text-text-muted! text-center! bg-surface-sunken border-hairline border-1;
+    color: var(--text-muted) !important;
+    text-align: center !important;
+    background: var(--surface-sunken);
+    border: 1px solid var(--hairline);
   }
 
   fieldset.cbi-section > legend {
-    @apply border-hairline text-text float-left mb-4 w-full border-b px-0 pb-3 leading-tight;
+    border-bottom: 1px solid var(--hairline);
+    color: var(--text);
+    float: left;
+    margin-bottom: 1rem;
+    width: 100%;
+    padding: 0 0 0.75rem;
+    line-height: 1.25;
   }
 
   fieldset.cbi-section {
-    @apply flow-root;
+    display: flow-root;
   }
 
   fieldset.cbi-section > :not(legend) {
-    @apply clear-both;
+    clear: both;
   }
 
-  .cbi-section-table-titles.named {
-    @apply before:bg-surface-sunken before:rounded-tl-2xl before:border-b! before:border-hairline!;
-
-
+  .cbi-section-table-titles.named::before {
+    background: var(--surface-sunken);
+    /* :root exposes only --radius-base; the theme's radius scale is
+       calc multiples of it (kept reactive to config overrides). */
+    border-top-left-radius: calc(var(--radius-base) * 2);
+    border-bottom: 1px solid var(--hairline) !important;
   }
 }
 
 [data-page^="admin-modem-qmodem-sms-conversation"] {
   #sms-messages-area {
-    @apply border-hairline! border-1 bg-surface-sunken! text-text!;
+    border: 1px solid var(--hairline) !important;
+    background: var(--surface-sunken) !important;
+    color: var(--text) !important;
   }
 
   .sms-message-bubble {
-    @apply border-hairline! border-1 bg-surface-overlay! text-text!;
+    border: 1px solid var(--hairline) !important;
+    background: var(--surface-overlay) !important;
+    color: var(--text) !important;
   }
 
   .sms-message-content {
-    @apply text-text!;
+    color: var(--text) !important;
   }
 
   .sms-message-meta {
-    @apply text-text-muted!;
+    color: var(--text-muted) !important;
   }
 }
 
@@ -51,97 +67,140 @@
   /* NOTE: targets <li> directly (not li > a) because qmodem's tab markup
      has no <a> inside tabs — so this won't auto-update with the shared
      _segmented.css conventions. */
-  .cbi-tabmenu {
-    & li {
-      @apply text-text-muted hover:text-text hover:bg-hover-faint cursor-pointer rounded-4xl px-4 py-2 text-center text-sm font-medium whitespace-nowrap transition-colors duration-150;
+  .cbi-tabmenu li {
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: calc(var(--radius-base) * 4);
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+      color 0.15s,
+      background-color 0.15s;
 
-      &.cbi-tab {
-        @apply bg-text text-surface font-semibold shadow-sm;
-      }
+    &:hover {
+      color: var(--text);
+      background: var(--hover-faint);
+    }
+
+    &.cbi-tab {
+      background: var(--text);
+      color: var(--surface);
+      font-weight: 600;
+      box-shadow: var(--app-shadow-sm);
     }
   }
 }
 
 [data-page="admin-modem-qmodem-sms"] {
   .td > div {
-    @apply text-text-muted! mt-1.5! text-xs! leading-relaxed!;
+    color: var(--text-muted) !important;
+    margin-top: 0.375rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1.625 !important;
   }
 
   .td > span[style*="margin-left"] {
-    @apply text-text ml-2!;
+    color: var(--text);
+    margin-left: 0.5rem !important;
   }
 
   .sms-conversations {
-    @apply mt-5 mb-0;
+    margin-top: 1.25rem;
+    margin-bottom: 0;
 
     & > .cbi-section {
-      @apply m-0! border-0! bg-transparent! p-0! shadow-none!;
+      margin: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      padding: 0 !important;
+      box-shadow: none !important;
     }
 
     & fieldset.cbi-section {
-      @apply mb-0;
+      margin-bottom: 0;
     }
 
     & .table.cbi-section-table {
-      @apply mb-0 overflow-hidden;
+      margin-bottom: 0;
+      overflow: hidden;
     }
   }
 
   .cbi-section-table-row.tr {
-    @apply text-text transition-colors duration-150;
+    color: var(--text);
+    transition:
+      color 0.15s,
+      background-color 0.15s;
 
     & > .td,
     & > td {
-      @apply text-text;
+      color: var(--text);
     }
 
     & > .td:nth-child(2),
     & > td:nth-child(2) {
-      @apply text-text-muted;
+      color: var(--text-muted);
     }
 
     &:hover {
-      @apply bg-hover-faint! text-text!;
+      background: var(--hover-faint) !important;
+      color: var(--text) !important;
 
       & > .td,
       & > td {
-        @apply text-text! bg-transparent!;
+        color: var(--text) !important;
+        background: transparent !important;
       }
     }
   }
 
   .sms-unread-conversation {
-    @apply bg-brand-subtle! font-semibold;
+    background: var(--brand-subtle) !important;
+    font-weight: 600;
   }
 
   .sms-unread-badge {
-    @apply bg-danger! text-on-brand! ml-2! rounded-full! px-2! py-0.5! text-xs! font-semibold!;
+    background: var(--danger) !important;
+    color: var(--on-brand) !important;
+    margin-left: 0.5rem !important;
+    border-radius: 9999px !important;
+    padding: 0.125rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
   }
 }
 
 [data-page="admin-modem-qmodem-sms_sim"] {
   .cbi-section-table-row.tr {
-    @apply text-text transition-colors duration-150;
+    color: var(--text);
+    transition:
+      color 0.15s,
+      background-color 0.15s;
 
     & > .td,
     & > td {
-      @apply text-text;
+      color: var(--text);
     }
 
     &:hover {
-      @apply bg-hover-faint!;
+      background: var(--hover-faint) !important;
 
       & > .td,
       & > td {
-        @apply text-text! bg-transparent!;
+        color: var(--text) !important;
+        background: transparent !important;
       }
     }
   }
 }
 
 [data-page="admin-modem-qmodem-settings"] {
-
-  .cbi-section-table-descr.named {
-    @apply before:bg-surface-sunken before:content-['']!;
+  .cbi-section-table-descr.named::before {
+    background: var(--surface-sunken);
+    content: "" !important;
   }
 }

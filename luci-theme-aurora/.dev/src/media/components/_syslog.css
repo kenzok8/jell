@@ -1,0 +1,110 @@
+/*
+  Log viewer for the core System/Kernel Log pages (admin/status/logs/*).
+
+  This is theme styling for a stock LuCI page, so it lives in the main.css
+  component pipeline — NOT in patches/ — and consumes the Tailwind token
+  system: radii resolve through the --radius-base chain, shadows through
+  --app-shadow-*, colors through the theme map, so config-app overrides of
+  the base tokens reach this page like any other. (patches/ stays reserved
+  for third-party compatibility, written in plain CSS.)
+
+  The class names are deliberately global, not page-scoped: any package may
+  reuse the same markup contract for its own log UI — .syslog-view wrapping
+  .log-row rows built from .log-time / .log-sev / .log-tag / .log-msg spans,
+  with an lv-{info|notice|warn|err|crit|debug} severity class on the row —
+  and inherit this component wholesale.
+
+  The companion JS ships on-demand as patches/admin-status-logs.js. It
+  parses the read-only #syslog textarea into a .syslog-view sibling and
+  marks #content_syslog with .log-enhanced. Without JS (or when its parse
+  gate trips) none of the viewer markup exists and the stock textarea
+  styling from _layout.css still applies.
+
+  Chosen design (user-picked variant "彩色级别词", Vercel/Axiom style):
+  fixed-width time · level · source columns so messages start flush; the
+  level is a short uppercase word colored per severity (facility lives in
+  its tooltip), source neutral, err-and-above rows tinted, whole lines with
+  sideways scrolling (the stock textarea's wrap="off" model). Fields are
+  inline-blocks inside inline flow (not grid/flex) so the real spaces
+  between them survive into copied text.
+*/
+
+#content_syslog.log-enhanced > #syslog {
+  @apply hidden;
+}
+
+.syslog-view {
+  /* Direct child of #content_syslog: undo the filter-row flex from
+     _layout.css's `#content_syslog > div` rule. */
+  @apply block w-full;
+  /* Same shell as the stock textarea, with the border color made explicit:
+     a bare `border` falls back to currentColor (near-black) in Tailwind v4. */
+  @apply bg-surface-sunken border-hairline text-text rounded-3xl border p-6 shadow-lg max-md:p-3;
+  @apply font-mono text-xs leading-relaxed;
+  /* Whole lines, sideways scroll (the stock textarea's wrap="off" model). */
+  @apply overflow-x-auto;
+
+  & .log-row {
+    /* max-content width so hover/tint backgrounds span the scrolled width. */
+    @apply w-max min-w-full rounded-md px-2 whitespace-pre;
+
+    &:hover {
+      @apply bg-hover-faint;
+    }
+  }
+
+  /* The browser-default selection highlight turns the dimmed fields to mud;
+     use the theme's info surface pair and restore full text contrast. */
+  & ::selection {
+    @apply bg-info-surface text-text;
+  }
+
+  & .log-time {
+    @apply text-text-subtle;
+    @apply md:inline-block md:w-[15ch] md:overflow-hidden md:align-bottom md:whitespace-nowrap;
+  }
+
+  & .log-sev {
+    @apply font-semibold tracking-wide uppercase;
+    @apply md:inline-block md:w-[7ch] md:overflow-hidden md:align-bottom md:whitespace-nowrap;
+  }
+
+  & .log-tag {
+    @apply text-text-muted;
+    @apply md:inline-block md:max-w-[18ch] md:overflow-hidden md:align-bottom md:text-ellipsis md:whitespace-nowrap;
+  }
+
+  & .lv-info .log-sev {
+    @apply text-info;
+  }
+
+  & .lv-notice .log-sev {
+    @apply text-success;
+  }
+
+  & .lv-warn .log-sev {
+    @apply text-warning;
+  }
+
+  & .lv-debug {
+    @apply text-text-subtle;
+    & .log-sev,
+    & .log-tag {
+      @apply text-text-subtle;
+    }
+  }
+
+  /* err and above are rare and load-bearing — full-row emphasis. */
+  & .lv-err,
+  & .lv-crit {
+    @apply bg-danger-surface;
+
+    &:hover {
+      @apply bg-danger-surface-hover;
+    }
+
+    & .log-sev {
+      @apply text-danger;
+    }
+  }
+}

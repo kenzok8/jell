@@ -550,12 +550,14 @@ return baseclass.extend({
     // index — matched and rendered like pages, grouped under _("Design")
     // (the System → Language and Style label) — but execute header.ut's
     // global setTheme() instead of navigating, so the panel stays open and
-    // previews the switch live. luci-base has no Light/Dark msgids — they
-    // stay English literals, wrapped in _() so a future catalog entry would
-    // take effect (the same trade the icon-only switcher makes).
+    // previews the switch live. luci-base carries no mode msgids, so the
+    // labels borrow luci-app-aurora-config's already-translated "Light
+    // Mode"/"Dark Mode" — matching its msgids verbatim is what makes the
+    // palette follow the UI language wherever the config app is installed,
+    // and they fall back to English where it isn't.
     [
-      ["light", _("Light")],
-      ["dark", _("Dark")],
+      ["light", _("Light Mode")],
+      ["dark", _("Dark Mode")],
       ["device", _("Automatic")],
     ].forEach(([mode, title]) =>
       this.paletteIndex.push({
@@ -566,8 +568,9 @@ return baseclass.extend({
       }),
     );
 
-    // Only msgids that already exist in the luci-base catalog are used —
-    // the theme intentionally ships no translations of its own.
+    // Only msgids that already exist in a shipped catalog (luci-base, or the
+    // config app's as above) are used — the theme intentionally ships no
+    // translations of its own.
     const isMac = /Mac|iP(ad|hone|od)/.test(navigator.platform);
     this.paletteKey = isMac ? "⌘K" : "Ctrl+K";
     toggle.setAttribute("aria-keyshortcuts", isMac ? "Meta+K" : "Control+K");
@@ -1056,8 +1059,9 @@ return baseclass.extend({
         );
       }
       // Both vars live on the header, not the container: the container
-      // inherits the height, and the header's own transition-colors reads
-      // the duration so the bar colour fades in lockstep with the wipe.
+      // inherits both, and the close fallback timer reads the duration
+      // back off the header (the bar itself must stay transition-free so
+      // theme flips repaint it in the same frame as the page).
       header.style.setProperty("--mega-menu-height", `${canvasHeight}px`);
       header.style.setProperty("--mega-menu-duration", `${revealDuration}ms`);
     };
