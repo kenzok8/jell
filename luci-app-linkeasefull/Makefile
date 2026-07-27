@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for linkeasefull
-LUCI_DEPENDS:=+linkeasefull
+LUCI_DEPENDS:=+linkeasefull +luci-lib-linkeasefile
 LUCI_PKGARCH:=all
 
 
