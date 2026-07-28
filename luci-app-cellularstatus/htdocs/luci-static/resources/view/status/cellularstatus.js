@@ -25,23 +25,23 @@ function reception_lv(v) {
 			if (pc > 100) {
 				pc = 100;
 			}
-			i = L.resource('icons/signal-75-100.png');
+			i = L.resource('icons/signal-075-100.svg');
 		} else {
-			i = L.resource('icons/signal-50-75.png');
+			i = L.resource('icons/signal-050-075.svg');
 		}
 		c = 'green';
 	} else if (pc >= 25) {
-		i = L.resource('icons/signal-25-50.png');
+		i = L.resource('icons/signal-025-050.svg');
 		c = 'orange';
 	} else if (pc >= 10) {
-		i = L.resource('icons/signal-0-25.png');
+		i = L.resource('icons/signal-000-025.svg');
 		c = 'red';
 	} else {
 		if (pc > 0) {
-			i = L.resource('icons/signal-0.png');
+			i = L.resource('icons/signal-000-000.svg');
 		} else {
 			pc = 0;
-			i = L.resource('icons/signal-none.png');
+			i = L.resource('icons/signal-none.svg');
 		}
 		c = 'grey';
 	}
