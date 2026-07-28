@@ -48,7 +48,7 @@ set_ipv4_interface()
 	uci set network.${interface_name}='interface'
 	uci set network.${interface_name}.proto='dhcp'
 	uci set network.${interface_name}.device="${network_interface}"
-	uci set network.${interface_name}.ifname="${network_interface}"
+	uci set network.${interface_name}.device="${network_interface}"
 	uci commit network
 
 	#加入WAN防火墙
@@ -71,7 +71,7 @@ set_ipv6_interface()
 	uci set network.${interface_name}.proto='dhcpv6'
 	uci set network.${interface_name}.extendprefix='1'
 	uci set network.${interface_name}.device="${network_interface}"
-	uci set network.${interface_name}.ifname="${network_interface}"
+	uci set network.${interface_name}.device="${network_interface}"
 	uci commit network
 
 	#加入WAN防火墙
@@ -759,7 +759,7 @@ stop_service()
 	#删除记录文件
 	rm -rf ${MODEM_RUN_CONFIG}
 	#停止qmi、mbim拨号
-	killall quectel-CM >/dev/null 2>&1
+	killall -3 quectel-CM >/dev/null 2>&1
 	#停止gobinet、ecm、rndis、ncm拨号
 	local modem_number=$(uci -q get modem.@global[0].modem_number)
 	for i in $(seq 0 $((modem_number-1))); do

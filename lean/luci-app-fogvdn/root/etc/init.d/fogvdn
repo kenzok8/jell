@@ -94,7 +94,7 @@ function nics_hd()
 #     else
 #         config=vw$config
 #     fi
-#     l2_device=$(uci get network.$config.ifname)
+#     l2_device=$(uci get network.$config.device)
 #     proto=$(uci get network.$config.proto)
 #     if [ "$proto" == "pppoe" ];then
 #         nic_name=pppoe-$config
