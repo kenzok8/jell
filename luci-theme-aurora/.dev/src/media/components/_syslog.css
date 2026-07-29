@@ -21,10 +21,12 @@
   styling from _layout.css still applies.
 
   Chosen design (user-picked variant "彩色级别词", Vercel/Axiom style):
-  fixed-width time · level · source columns so messages start flush; the
-  level is a short uppercase word colored per severity (facility lives in
-  its tooltip), source neutral, err-and-above rows tinted, whole lines with
-  sideways scrolling (the stock textarea's wrap="off" model). Fields are
+  min-width time · level · source columns so messages start flush while
+  every token renders verbatim — year, timezone, colons, ctime padding all
+  kept, nothing truncated — so a copied row is byte-identical to the source
+  line; the level token is colored per severity, source neutral,
+  err-and-above rows tinted, whole lines with sideways scrolling (the stock
+  textarea's wrap="off" model). Fields are
   inline-blocks inside inline flow (not grid/flex) so the real spaces
   between them survive into copied text.
 */
@@ -64,17 +66,20 @@
 
   & .log-time {
     @apply text-text-subtle;
-    @apply md:inline-block md:w-[15ch] md:overflow-hidden md:align-bottom md:whitespace-nowrap;
+    /* ctime stamps are a fixed 24ch; RPC datestrs run longer but uniform. */
+    @apply md:inline-block md:min-w-[24ch] md:align-bottom;
   }
 
   & .log-sev {
-    @apply font-semibold tracking-wide uppercase;
-    @apply md:inline-block md:w-[7ch] md:overflow-hidden md:align-bottom md:whitespace-nowrap;
+    /* "authpriv.notice:" is 16ch — the longest real fac.sev token. */
+    @apply font-semibold;
+    @apply md:inline-block md:min-w-[16ch] md:align-bottom;
   }
 
   & .log-tag {
     @apply text-text-muted;
-    @apply md:inline-block md:max-w-[18ch] md:overflow-hidden md:align-bottom md:text-ellipsis md:whitespace-nowrap;
+    /* min-width, not a clamp: long tags extend rather than truncate. */
+    @apply md:inline-block md:min-w-[18ch] md:align-bottom;
   }
 
   & .lv-info .log-sev {

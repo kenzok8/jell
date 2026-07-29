@@ -18,29 +18,29 @@ new Function("module", "exports", "document", "window", source)(
   undefined,
   undefined,
 );
-const { parseSyslogLine, parseDmesgLine, shortenTime, evaluate, PARSE_GATE } =
-  mod.exports;
+const { parseSyslogLine, parseDmesgLine, evaluate, PARSE_GATE } = mod.exports;
 
 test("classic logread format (23.05 syslog, 24.10 syslog-wrapper) parses", () => {
   const r = parseSyslogLine(
     "Sat Jul 26 03:14:15 2026 daemon.info dnsmasq-dhcp[1]: DHCPACK(br-lan) 192.168.1.140",
   );
   assert.deepEqual(
-    { time: r.time, fac: r.fac, sev: r.sev, tag: r.tag },
+    { time: r.time, fac: r.fac, sev: r.sev, sevTok: r.sevTok, tag: r.tag },
     {
-      time: "Jul 26 03:14:15",
+      time: "Sat Jul 26 03:14:15 2026",
       fac: "daemon",
       sev: "info",
+      sevTok: "daemon.info",
       tag: "dnsmasq-dhcp[1]",
     },
   );
   assert.equal(r.msg, "DHCPACK(br-lan) 192.168.1.140");
 
-  // ctime() pads single-digit days with a space.
+  // ctime() pads single-digit days with a space — kept verbatim.
   const padded = parseSyslogLine(
     "Sun Jul  6 09:05:07 2026 daemon.warn odhcpd[2029]: No default route present",
   );
-  assert.equal(padded.time, "Jul 06 09:05:07");
+  assert.equal(padded.time, "Sun Jul  6 09:05:07 2026");
 
   // Kernel lines routed through logread; hostapd logs without a pid.
   assert.equal(
@@ -58,18 +58,19 @@ test("classic logread format (23.05 syslog, 24.10 syslog-wrapper) parses", () =>
 });
 
 test("master RPC bracket format parses across browser locales", () => {
+  // The datestr renders verbatim, brackets and timezone included — the
+  // stamp is UTC-formatted upstream and hiding the zone read as local time.
   const en = parseSyslogLine(
     "[Jul 24, 2026, 10:59:50 PM UTC] daemon.info: dnsmasq-dhcp[1]: DHCPREQUEST(br-lan) 192.168.1.140",
   );
-  assert.equal(en.time, "Jul 24 22:59:50");
-  assert.equal(en.fullTime, "Jul 24, 2026, 10:59:50 PM UTC");
+  assert.equal(en.time, "[Jul 24, 2026, 10:59:50 PM UTC]");
+  assert.equal(en.sevTok, "daemon.info:");
 
-  // timeStyle "full" spells the zone out; still en-shaped, still shortened.
   assert.equal(
     parseSyslogLine(
       "[Jul 24, 2026, 10:59:50 PM Coordinated Universal Time] daemon.warn: odhcpd[2029]: No default route present",
     ).time,
-    "Jul 24 22:59:50",
+    "[Jul 24, 2026, 10:59:50 PM Coordinated Universal Time]",
   );
 
   // Non-en datestrs parse fine and display untouched — never guessed at.
@@ -77,7 +78,26 @@ test("master RPC bracket format parses across browser locales", () => {
     "[2026年7月24日 GMT 22:59:50] daemon.err: odhcpd[2029]: Failed to send RA",
   );
   assert.equal(zh.sev, "err");
-  assert.equal(zh.time, "2026年7月24日 GMT 22:59:50");
+  assert.equal(zh.time, "[2026年7月24日 GMT 22:59:50]");
+});
+
+test("rendered tokens rejoin into the source line byte for byte", () => {
+  const lines = [
+    "[Jul 24, 2026, 10:59:50 PM UTC] daemon.info: dnsmasq-dhcp[1]: DHCPREQUEST(br-lan) 192.168.1.140",
+    "[Jul 25, 2026, 4:30:55 PM UTC] kern.info: [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x51af8014]",
+    "Sun Jul  6 09:05:07 2026 daemon.warn odhcpd[2029]: No default route present",
+    "Sat Jul 26 03:14:16 2026 kern.info kernel: [73412.882110] br-lan: port 3(lan3) entered forwarding state",
+  ];
+  for (const line of lines) {
+    const p = parseSyslogLine(line);
+    const parts = [p.time, p.sevTok];
+    if (p.tag) parts.push(p.tag + ":");
+    parts.push(p.msg);
+    assert.equal(parts.join(" "), line, line);
+  }
+  const dm = "[   12.345678] br-lan: port 3(lan3) entered forwarding state";
+  const d = parseDmesgLine(dm);
+  assert.equal([d.time, d.msg].join(" "), dm);
 });
 
 test("severity comes from the field, never from message content", () => {
@@ -113,7 +133,7 @@ test("dmesg lines: uptime stamp only, message verbatim, no severity", () => {
   const r = parseDmesgLine(
     "[   12.345678] br-lan: port 3(lan3) entered forwarding state",
   );
-  assert.equal(r.time, "[12.345678]");
+  assert.equal(r.time, "[   12.345678]");
   assert.equal(r.tag, "");
   assert.equal(r.sev, "");
   assert.equal(r.msg, "br-lan: port 3(lan3) entered forwarding state");
@@ -125,15 +145,6 @@ test("dmesg lines: uptime stamp only, message verbatim, no severity", () => {
   assert.equal(pci.msg, "mt7921e 0000:01:00.0: Message 00000010 timeout");
 
   assert.equal(parseDmesgLine("no bracket prefix here"), null);
-});
-
-test("shortenTime handles 12-hour edges and leaves unknown shapes alone", () => {
-  assert.equal(shortenTime("Jul 24, 2026, 12:05:01 AM UTC"), "Jul 24 00:05:01");
-  assert.equal(shortenTime("Jul 24, 2026, 12:15:09 PM UTC"), "Jul 24 12:15:09");
-  assert.equal(
-    shortenTime("2026年7月24日 GMT 22:59:50"),
-    "2026年7月24日 GMT 22:59:50",
-  );
 });
 
 test("parse gate: mixed content falls back, empty value stays calm", () => {
