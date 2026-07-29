@@ -43,6 +43,9 @@
   @apply font-mono text-xs leading-relaxed;
   /* Whole lines, sideways scroll (the stock textarea's wrap="off" model). */
   @apply overflow-x-auto;
+  /* Focusable (tabIndex in the companion JS) so select-all stays inside the
+     log; only keyboard focus draws the ring — a click into the log must not. */
+  @apply focus-visible:ring-focus-ring outline-none focus-visible:ring-2;
 
   & .log-row {
     /* max-content width so hover/tint backgrounds span the scrolled width. */

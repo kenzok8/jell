@@ -105,15 +105,19 @@ test("unknown facility/severity and foreign formats are rejected", () => {
   assert.equal(parseSyslogLine(""), null);
 });
 
-test("dmesg lines: uptime stamp and safe tag split, no severity", () => {
+test("dmesg lines: uptime stamp only, message verbatim, no severity", () => {
+  // Kernel lines have no uniform tag grammar (upstream renders them as plain
+  // text for the same reason) — a partial split styled only some lines and
+  // ate only their colons, so no tag is ever extracted and the message keeps
+  // its punctuation untouched.
   const r = parseDmesgLine(
     "[   12.345678] br-lan: port 3(lan3) entered forwarding state",
   );
   assert.equal(r.time, "[12.345678]");
-  assert.equal(r.tag, "br-lan");
+  assert.equal(r.tag, "");
   assert.equal(r.sev, "");
+  assert.equal(r.msg, "br-lan: port 3(lan3) entered forwarding state");
 
-  // A device path with spaces must not be mistaken for a tag.
   const pci = parseDmesgLine(
     "[75821.004518] mt7921e 0000:01:00.0: Message 00000010 timeout",
   );
