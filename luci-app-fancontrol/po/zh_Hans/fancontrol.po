@@ -1,38 +1,287 @@
-msgid "Fan General Control"
-msgstr "风扇通用控制小程序"
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-app-fancontrol 2.0.0\n"
+"PO-Revision-Date: 2026-07-30 00:00+0800\n"
+"Last-Translator: JiaY-shi <shi05275@163.com>\n"
+"Language-Team: Chinese (Simplified Han script)\n"
+"Language: zh_Hans\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "Enabled"
-msgstr "是否开启"
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:173
+msgid ""
+"After starting, the fan stops only after temperature falls this many degrees "
+"below the start temperature. This prevents rapid on/off cycling."
+msgstr "风扇启动后，温度需要降到比启动温度低这么多度时才会停转，避免风扇频繁启停。"
 
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:143
+msgid ""
+"Automatic detection works on most devices. Select explicit sysfs entries "
+"only when necessary."
+msgstr "自动检测适用于大多数设备，仅在必要时手动指定 sysfs 项。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:238
+msgid ""
+"Brief PWM applied when a stopped fan starts. It helps fans that cannot start "
+"reliably at low duty. Set to 0 together with a zero duration to disable."
+msgstr "风扇从停止状态启动时短暂使用的 PWM，可帮助低占空比下无法可靠启动的风扇。将此项和助推时长都设为 0 可禁用。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:122
+msgid "Collecting data..."
+msgstr "正在采集数据..."
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:111
+msgid ""
+"Configure a continuous PWM curve based on device temperature. Automatic "
+"hardware detection is suitable for most devices."
+msgstr "根据设备温度配置连续 PWM 调速曲线。自动硬件检测适用于大多数设备。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:145
+msgid ""
+"Controls startup assistance and fail-safe behavior. Full-speed safety "
+"defaults are recommended."
+msgstr "控制启动助推和故障保护行为，建议保留默认的全速安全设置。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:141
+msgid "Controls when the fan starts and how its speed rises with temperature."
+msgstr "控制风扇何时启动，以及转速如何随温度升高。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:263
+msgid "Debug logging"
+msgstr "调试日志"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:232
+msgid ""
+"Divides the raw sensor value before control calculations. Standard Linux "
+"temperature inputs use 1000; sensors reporting whole degrees use 1."
+msgstr "进行控制计算前用于换算传感器原始值。标准 Linux 温度输入使用 1000，直接报告摄氏度的传感器使用 1。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:147
+msgid "Enable"
+msgstr "启用"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:98
+msgid "Enter \"auto\" or an absolute sysfs path."
+msgstr "请输入 \"auto\" 或 sysfs 绝对路径。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:110
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/root/usr/share/luci/menu.d/luci-app-fancontrol.json:3
+msgid "Fan Control"
+msgstr "风扇控制"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:84
+msgid "Fan speed"
+msgstr "风扇转速"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:89
+msgid "Fault"
+msgstr "故障"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:158
+msgid "Full-speed temperature"
+msgstr "全速温度"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:165
+msgid "Full-speed temperature must be higher than start temperature."
+msgstr "全速温度必须高于启动温度。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/root/usr/share/rpcd/acl.d/luci-app-fancontrol.json:3
+msgid "Grant access to Fan Control"
+msgstr "授予风扇控制访问权限"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:142
+msgid "Hardware"
+msgstr "硬件"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:185
+msgid "Highest PWM allowed by the curve. A value of 255 means 100% duty cycle."
+msgstr "温控曲线允许的最高 PWM，255 表示 100% 占空比。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:244
+msgid "How long the startup kick is applied. Unit: milliseconds."
+msgstr "启动助推持续的时间，单位为毫秒。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:196
+msgid ""
+"How often the temperature is read and the PWM output is updated. Unit: "
+"seconds."
+msgstr "读取温度并更新 PWM 输出的时间间隔，单位为秒。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:215
+msgid "Hwmon device name"
+msgstr "Hwmon 设备名称"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:179
+msgid ""
+"Lowest PWM used while the fan is running. Increase it if the fan stalls or "
+"cannot maintain rotation. Range: 1–255."
+msgstr "风扇运行时使用的最低 PWM。如果风扇停转或无法持续旋转，请提高此值。范围：1–255。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:181
+msgid "Maximum PWM"
+msgstr "最大 PWM"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:188
+msgid "Maximum PWM must not be lower than minimum running PWM."
+msgstr "最大 PWM 不得低于最低运行 PWM。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:175
+msgid "Minimum running PWM"
+msgstr "最低运行 PWM"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:71
+msgid "None"
+msgstr "无"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:224
+msgid ""
+"Optional pwmN_enable path used to select manual PWM mode. With \"auto\", the "
+"matching control is used when available."
+msgstr "用于选择手动 PWM 模式的可选 pwmN_enable 路径。设为 \"auto\" 时会自动使用匹配的控制项。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:88
+msgid "PWM device"
+msgstr "PWM 设备"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:220
+msgid "PWM mode control"
+msgstr "PWM 模式控制"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:82
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:209
+msgid "PWM output"
+msgstr "PWM 输出"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:162
+msgid ""
+"PWM rises linearly and reaches the configured maximum at this temperature. "
+"Unit: °C."
+msgstr "PWM 随温度线性升高，并在此温度达到设定的最大值，单位为 °C。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:255
+msgid ""
+"PWM used when the temperature sensor cannot be read. Keeping 255 is the "
+"safest choice."
+msgstr "温度传感器读取失败时使用的 PWM。保持 255 是最安全的选择。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:261
+msgid ""
+"PWM written when the service stops. Keeping the fan at full speed avoids "
+"losing cooling after an unexpected exit."
+msgstr "服务停止时写入的 PWM。保持风扇全速可避免服务意外退出后失去散热。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:192
+msgid "Polling interval"
+msgstr "轮询间隔"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:218
+msgid ""
+"Preferred hwmon name when PWM output is automatic. The pwmfan driver is "
+"preferred by default."
+msgstr "自动选择 PWM 输出时优先使用的 hwmon 名称，默认优先选择 pwmfan 驱动。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:207
+msgid ""
+"Preferred thermal zone type when temperature input is automatic, for example "
+"cpu_top_thermal. Leave as \"auto\" unless several sensors are available."
+msgstr "自动选择温度输入时优先使用的 thermal zone 类型，例如 cpu_top_thermal。除非存在多个传感器，否则保持 \"auto\"。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:150
+msgid "Run the controller and apply this temperature curve."
+msgstr "运行风扇控制器并应用此温控曲线。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:77
+msgid "Running"
+msgstr "运行中"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:75
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:113
+msgid "Runtime Status"
+msgstr "运行状态"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:144
+msgid "Safety"
+msgstr "安全"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:251
+msgid "Sensor failure PWM"
+msgstr "传感器故障 PWM"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:257
+msgid "Service exit PWM"
+msgstr "服务退出 PWM"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:138
 msgid "Settings"
 msgstr "设置"
 
-msgid "Thermal File"
-msgstr "温度虚拟文件"
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:234
+msgid "Start kick PWM"
+msgstr "启动助推 PWM"
 
-msgid "Fan Speed File"
-msgstr "风扇速度虚拟文件"
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:247
+msgid "Start kick PWM must be non-zero when a kick duration is configured."
+msgstr "配置启动助推时长时，启动助推 PWM 不能为零。"
 
-msgid "Initial Speed"
-msgstr "启动初始速度"
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:240
+msgid "Start kick duration"
+msgstr "启动助推时长"
 
-msgid "Please enter the initial speed for fan startup."
-msgstr "请输入风扇启动的初始速度。"
-
-msgid "Max Speed"
-msgstr "最大速度"
-
-msgid "Please enter maximum fan speed."
-msgstr "请输入风扇最大速度"
-
-msgid "Start Temperature"
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:152
+msgid "Start temperature"
 msgstr "启动温度"
 
-msgid "Please enter the fan start temperature."
-msgstr "请输入风扇启动温度。"
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:169
+msgid "Stop hysteresis"
+msgstr "停转回差"
 
-msgid "Current speed:"
-msgstr "当前速度："
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:77
+msgid "Stopped"
+msgstr "已停止"
 
-msgid "Current temperature:"
-msgstr "当前温度："
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:80
+msgid "Temperature"
+msgstr "温度"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:140
+msgid "Temperature Curve"
+msgstr "温控曲线"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:226
+msgid "Temperature divisor"
+msgstr "温度除数"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:87
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:198
+msgid "Temperature input"
+msgstr "温度输入"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:156
+msgid ""
+"The fan remains off below this temperature and starts at the minimum running "
+"PWM when it is reached. Unit: °C."
+msgstr "低于此温度时风扇保持停止；达到此温度时，以最低运行 PWM 启动。单位为 °C。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:204
+msgid "Thermal zone type"
+msgstr "温度区域类型"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:202
+msgid ""
+"Use \"auto\" to select a CPU or SoC thermal sensor, or enter an absolute "
+"thermal zone or hwmon tempN_input path."
+msgstr "使用 \"auto\" 自动选择 CPU 或 SoC 温度传感器，也可输入 thermal zone 或 hwmon tempN_input 的绝对路径。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:213
+msgid ""
+"Use \"auto\" to select a writable hwmon pwmN output, or enter its absolute "
+"path. cooling_device cur_state is not a PWM output."
+msgstr "使用 \"auto\" 自动选择可写的 hwmon pwmN 输出，也可输入其绝对路径。cooling_device cur_state 不是 PWM 输出。"
+
+#: /home/shi/document/c-service/fancontrol/luci-app-fancontrol/htdocs/luci-static/resources/view/fancontrol.js:266
+msgid ""
+"Write temperature, PWM and RPM values to the system log at every polling "
+"interval."
+msgstr "每次轮询时将温度、PWM 和 RPM 数值写入系统日志。"

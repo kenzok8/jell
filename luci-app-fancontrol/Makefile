@@ -6,9 +6,12 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=LuCI support for Fan Controller
-LUCI_DEPENDS:=+luci +fancontrol
+LUCI_TITLE:=LuCI support for the generic PWM fan controller
+LUCI_DEPENDS:=+luci-base +fancontrol
 LUCI_PKGARCH:=all
+
+PKG_LICENSE:=Apache-2.0
+PKG_MAINTAINER:=JiaY-shi <shi05275@163.com>
 
 PKG_NAME:=luci-app-fancontrol
 

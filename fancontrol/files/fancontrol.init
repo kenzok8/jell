@@ -5,53 +5,51 @@ STOP=01
 USE_PROCD=1
 
 NAME=fancontrol
-PROG=/usr/bin/$NAME
+PROG=/usr/bin/fancontrol
+
+append_option() {
+	local option="$1"
+	local argument="$2"
+	local value
+
+	config_get value settings "$option"
+	[ -n "$value" ] && procd_append_param command "$argument" "$value"
+}
 
 start_service() {
-    config_load "$NAME"
+	local enabled
+	local debug
 
-    local enabled
-    config_get enabled settings enabled
-    [ "$enabled" = "1" ] || { _info "Instance \"$NAME\" disabled."; return 1; }
+	config_load "$NAME"
+	config_get_bool enabled settings enabled 0
+	[ "$enabled" -eq 1 ] || return 0
 
-    local thermal_file
-    local fan_file
-    local start_temp
-    local start_speed
-    local max_speed
-    local temp_div
-
-    config_get thermal_file settings thermal_file
-    config_get fan_file settings fan_file
-    config_get start_temp settings start_temp
-    config_get start_speed settings start_speed
-    config_get max_speed settings max_speed
-    config_get temp_div settings temp_div
-
-    procd_open_instance
-    procd_set_param command $PROG
-    [ -n "$thermal_file" ] && procd_append_param command -T "$thermal_file"
-    [ -n "$fan_file" ] && procd_append_param command -F "$fan_file"
-    [ -n "$start_temp" ] && procd_append_param command -t "$start_temp"
-    [ -n "$start_speed" ] && procd_append_param command -s "$start_speed"
-    [ -n "$max_speed" ] && procd_append_param command -m "$max_speed"
-    [ -n "$temp_div" ] && procd_append_param command -d "$temp_div"
-    procd_set_param respawn
-    procd_close_instance
-}
-
-start() {
-    start_service
-}
-
-stop() {
-    procd_kill_instance
-}
-
-reload() {
-    procd_reload_instance
+	procd_open_instance
+	procd_set_param command "$PROG"
+	append_option thermal_file -T
+	append_option thermal_zone -Z
+	append_option fan_file -F
+	append_option fan_hwmon -N
+	append_option enable_file -E
+	append_option start_temp -t
+	append_option full_speed_temp -x
+	append_option hysteresis -H
+	append_option start_speed -s
+	append_option max_speed -m
+	append_option kick_speed -k
+	append_option kick_ms -K
+	append_option fail_safe_speed -f
+	append_option exit_speed -q
+	append_option temp_div -d
+	append_option interval -i
+	config_get_bool debug settings debug 0
+	[ "$debug" -eq 1 ] && procd_append_param command -D
+	procd_set_param respawn 3600 5 5
+	procd_set_param term_timeout 10
+	procd_set_param file /etc/config/fancontrol
+	procd_close_instance
 }
 
 service_triggers() {
-    procd_add_reload_trigger "fancontrol"
+	procd_add_reload_trigger fancontrol
 }
