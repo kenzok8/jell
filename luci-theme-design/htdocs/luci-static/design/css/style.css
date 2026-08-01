@@ -2962,7 +2962,8 @@ span[data-tooltip] .label {
 	pointer-events: none;
 	opacity: 0;
 	border-radius: 3px;
-	background: #fff;
+	color: var(--text_color);
+	background: var(--sectionbg_color);
 	box-shadow: 0 0 2px #444;
 }
 
