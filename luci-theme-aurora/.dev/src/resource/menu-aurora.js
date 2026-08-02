@@ -345,7 +345,15 @@ return baseclass.extend({
         href: item.href,
       };
       if (item.isActivePage) attributes["aria-current"] = "page";
-      return E("li", { class: itemClass }, [E("a", attributes, [item.title])]);
+      // data-section keys the shared name → icon map (_nav.css); the icon
+      // span renders it, unmapped names fall back at the consumer.
+      attributes["data-section"] = item.name;
+      return E("li", { class: itemClass }, [
+        E("a", attributes, [
+          E("span", { class: "nav-icon", "aria-hidden": "true" }),
+          E("span", { class: "nav-label" }, [item.title]),
+        ]),
+      ]);
     }
 
     const submenuId = this.navigationSubmenuId(mode, item.name);
@@ -364,6 +372,8 @@ return baseclass.extend({
       "aria-controls": submenuId,
     };
     if (item.isActiveGroup) toggleAttributes["aria-current"] = "location";
+    // See the direct-row note: keys the shared icon map.
+    toggleAttributes["data-section"] = item.name;
 
     const list = E("ul", {
       class: mobile
@@ -400,6 +410,7 @@ return baseclass.extend({
 
     return E("li", { class: groupClasses.join(" ") }, [
       E("button", toggleAttributes, [
+        E("span", { class: "nav-icon", "aria-hidden": "true" }),
         E("span", { class: "nav-category-label" }, [item.title]),
       ]),
       E("div", regionAttributes, [list]),

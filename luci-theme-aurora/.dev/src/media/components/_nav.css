@@ -55,6 +55,31 @@
   @apply text-brand;
 }
 
+/* ── Row icons ──
+   A leading glyph inline with the label, on sidebar and mobile-drawer
+   rows alike (the mega-menu title draws its own ::before). bg-current +
+   mask lets the glyph track the row's text colour through hover, expanded
+   and active states; the size is set per surface — sidebar rows in
+   _layout.css, drawer rows in _overlay.css. */
+.nav-icon {
+  @apply shrink-0 bg-current opacity-55 transition-opacity duration-150 [mask:var(--menu-icon,var(--icon-category))_center/contain_no-repeat];
+}
+
+/* Direct-row labels; group rows keep .nav-category-label. flex-1 also
+   holds the label against the drawer's justify-between rows. */
+.nav-label {
+  @apply min-w-0 flex-1 truncate;
+}
+
+/* Full-strength glyph wherever the row itself is highlighted. */
+.navigation-direct:hover .nav-icon,
+.navigation-group-toggle:hover .nav-icon,
+.navigation-direct.is-active-page .nav-icon,
+.navigation-group.is-expanded > .navigation-group-toggle .nav-icon,
+.navigation-group.is-active-group > .navigation-group-toggle .nav-icon {
+  @apply opacity-100;
+}
+
 .navigation-group-region {
   @apply grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-[250ms] ease-out;
 }
@@ -85,45 +110,49 @@
 }
 
 /* ── First-level section icons ──
-   The name → icon map, consumed by the mega-menu title (_layout.css).
-   Keyed on the LuCI node name (data-section, set by menu-aurora.js) —
-   stable and language-independent. Scoped to .desktop-nav-title so the
-   selector can't accidentally match unrelated data-section usage elsewhere.
-   The only maintenance point: add new first-level sections here; anything
-   unmapped falls back to the default icon at the consumer. */
-.desktop-nav-title[data-section="status"] {
+   The name → icon map, shared by every navigation surface: the mega-menu
+   title (::before consumer in _layout.css) and the sidebar/mobile-drawer
+   row glyphs (.nav-icon below). Keyed on the LuCI node name (data-section,
+   set by menu-aurora.js) — stable and language-independent. Scoped to the
+   three row elements that carry the attribute so the selector can't
+   accidentally match unrelated data-section usage elsewhere; :is() keeps
+   every key at (0,2,0) — the mega-menu consumer's fallback chain would
+   outrank anything higher (see _layout.css). The only maintenance point:
+   add new first-level sections here; anything unmapped falls back to the
+   default icon at the consumer. */
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="status"] {
   @apply [--menu-icon:var(--icon-activity)];
 }
-.desktop-nav-title[data-section="statistics"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="statistics"] {
   @apply [--menu-icon:var(--icon-chart-bar)];
 }
-.desktop-nav-title[data-section="nlbw"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="nlbw"] {
   @apply [--menu-icon:var(--icon-gauge)];
 }
-.desktop-nav-title[data-section="system"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="system"] {
   @apply [--menu-icon:var(--icon-settings)];
 }
-.desktop-nav-title[data-section="services"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="services"] {
   @apply [--menu-icon:var(--icon-apps)];
 }
-.desktop-nav-title[data-section="nas"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="nas"] {
   @apply [--menu-icon:var(--icon-server)];
 }
-.desktop-nav-title[data-section="control"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="control"] {
   @apply [--menu-icon:var(--icon-adjustments)];
 }
-.desktop-nav-title[data-section="network"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="network"] {
   @apply [--menu-icon:var(--icon-world)];
 }
-.desktop-nav-title[data-section="vpn"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="vpn"] {
   @apply [--menu-icon:var(--icon-shield)];
 }
-.desktop-nav-title[data-section="docker"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="docker"] {
   @apply [--menu-icon:var(--icon-box)];
 }
 /* "asterisk" covers VoIP/PBX apps (e.g. luci-app-asterisk forks) — no
    official OpenWrt package registers a verified menu.d node under this
    name, so this is a best-effort key. */
-.desktop-nav-title[data-section="asterisk"] {
+:is(.desktop-nav-title, .navigation-direct, .navigation-group-toggle)[data-section="asterisk"] {
   @apply [--menu-icon:var(--icon-phone)];
 }

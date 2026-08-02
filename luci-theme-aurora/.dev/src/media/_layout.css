@@ -498,11 +498,21 @@ body[data-nav-type="sidebar"] {
   }
 
   & .sidebar-list .navigation-direct {
-    @apply truncate text-lg;
+    /* flex, matching .nav-category: icon + label on one row (the label
+       span owns the truncation). */
+    @apply flex items-center gap-2 text-lg;
+  }
+
+  & .sidebar-list .nav-icon {
+    @apply size-4.5;
   }
 
   & .sidebar-submenu {
-    @apply m-0 min-h-0 list-none space-y-0.5 overflow-hidden p-0 pl-4;
+    /* pl: the parent row's px-3 (0.75) + icon (1.125) + gap (0.5) put the
+       label at 2.375rem; sublinks bring their own px-3, so the list
+       supplies the remaining 1.625rem and sublink text hangs off the
+       parent label, not the row edge. */
+    @apply m-0 min-h-0 list-none space-y-0.5 overflow-hidden p-0 pl-6.5;
   }
 
   & .sidebar-submenu .navigation-sublink {

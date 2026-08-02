@@ -28,12 +28,22 @@
         @apply max-md:shrink-0;
 
         & .mobile-nav-link {
-          @apply max-md:flex max-md:min-h-13 max-md:w-full max-md:items-center max-md:justify-between max-md:gap-4 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-2.5 max-md:text-left max-md:text-2xl max-md:leading-tight max-md:font-medium max-md:tracking-tight max-md:no-underline max-md:shadow-none;
+          /* gap-3 (not 4): tight enough that the leading .nav-icon reads
+             attached to its label; justify-between still pins the group
+             arrow to the right edge. */
+          @apply max-md:flex max-md:min-h-13 max-md:w-full max-md:items-center max-md:justify-between max-md:gap-3 max-md:rounded-none max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-2.5 max-md:text-left max-md:text-2xl max-md:leading-tight max-md:font-medium max-md:tracking-tight max-md:no-underline max-md:shadow-none;
+
+          & .nav-icon {
+            /* Row icons at drawer scale, against the text-2xl labels. */
+            @apply max-md:size-6;
+          }
         }
 
         & .mobile-nav-submenu {
           & .mobile-nav-submenu-list {
-            @apply max-md:mx-0 max-md:mt-0 max-md:mb-2 max-md:py-1 max-md:pr-0 max-md:pl-4;
+            /* pl: rows are px-0, so icon (1.5) + gap (0.75) put the label
+               at 2.25rem; sublinks bring px-3, the list supplies the rest. */
+            @apply max-md:mx-0 max-md:mt-0 max-md:mb-2 max-md:py-1 max-md:pr-0 max-md:pl-6;
           }
 
           & .mobile-nav-subitem {

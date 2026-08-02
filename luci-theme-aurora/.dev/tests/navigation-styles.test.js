@@ -125,11 +125,16 @@ test("shared navigation styles own accordion animation without a guide rail", ()
 test("desktop sidebar styles only provide desktop navigation density", () => {
   const sidebar = getBlock(layoutStyles, 'body[data-nav-type="sidebar"]');
   const direct = getBlock(sidebar, "& .sidebar-list .navigation-direct");
+  const icon = getBlock(sidebar, "& .sidebar-list .nav-icon");
   const submenu = getBlock(sidebar, "& .sidebar-submenu");
   const sublink = getBlock(sidebar, "& .sidebar-submenu .navigation-sublink");
 
-  assertIncludesUtilities(direct, ["truncate", "text-lg"]);
-  assertIncludesUtilities(submenu, ["pl-4"]);
+  // Direct rows are icon + label flex rows; the label span truncates.
+  assertIncludesUtilities(direct, ["flex", "items-center", "gap-2", "text-lg"]);
+  assertIncludesUtilities(icon, ["size-4.5"]);
+  // pl-6.5 hangs sublink text off the parent label (px-3 + icon + gap −
+  // the sublink's own px-3), not the row edge.
+  assertIncludesUtilities(submenu, ["pl-6.5"]);
   assertIncludesUtilities(sublink, ["px-3", "py-1.5", "text-sm"]);
   assert.doesNotMatch(
     sidebar,
@@ -140,10 +145,15 @@ test("desktop sidebar styles only provide desktop navigation density", () => {
 
 test("mobile drawer styles only provide mobile navigation density", () => {
   const drawer = getBlock(overlayStyles, ".mobile-menu-overlay");
+  const icon = getBlock(drawer, "& .nav-icon");
   const submenu = getBlock(drawer, "& .mobile-nav-submenu-list");
   const sublink = getBlock(drawer, "& .mobile-nav-sublink");
 
-  assertIncludesUtilities(submenu, ["max-md:pl-4"]);
+  // Row icons at drawer scale, against the text-2xl labels.
+  assertIncludesUtilities(icon, ["max-md:size-6"]);
+  // pl-6 hangs sublink text off the parent label (rows are px-0: icon +
+  // gap − the sublink's own px-3).
+  assertIncludesUtilities(submenu, ["max-md:pl-6"]);
   assertIncludesUtilities(sublink, [
     "max-md:min-h-10",
     "max-md:px-3",
