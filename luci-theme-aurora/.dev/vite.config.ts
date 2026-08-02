@@ -383,19 +383,15 @@ function createLocalServePlugin(): Plugin {
 // patches/*.css, served JS) trigger the existing full-reload in handleHotUpdate.
 // Any third-party asset a snapshot needs (the app's own css/js, e.g.
 // qmodem-next.css) goes under .dev/mocks/static/ mirroring its /luci-static/…
-// URL and is served as-is (no HMR). Served snapshots additionally get
-// scripts/mock-nav.client.js (links between captured pages navigate in place,
-// plus a floating switcher), and proxied device pages get
-// scripts/mock-capture.client.js (hotkey → POST /mocks/__save captures the
-// open page as a snapshot). See "Mock Pages" in .dev/docs/DEVELOPMENT.md.
+// URL and is served as-is (no HMR). Both served snapshots and proxied device
+// pages get scripts/mock-bar.client.js — a floating bar that lists the
+// snapshots, opens the one matching the open page, captures the open device
+// page (POST /mocks/__save), and inside a snapshot takes over its LuCI links.
+// See "Mock Pages" in .dev/docs/DEVELOPMENT.md.
 const MOCK_ROUTE = "/mocks";
 const MOCKS_DIR = resolve(CURRENT_DIR, "mocks");
 const MOCKS_STATIC_DIR = join(MOCKS_DIR, "static");
-const MOCK_NAV_CLIENT = resolve(CURRENT_DIR, "scripts/mock-nav.client.js");
-const MOCK_CAPTURE_CLIENT = resolve(
-  CURRENT_DIR,
-  "scripts/mock-capture.client.js",
-);
+const MOCK_BAR_CLIENT = resolve(CURRENT_DIR, "scripts/mock-bar.client.js");
 // A captured LuCI page is tens of KB — anything past this is not a page.
 const MOCK_SAVE_LIMIT = 20 * 1024 * 1024;
 
@@ -513,17 +509,19 @@ function listMocks(): MockEntry[] {
     .sort((a, b) => a.file.localeCompare(b.file));
 }
 
-// Handing the snapshot list to the page lets mock-nav.client.js take over the
-// snapshot's own /cgi-bin/luci/ links (jump to the matching mock instead of
-// falling through to the proxied router) and render the floating switcher.
-function injectMockNav(html: string, current: string): string {
+// Handing the snapshot list to the page is what makes the bar work in both
+// contexts: inside a snapshot it also drives the link takeover, on a device
+// page it tells the bar which snapshots exist (`current` is null there — a
+// live page is not one of them). data-aurora-mock marks every tag this server
+// injects so a capture can strip them back out.
+function injectMockBar(html: string, current: string | null): string {
   const payload = JSON.stringify({
     current,
     mocks: listMocks().map(({ file, page }) => ({ file, page })),
   }).replace(/</g, "\\u003c");
   const tags =
-    `<script>window.__AURORA_MOCKS__ = ${payload};</script>\n` +
-    `    <script defer src="${MOCK_ROUTE}/__nav.js"></script>\n  `;
+    `<script data-aurora-mock>window.__AURORA_MOCKS__ = ${payload};</script>\n` +
+    `    <script data-aurora-mock defer src="${MOCK_ROUTE}/__bar.js"></script>\n  `;
   return html.includes("</head>")
     ? html.replace("</head>", `${tags}</head>`)
     : html + tags;
@@ -623,23 +621,17 @@ function createMockPlugin(): Plugin {
         // response — thrown, it becomes an unhandled rejection and takes the
         // whole dev server down with it.
         try {
-          // Dev-helper client scripts (kept as real files for editability).
-          if (
-            pathname === `${MOCK_ROUTE}/__nav.js` ||
-            pathname === `${MOCK_ROUTE}/__capture.js`
-          ) {
-            const file = pathname.endsWith("/__nav.js")
-              ? MOCK_NAV_CLIENT
-              : MOCK_CAPTURE_CLIENT;
+          // Dev-helper client script (kept as a real file for editability).
+          if (pathname === `${MOCK_ROUTE}/__bar.js`) {
             res.statusCode = 200;
             res.setHeader("Content-Type", "text/javascript; charset=utf-8");
             res.setHeader("Cache-Control", "no-store");
-            res.end(await readFile(file, "utf-8"));
+            res.end(await readFile(MOCK_BAR_CLIENT, "utf-8"));
             return;
           }
 
-          // Capture endpoint, written to by mock-capture.client.js from
-          // proxied device pages. The custom header doubles as a CORS gate: a
+          // Capture endpoint, written to by mock-bar.client.js from proxied
+          // device pages. The custom header doubles as a CORS gate: a
           // foreign origin can't send it without a preflight this server never
           // approves, so drive-by cross-site POSTs are rejected.
           if (pathname === `${MOCK_ROUTE}/__save`) {
@@ -649,9 +641,15 @@ function createMockPlugin(): Plugin {
               return sendJson(res, 403, { error: "missing capture header" });
             const html = (await readRequestBody(req, MOCK_SAVE_LIMIT))
               // The live DOM carries the dev-only tags this server injected;
-              // a snapshot must stay a clean capture of the real page.
+              // a snapshot must stay a clean capture of the real page. The
+              // snapshot list in particular must not be baked in — it is
+              // re-injected, current, on every serve.
               .replace(
-                /<script[^>]*\bsrc="(?:\/@vite\/client|\/mocks\/__capture\.js)"[^>]*>\s*<\/script>\s*/gi,
+                /<script\b[^>]*\bdata-aurora-mock\b[^>]*>[\s\S]*?<\/script>\s*/gi,
+                "",
+              )
+              .replace(
+                /<script[^>]*\bsrc="\/@vite\/client"[^>]*>\s*<\/script>\s*/gi,
                 "",
               );
             const page =
@@ -679,8 +677,8 @@ function createMockPlugin(): Plugin {
             return;
           }
 
-          // A single snapshot: LuCI runtime neutralised, HMR client + in-mock
-          // navigation injected, doctype restored.
+          // A single snapshot: LuCI runtime neutralised, HMR client + mock bar
+          // injected, doctype restored.
           if (inMocks && pathname.endsWith(".html")) {
             const name = basename(decodeURIComponent(pathname));
             const file = resolve(MOCKS_DIR, name);
@@ -702,7 +700,7 @@ function createMockPlugin(): Plugin {
             const snapshot = await readFile(file, "utf-8");
             res.end(
               ensureDoctype(
-                injectMockNav(
+                injectMockBar(
                   injectHmrClient(neutralizeLuciRuntime(snapshot)),
                   name,
                 ),
@@ -1060,15 +1058,14 @@ export default defineConfig(({ mode }) => {
                 ) {
                   html = html.replace("</head>", `${client}\n\t</head>`);
                 }
-                // Real device pages also get the mock-capture helper:
-                // Alt/Option+Shift+S → POST /mocks/__save stores the open
-                // page as a snapshot for the /mocks/ workflow.
-                const capture = `<script defer src="${MOCK_ROUTE}/__capture.js"></script>`;
-                if (
-                  html.includes("</head>") &&
-                  !html.includes("/__capture.js")
-                ) {
-                  html = html.replace("</head>", `${capture}\n\t</head>`);
+                // Real device pages also get the mock bar, so the snapshot
+                // workflow is one click away instead of a URL to remember:
+                // it lists what .dev/mocks/ holds, opens this page's own
+                // snapshot when there is one, and captures the open page
+                // (same as Alt/Option+Shift+S). `current` is null — a live
+                // page is not itself a snapshot.
+                if (html.includes("</head>") && !html.includes("/__bar.js")) {
+                  html = injectMockBar(html, null);
                 }
                 const { "transfer-encoding": _, ...headers } = proxyRes.headers;
                 res.writeHead(status, {
