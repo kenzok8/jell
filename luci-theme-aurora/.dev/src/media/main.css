@@ -10,7 +10,7 @@
 
 @custom-variant dark (&:where([data-darkmode=true], [data-darkmode=true] *));
 
-@import "./_tokens.css";
+@import "@eamonxg/luci-theme-tokens/dist/aurora/tokens.css";
 @import "./_icons.css";
 
 @import "./_base.css";

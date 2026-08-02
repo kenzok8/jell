@@ -9,7 +9,7 @@
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities) source(none);
-@import "./_tokens.css";
+@import "@eamonxg/luci-theme-tokens/dist/aurora/tokens.css";
 
 @import "./_reduced-motion.css";
 @import "./_base.css";
