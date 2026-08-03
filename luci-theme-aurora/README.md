@@ -58,29 +58,17 @@ Run these commands on the router itself (e.g. over an SSH session).
 
 ### Via the eamonxg package feed
 
-OpenWrt 25.12+ and snapshots use `apk`; other versions use `opkg`:
-
-> **Tip**: You can confirm your package manager by running `opkg --version` or `apk --version`. If it returns output (not "not found"), that's your package manager.
-
 ```sh
 wget -qO- https://openwrt.eamonxg.fun/install.sh | sh
 ```
 
-- **opkg** (OpenWrt < 25.12):
-
-  ```sh
-  opkg install luci-theme-aurora
-  ```
-
-- **apk** (OpenWrt 25.12+ and snapshots):
-
-  ```sh
-  apk add luci-theme-aurora
-  ```
-
-Adds the feed once; later updates are just `opkg update && opkg install luci-theme-aurora` / `apk update && apk add luci-theme-aurora` — no re-downloading the file. Details: [openwrt.eamonxg.fun](https://openwrt.eamonxg.fun/).
+That is the whole installation — the script adds the feed and installs whatever you tick from the list it shows. Upgrade later with the usual commands: `apk update && apk upgrade luci-theme-aurora`, or `opkg update && opkg upgrade luci-theme-aurora`. Details: [openwrt.eamonxg.fun](https://openwrt.eamonxg.fun/).
 
 ### Via a GitHub release
+
+OpenWrt 25.12+ and snapshots use `apk`; other versions use `opkg`:
+
+> **Tip**: You can confirm your package manager by running `opkg --version` or `apk --version`. If it returns output (not "not found"), that's your package manager.
 
 ```sh
 cd /tmp
