@@ -10,10 +10,10 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_BAIDUDRIVE:=$(ARCH)
 
 PKG_NAME:=baidudrive
-PKG_VERSION:=1.0.2
-PKG_RELEASE:=254
+PKG_VERSION:=baidudrive-runtime-v1.0.4
+PKG_RELEASE:=1
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/linkease/istore-packages/releases/download/prebuilt/
+PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/baidudrive-runtime-v$(PKG_VERSION)/
 PKG_HASH:=skip
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-binary-$(PKG_VERSION)
 
