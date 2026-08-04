@@ -2,7 +2,6 @@
 
 include $(TOPDIR)/rules.mk
 
-# Updated: 2025-10-09
 
 LUCI_TITLE:=LuCI support for DPanel
 LUCI_PKGARCH:=all
