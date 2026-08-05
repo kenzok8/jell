@@ -14,6 +14,11 @@ const callServiceList = rpc.declare({
 	expect: { '': {} }
 });
 
+const HISTORY_WINDOW_MS = 2 * 60 * 1000;
+const TIME_GRID_INTERVAL_MS = 10 * 1000;
+const TIME_LABEL_INTERVAL_MS = 30 * 1000;
+const VALUE_GRID_DIVISIONS = 4;
+
 function serviceRunning(result) {
 	const instances = result?.fancontrol?.instances || {};
 
@@ -35,20 +40,173 @@ function parseStatus(text) {
 	return status;
 }
 
-function statusMetric(title, value, unit, level) {
+function validStatusNumber(value) {
+	const number = Number(value);
+
+	return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function appendHistory(history, running, status) {
+	const now = Date.now();
+	const temperature = validStatusNumber(status.temperature_mc);
+	const pwm = validStatusNumber(status.pwm);
+	const rpm = validStatusNumber(status.rpm);
+
+	history.push({
+		time: now,
+		temperature: running && temperature != null ? temperature / 1000 : null,
+		pwm: running && pwm != null ? pwm * 100 / 255 : null,
+		rpm: running ? rpm : null
+	});
+
+	while (history.length && history[0].time < now - HISTORY_WINDOW_MS)
+		history.shift();
+}
+
+function chartScale(history, key, minimumMax, step) {
+	let maximum = minimumMax;
+
+	history.forEach(function(sample) {
+		if (sample[key] != null)
+			maximum = Math.max(maximum, sample[key]);
+	});
+
+	return Math.ceil(maximum / step) * step;
+}
+
+function drawChart(canvas, history, key, options) {
+	const style = window.getComputedStyle(canvas);
+	const width = Math.max(canvas.clientWidth, 1);
+	const height = Math.max(canvas.clientHeight, 1);
+	const ratio = Math.min(window.devicePixelRatio || 1, 2);
+	const context = canvas.getContext('2d');
+	const padding = { left: 28, right: 5, top: 6, bottom: 14 };
+	const plotWidth = Math.max(width - padding.left - padding.right, 1);
+	const plotHeight = Math.max(height - padding.top - padding.bottom, 1);
+	const plotBottom = padding.top + plotHeight;
+	const now = history.length ? history[history.length - 1].time : Date.now();
+	const start = now - HISTORY_WINDOW_MS;
+	const maximum = chartScale(history, key, options.minimumMax, options.step);
+	const lineColor = style.getPropertyValue('--fancontrol-chart-line').trim() || '#1976d2';
+	const fillColor = style.getPropertyValue('--fancontrol-chart-fill').trim() || 'rgba(25, 118, 210, .2)';
+	const labelColor = style.color || '#666';
+	const gridColor = 'rgba(127, 127, 127, .2)';
+	let segment = [];
+
+	canvas.width = Math.round(width * ratio);
+	canvas.height = Math.round(height * ratio);
+	context.setTransform(ratio, 0, 0, ratio, 0, 0);
+	context.clearRect(0, 0, width, height);
+
+	context.strokeStyle = gridColor;
+	context.lineWidth = 1;
+	context.beginPath();
+	for (let elapsed = 0; elapsed <= HISTORY_WINDOW_MS; elapsed += TIME_GRID_INTERVAL_MS) {
+		const x = padding.left + plotWidth * elapsed / HISTORY_WINDOW_MS;
+
+		context.moveTo(x, padding.top);
+		context.lineTo(x, plotBottom);
+	}
+	for (let division = 0; division <= VALUE_GRID_DIVISIONS; division++) {
+		const y = padding.top + plotHeight * division / VALUE_GRID_DIVISIONS;
+
+		context.moveTo(padding.left, y);
+		context.lineTo(padding.left + plotWidth, y);
+	}
+	context.stroke();
+
+	context.fillStyle = labelColor;
+	context.font = '9px sans-serif';
+	context.textAlign = 'right';
+	context.textBaseline = 'top';
+	context.fillText(options.format(maximum), padding.left - 4, padding.top - 1);
+	context.textBaseline = 'bottom';
+	context.fillText(options.format(0), padding.left - 4, plotBottom + 1);
+	context.textBaseline = 'middle';
+	context.fillText(options.format(maximum / 2), padding.left - 4,
+		padding.top + plotHeight / 2);
+
+	context.textBaseline = 'bottom';
+	for (let elapsed = 0; elapsed <= HISTORY_WINDOW_MS; elapsed += TIME_LABEL_INTERVAL_MS) {
+		const x = padding.left + plotWidth * elapsed / HISTORY_WINDOW_MS;
+		const remaining = (HISTORY_WINDOW_MS - elapsed) / 1000;
+
+		context.textAlign = elapsed === 0 ? 'left' :
+			elapsed === HISTORY_WINDOW_MS ? 'right' : 'center';
+		context.fillText(remaining ? '-%ds'.format(remaining) : '0', x, height);
+	}
+
+	function point(sample) {
+		return {
+			x: padding.left + (sample.time - start) / HISTORY_WINDOW_MS * plotWidth,
+			y: plotBottom - sample[key] / maximum * plotHeight
+		};
+	}
+
+	function drawSegment() {
+		if (!segment.length)
+			return;
+
+		if (segment.length > 1) {
+			context.beginPath();
+			context.moveTo(segment[0].x, plotBottom);
+			segment.forEach(function(item) { context.lineTo(item.x, item.y); });
+			context.lineTo(segment[segment.length - 1].x, plotBottom);
+			context.closePath();
+			context.fillStyle = fillColor;
+			context.fill();
+
+			context.beginPath();
+			segment.forEach(function(item, index) {
+				if (index)
+					context.lineTo(item.x, item.y);
+				else
+					context.moveTo(item.x, item.y);
+			});
+			context.strokeStyle = lineColor;
+			context.lineWidth = 1.5;
+			context.lineJoin = 'round';
+			context.stroke();
+		} else {
+			context.beginPath();
+			context.arc(segment[0].x, segment[0].y, 2, 0, Math.PI * 2);
+			context.fillStyle = lineColor;
+			context.fill();
+		}
+
+		segment = [];
+	}
+
+	history.forEach(function(sample) {
+		if (sample[key] == null) {
+			drawSegment();
+			return;
+		}
+
+		segment.push(point(sample));
+	});
+	drawSegment();
+}
+
+function statusMetric(title, value, unit, chartClass) {
+	const canvas = E('canvas', {
+		'class': 'fancontrol-chart fancontrol-chart-%s'.format(chartClass),
+		'role': 'img',
+		'aria-label': title
+	});
 	const children = [
 		E('span', { 'class': 'fancontrol-metric-label' }, title),
 		E('div', { 'class': 'fancontrol-metric-reading' }, [
 			E('span', { 'class': 'fancontrol-metric-value' }, value),
 			unit ? E('span', { 'class': 'fancontrol-metric-unit' }, unit) : ''
-		])
+		]),
+		E('div', { 'class': 'fancontrol-chart-wrap' }, canvas)
 	];
 
-	if (level != null)
-		children.push(E('div', { 'class': 'fancontrol-level', 'aria-hidden': 'true' },
-			E('div', { 'style': 'width:%d%%'.format(level) })));
-
-	return E('div', { 'class': 'fancontrol-metric' }, children);
+	return {
+		node: E('div', { 'class': 'fancontrol-metric' }, children),
+		canvas: canvas
+	};
 }
 
 function statusDetail(title, value) {
@@ -58,7 +216,7 @@ function statusDetail(title, value) {
 	]);
 }
 
-function renderStatus(node, running, status) {
+function renderStatus(node, running, status, history) {
 	const temp = Number(status.temperature_mc);
 	const pwm = Number(status.pwm);
 	const rpm = Number(status.rpm);
@@ -69,6 +227,12 @@ function renderStatus(node, running, status) {
 	const fault = status.error
 		? E('span', { 'class': 'label warning' }, status.error)
 		: E('span', { 'class': 'fancontrol-ok' }, _('None'));
+	const temperatureMetric = statusMetric(_('Temperature'),
+		tempValid ? '%.1f'.format(temp / 1000) : '-', tempValid ? '°C' : '', 'temperature');
+	const pwmMetric = statusMetric(_('PWM output'), pwmValid ? String(pwm) : '-',
+		pwmValid ? '/ 255 · %d%%'.format(pwmPercent) : '', 'pwm');
+	const rpmMetric = statusMetric(_('Fan speed'), rpmValid ? String(rpm) : '-',
+		rpmValid ? 'RPM' : '', 'rpm');
 
 	dom.content(node, E('div', { 'class': 'fancontrol-status' }, [
 		E('div', { 'class': 'fancontrol-status-head' }, [
@@ -77,11 +241,9 @@ function renderStatus(node, running, status) {
 				running ? _('Running') : _('Stopped'))
 		]),
 		E('div', { 'class': 'fancontrol-metrics' }, [
-			statusMetric(_('Temperature'), tempValid ? '%.1f'.format(temp / 1000) : '-',
-				tempValid ? '°C' : ''),
-			statusMetric(_('PWM output'), pwmValid ? String(pwm) : '-',
-				pwmValid ? '/ 255 · %d%%'.format(pwmPercent) : '', pwmPercent),
-			statusMetric(_('Fan speed'), rpmValid ? String(rpm) : '-', rpmValid ? 'RPM' : '')
+			temperatureMetric.node,
+			pwmMetric.node,
+			rpmMetric.node
 		]),
 		E('div', { 'class': 'fancontrol-details' }, [
 			statusDetail(_('Temperature input'), status.thermal_file || '-'),
@@ -89,6 +251,22 @@ function renderStatus(node, running, status) {
 			statusDetail(_('Fault'), fault)
 		])
 	]));
+
+	drawChart(temperatureMetric.canvas, history, 'temperature', {
+		minimumMax: 100,
+		step: 10,
+		format: function(value) { return '%d°'.format(value); }
+	});
+	drawChart(pwmMetric.canvas, history, 'pwm', {
+		minimumMax: 100,
+		step: 100,
+		format: function(value) { return '%d%%'.format(value); }
+	});
+	drawChart(rpmMetric.canvas, history, 'rpm', {
+		minimumMax: 1000,
+		step: 500,
+		format: function(value) { return String(value); }
+	});
 }
 
 function validateAutoPath(sectionId, value) {
@@ -114,6 +292,7 @@ return view.extend({
 		s.anonymous = true;
 		s.addremove = false;
 		s.render = function() {
+			const history = [];
 			const node = E('div', { 'class': 'cbi-section fancontrol-runtime' }, [
 				E('link', {
 					'rel': 'stylesheet',
@@ -128,7 +307,11 @@ return view.extend({
 					L.resolveDefault(callServiceList('fancontrol'), {}),
 					L.resolveDefault(fs.read_direct('/var/run/fancontrol.status'), '')
 				]).then(function(result) {
-					renderStatus(statusNode, serviceRunning(result[0]), parseStatus(result[1]));
+					const running = serviceRunning(result[0]);
+					const status = parseStatus(result[1]);
+
+					appendHistory(history, running, status);
+					renderStatus(statusNode, running, status, history);
 				});
 			}, 5);
 

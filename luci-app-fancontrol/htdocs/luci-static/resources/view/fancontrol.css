@@ -70,24 +70,38 @@
 	text-overflow: ellipsis;
 }
 
-.fancontrol-level {
-	height: 4px;
-	margin-top: .35rem;
-	overflow: hidden;
-	background: rgba(127, 127, 127, .2);
-	border-radius: 3px;
+.fancontrol-chart-wrap {
+	height: 72px;
+	margin-top: .4rem;
 }
 
-.fancontrol-level > div {
+.fancontrol-chart {
+	display: block;
+	width: 100%;
 	height: 100%;
-	background: var(--primary-color-medium, #1976d2);
-	border-radius: 3px;
-	transition: width .25s ease-in;
+	color: var(--text-color-medium, #666);
+	background: rgba(127, 127, 127, .025);
+	border: 1px solid rgba(127, 127, 127, .24);
+}
+
+.fancontrol-chart-temperature {
+	--fancontrol-chart-line: #c74b45;
+	--fancontrol-chart-fill: rgba(199, 75, 69, .2);
+}
+
+.fancontrol-chart-pwm {
+	--fancontrol-chart-line: #1976d2;
+	--fancontrol-chart-fill: rgba(25, 118, 210, .2);
+}
+
+.fancontrol-chart-rpm {
+	--fancontrol-chart-line: #2f8a57;
+	--fancontrol-chart-fill: rgba(47, 138, 87, .2);
 }
 
 .fancontrol-details {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: .3rem 1rem;
 	padding: .42rem .7rem;
 	background: rgba(127, 127, 127, .04);
@@ -100,10 +114,6 @@
 	align-items: baseline;
 	gap: .45rem;
 	min-width: 0;
-}
-
-.fancontrol-detail:last-child {
-	grid-column: 1 / -1;
 }
 
 .fancontrol-detail-value {
@@ -133,9 +143,6 @@
 		grid-template-columns: 1fr;
 	}
 
-	.fancontrol-detail:last-child {
-		grid-column: auto;
-	}
 }
 
 @media (max-width: 420px) {
