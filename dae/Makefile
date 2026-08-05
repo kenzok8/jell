@@ -5,10 +5,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dae
-PKG_VERSION:=2026.08.03
+PKG_VERSION:=2026.08.05
 PKG_RELEASE:=1
 
-PKG_SOURCE:=dae-src-2026.08.03-354bb6787b4e.tar.gz
+PKG_SOURCE:=dae-src-2026.08.05-03ce5c39b38c.tar.gz
 PKG_SOURCE_URL:=https://github.com/kenzok8/openwrt-daede/releases/download/dae-src
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_HASH:=skip
