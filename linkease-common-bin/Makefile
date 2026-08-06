@@ -10,25 +10,28 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_LINKEASE:=$(ARCH)
 
 PKG_NAME:=linkease-common-bin
-PKG_SOURCE_DATE:=1.7.5
-PKG_RELEASE:=1
+PKG_VERSION:=linkease-runtime-v1.7.5
+PKG_SOURCE_DATE:=$(PKG_VERSION)
+PKG_RELEASE:=2
 
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
 ARCH_HEXCODE=8664
+PKG_HASH:=skip
 else ifeq ($(ARCH),aarch64)
 ARCH_HEXCODE=aa64
+PKG_HASH:=skip
 else ifeq ($(ARCH),arm)
 ARCH_HEXCODE=aa32
+PKG_HASH:=skip
 else ifeq ($(ARCH),mipsel)
 ARCH_HEXCODE=1b0c
 endif
 
-PKG_SOURCE_VERSION:=$(ARCH_HEXCODE)
-PKG_SOURCE:=linkease-binary-$(PKG_SOURCE_DATE).tar.gz
-PKG_SOURCE_URL:=https://dl.istoreos.com/binary/LinkEase/LinuxStorage/
-PKG_HASH:=skip
-PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-binary-$(PKG_SOURCE_DATE)
+PKG_SOURCE_VERSION:=f6d705f77dade7d57c1bb24334da4028279689b9
+PKG_SOURCE:=linkease-common-bin-$(PKG_SOURCE_DATE)-linux-$(PKG_ARCH_LINKEASE).tar.gz
+PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/linkease-runtime-v$(PKG_SOURCE_DATE)/
+PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-common-bin-$(PKG_SOURCE_DATE)-linux-$(PKG_ARCH_LINKEASE)
 
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
@@ -57,8 +60,8 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/heif-converter.$(PKG_ARCH_LINKEASE) $(1)/usr/sbin/heif-converter
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/linkease-media.$(PKG_ARCH_LINKEASE) $(1)/usr/sbin/linkease-media
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/heif-converter $(1)/usr/sbin/heif-converter
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/linkease-media $(1)/usr/sbin/linkease-media
 	$(INSTALL_BIN) ./files/linkease-config.sh $(1)/usr/sbin/linkease-config.sh
 endef
 

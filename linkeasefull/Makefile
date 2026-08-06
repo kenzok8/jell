@@ -7,8 +7,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=linkeasefull
-PKG_SOURCE_DATE:=3.0.4
-PKG_RELEASE:=2
+PKG_VERSION:=linkease-runtime-v1.7.5
+PKG_SOURCE_DATE:=$(PKG_VERSION)
+PKG_RELEASE:=3
 
 ifeq ($(ARCH),x86_64)
 LINKEASE_RUNTIME_ARCH:=amd64
