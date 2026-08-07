@@ -591,7 +591,7 @@ function add_rule(var)
 
 					local domain_list = s.domain_list or ""
 					for line in string.gmatch(domain_list, "[^\r\n]+") do
-						if line ~= "" and not line:find("#") and not line:find("regexp:") and not line:find("geosite:") and not line:find("ext:") then
+						if line ~= "" and not line:find("#") and not line:find("regexp:") and not line:find("geosite:") and not line:find("ext:") and not line:find("rule-set:") and not line:find("rs:") then
 							if line:find("domain:") or line:find("full:") then
 								line = string.match(line, ":([^:]+)$")
 							end
