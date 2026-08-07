@@ -36,6 +36,14 @@
 		sort(patch_files);
 		sort(patch_scripts);
 	}
+	// Both background tokens store a url('...') wrapper; preload wants the
+	// bare URL, and a data: URI (an inline LQIP-sized value) needs no preload.
+	function bg_preload_url(raw) {
+		const m = match(raw ?? '', /^url\(\s*['"]?([^'")\s]+)['"]?\s*\)$/);
+		const u = m ? m[1] : null;
+		return (u && index(u, 'data:') != 0) ? u : null;
+	}
+
 	let token_css_light = '', token_css_dark = '';
 	for (let key, val in tokens) {
 		if (index(key, 'light_') == 0)
@@ -167,18 +175,16 @@
 		<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
 		<meta name="color-scheme" content="light dark">
 		{% if (blank_page): %}
-		{% if (tokens.struct_login_bg): %}
-		{%
-			const _bgRaw = tokens.struct_login_bg;
-			const _bgMatch = match(_bgRaw, /^url\(\s*['"]?([^'")\s]+)['"]?\s*\)$/);
-			const _bgUrl = _bgMatch ? _bgMatch[1] : null;
-		-%}
-		{% if (_bgUrl && index(_bgUrl, 'data:') !== 0): %}
-		<link rel="preload" as="image" href="{{ entityencode(_bgUrl, true) }}">
-		{% endif %}
+		{% const _loginBgUrl = tokens.struct_login_bg ? bg_preload_url(tokens.struct_login_bg) : null; -%}
+		{% if (_loginBgUrl): %}
+		<link rel="preload" as="image" href="{{ entityencode(_loginBgUrl, true) }}">
 		{% endif %}
 		<link rel="stylesheet" href="{{ media }}/login.css">
 		{% else %}
+		{% const _mainBgUrl = tokens.struct_main_bg ? bg_preload_url(tokens.struct_main_bg) : null; -%}
+		{% if (_mainBgUrl): %}
+		<link rel="preload" as="image" href="{{ entityencode(_mainBgUrl, true) }}">
+		{% endif %}
 		<link rel="stylesheet" href="{{ media }}/main.css">
 		{% for (let patch in patch_files): %}
 		<link rel="stylesheet" href="{{ media }}/patches/{{ patch }}.css">
@@ -223,8 +229,23 @@
 		{% endif %}
 	</head>
 
-	<body class="lang_{{ dispatcher.lang }} {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(page, true) }}" data-nav-type="{{ nav_type }}">
+	<body class="lang_{{ dispatcher.lang }} {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(page, true) }}" data-nav-type="{{ nav_type }}"{% if (blank_page ? tokens.struct_login_bg : tokens.struct_main_bg): %} data-bg{% endif %}>
 		{% if (!blank_page): %}
+		{% if (tokens.struct_main_bg): %}
+		<div class="page-bg" aria-hidden="true"></div>
+		<script>
+			(function () {
+				var bg = document.querySelector('.page-bg');
+				if (!bg) return;
+				var val = getComputedStyle(bg).getPropertyValue('--page-bg').trim();
+				var m = val.match(/url\(["']?(.+?)["']?\)/);
+				if (!m) return;
+				var img = new Image();
+				img.onload = function () { bg.classList.add('full-loaded'); };
+				img.src = m[1];
+			}());
+		</script>
+		{% endif %}
 		<header>
 			<div class="header-content">
 				<div class="navigation-controls">

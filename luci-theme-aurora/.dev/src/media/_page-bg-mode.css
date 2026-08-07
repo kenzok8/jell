@@ -1,0 +1,47 @@
+/**
+ * Admin custom-background mode (scheme D) — active only when header.ut saw
+ * struct_main_bg and stamped <body data-bg>. Without the attribute none of
+ * these selectors match and the page paints exactly as it does today.
+ *
+ * Frost only the two small fixed chrome surfaces (the budget Apple's own
+ * iOS chrome runs on); cards stay blur-free alpha blends. Every color
+ * derives from --bg/--surface via color-mix, so custom palettes and dark
+ * mode follow automatically. The three tunables default in var() fallbacks,
+ * never on body — the config app's UCI overrides land on :root and a
+ * body-level declaration would mask them.
+ */
+body[data-bg] {
+  & .page-bg {
+    --page-bg: var(--main-bg);
+    --page-bg-lqip: var(--main-bg-lqip);
+  }
+
+  /* Two jobs on one element. relative: the fixed .page-bg paints above
+     non-positioned flow content (positioned elements come after in-flow
+     blocks in the painting order) — the login page has always dodged this
+     via .login-screen's relative; a negative z-index on the layer is NOT an
+     option, body's own opaque background would cover the image. canvas: a
+     --bg-derived translucent wash under ALL content is what makes ARBITRARY
+     plugin DOM readable — bare headings, descriptions and hand-rolled
+     widgets sit on this floor instead of the raw photo, with zero
+     per-plugin knowledge. 55% is a deliberate internal constant, not a
+     fourth tunable. */
+  & #maincontent {
+    @apply relative [background:color-mix(in_srgb,var(--bg)_55%,transparent)];
+  }
+
+  & header,
+  & .sidebar-panel-inner {
+    @apply [background:color-mix(in_srgb,var(--bg)_var(--main-bg-alpha,67%),transparent)] [backdrop-filter:blur(var(--main-bg-blur,20px))_saturate(150%)];
+  }
+
+  /* Scrim washes toward the theme bg to keep contrast; z-1 lifts it above
+     the ::after full-image layer (siblings otherwise paint after ::before). */
+  & .page-bg::before {
+    @apply pointer-events-none absolute inset-0 z-1 content-[''] [background:color-mix(in_srgb,var(--bg)_var(--main-bg-scrim,20%),transparent)];
+  }
+
+  & #maincontent .cbi-section {
+    @apply [background:color-mix(in_srgb,var(--surface)_var(--main-bg-alpha,67%),transparent)];
+  }
+}

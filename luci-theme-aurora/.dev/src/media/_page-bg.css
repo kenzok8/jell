@@ -1,0 +1,21 @@
+/**
+ * Generic full-page background layer — one pipeline for the login page and
+ * the admin UI. Pure mechanism: it consumes only the --page-bg pair; each
+ * entry maps its own tokens onto it (login.css → --login-bg pair,
+ * _page-bg-mode.css → --main-bg pair), so neither sheet drags the other's
+ * tokens along. Fixed sibling layer on its own GPU surface (iOS Safari has
+ * no background-attachment:fixed) so content paints never re-sample the
+ * image. LQIP paints first; the full image fades in on ::after once loaded
+ * (compositor-only opacity change).
+ */
+.page-bg {
+  @apply pointer-events-none fixed inset-0 transform-[translateZ(0)] bg-cover bg-center bg-no-repeat [background-image:var(--page-bg-lqip,var(--page-bg))];
+
+  &::after {
+    @apply pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 content-[''] [transition:opacity_0.5s_ease] [background-image:var(--page-bg)];
+  }
+
+  &.full-loaded::after {
+    @apply opacity-100;
+  }
+}

@@ -1,0 +1,101 @@
+/*
+  PATCH: admin-system-aurora (luci-app-aurora-config — Page Backgrounds)
+  Loaded on-demand by header.ut only when data-page matches this filename.
+  Native declarations keep this standalone patch free of Tailwind helper
+  output; theme values come through the :root custom properties.
+
+  Design A: the two background targets sit side by side as always-visible
+  picker cards (select in the card head, mini preview below); one shared
+  slider pane under the pair follows whichever card is active. No tab ever
+  hides the other target's state.
+*/
+
+[data-bg-target].cbi-value {
+  display: block;
+}
+
+[data-bg-target] > .cbi-value-title {
+  display: none;
+}
+
+/* 双卡并排;窄屏落回单列 */
+.bg-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  max-width: 760px;
+}
+
+@media (width < 680px) {
+  .bg-duo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bg-duo [data-bg-target].cbi-value {
+  margin: 0;
+  padding: 0.8rem;
+  border: 2px solid var(--hairline);
+  border-radius: calc(var(--radius-base) * 1.8);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.bg-duo [data-bg-target].on {
+  border-color: var(--brand);
+}
+
+.bg-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.6rem;
+}
+
+.bg-card-title {
+  font-weight: 650;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.bg-preview {
+  position: relative;
+  overflow: hidden;
+  height: 130px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-base);
+  background: var(--bg);
+}
+
+/* 共享滑杆面板:跟随选中的卡 */
+.bg-pane {
+  max-width: 620px;
+  margin-top: 1rem;
+}
+
+.bg-srow {
+  display: grid;
+  grid-template-columns: minmax(6.5em, max-content) 1fr 3.2em;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.bg-srow label {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.bg-srow input[type="range"] {
+  width: 100%;
+  accent-color: var(--brand);
+}
+
+.bg-srow output {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}

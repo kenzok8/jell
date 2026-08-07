@@ -14,6 +14,7 @@
 @import "./_icons.css";
 
 @import "./_base.css";
+@import "./_page-bg.css";
 @import "./_elements.css";
 @import "./_layout.css";
 
@@ -38,6 +39,8 @@
 @import "./components/_segmented.css";
 @import "./components/_tab.css";
 @import "./components/_palette.css";
+
+@import "./_page-bg-mode.css";
 
 @import "./_utilities.css";
 @import "./_reduced-motion.css";

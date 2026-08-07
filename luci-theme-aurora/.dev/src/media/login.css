@@ -13,6 +13,7 @@
 
 @import "./_reduced-motion.css";
 @import "./_base.css";
+@import "./_page-bg.css";
 
 @custom-variant dark (&:where([data-darkmode=true], [data-darkmode=true] *));
 
@@ -61,20 +62,33 @@
   @apply w-full max-w-md;
 }
 
-/* Fixed sibling layer (not form ancestor) on its own GPU surface so input
-   paints don't re-sample the bg image. DOM order keeps the form on top. */
-/* LQIP shown immediately; falls back to full image when no LQIP stored */
-.login-bg {
-  @apply pointer-events-none fixed inset-0 transform-[translateZ(0)] bg-cover bg-center bg-no-repeat [background-image:var(--login-bg-lqip,var(--login-bg))];
+/* Login maps its own token pair onto the shared page background layer. */
+.page-bg {
+  --page-bg: var(--login-bg);
+  --page-bg-lqip: var(--login-bg-lqip);
 }
 
-/* Full image fades in on top once loaded (compositor-only opacity change) */
-.login-bg::after {
-  @apply pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 content-[''] [transition:opacity_0.5s_ease] [background-image:var(--login-bg)];
+/* Login tunables — the var() fallbacks reproduce today's look exactly
+   (opaque card, no blur, no scrim), so an unset config changes nothing;
+   the config app's :root overrides pull them live. data-bg is stamped by
+   header.ut only when a login background is set. */
+body[data-bg] .page-bg::before {
+  @apply pointer-events-none absolute inset-0 z-1 content-[''] [background:color-mix(in_srgb,var(--bg)_var(--login-bg-scrim,0%),transparent)];
 }
 
-.login-bg.full-loaded::after {
-  @apply opacity-100;
+body[data-bg] .login-card {
+  @apply [background:color-mix(in_srgb,var(--surface)_var(--login-bg-alpha,100%),transparent)] [backdrop-filter:blur(var(--login-bg-blur,0px))_saturate(150%)];
+}
+
+/* login.css does not import _reduced-transparency.css (it would drag
+   admin-only tokens into the pruned sheet), so the login card carries its
+   own fallback: no blur, and the local --login-bg-alpha declaration
+   outranks the :root override to restore full opacity. */
+@media (prefers-reduced-transparency: reduce) {
+  body[data-bg] .login-card {
+    --login-bg-alpha: 100%;
+    @apply [backdrop-filter:none]!;
+  }
 }
 
 .login-card {

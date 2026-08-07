@@ -22,4 +22,12 @@
   :root {
     --mega-menu-bg: var(--surface-overlay);
   }
+
+  /* With a custom admin background the translucent surfaces minus their
+     blur would leave text floating on the image — restore full opacity
+     instead. Deliberately declared on body: unlike the theme's own
+     defaults (var() fallbacks), this MUST outrank the :root UCI override. */
+  body[data-bg] {
+    --main-bg-alpha: 100%;
+  }
 }
