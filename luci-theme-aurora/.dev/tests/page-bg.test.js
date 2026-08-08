@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 
@@ -126,10 +126,16 @@ test("login tunables default to today's exact look", () => {
   assert.match(ut, /blank_page && tokens\.struct_login_bg[^\n]*data-bg|\(blank_page \? tokens\.struct_login_bg : tokens\.struct_main_bg\)[^\n]*data-bg/);
 });
 
-// studio 背景组件的版式类走页面补丁通道(admin-system-aurora),不打内联
-test("the studio background component ships its layout as a page patch", () => {
-  const patch = read("../src/media/patches/admin-system-aurora.css");
-  for (const cls of [".bg-duo", ".bg-preview", ".bg-srow", ".bg-pane", "[data-bg-target]"]) {
-    assert.ok(patch.includes(cls), `${cls} missing from the patch`);
-  }
+// studio 背景组件的版式曾走页面补丁通道(admin-system-aurora),等于把
+// luci-app-aurora-config 自己的组件绑死在本主题上:装到 shadcn 下补丁不加载,
+// .bg-preview 丢掉 position/height/overflow,内部八层 absolute 逃出去糊满全页。
+// 版式已随 app 走(studio.js 的 ensureBgCardStyles 注入),这里只守住"别回来"。
+test("the studio background component's layout is the app's, not this theme's", () => {
+  const src = new URL("../src/media/patches/admin-system-aurora.css", import.meta.url);
+  const built = new URL(
+    "../../htdocs/luci-static/aurora/patches/admin-system-aurora.css",
+    import.meta.url
+  );
+  assert.ok(!existsSync(src), "the retired patch source must stay deleted");
+  assert.ok(!existsSync(built), "and so must its build artifact");
 });
