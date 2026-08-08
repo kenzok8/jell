@@ -72,30 +72,18 @@
 	const favicon_ico = tokens.favicon_ico || 'favicon.ico';
 	const pwa_apple_touch = tokens.pwa_apple_touch || 'apple-touch-icon.png';
 
-	let toolbar_items = [
-		{ url: '/cgi-bin/luci/admin/status/overview', icon: 'overview.svg', title: 'Overview' },
-		{ url: '/cgi-bin/luci/admin/system/system', icon: 'system.svg', title: 'System' },
-		{ url: '/cgi-bin/luci/admin/network/network', icon: 'network.svg', title: 'Network' }
-	];
+	let toolbar_items = [];
 
 	if (!blank_page && toolbar_enabled) {
-		let has_config = false;
-		const custom_items = [];
-
 		uci.foreach('aurora', 'toolbar_item', (section) => {
-			has_config = true;
-			if (section.enabled == '1') {
-				push(custom_items, {
+			if (section.enabled == '1' && section.icon) {
+				push(toolbar_items, {
 					title: section.title || '',
 					url: section.url || '',
-					icon: section.icon || ''
+					icon: section.icon
 				});
 			}
 		});
-
-		if (has_config) {
-			toolbar_items = custom_items;
-		}
 	}
 
 	http.prepare_content('text/html; charset=UTF-8');
@@ -355,7 +343,7 @@
 			</nav>
 		</div>
 
-		{% if (toolbar_enabled): %}
+		{% if (toolbar_enabled && length(toolbar_items)): %}
 		<div id="floating-toolbar" class="floating-toolbar">
     		<div class="toolbar-list" style="--fab-n:{{ length(toolbar_items) }}">
         		{% for (let i = 0; i < length(toolbar_items); i++): %}

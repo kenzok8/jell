@@ -68,7 +68,7 @@ const loginIconVer = themeTokens.icon_cache_version || '0';
 	</div>
 
 	<footer class="login-footer">
-		<p>© <a href="https://github.com/eamonxg/luci-theme-aurora/graphs/contributors" target="_blank" rel="noreferrer">Aurora Theme Contributors</a> · Powered by <a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">{{ version.distname }}</a> & <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }}</a></p>
+		<p>© <a href="https://github.com/eamonxg/luci-theme-aurora/graphs/contributors?all=1" target="_blank" rel="noreferrer">Aurora Theme Contributors</a> · Powered by <a href="{{ entityencode(version.disturl ?? '#', true) }}" target="_blank" rel="noreferrer">{{ version.distname }}</a> & <a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ version.luciname }}</a></p>
 	</footer>
 </main>
 
