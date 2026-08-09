@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_ghttpd:=$(ARCH)
 
 PKG_NAME:=ghttpd
-PKG_VERSION:=0.0.2
+PKG_VERSION:=0.0.3
 PKG_RELEASE:=1
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Carseason/openwrt-packages/releases/download/prebuilt/
@@ -47,6 +47,15 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 		/etc/uci-defaults/09-ghttpd && rm -f /etc/uci-defaults/09-ghttpd
 	fi
 fi
+endef
+
+define Package/$(PKG_NAME)/postrm
+#!/bin/sh
+for service in uhttpd nginx; do
+	[ -x "/etc/init.d/$$service" ] || continue
+	"/etc/init.d/$$service" enabled && "/etc/init.d/$$service" restart
+done
+exit 0
 endef
 
 define Build/Configure
