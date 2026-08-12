@@ -9,6 +9,11 @@
 var BANDIX_COLOR_UPLOAD = '#f97316';     // 橙色 - 上传/上行
 var BANDIX_COLOR_DOWNLOAD = '#06b6d4';   // 青色 - 下载/下行
 
+// 远程广告配置
+var BANDIX_AD_CONFIG_URL = 'https://raw.githubusercontent.com/timsaya/bandix-ads/main/ads.json';
+var BANDIX_AD_DEFAULT_REFRESH_INTERVAL = 3600;
+var BANDIX_AD_RETRY_INTERVAL = 900;
+
 // 悬浮框背景色定义
 var BANDIX_TOOLTIP_BG_OPENWRT2020_LIGHT = '#ffffff';    // OpenWrt 2020 浅色主题悬浮框背景
 var BANDIX_TOOLTIP_BG_OPENWRT2020_DARK = '#2a2a2a';     // OpenWrt 2020 深色主题悬浮框背景
@@ -556,12 +561,143 @@ return view.extend({
                 background-color: rgba(239, 68, 68, 0.2);
                 transform: translateY(-1px);
             }
+
+            .bandix-ad-row {
+                display: grid;
+                grid-template-columns: repeat(var(--bandix-ad-count, 6), minmax(112px, 1fr));
+                gap: 8px;
+                margin: 12px 0;
+                overflow-x: auto;
+                scrollbar-width: thin;
+            }
+
+            .bandix-ad-slot {
+                flex: 1 1 0;
+                min-width: 112px;
+                padding: 0;
+                aspect-ratio: 3 / 1;
+                border: 1px solid rgba(107, 114, 128, 0.35);
+                border-radius: 6px;
+                background: linear-gradient(135deg, rgba(225, 37, 27, 0.08), rgba(107, 114, 128, 0.04));
+                display: flex;
+                align-items: center;
+                color: inherit;
+                box-sizing: border-box;
+                overflow: hidden;
+                position: relative;
+                text-decoration: none;
+                transition: border-color 0.2s ease, transform 0.2s ease;
+            }
+
+            .bandix-ad-slot:not(.bandix-ad-disabled):hover,
+            .bandix-ad-slot:not(.bandix-ad-disabled):focus-visible {
+                border-color: rgba(225, 37, 27, 0.75);
+                box-shadow: 0 4px 12px rgba(225, 37, 27, 0.12);
+                transform: translateY(-2px);
+            }
+
+            .bandix-ad-disabled {
+                cursor: default;
+            }
+
+            .bandix-ad-label {
+                align-self: flex-start;
+                padding: 1px 5px;
+                border: none;
+                border-radius: 3px;
+                background: rgba(225, 37, 27, 0.88);
+                color: #ffffff;
+                font-size: 0.5625rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                line-height: 1.4;
+            }
+
+            .bandix-ad-copy {
+                align-self: stretch;
+                flex: 1 1 auto;
+                min-width: 0;
+                padding: 6px 4px 6px 8px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 3px;
+                box-sizing: border-box;
+            }
+
+            .bandix-ad-title {
+                width: 100%;
+                font-size: 0.6875rem;
+                font-weight: 600;
+                line-height: 1.25;
+                text-align: left;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .bandix-ad-media {
+                align-self: stretch;
+                flex: 0 0 33.333333%;
+                min-width: 0;
+                aspect-ratio: 1 / 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255, 255, 255, 0.92);
+            }
+
+            .bandix-ad-image {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            .bandix-ad-placeholder {
+                flex: 0 0 33.333333%;
+                aspect-ratio: 1 / 1;
+                align-self: stretch;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 3px;
+                background: rgba(255, 255, 255, 0.92);
+                color: #e1251b;
+                font-size: 0.625rem;
+                font-weight: 700;
+                line-height: 1.2;
+                text-align: center;
+                box-sizing: border-box;
+            }
             
             
             /* 移动端隐藏版本信息和更新徽章 */
             @media (max-width: 768px) {
                 .bandix-version-wrapper {
                     display: none;
+                }
+
+                .bandix-ad-row {
+                    display: flex;
+                    gap: 6px;
+                    padding-bottom: 4px;
+                }
+
+                .bandix-ad-slot {
+                    flex: 0 0 180px;
+                    min-width: 180px;
+                    height: 60px;
+                }
+
+                .bandix-ad-copy {
+                    padding-left: 7px;
+                }
+
+                .bandix-ad-title {
+                    font-size: 0.625rem;
                 }
             }
             
@@ -2820,6 +2956,25 @@ return view.extend({
                 ])
             ]),
 
+            // 广告数据从公开仓库动态加载
+            E('div', {
+                'class': 'bandix-ad-row',
+                'id': 'bandix-ad-row',
+                'aria-label': _('Advertising spaces')
+            }, [1, 2, 3, 4, 5, 6].map(function (index) {
+                return E('div', {
+                    'class': 'bandix-ad-slot bandix-ad-disabled',
+                    'data-ad-slot': String(index),
+                    'aria-disabled': 'true'
+                }, [
+                    E('div', { 'class': 'bandix-ad-copy' }, [
+                        E('span', { 'class': 'bandix-ad-label' }, _('AD')),
+                        E('span', { 'class': 'bandix-ad-title' }, _('Advertising space') + ' ' + index)
+                    ]),
+                    E('span', { 'class': 'bandix-ad-placeholder' }, _('Advertising space'))
+                ]);
+            })),
+
             // 警告提示（包含在线设备数）
             E('div', {
                 'class': 'bandix-alert' + (getThemeType() === 'wide' ? ' wide-theme' : '')
@@ -2975,7 +3130,8 @@ return view.extend({
                                     ])
                                 ]),
                                 E('div', { 'class': 'usage-ranking-query-presets' }, [
-                                    E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'today' }, _('Today')),
+                                    E('button', { 'class': 'cbi-button cbi-button-positive', 'data-preset': 'today' }, _('Today')),
+                                    E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'yesterday' }, _('Yesterday')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'thisweek' }, _('This Week')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'lastweek' }, _('Last Week')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'thismonth' }, _('This Month')),
@@ -2983,7 +3139,7 @@ return view.extend({
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '7days' }, _('Last 7 Days')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '30days' }, _('Last 30 Days')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '90days' }, _('Last 90 Days')),
-                                    E('button', { 'class': 'cbi-button cbi-button-positive', 'data-preset': '1year' }, _('Last Year'))
+                                    E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '1year' }, _('Last Year'))
                                 ]),
                                 E('div', { 'class': 'usage-ranking-timeline', 'id': 'usage-ranking-timeline' }, [
                                     E('div', { 'class': 'usage-ranking-timeline-range', 'id': 'usage-ranking-timeline-range' })
@@ -3047,7 +3203,8 @@ return view.extend({
                                     ])
                                 ]),
                                 E('div', { 'class': 'usage-ranking-query-presets' }, [
-                                    E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'today' }, _('Today')),
+                                    E('button', { 'class': 'cbi-button cbi-button-positive', 'data-preset': 'today' }, _('Today')),
+                                    E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'yesterday' }, _('Yesterday')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'thisweek' }, _('This Week')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'lastweek' }, _('Last Week')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': 'thismonth' }, _('This Month')),
@@ -3055,7 +3212,7 @@ return view.extend({
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '7days' }, _('Last 7 Days')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '30days' }, _('Last 30 Days')),
                                     E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '90days' }, _('Last 90 Days')),
-                                    E('button', { 'class': 'cbi-button cbi-button-positive', 'data-preset': '1year' }, _('Last Year'))
+                                    E('button', { 'class': 'cbi-button cbi-button-neutral', 'data-preset': '1year' }, _('Last Year'))
                                 ]),
                                 E('div', { 'class': 'usage-ranking-timeline', 'id': 'traffic-increments-timeline' }, [
                                     E('div', { 'class': 'usage-ranking-timeline-range', 'id': 'traffic-increments-timeline-range' })
@@ -7504,7 +7661,6 @@ return view.extend({
         updateDeviceData();
         refreshWhitelistStatus();
         fetchAllScheduleRules();
-        updateTrafficStatistics();
 
         // 初始化时间范围查询功能
         setTimeout(function () {
@@ -7631,6 +7787,12 @@ return view.extend({
                             startDate = new Date(today);
                             endDate = new Date(today);
                             break;
+                        case 'yesterday':
+                            var yesterdayDate = new Date(today);
+                            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+                            startDate = new Date(yesterdayDate);
+                            endDate = new Date(yesterdayDate);
+                            break;
                         case 'thisweek':
                             // 本周：周一到今天
                             var dayOfWeek = today.getDay(); // 0=周日, 1=周一, ..., 6=周六
@@ -7724,18 +7886,16 @@ return view.extend({
             // 重置按钮
             if (resetBtn) {
                 resetBtn.addEventListener('click', function () {
-                    var oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-                    setDateRange(oneYearAgo, today, '1year');
+                    setDateRange(today, today, 'today');
                     queryData();
                 });
             }
 
-            // 初始化：默认选择最近一年
-            var oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-            setDateRange(oneYearAgo, today, '1year');
+            // 初始化：默认选择今天
+            setDateRange(today, today, 'today');
 
             // 设置初始时间范围并自动加载数据（结束时间为当天的 23:59:59）
-            var startMs = oneYearAgo.getTime();
+            var startMs = todayMs;
             var endToday = new Date(today);
             endToday.setHours(23, 59, 59, 999);
             var endMs = endToday.getTime();
@@ -7896,6 +8056,12 @@ return view.extend({
                             startDate = new Date(today);
                             endDate = new Date(today);
                             break;
+                        case 'yesterday':
+                            var yesterdayDate = new Date(today);
+                            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+                            startDate = new Date(yesterdayDate);
+                            endDate = new Date(yesterdayDate);
+                            break;
                         case 'thisweek':
                             var dayOfWeek = today.getDay();
                             var mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -7952,15 +8118,13 @@ return view.extend({
             // 重置按钮
             if (resetBtn) {
                 resetBtn.addEventListener('click', function () {
-                    var oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-                    setDateRange(oneYearAgo, today, '1year');
+                    setDateRange(today, today, 'today');
                     queryData();
                 });
             }
 
-            // 初始化：默认选择最近一年
-            var oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-            setDateRange(oneYearAgo, today, '1year');
+            // 初始化：默认选择今天
+            setDateRange(today, today, 'today');
 
             startDateInput.addEventListener('change', function () {
                 updateTimeline(this.value, endDateInput.value);
@@ -7971,7 +8135,7 @@ return view.extend({
             });
 
             // 设置初始时间范围并自动加载数据（不显示 loading）
-            var startMs = oneYearAgo.getTime();
+            var startMs = todayMs;
             var endToday = new Date(today);
             endToday.setHours(23, 59, 59, 999);
             var endMs = endToday.getTime();
@@ -7982,6 +8146,205 @@ return view.extend({
             // 自动加载数据，但不设置 loading 状态
             updateTrafficIncrements(startMs, endMs, null, null);
         }, 700);
+
+        // 异步加载远程广告（不阻塞主流程）
+        (function () {
+            var refreshTimer = null;
+
+            function resolveHttpsUrl(value, baseUrl) {
+                if (typeof value !== 'string' || !value) return null;
+
+                try {
+                    var resolved = new URL(value, baseUrl);
+                    return resolved.protocol === 'https:' ? resolved.href : null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function scheduleRefresh(seconds) {
+                var interval = Number(seconds);
+                if (!Number.isFinite(interval)) interval = BANDIX_AD_DEFAULT_REFRESH_INTERVAL;
+                interval = Math.max(300, Math.min(86400, interval));
+
+                if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+                refreshTimer = window.setTimeout(loadAdvertisements, interval * 1000);
+            }
+
+            function normalizeAdvertisementLocale(value) {
+                if (typeof value !== 'string') return '';
+
+                var locale = value.trim().replace(/_/g, '-').toLowerCase();
+                if (!locale || locale === 'auto' || locale === 'und') return '';
+
+                if (locale === 'zh' || locale === 'zh-cn' || locale === 'zh-sg' || locale === 'zh-hans') {
+                    return 'zh-hans';
+                }
+                if (locale === 'zh-tw' || locale === 'zh-hk' || locale === 'zh-mo' || locale === 'zh-hant') {
+                    return 'zh-hant';
+                }
+
+                return locale;
+            }
+
+            function getAdvertisementLocale() {
+                var candidates = [];
+                if (L.env) candidates.push(L.env.lang || L.env.language || '');
+                var htmlLanguage = document.documentElement.getAttribute('lang');
+                if (htmlLanguage) candidates.push(htmlLanguage);
+                if (window.navigator) candidates.push(window.navigator.language || '');
+
+                for (var i = 0; i < candidates.length; i++) {
+                    var locale = normalizeAdvertisementLocale(candidates[i]);
+                    if (locale) return locale;
+                }
+
+                return '';
+            }
+
+            function selectLocalizedAdvertisements(config) {
+                // 兼容旧版单语言配置，方便两个仓库分开部署
+                if (config.version === 1 && Array.isArray(config.ads)) {
+                    return { locale: 'legacy', ads: config.ads };
+                }
+
+                if (config.version !== 2 || !config.locales || typeof config.locales !== 'object') {
+                    throw new Error('Invalid advertising configuration');
+                }
+
+                var currentLocale = getAdvertisementLocale();
+                var defaultLocale = normalizeAdvertisementLocale(config.default_locale);
+                var localeCandidates = [];
+
+                if (currentLocale) {
+                    localeCandidates.push(currentLocale);
+                    var separatorIndex = currentLocale.indexOf('-');
+                    if (separatorIndex > 0) localeCandidates.push(currentLocale.substring(0, separatorIndex));
+                }
+                if (defaultLocale) localeCandidates.push(defaultLocale);
+
+                for (var i = 0; i < localeCandidates.length; i++) {
+                    var candidate = localeCandidates[i];
+                    if (Object.prototype.hasOwnProperty.call(config.locales, candidate) &&
+                        Array.isArray(config.locales[candidate])) {
+                        return { locale: candidate, ads: config.locales[candidate] };
+                    }
+                }
+
+                throw new Error('No advertising locale is available');
+            }
+
+            function renderAdvertisements(config) {
+                var adRow = document.getElementById('bandix-ad-row');
+                if (!adRow || !config) {
+                    throw new Error('Invalid advertising configuration');
+                }
+
+                var selection = selectLocalizedAdvertisements(config);
+                adRow.setAttribute('data-ad-locale', selection.locale);
+
+                var ads = selection.ads.slice(0, 6).map(function (ad, index) {
+                    if (!ad || typeof ad !== 'object') ad = {};
+
+                    var href = resolveHttpsUrl(ad.href, BANDIX_AD_CONFIG_URL);
+                    var image = resolveHttpsUrl(ad.image, BANDIX_AD_CONFIG_URL);
+                    var title = typeof ad.title === 'string' ? ad.title.trim() : _('Advertising space') + ' ' + (index + 1);
+                    if (!title) title = _('Advertising space') + ' ' + (index + 1);
+                    var alt = typeof ad.alt === 'string' ? ad.alt.trim() : title;
+
+                    return {
+                        enabled: ad.enabled === true && href !== null,
+                        href: href,
+                        image: image,
+                        title: title,
+                        alt: alt || title
+                    };
+                });
+
+                while (ads.length < 6) {
+                    ads.push({
+                        enabled: false,
+                        href: null,
+                        image: null,
+                        title: _('Advertising space') + ' ' + (ads.length + 1),
+                        alt: _('Advertising space')
+                    });
+                }
+
+                while (adRow.firstChild) adRow.removeChild(adRow.firstChild);
+
+                ads.forEach(function (ad, index) {
+                    var tagName = ad.enabled ? 'a' : 'div';
+                    var attributes = {
+                        'class': 'bandix-ad-slot' + (ad.enabled ? '' : ' bandix-ad-disabled'),
+                        'data-ad-slot': String(index + 1),
+                        'title': ad.title
+                    };
+
+                    if (ad.enabled) {
+                        attributes.href = ad.href;
+                        attributes.target = '_blank';
+                        attributes.rel = 'noopener noreferrer sponsored';
+                    } else {
+                        attributes['aria-disabled'] = 'true';
+                    }
+
+                    var content = [E('div', { 'class': 'bandix-ad-copy' }, [
+                        E('span', { 'class': 'bandix-ad-label' }, _('AD')),
+                        E('span', { 'class': 'bandix-ad-title' }, ad.title)
+                    ])];
+                    if (ad.enabled && ad.image) {
+                        content.push(E('div', { 'class': 'bandix-ad-media' }, [
+                            E('img', {
+                                'class': 'bandix-ad-image',
+                                'src': ad.image,
+                                'alt': ad.alt,
+                                'loading': 'lazy',
+                                'referrerpolicy': 'no-referrer'
+                            })
+                        ]));
+                    } else {
+                        content.push(E('span', { 'class': 'bandix-ad-placeholder' }, _('Advertising space')));
+                    }
+
+                    adRow.appendChild(E(tagName, attributes, content));
+                });
+
+                adRow.style.setProperty('--bandix-ad-count', '6');
+            }
+
+            function loadAdvertisements() {
+                var adRow = document.getElementById('bandix-ad-row');
+                if (!adRow) return;
+
+                if (typeof window.fetch !== 'function') {
+                    console.debug('Failed to load advertisements: Fetch API is unavailable');
+                    scheduleRefresh(BANDIX_AD_RETRY_INTERVAL);
+                    return;
+                }
+
+                var separator = BANDIX_AD_CONFIG_URL.indexOf('?') === -1 ? '?' : '&';
+                var configUrl = BANDIX_AD_CONFIG_URL + separator + '_=' + Date.now();
+
+                window.fetch(configUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'omit',
+                    cache: 'no-store'
+                }).then(function (response) {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                }).then(function (config) {
+                    renderAdvertisements(config);
+                    scheduleRefresh(config.refresh_interval);
+                }).catch(function (err) {
+                    console.debug('Failed to load advertisements:', err);
+                    scheduleRefresh(BANDIX_AD_RETRY_INTERVAL);
+                });
+            }
+
+            window.setTimeout(loadAdvertisements, 200);
+        })();
 
         // 异步加载版本信息（不阻塞主流程）
         (function () {
