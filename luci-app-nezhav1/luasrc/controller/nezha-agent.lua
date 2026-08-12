@@ -1,11 +1,14 @@
 module("luci.controller.nezha-agent", package.seeall)
 
 function index()
-	if not nixio.fs.access("/etc/config/nezha-agent") then
-		return
-	end
-	entry({"admin", "services", "nezha-agent"}, cbi("nezha-agent"), _("Nezha Agent"), 300).dependent = true
-	entry({"admin","services","nezha-agent","status"},call("act_status")).leaf=true
+        if not nixio.fs.access("/etc/config/nezha-agent") then
+                return
+        end
+        local page = entry({"admin", "services", "nezha-agent"}, cbi("nezha-agent"), nil, 300)
+        page.dependent = true
+        page.hidden = true
+        page.index = false  -- 不在菜单索引中显示
+        entry({"admin","services","nezha-agent","status"},call("act_status")).leaf=true
 end
 
 function trim(s)
