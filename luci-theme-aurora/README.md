@@ -23,6 +23,7 @@
 ## Features
 
 - **Modern**: Modern, content-first UI design with a clean layout and elegant animations.
+- **Fast, silky navigation**: On supported browsers, switching pages only updates the content instead of reloading the whole page, so moving between pages feels silky and seamless — and loads much faster, about 67% quicker per page switch at the median in our measurements (see the [router doc](.dev/docs/router.md#why-it-pays-measured)). This no-reload page-switching took cues from [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap).
 - **Mobile-friendly**: Optimized for mobile interactions and display, supporting both smartphones and tablets.
 - **Theme Switcher**: Built-in theme switcher with seamless switching between Auto (system), Light, and Dark modes.
 - **Command Palette (⌘K)**: Search and jump to any page from the header.
@@ -53,6 +54,7 @@
   - **Chrome/Edge 111+** _(released March 2023)_
   - **Safari 16.4+** _(released March 2023)_
   - **Firefox 128+** _(released July 2024)_
+  - _Optional enhancement, not a requirement:_ same-document navigation (no full page reload between view pages) uses the [Navigation API](https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API) where available — Chrome/Edge 105+, Safari 26.2+, Firefox 147+. Browsers without it keep classic full-page navigation automatically, with no loss of function.
 
 ## Installation
 
@@ -152,6 +154,7 @@ Thanks goes to these wonderful people:
 [Apache 2.0](LICENSE). Thanks to:
 
 - [luci-theme-bootstrap](https://github.com/openwrt/luci/tree/master/themes/luci-theme-bootstrap)
+- [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap) — a LuCI theme with its own client-side router. Aurora's same-document navigation borrows some of its ideas and implements them on the Navigation API instead — see the [router doc](.dev/docs/router.md)
 - [Vite](https://vitejs.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Tabler Icons](https://tabler.io/icons) — the interface icon set

@@ -551,14 +551,46 @@ body[data-nav-type="sidebar"] {
   }
 }
 
+/* Router progress (router.md): a hairline across the top that only
+   appears once a navigation outlives its silent 150 ms, creeps towards
+   the right while the view renders, and completes on commit. */
+#aurora-nav-progress {
+  @apply from-progress-start to-progress-end pointer-events-none fixed inset-x-0 top-0 z-80 h-0.5 origin-left scale-x-0 bg-linear-to-r opacity-0;
+
+  &[data-state="active"] {
+    @apply scale-x-90 opacity-100 transition-[scale,opacity] duration-[8s] ease-out;
+  }
+
+  &[data-state="done"] {
+    @apply scale-x-100 opacity-0 transition-[scale,opacity] duration-300 ease-out;
+  }
+}
+
+/* Router announcement (router.md): the new page's title for screen
+   readers after a same-document swap, which fires no load event. */
+#aurora-nav-status {
+  @apply sr-only;
+}
+
 #maincontent {
   /* Centred shells (top-bar navigation) clamp here and gutter the remainder.
      The sidebar shell overrides this — it caps the shell instead, see
      body[data-nav-type="sidebar"] above. */
   @apply mx-auto min-h-[calc(100vh-4rem)] w-23/24 max-w-(--content-width-centered) px-4 max-md:w-full max-md:px-3;
 
+  /* Router staging (router.md): the incoming region keeps its full
+     width for layout-measuring renders but takes no space and no paint. */
+  .view-staging {
+    @apply invisible h-0 overflow-hidden;
+  }
+
   #view {
     @apply mx-0 w-full bg-transparent p-0 shadow-none empty:hidden md:p-0;
+
+    /* Outgoing page while the router renders the next one (router.md). */
+    &.view-leaving {
+      @apply cursor-progress opacity-60 transition-opacity duration-150;
+    }
 
     .cbi-title-section {
       @apply mb-6 leading-relaxed max-md:mx-2 max-md:mb-3;

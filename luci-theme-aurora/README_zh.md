@@ -23,6 +23,7 @@
 ## 特性
 
 - **现代化**：内容优先的现代化 UI 设计，布局整洁，动画优雅。
+- **快且丝滑的导航体验**：在支持的浏览器上，切换页面时只更新内容、不整页刷新，切换起来丝滑流畅，加载速度大幅提升——实测页面切换中位数快约 67%（详见[路由文档](.dev/docs/router.md#why-it-pays-measured)）。这套无刷新切换的思路参考了 [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap)。
 - **移动端友好**：针对移动端的交互和显示进行了优化，适配手机和平板设备。
 - **主题切换**：内置主题切换器，支持在自动（跟随系统）、浅色和深色模式之间无缝切换。
 - **命令面板（⌘K）**：在顶栏一键搜索并跳转到任意页面。
@@ -53,6 +54,7 @@
   - **Chrome/Edge 111+** _(2023 年 3 月发布)_
   - **Safari 16.4+** _(2023 年 3 月发布)_
   - **Firefox 128+** _(2024 年 7 月发布)_
+  - _可选增强，非必需：_ 页面间的同文档导航（点菜单不整页刷新）在支持的浏览器上使用 [Navigation API](https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API)——Chrome/Edge 105+、Safari 26.2+、Firefox 147+；不支持的浏览器自动保持传统整页跳转，功能不受影响。
 
 ## 安装
 
@@ -152,6 +154,7 @@ Aurora 使用 **Vite** 与现代前端工具链构建，并尝试将 AI 融入�
 [Apache 2.0](LICENSE)。致谢：
 
 - [luci-theme-bootstrap](https://github.com/openwrt/luci/tree/master/themes/luci-theme-bootstrap)
+- [luci-theme-footstrap](https://github.com/VizzleTF/luci-theme-footstrap) — 一个自带客户端路由的 LuCI 主题。Aurora 的同文档导航借鉴了它的部分思路，并改用 Navigation API 实现——见[路由文档](.dev/docs/router.md)
 - [Vite](https://vitejs.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Tabler Icons](https://tabler.io/icons) — 界面图标集

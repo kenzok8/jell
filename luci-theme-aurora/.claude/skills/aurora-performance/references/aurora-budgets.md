@@ -11,11 +11,12 @@ address, so they stay local).
 
 | Metric | Budget | Track | Source |
 |---|---|---|---|
-| main.css (identity/raw) | ≤ 190 KB | size | production build, 2026-07 (183,820 B) |
+| main.css (identity/raw) | ≤ 193 KB | size | production build, 2026-08 (192,201 B; +~2 KB custom-background mode, +~0.5 KB router progress bar / live region) |
 | login.css (identity/raw) | ≤ 12 KB | size | production build, 2026-07 (10,935 B, token-pruned) |
-| menu-aurora.js (identity/raw) | ≤ 20 KB | size | production build, 2026-07 (19,100 B) |
+| menu-aurora.js (identity/raw) | ≤ 21.5 KB | size | production build, 2026-08 (20,851 B; +1.3 KB for the router's `syncRoute`/`closeSurfaces` hooks) |
+| router-aurora.js (identity/raw, Navigation-API browsers only) | ≤ 15 KB | size | production build, 2026-08 (14,568 B: template shells fetched, per-render listener teardown, timeout-as-failure, expiry gate, readonly folding, node css, wildcard actions, progress bar, visibility gate, contract check) |
 | Default logo (identity/raw) | ≤ 16 KB | size | production build, 2026-07 (15,057 B) |
-| Core admin cold theme assets (identity/raw) | ≤ 250 KB | size | main CSS + menu JS + default font + logo, 2026-07 (241,557 B) |
+| Core admin cold theme assets (identity/raw) | ≤ 267 KB | size | main CSS + menu JS + router JS + default font + logo, 2026-08 (≈266.3 KB; the router is a one-time cost that removes per-click dispatcher work) |
 | Login cold theme assets, excluding configured background (identity/raw) | ≤ 55 KB | size | login CSS + default font + logo, 2026-07 (49,572 B) |
 | Blocking requests before first paint | ≤ 4 | count | current waterfall |
 | Repeat-visit asset requests | ≈ 0 | count | target state; package-built CSS/JS URLs are versioned, but long-lived cache headers still need live verification |
@@ -41,6 +42,19 @@ Budget revisions require a new baseline entry under `../baselines/`.
 - Package-root `.DS_Store` metadata removed and covered by a regression test.
 - login.css pruned to its reachable custom properties at build time (the
   shared token sheet is admin-sized; the login page consumes a fraction).
+
+- Client-side router (`router-aurora.js`, `.dev/docs/router.md`,
+  2026-08-16): view/alias/firstchild/overview navigations become
+  same-document swaps on Navigation-API browsers, MPA elsewhere.
+  Measured on RE-SS-01 over plain HTTP (`bench-router.mjs`, RUNS=10): click →
+  view painted **241–544 ms → 49–251 ms warm, median −67 %**; walk of
+  51/62 linked pages (mega-menu/sidebar), 42–43 served, **0 divergences** vs
+  full loads incl. DOM shape; 65-navigation soak flat after the first lap
+  once departed regions are cleared through `dom.content()` (the data-idref
+  registry otherwise pins every departed subtree: 26k → 72k nodes before)
+  and per-render window/document listeners are torn down; back traversal
+  through alias/firstchild entries same-document; poison gate → full load →
+  router again. Report in `../baselines/router-re-ss-01.md`.
 
 ### Pending
 | Item | Principle | Estimated gain |
