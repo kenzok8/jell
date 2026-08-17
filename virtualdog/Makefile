@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=virtualdog
 PKG_VERSION:=0.0.4
-PKG_RELEASE:=158
+PKG_RELEASE:=159
 # Point this at the released binary tarball when you publish builds.
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Carseason/openwrt-packages/releases/download/prebuilt/

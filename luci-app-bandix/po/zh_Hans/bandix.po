@@ -1094,15 +1094,6 @@ msgstr "有更新"
 msgid "Update available, click to go to settings"
 msgstr "有更新，点击前往设置"
 
-msgid "Advertising spaces"
-msgstr "广告位"
-
-msgid "Advertising space"
-msgstr "广告位"
-
-msgid "AD"
-msgstr "广告"
-
 msgid "Traffic Statistics"
 msgstr "流量统计"
 
