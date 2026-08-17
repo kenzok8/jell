@@ -160,6 +160,16 @@ A `navigate` event is intercepted only when **all** hold:
 
 - `event.canIntercept` (same-origin, not cross-document-only), not
   `hashChange`, no `downloadRequest`, no `formData`, `navigationType !== 'reload'`;
+- the destination is **not the document's own URL** (fragment aside). A
+  same-URL navigation arrives as `navigationType: 'replace'`, not
+  `'reload'`, yet it is a reload by another name: luci-base's
+  `ui.changes.apply/revert` end in `window.location =
+  window.location.href.split('#')[0]` (and the expiry modal's button in the
+  same) precisely so the server re-renders the shell — a theme switched
+  under System → Language and Style, a new language, a new hostname, a
+  changed menu tree — and intercepting it left the swap showing the old
+  shell until F5. A click on the current page's own link is the same reload
+  it is in the MPA;
 - the destination path (minus `L.env.scriptname`) resolves in the menu tree
   to a **serviceable node** (below);
 - the document is not **poisoned** (below) and its session is not known to
@@ -392,12 +402,22 @@ handler in order:
 8. **Focus and announcement.** `#maincontent` (`tabindex=-1`) with
    `preventScroll`; the new `document.title` is written into
    `#aurora-nav-status` (`role=status`, `aria-live=polite`), since a
-   same-document swap fires no load a screen reader would announce.
-9. **Progress.** A navigation that outlives 150 ms shows `#aurora-nav-progress`,
-   a hairline at the top that creeps right while the view renders and
-   completes on commit (`data-state` active → done); shorter ones stay
-   silent, overlapping ones share the bar. Reduced motion drops its
-   transitions, not the bar.
+   same-document swap fires no load a screen reader would announce. The
+   landmark carries `outline-none`: iOS WebKit (Safari and Chrome for iOS
+   alike) paints its focus ring for programmatic focus, and the ring's top
+   edge just under the sticky header was reported as "a progress bar that
+   never goes away" — it was never the bar.
+9. **Progress.** A navigation that outlives 150 ms gets `#aurora-nav-progress`
+   inserted — Turbo Drive's bar, in shape: a hairline at the top whose
+   `width` is driven inline and **trickles** in ever-smaller steps
+   (`+ (100 - w) / 30` every 300 ms) until commit, so a slow render keeps
+   visibly moving instead of looking stuck; on commit it fills to 100 %,
+   fades (`data-state="done"`) and is **removed from the DOM**. Shorter
+   navigations stay silent, overlapping ones share the bar. The browser's
+   own progress bar is no help here: it only shows for document loads,
+   which is exactly what a same-document swap is not — hence GitHub,
+   YouTube, Turbo/HEY and every nprogress user draw their own. Reduced
+   motion drops the transitions, not the bar.
 10. Any exception → `console.error` (a silent fallback makes every router
    regression look like "the page is just slow") → `location.href =
    destination` — a hard full load, never a stuck page.
@@ -491,8 +511,8 @@ already 0-byte cache hits.
 - Unit (`.dev/tests/router.test.js`): resolver against a fixture tree
   (alias chain, nested firstchild, weights, ineligible, unsatisfied,
   wildcard args, cycle); URL → segments; patch prefix matching; pragma scan
-  on a minified head; readonly folding; expiry signals; node css of the
-  resolved leaf; the contract check.
+  on a minified head; readonly folding; expiry signals; the same-URL reload
+  rule; node css of the resolved leaf; the contract check.
 - Device (`.claude/skills/aurora-performance/scripts/bench-router.mjs`, CDP):
   1. full walk of every clickable node in each nav mode, each compared
      against a real full load of the same URL — `data-page`,
@@ -507,8 +527,9 @@ already 0-byte cache hits.
      own sheets (found on the walk) instead of an injected one — reached
      same-document and landed on directly (its modules insert before the
      router boots), leaving is a full load either way;
-  5c. hygiene: progress bar and live region present, live region carries the
-     title, a hidden tab stops polling and a visible one resumes it;
+  5c. hygiene: no progress bar left in the DOM after a swap, live region
+     present and carrying the title, a hidden tab stops polling and a
+     visible one resumes it;
   6. nodecss: a page whose menu.d node declares `css` — link enabled on
      arrival, disabled after leaving, re-enabled without a duplicate on
      return (skipped when no installed node declares one);

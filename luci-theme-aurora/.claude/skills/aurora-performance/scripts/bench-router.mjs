@@ -27,8 +27,9 @@
  *          on the walk): reached same-document, the navigation away is a
  *          full load (poison gate), the one after is same-document again.
  *          Skipped when the walk found no such page.
- *   hygiene progress bar and live region exist; a hidden tab stops polling
- *          and a visible one resumes it; the live region carries the title.
+ *   hygiene no progress bar remains after a swap (it is inserted for the
+ *          navigation and removed after its fade), the live region carries
+ *          the title, a hidden tab stops polling and a visible one resumes it.
  *   nodecss a page whose menu.d node declares `css`: its link is enabled on
  *          arrival, disabled (not removed) after leaving, re-enabled without
  *          a duplicate on return. Skipped when no such node is installed.
@@ -495,7 +496,7 @@ if (!ONLY || ONLY === "hygiene") {
   const home = await spaNavigate(p.sessionId, START);
   await waitViewSettled(p.sessionId); await sleep(1500);
   const r = JSON.parse(await evaljs(p.sessionId, `(async () => {
-    const bar = !!document.getElementById('aurora-nav-progress');
+    const barGone = !document.getElementById('aurora-nav-progress');
     const status = document.getElementById('aurora-nav-status')?.textContent;
     const wasActive = L.Poll.active();
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
@@ -504,10 +505,10 @@ if (!ONLY || ONLY === "hygiene") {
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
     document.dispatchEvent(new Event('visibilitychange'));
     const shownActive = L.Poll.active();
-    return JSON.stringify({ bar, status, title: document.title, wasActive, hiddenActive, shownActive });
+    return JSON.stringify({ barGone, status, title: document.title, wasActive, hiddenActive, shownActive });
   })()`, true));
   out.hygiene = { ...r, sameDoc: nav.sameDoc && home.sameDoc,
-    ok: nav.sameDoc && home.sameDoc && r.bar && r.status === r.title && r.wasActive && !r.hiddenActive && r.shownActive };
+    ok: nav.sameDoc && home.sameDoc && r.barGone && r.status === r.title && r.wasActive && !r.hiddenActive && r.shownActive };
 }
 
 /* ---------- menu.d node css ---------- */

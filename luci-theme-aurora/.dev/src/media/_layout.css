@@ -551,18 +551,16 @@ body[data-nav-type="sidebar"] {
   }
 }
 
-/* Router progress (router.md): a hairline across the top that only
-   appears once a navigation outlives its silent 150 ms, creeps towards
-   the right while the view renders, and completes on commit. */
+/* Router progress (router.md) — Turbo Drive's bar: inserted by the router
+   once a navigation outlives its silent 150 ms, width driven inline and
+   trickling until commit (so a slow render keeps visibly moving), then
+   filled, faded and removed from the DOM. Only width and opacity move.
+   Reduced motion drops the transitions, not the bar. */
 #aurora-nav-progress {
-  @apply from-progress-start to-progress-end pointer-events-none fixed inset-x-0 top-0 z-80 h-0.5 origin-left scale-x-0 bg-linear-to-r opacity-0;
-
-  &[data-state="active"] {
-    @apply scale-x-90 opacity-100 transition-[scale,opacity] duration-[8s] ease-out;
-  }
+  @apply from-progress-start to-progress-end pointer-events-none fixed top-0 left-0 z-80 h-0.5 w-0 bg-linear-to-r transition-[width] duration-300 ease-out;
 
   &[data-state="done"] {
-    @apply scale-x-100 opacity-0 transition-[scale,opacity] duration-300 ease-out;
+    @apply opacity-0 [transition:width_.3s_ease-out,opacity_.15s_ease-in_.15s];
   }
 }
 
@@ -576,7 +574,11 @@ body[data-nav-type="sidebar"] {
   /* Centred shells (top-bar navigation) clamp here and gutter the remainder.
      The sidebar shell overrides this — it caps the shell instead, see
      body[data-nav-type="sidebar"] above. */
-  @apply mx-auto min-h-[calc(100vh-4rem)] w-23/24 max-w-(--content-width-centered) px-4 max-md:w-full max-md:px-3;
+  @apply mx-auto min-h-[calc(100vh-4rem)] w-23/24 max-w-(--content-width-centered) px-4 outline-none max-md:w-full max-md:px-3;
+  /* outline-none: the router focuses this landmark (tabindex=-1) after a
+     same-document swap for assistive tech. iOS WebKit paints its focus ring
+     for programmatic focus, and the ring's top edge just under the sticky
+     header read as a stuck progress bar; a landmark needs no visible ring. */
 
   /* Router staging (router.md): the incoming region keeps its full
      width for layout-measuring renders but takes no space and no paint. */
