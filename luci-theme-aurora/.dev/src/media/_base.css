@@ -4,7 +4,11 @@
  * fixed pseudo made the same var(--bg) look mismatched).
  */
 html {
-  @apply bg-bg min-h-dvh font-sans;
+  @apply bg-bg min-h-dvh font-sans scheme-light;
+
+  &[data-darkmode="true"] {
+    @apply scheme-dark;
+  }
 
   body {
     @apply bg-bg min-h-dvh;

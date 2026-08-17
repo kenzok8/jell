@@ -1,0 +1,72 @@
+name: Build package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "OpenWrt release: 'latest' (latest stable), 'snapshot' (master), or a release like '24.10.8' / 'v24.10.8'"
+        required: false
+        default: "latest"
+      arch:
+        description: "OpenWrt package architecture, e.g. aarch64_cortex-a53 (mediatek/filogic), x86_64"
+        required: false
+        default: "aarch64_cortex-a53"
+
+jobs:
+  build:
+    name: Build (${{ inputs.arch }}-${{ steps.version.outputs.release }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Determine OpenWrt SDK release
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED: ${{ inputs.version }}
+        run: |
+          set -eu
+          case "${REQUESTED}" in
+            latest)
+              # Resolve the latest stable OpenWrt release, skipping RCs / pre-releases.
+              tag="$(gh api \
+                -H "Accept: application/vnd.github+json" \
+                /repos/openwrt/openwrt/releases \
+                --paginate \
+                -q '[.[] | select(.prerelease == false and (.tag_name | test("-rc|-RC")) | not) | .tag_name] | .[0]')"
+              if [ -z "${tag}" ]; then
+                echo "Could not determine latest OpenWrt release" >&2
+                exit 1
+              fi
+              echo "Resolved latest OpenWrt release: ${tag}"
+              release="${tag#v}"
+              ;;
+            snapshot|master)
+              release="master"
+              ;;
+            *)
+              release="${REQUESTED#v}"
+              ;;
+          esac
+          echo "release=${release}" >> "${GITHUB_OUTPUT}"
+
+      # Checkout the repository into a subdirectory named after the package.
+      # openwrt/gh-action-sdk mounts the workspace as a feed (src-link -> /feed)
+      # and the OpenWrt feed scanner skips a Makefile at the feed root, so the
+      # package must live one directory level deep to be discovered.
+      - name: Checkout package
+        uses: actions/checkout@v4
+        with:
+          path: luci-app-dnsmasq-ipset
+
+      - name: Build package
+        uses: openwrt/gh-action-sdk@v4
+        env:
+          ARCH: ${{ inputs.arch }}-${{ steps.version.outputs.release }}
+          PACKAGES: luci-app-dnsmasq-ipset
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: luci-app-dnsmasq-ipset-${{ steps.version.outputs.release }}-${{ inputs.arch }}
+          path: bin/**/luci-app-dnsmasq-ipset*.ipk
+          if-no-files-found: error
