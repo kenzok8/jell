@@ -61,8 +61,8 @@ HOST=http://<device> COOKIE_NAME=sysauth_http COOKIE_VALUE=<from jar> \
   node ../.claude/skills/aurora-performance/scripts/bench-router.mjs <label>
 ```
 
-`ONLY=walk|timing|soak|back|poison` runs one scenario (`RUNS` defaults to and
-is floored at 10). `walk` visits every page
+`ONLY=walk|timing|soak|back|poison|sheets|hygiene|nodecss|expiry` runs one
+scenario (`RUNS` defaults to and is floored at 10). `walk` visits every page
 the navigation model links to (menu + each page's tab strip) through the
 router, then full-loads the same URL and diffs title, `data-page`,
 `dispatchpath`, tab strip, active nav mark, footer presence and console
@@ -75,12 +75,57 @@ deliberately interleaves alias/firstchild URLs (read from the menu tree)
 with view URLs and asserts each step stayed same-document with the right
 URL and `data-page`. `poison` injects a foreign `<style>` into `<head>` and
 asserts the next navigation is a full load and the one after is
-same-document again.
+same-document again. `sheets` repeats that against the view pages the walk
+found actually inserting their own sheets. `hygiene` checks that no progress
+bar is left in the DOM, that the live region carries the title, and that a
+hidden tab stops polling. `nodecss` checks a `menu.d` node's `css` link is
+enabled on arrival, disabled after leaving and re-enabled without a
+duplicate. `expiry` destroys the session and must land on the login form —
+it always runs last.
 
 Trap: a navigation the router does not take is a real document load and
 tears down the CDP evaluation ("Inspected target navigated"); the harness
 treats that as a fallback, waits for the new document, and re-arms its
 same-document marker there.
+
+## `bench-fullload.mjs` — where one navigation's time goes (CDP)
+
+`bench-router.mjs` answers *how much faster*; this answers *what the full
+load was spending the time on*, which is what the router doc's stage table
+and the architecture diagram quote.
+
+```bash
+HOST=http://<device> COOKIE_NAME=sysauth_http COOKIE_VALUE=<sid> RUNS=10 \
+  node ../.claude/skills/aurora-performance/scripts/bench-fullload.mjs <label>
+```
+
+Per page it reports medians, read off the document's own Navigation/Resource
+Timing rather than the harness clock: `ttfb` and `htmlEnd` (dispatcher run
+#1), `trStart`/`trEnd` (the `admin/translations/<lang>` script — dispatcher
+run #2, parser-blocking), `dcl`, `viewReady`, and the `ubus` window (the
+view's own data calls). It then measures the **same page over the router in
+the same loop**, so both halves see the same device state and are
+subtractable — run-to-run spread on an embedded device is large enough that
+two separately-run harnesses will not agree.
+
+Set `PAGES` to override the sample; the default is the same 8 pages
+`bench-router.mjs timing` uses.
+
+## `bench-dispatch.sh` — what one CGI dispatch costs (on the device)
+
+```bash
+ssh root@<device> 'sh -s' < ../.claude/skills/aurora-performance/scripts/bench-dispatch.sh
+```
+
+Runs on the router, so no network is in the number. Two halves: loopback
+`curl` medians (page HTML, both i18n catalogs, `/admin/menu`, one static
+file) and the per-process cost of each phase every dispatch pays, timed over
+50 `ucode` processes (`fork + ucode VM`, `import luci.dispatcher`, menu tree
+stat + index-cache parse, `session.get` + `session.access`).
+
+The `admin/translations/en` row is the control: a 13-byte response that still
+pays a full dispatch. Compare it against the static-file row to separate
+dispatch cost from payload cost. It makes and destroys its own session.
 
 ## Measurement discipline
 
