@@ -2189,9 +2189,7 @@ local execute = function()
 				else
 					fail_list[#fail_list + 1] = value
 				end
-				if url_is_local then
-					value.http_code = 0
-				else
+				if not url_is_local then
 					luci.sys.call("rm -f " .. tmp_file)
 				end
 			end
@@ -2199,7 +2197,7 @@ local execute = function()
 
 		if #fail_list > 0 then
 			for index, value in ipairs(fail_list) do
-				log(string.format('【%s】订阅失败，可能是订阅地址无效，或是网络问题，请诊断！[%s]', value.remark, tostring(value.http_code)))
+				log(string.format('【%s】订阅失败，可能是订阅地址无效，或是网络问题，请诊断！[%s]', (value.remark or ""), tostring(value.http_code or 0)))
 			end
 		end
 		update_node(0)

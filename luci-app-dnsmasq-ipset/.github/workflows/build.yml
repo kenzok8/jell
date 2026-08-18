@@ -52,78 +52,27 @@ jobs:
           esac
           echo "release=${release}" >> "${GITHUB_OUTPUT}"
 
+      # Checkout the repository into a subdirectory named after the package.
+      # openwrt/gh-action-sdk mounts the workspace as a feed (src-link -> /feed)
+      # and the OpenWrt feed scanner skips a Makefile at the feed root, so the
+      # package must live one directory level deep to be discovered.
       - name: Checkout package
         uses: actions/checkout@v4
         with:
           path: luci-app-dnsmasq-ipset
 
-      - name: Build package with OpenWrt SDK
+      - name: Build package
+        uses: openwrt/gh-action-sdk@v11
         env:
           ARCH: ${{ inputs.arch }}-${{ steps.version.outputs.release }}
-          PKG_NAME: luci-app-dnsmasq-ipset
-        run: |
-          set -eu
-          mkdir -p artifacts
-          # The SDK container runs as the non-root `buildbot` user (uid 1000),
-          # so the bind-mounted artifacts dir (owned by the runner, uid 1001,
-          # mode 755) is not writable by default — the in-container `cp ...
-          # /artifacts/` would fail with "Permission denied". Make it writable
-          # by any uid so the built package can be copied out.
-          chmod 777 artifacts
-
-          # The OpenWrt SDK containers are x86_64-native (the SDK is a Linux
-          # x86_64 toolchain that cross-compiles target packages), so this runs
-          # natively on the amd64 GitHub runner without QEMU.
-
-          docker run --rm \
-            -v "$GITHUB_WORKSPACE:/feed" \
-            -v "$GITHUB_WORKSPACE/artifacts:/artifacts" \
-            -e PKG_NAME \
-            "ghcr.io/openwrt/sdk:${ARCH}" \
-            /bin/bash -lc '
-              set -eu
-              cd /builder
-
-              # Snapshot containers ship a setup.sh that extracts the SDK;
-              # release containers already have it, so this is effectively a
-              # no-op there.
-              [ ! -f setup.sh ] || bash setup.sh
-
-              # Mount our repo as a feed. The OpenWrt feed scanner skips a
-              # Makefile at the feed root (find -mindepth 1), so the package
-              # is checked out one directory level deep (luci-app-dnsmasq-ipset/).
-              echo "src-link packages_ci /feed/" >> feeds.conf
-
-              ./scripts/feeds update -a
-
-              # Install our package into package/feeds/ BEFORE defconfig so it
-              # is part of Config.in and can actually be selected — defconfig
-              # only reflects packages known at the time it runs.
-              ./scripts/feeds install -p packages_ci -f "$PKG_NAME"
-
-              # Explicitly select the package, then expand dependencies.
-              echo "CONFIG_PACKAGE_${PKG_NAME}=y" >> .config
-              make defconfig
-
-              echo "::group::.config (selected package)"
-              grep -E "CONFIG_PACKAGE_(luci-app-dnsmasq-ipset|dnsmasq-full)=" .config || true
-              echo "::endgroup::"
-
-              make "package/$PKG_NAME/compile" V=s -j"$(nproc)"
-
-              if [ -d bin/ ]; then
-                find bin/ -name "${PKG_NAME}*.ipk" -exec cp -v -t /artifacts/ {} +
-                find bin/ -name "${PKG_NAME}*.apk" -exec cp -v -t /artifacts/ {} +
-              fi
-            '
-
-      - name: List artifacts
-        if: always()
-        run: ls -la artifacts/ 2>/dev/null || true
+          PACKAGES: luci-app-dnsmasq-ipset
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: luci-app-dnsmasq-ipset-${{ steps.version.outputs.release }}-${{ inputs.arch }}
-          path: artifacts/luci-app-dnsmasq-ipset*.*pk
-          if-no-files-found: warn
+          # Collect both package formats: OpenWrt 25.12+ defaults to
+          # CONFIG_USE_APK=y and produces .apk, while older releases (e.g.
+          # 24.10.x) still produce .ipk.
+          path: bin/**/luci-app-dnsmasq-ipset*.*pk
+          if-no-files-found: error
