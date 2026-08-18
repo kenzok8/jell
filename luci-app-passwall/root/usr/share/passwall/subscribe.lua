@@ -145,7 +145,13 @@ do
 		CONFIG[#CONFIG + 1] = {
 			log = true,
 			remarks = name .. "节点",
-			currentNode = node_id and uci_get(node_id) or nil,
+			currentNode = node_id and (function()
+				local section = uci_get(node_id) or {}
+				if section[".type"] == "socks" then
+					return { Socks = node_id }
+				end
+				return section
+			end)() or nil,
 			set = function(o, server)
 				uci_set(szType, option, server)
 				o.newNodeId = server
@@ -258,7 +264,13 @@ do
 					log = true,
 					id = t[".name"],
 					remarks = "访问控制列表[" .. i .. "]",
-					currentNode = node_id and uci_get(node_id) or nil,
+					currentNode = node_id and (function()
+						local section = uci_get(node_id) or {}
+						if section[".type"] == "socks" then
+							return { Socks = node_id }
+						end
+						return section
+					end)() or nil,
 					set = function(o, server)
 						uci_set(t[".name"], option, server)
 						o.newNodeId = server
@@ -1776,7 +1788,7 @@ end
 local function select_node(nodes, config, parentConfig)
 	if config.currentNode then
 		local server
-		-- 负载均衡、urltest中的 Socks [端口] 节点保持原id
+		-- 全局节点、acl节点、负载均衡、urltest中的 (Socks [端口]) 节点保持原id
 		if config.currentNode["Socks"] then
 			server = config.currentNode.Socks
 		end
