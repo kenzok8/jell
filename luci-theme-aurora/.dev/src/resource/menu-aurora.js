@@ -2,6 +2,8 @@
 "require baseclass";
 "require ui";
 
+const PALETTE_RECENTS_KEY = "aurora.paletteRecents";
+
 return baseclass.extend({
   __init__() {
     ui.menu.load().then((tree) => this.render(tree));
@@ -599,8 +601,12 @@ return baseclass.extend({
     if (!toggle || this.paletteIndex) return;
 
     this.paletteIndex = [];
+    let logout = null;
     items.forEach((item) => {
-      if (item.isLogout) return;
+      if (item.isLogout) {
+        logout = item;
+        return;
+      }
       if (!item.hasChildren) {
         this.paletteIndex.push({
           title: item.title,
@@ -644,6 +650,18 @@ return baseclass.extend({
         mode,
       }),
     );
+
+    // Logout is a command, not a destination: it rides ">" only (last, after
+    // the modes), stays out of the plain browse list, and is never recorded
+    // as a recent — but a typed query still reaches it.
+    if (logout)
+      this.paletteIndex.push({
+        title: logout.title,
+        name: logout.name,
+        group: null,
+        href: logout.href,
+        isLogout: true,
+      });
 
     // Only msgids that already exist in a shipped catalog (luci-base, or the
     // config app's as above) are used — the theme intentionally ships no
@@ -785,8 +803,15 @@ return baseclass.extend({
     // the clicked anchor is replaced by the re-render, which would strand
     // focus on <body> with the dialog still open.
     results.addEventListener("click", (e) => {
-      const mode = e.target?.closest?.(".cmdk-row")?.dataset.mode;
-      if (!mode) return;
+      const row = e.target?.closest?.(".cmdk-row");
+      if (!row) return;
+      const mode = row.dataset.mode;
+      if (!mode) {
+        // Navigation rows: remember the pick, then let the click navigate
+        // (same-document router or full load) untouched.
+        if (row.dataset.name) this.recordPaletteRecent(row.dataset.name);
+        return;
+      }
       e.preventDefault();
       setTheme(mode);
       syncSwitchers();
@@ -876,6 +901,46 @@ return baseclass.extend({
 
   // Empty query matches everything at score 0 (the browse list); title hits
   // outrank name/path and group hits and are the only ones highlighted.
+  // localStorage can be unavailable (privacy modes) or hold anything after
+  // a downgrade — both read as "no history". No size cap: dedupe bounds the
+  // list by the pages actually visited, i.e. the menu's own scale.
+  readPaletteRecents() {
+    try {
+      const list = JSON.parse(localStorage.getItem(PALETTE_RECENTS_KEY));
+      return Array.isArray(list)
+        ? list.filter((name) => typeof name === "string")
+        : [];
+    } catch {
+      return [];
+    }
+  },
+
+  recordPaletteRecent(name) {
+    try {
+      localStorage.setItem(
+        PALETTE_RECENTS_KEY,
+        JSON.stringify([
+          name,
+          ...this.readPaletteRecents().filter((kept) => kept !== name),
+        ]),
+      );
+    } catch {
+      // History is decorative; a sealed or full store just means none.
+    }
+  },
+
+  // Pure LRU: every visited page floats, so long use converges on a fully
+  // most-recently-used browse order (Sublime's model). Names that vanished
+  // from the menu (ACL change, package removed) drop out here; command rows
+  // never float, whatever the store says.
+  paletteBrowseRecents() {
+    return this.readPaletteRecents().filter((name) =>
+      this.paletteIndex.some(
+        (page) => page.name === name && !page.mode && !page.isLogout,
+      ),
+    );
+  },
+
   matchPaletteEntry(q, page) {
     if (!q) return { score: 0, ranges: null };
 
@@ -888,23 +953,37 @@ return baseclass.extend({
     return rest && { score: rest.score, ranges: null };
   },
 
-  renderPaletteResults(value) {
+  collectPaletteMatches(value) {
     let q = value.trim().toLowerCase();
     // A leading ">" scopes the list to the command rows (the prototype's
     // command-only mode); "＞" covers CJK IMEs emitting the full-width form.
     const cmdOnly = q[0] === ">" || q[0] === "＞";
     if (cmdOnly) q = q.slice(1).trim();
-    const theme = localStorage.getItem("aurora.theme") || "device";
+    // Browsing floats the recently opened pages; recency rides the same
+    // stable sort as fuzzy rank, so ties keep menu order and typed queries
+    // (which leave recents empty) stay pure fuzzy.
+    const recents = q || cmdOnly ? [] : this.paletteBrowseRecents();
     const matches = [];
 
     for (const page of this.paletteIndex) {
-      if (cmdOnly && !page.mode) continue;
+      if (cmdOnly && !page.mode && !page.isLogout) continue;
+      if (page.isLogout && !cmdOnly && !q) continue;
       const m = this.matchPaletteEntry(q, page);
-      if (m) matches.push({ page, score: m.score, ranges: m.ranges });
+      if (!m) continue;
+      const at = recents.indexOf(page.name);
+      matches.push({
+        page,
+        score: at < 0 ? m.score : recents.length - at,
+        ranges: m.ranges,
+      });
     }
-    // sort() is spec-stable: equal scores keep menu order (and the browse
-    // list stays in menu order by skipping the sort entirely).
-    if (q) matches.sort((a, b) => b.score - a.score);
+    if (q || recents.length) matches.sort((a, b) => b.score - a.score);
+    return matches;
+  },
+
+  renderPaletteResults(value) {
+    const matches = this.collectPaletteMatches(value);
+    const theme = localStorage.getItem("aurora.theme") || "device";
 
     this.paletteInput.removeAttribute("aria-activedescendant");
     this.paletteList.replaceChildren();
@@ -926,6 +1005,7 @@ return baseclass.extend({
         href: page.href || "#",
       };
       if (page.mode) attributes["data-mode"] = page.mode;
+      else if (!page.isLogout) attributes["data-name"] = page.name;
       if (current) attributes["aria-current"] = "true";
 
       this.paletteList.appendChild(

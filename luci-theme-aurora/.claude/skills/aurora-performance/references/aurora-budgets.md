@@ -13,10 +13,10 @@ address, so they stay local).
 |---|---|---|---|
 | main.css (identity/raw) | ≤ 193 KB | size | production build, 2026-08 (191,899 B; +~2 KB custom-background mode, +~0.5 KB router progress bar / live region; the bar is now Turbo-shaped — width/opacity only, inserted per navigation) |
 | login.css (identity/raw) | ≤ 12 KB | size | production build, 2026-07 (10,935 B, token-pruned) |
-| menu-aurora.js (identity/raw) | ≤ 21.5 KB | size | production build, 2026-08 (20,851 B; +1.3 KB for the router's `syncRoute`/`closeSurfaces` hooks) |
+| menu-aurora.js (identity/raw) | ≤ 22 KB | size | production build, 2026-08 (21,809 B; +0.8 KB palette recents: record on pick, pure-LRU browse order, storage validation; +0.2 KB ">" logout command) |
 | router-aurora.js (identity/raw, Navigation-API browsers only) | ≤ 15 KB | size | production build, 2026-08 (14,844 B: template shells fetched, per-render listener teardown, timeout-as-failure, expiry gate, readonly folding, node css, wildcard actions, trickling progress bar, same-URL reload rule, visibility gate, contract check) |
 | Default logo (identity/raw) | ≤ 16 KB | size | production build, 2026-07 (15,057 B) |
-| Core admin cold theme assets (identity/raw) | ≤ 267 KB | size | main CSS + menu JS + router JS + default font + logo, 2026-08 (≈266.3 KB; the router is a one-time cost that removes per-click dispatcher work) |
+| Core admin cold theme assets (identity/raw) | ≤ 267.5 KB | size | main CSS + menu JS + router JS + default font + logo, 2026-08 (≈267.2 KB; the router is a one-time cost that removes per-click dispatcher work; +1.0 KB palette recents and logout command) |
 | Login cold theme assets, excluding configured background (identity/raw) | ≤ 55 KB | size | login CSS + default font + logo, 2026-07 (49,572 B) |
 | Blocking requests before first paint | ≤ 4 | count | current waterfall |
 | Repeat-visit asset requests | ≈ 0 | count | target state; package-built CSS/JS URLs are versioned, but long-lived cache headers still need live verification |
