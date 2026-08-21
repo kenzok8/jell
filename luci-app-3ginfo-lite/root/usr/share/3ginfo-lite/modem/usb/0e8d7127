@@ -93,7 +93,7 @@ if [ -n "$T1" ]; then
     esac
   fi
   if [ -n "$CSQ" ]; then
-    RSSI=$((2 * $CSQ -113))
+    RSSI=$((2 * $CSQ - 113))
   fi
 fi
 
@@ -152,7 +152,6 @@ elif [ -n "$T_5G_PBAND" ]; then
   PCI="$T_5G_PCI"
   EARFCN="$T_5G_EARFCN"
 fi
-
 
 IFS="
 "
@@ -258,13 +257,21 @@ if [ -z "$T_MODE" ]; then
   fi
 fi
 
-# Modem data forcing
-if [ "$CSQ" = "0" ]; then
-$CSQ="1"
-$CSQ_PER="10"
+# Fixed Modem Data & Signal percentage calculation based on RSRP
+if [ "$CSQ" = "0" ] || [ -z "$CSQ" ]; then
+  CSQ="1"
 fi
 
-# Modem
+if [ -n "$RSRP" ] && [ "$RSRP" != "-" ]; then
+  MAX_RSRP=-44
+  MIN_RSRP=-140
+  TMP_RSRP=$RSRP
+  if [ "$TMP_RSRP" -gt "$MAX_RSRP" ]; then TMP_RSRP=$MAX_RSRP; fi
+  if [ "$TMP_RSRP" -lt "$MIN_RSRP" ]; then TMP_RSRP=$MIN_RSRP; fi
+  CSQ_PER=$(( (TMP_RSRP - MIN_RSRP) * 100 / (MAX_RSRP - MIN_RSRP) ))
+fi
+
+# Modem Info
 OA=$(sms_tool -d $DEVICE at "AT+CGMM?")
 MODELA=$(echo "$OA" | awk -F [:,] '/\+CGMM/{print $2}' | xargs)
 OB=$(sms_tool -d $DEVICE at "AT+CGMI?")
@@ -295,8 +302,6 @@ if [ -n "$TM" ]; then
 fi
 
 # Protocol
-# DRIVER=QMI_WWAN & DRIVER=CDC_MBIM & DRIVER=CDC_ETHER
-
 TTY=$(basename $DEVICE)
 devpath=$(readlink -f /sys/class/tty/$TTY/device)
 BASE=$(readlink -f ${devpath%/*/*})
@@ -310,7 +315,7 @@ case $NETDRV in
   "cdc_mbim")
     PROTO="mbim";;
   "cdc_ether")
-     PROTO="ecm";;
+    PROTO="ecm";;
    "rndis_host")
-     PROTO="ncm";;
+    PROTO="ncm";;
 esac
