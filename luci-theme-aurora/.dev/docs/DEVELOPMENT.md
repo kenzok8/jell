@@ -1,3 +1,5 @@
+<h4 align="right"><strong>English</strong> | <a href="DEVELOPMENT_zh.md">简体中文</a></h4>
+
 # Development Guide
 
 This guide covers the complete development workflow for the Aurora theme, from environment setup to building production packages.

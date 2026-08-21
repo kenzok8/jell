@@ -1,3 +1,5 @@
+<h4 align="right"><strong>English</strong> | <a href="router_zh.md">简体中文</a></h4>
+
 # The client-side router
 
 How the theme turns a menu click into an in-document view swap instead of a
