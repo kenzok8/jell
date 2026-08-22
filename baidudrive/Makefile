@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_BAIDUDRIVE:=$(ARCH)
 
 PKG_NAME:=baidudrive
-PKG_VERSION:=linkeasefull-runtime-v3.0.11
+PKG_VERSION:=kaiplus-runtime-v1.0.5
 PKG_RELEASE:=1
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/baidudrive-runtime-v$(PKG_VERSION)/
@@ -41,6 +41,16 @@ define Package/$(PKG_NAME)/conffiles
 /etc/config/baidudrive
 endef
 
+define Package/$(PKG_NAME)/prerm
+#!/bin/sh
+if [ "$${IPKG_INSTROOT}" = "" ]; then
+	if [ "$$(readlink /usr/share/linkeasefull/desktop-apps.d/10-baidudrive-plugin.json 2>/dev/null)" = "/usr/share/baidudrive/baidudrive-plugin.json" ]; then
+		rm -f /usr/share/linkeasefull/desktop-apps.d/10-baidudrive-plugin.json
+	fi
+fi
+exit 0
+endef
+
 define Build/Configure
 endef
 
@@ -48,8 +58,11 @@ define Build/Compile
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/sbin $(1)/usr/libexec/baidudrive $(1)/opt/baidunas-sdk $(1)/opt/baidunas-glibc $(1)/etc/init.d $(1)/etc/uci-defaults $(1)/etc/config
+	$(INSTALL_DIR) $(1)/usr/sbin $(1)/usr/libexec/baidudrive $(1)/usr/share/baidudrive/www $(1)/usr/share/linkeasefull/desktop-apps.d $(1)/opt/baidunas-sdk $(1)/opt/baidunas-glibc $(1)/etc/init.d $(1)/etc/uci-defaults $(1)/etc/config
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/baidudrive.$(PKG_ARCH_BAIDUDRIVE) $(1)/usr/sbin/baidudrive
+	$(CP) $(PKG_BUILD_DIR)/web/dist/. $(1)/usr/share/baidudrive/www/
+	$(INSTALL_DATA) ./files/baidudrive-plugin.json $(1)/usr/share/baidudrive/baidudrive-plugin.json
+	ln -sf /usr/share/baidudrive/baidudrive-plugin.json $(1)/usr/share/linkeasefull/desktop-apps.d/10-baidudrive-plugin.json
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/nas_sdk/$(PKG_ARCH_BAIDUDRIVE)/baiduNas $(1)/opt/baidunas-sdk/baiduNas
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/nas_sdk/$(PKG_ARCH_BAIDUDRIVE)/P2PClient.bin $(1)/opt/baidunas-sdk/P2PClient.bin
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/nas_sdk/$(PKG_ARCH_BAIDUDRIVE)/libkernel.so $(1)/opt/baidunas-sdk/libkernel.so
