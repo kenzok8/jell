@@ -48,7 +48,7 @@ h6 {
 }
 
 hr {
-  @apply border-0;
+  @apply border-hairline my-6 border-t max-md:my-4;
 }
 
 strong {

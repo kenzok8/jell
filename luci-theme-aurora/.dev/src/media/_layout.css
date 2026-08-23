@@ -609,18 +609,6 @@ body[data-nav-type="sidebar"] {
       }
     }
 
-    #content_syslog {
-      @apply m-2 max-md:m-1;
-
-      & > div {
-        @apply flex flex-wrap items-baseline gap-x-2 max-md:gap-x-1.5;
-        & > .cbi-input-select,
-        & > .cbi-input-text {
-          @apply max-md:min-w-45;
-        }
-      }
-    }
-
     & div[style] {
       & > svg {
         @apply dark:!bg-surface;
@@ -652,17 +640,6 @@ body[data-nav-type="sidebar"] {
     .zone-dest {
       @apply flex flex-1 flex-col gap-1.5;
     }
-  }
-
-  #syslog,
-  #log_textarea {
-    @apply w-full font-mono text-xs leading-snug;
-  }
-
-  #syslog {
-    /* Explicit border color: bare `border` falls back to currentColor
-       (near-black text) in Tailwind v4. */
-    @apply bg-surface-sunken border-hairline text-text rounded-3xl border p-6 shadow-lg max-md:p-3;
   }
 }
 

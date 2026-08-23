@@ -18,7 +18,7 @@
   parses the read-only #syslog textarea into a .syslog-view sibling and
   marks #content_syslog with .log-enhanced. Without JS (or when its parse
   gate trips) none of the viewer markup exists and the stock textarea
-  styling from _layout.css still applies.
+  styling above still applies.
 
   Chosen design (user-picked variant "彩色级别词", Vercel/Axiom style):
   min-width time · level · source columns so messages start flush while
@@ -31,17 +31,55 @@
   between them survive into copied text.
 */
 
+#content_syslog {
+  @apply m-2 max-md:m-1;
+
+  & > div {
+    @apply flex flex-wrap items-center gap-x-2 max-md:gap-x-1.5;
+
+    /* Upstream drops an inline margin-bottom:10px on some of these; under
+       items-center that reads as half a margin of offset. */
+    & > select,
+    & > input {
+      @apply my-0!;
+    }
+
+    & > .cbi-input-select,
+    & > .cbi-input-text {
+      @apply max-md:min-w-45;
+    }
+  }
+}
+
+/* The viewer is a child div too, and a bare `.syslog-view` (0,1,0) loses to
+   the rule above — the escape has to carry the id. */
+#content_syslog > .syslog-view {
+  @apply block;
+}
+
+/* #log_textarea: same contract under a third-party id (luci-app-aria2,
+   -v2raya, -openlist). */
+#syslog,
+#log_textarea {
+  @apply w-full font-mono text-xs leading-snug;
+}
+
+#syslog {
+  /* Explicit border color: bare `border` falls back to currentColor
+     (near-black text) in Tailwind v4. mb: upstream leaves the gap above
+     "Scroll to head" at zero, so the log window supplies it. */
+  @apply bg-surface-sunken border-hairline text-text mb-5 rounded-3xl border p-6 shadow-lg max-md:p-3;
+}
+
 #content_syslog.log-enhanced > #syslog {
   @apply hidden;
 }
 
 .syslog-view {
-  /* Direct child of #content_syslog: undo the filter-row flex from
-     _layout.css's `#content_syslog > div` rule. */
-  @apply block w-full;
+  @apply w-full;
   /* Same shell as the stock textarea, with the border color made explicit:
      a bare `border` falls back to currentColor (near-black) in Tailwind v4. */
-  @apply bg-surface-sunken border-hairline text-text rounded-3xl border p-6 shadow-lg max-md:p-3;
+  @apply bg-surface-sunken border-hairline text-text mb-5 rounded-3xl border p-6 shadow-lg max-md:p-3;
   @apply font-mono text-xs leading-relaxed;
   /* Whole lines, sideways scroll (the stock textarea's wrap="off" model). */
   @apply overflow-x-auto;
