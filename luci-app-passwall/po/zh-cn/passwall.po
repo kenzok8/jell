@@ -112,11 +112,11 @@ msgstr "当前节点"
 msgid "Listen Port"
 msgstr "监听端口"
 
+msgid "Port Status"
+msgstr "端口状态"
+
 msgid "0 is not use"
 msgstr "0 为不使用"
-
-msgid "Same as the tcp node"
-msgstr "与 TCP 节点相同"
 
 msgid "Current node: %s"
 msgstr "当前节点：%s"

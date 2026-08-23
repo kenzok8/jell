@@ -750,6 +750,9 @@ msgstr "定时发送"
 msgid "Scheduled tasks"
 msgstr "定时任务"
 
+msgid "Traffic source"
+msgstr "流量数据来源"
+
 msgid "Scheduled time"
 msgstr "定时发送时间"
 
