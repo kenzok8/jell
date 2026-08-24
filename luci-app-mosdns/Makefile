@@ -4,7 +4,7 @@ PKG_NAME:=luci-app-mosdns
 
 LUCI_TITLE:=LuCI Support for mosdns
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+mosdns +curl +v2ray-geoip +v2ray-geosite +v2dat +ucode
+LUCI_DEPENDS:=+mosdns +curl +v2ray-geoip +v2ray-geosite +geo2txt +ucode
 
 PKG_MAINTAINER:=sbwml <admin@cooluc.com>
 
