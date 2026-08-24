@@ -1448,9 +1448,9 @@ function login_send(){
 	local login_ip_list=`cat ${dir}web_failed|awk '{print $1}'|grep -v "^$"|sort -u|head -n1`
 	for login_ip in $login_ip_list; do
 		[ -z "$login_ip" ] && continue
-		# 本机地址硬保护：本机探测/回环即使失败也不拉黑
-		is_local_address "$login_ip" && continue
-		ip_in_whitelist "$login_ip" && continue
+			# 本机地址硬保护：本机探测/回环即使失败也不拉黑，清除记录避免阻塞队列
+		is_local_address "$login_ip" && { sed -i "/^${login_ip}$/d" ${dir}web_failed 2>/dev/null; continue; }
+		ip_in_whitelist "$login_ip" && { sed -i "/^${login_ip}$/d" ${dir}web_failed 2>/dev/null; continue; }
 		local web_login_sum=`cat ${dir}web_failed|grep -w "${login_ip}"|wc -l`
 		if [ -z "$login_max_num" ]; then
 			local login_max_num=5   # 未配置时默认 5 次失败触发拉黑，避免空值比较异常
@@ -1498,9 +1498,9 @@ function login_send(){
 	local login_ip_list=`cat ${dir}ssh_failed|awk '{print $1}'|grep -v "^$"|sort -u|head -n1`
 	for login_ip in $login_ip_list; do
 		[ -z "$login_ip" ] && continue
-		# 本机地址硬保护：本机探测/回环即使失败也不拉黑
-		is_local_address "$login_ip" && continue
-		ip_in_whitelist "$login_ip" && continue
+		# 本机地址硬保护：本机探测/回环即使失败也不拉黑，清除记录避免阻塞队列
+		is_local_address "$login_ip" && { sed -i "/^${login_ip}$/d" ${dir}ssh_failed 2>/dev/null; continue; }
+		ip_in_whitelist "$login_ip" && { sed -i "/^${login_ip}$/d" ${dir}ssh_failed 2>/dev/null; continue; }
 		local ssh_login_sum=`cat ${dir}ssh_failed|grep -w "${login_ip}"|wc -l`
 		if [ -z "$login_max_num" ]; then
 			local login_max_num=5   # 未配置时默认 5 次失败触发拉黑，避免空值比较异常
