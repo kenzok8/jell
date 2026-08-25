@@ -49,7 +49,9 @@ fi
 
 if [ -z "$version" ] || [ "$version" -lt 1 ]; then
 	uci -q set luci.main.lang='auto'
-	uci -q set luci.main.mediaurlbase=/luci-static/footstrap
+	if [ -f /usr/share/rpcd/acl.d/luci-theme-footstrap.json ]; then
+		uci -q set luci.main.mediaurlbase=/luci-static/footstrap
+	fi
 	uci commit luci
 	
 	if uci -q get system.@system[0] >/dev/null; then
