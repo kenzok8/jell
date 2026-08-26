@@ -18,5 +18,12 @@ docs/superpowers/
 # On-device perf baselines — record device model and LAN address; keep local
 /.claude/skills/aurora-performance/baselines/
 
+# Agent workflow state and output (see .dev/docs/workflows.md): the
+# /luci-change approval marker, and the local decision records —
+# upstream proposals and change reports — of which only the template ships
+/.claude/.change-approved
+/.dev/decisions/*
+!/.dev/decisions/TEMPLATE.md
+
 # Local page snapshots for the dev /mocks/ route — see .dev/docs/DEVELOPMENT.md
 /.dev/mocks/

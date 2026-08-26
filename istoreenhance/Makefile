@@ -11,7 +11,7 @@ PKG_ARCH_ISTOREENHANCE:=$(ARCH)
 
 PKG_NAME:=istoreenhance
 # use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
-PKG_SOURCE_DATE:=0.7.15
+PKG_SOURCE_DATE:=0.7.16
 PKG_RELEASE:=1
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
@@ -29,9 +29,15 @@ PKG_SOURCE_URL:=https://github.com/kspeeder/docker_kspeeder/releases/download/v$
 PKG_HASH:=skip
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/iStoreEnhance-binary-$(PKG_SOURCE_DATE)
+KSPEEDER_WEB_ROOT:=$(PKG_BUILD_DIR)/wwwroot
 
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
+
+ISTOREENHANCE_LOGO:=./files/logo.png
+ifneq ($(wildcard ../app-meta-istoreenhance/logo.png),)
+ISTOREENHANCE_LOGO:=../app-meta-istoreenhance/logo.png
+endif
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -61,6 +67,16 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 fi
 endef
 
+define Package/$(PKG_NAME)/prerm
+#!/bin/sh
+if [ "$${IPKG_INSTROOT}" = "" ]; then
+	if [ "$$(readlink /usr/share/linkeasefull/desktop-apps.d/20-kspeeder.json 2>/dev/null)" = "/usr/share/kspeeder/kspeeder-plugin.json" ]; then
+		rm -f /usr/share/linkeasefull/desktop-apps.d/20-kspeeder.json
+	fi
+fi
+exit 0
+endef
+
 define Build/Configure
 endef
 
@@ -68,11 +84,20 @@ define Build/Compile
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/config $(1)/etc/init.d $(1)/etc/uci-defaults
+	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/config $(1)/etc/init.d $(1)/etc/uci-defaults $(1)/usr/share/kspeeder/www $(1)/usr/share/linkeasefull/desktop-apps.d
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/iStoreEnhance.$(PKG_ARCH_ISTOREENHANCE) $(1)/usr/sbin/iStoreEnhance
 	$(INSTALL_CONF) ./files/istoreenhance.config $(1)/etc/config/istoreenhance
 	$(INSTALL_BIN) ./files/istoreenhance.init $(1)/etc/init.d/istoreenhance
 	$(INSTALL_BIN) ./files/istoreenhance.uci-default $(1)/etc/uci-defaults/istoreenhance
+	$(INSTALL_DATA) ./files/kspeeder-plugin.json $(1)/usr/share/kspeeder/kspeeder-plugin.json
+	if [ -d "$(KSPEEDER_WEB_ROOT)" ] && [ -f "$(KSPEEDER_WEB_ROOT)/desktop-entry.js" ]; then \
+		$(CP) $(KSPEEDER_WEB_ROOT)/* $(1)/usr/share/kspeeder/www/; \
+	else \
+		$(INSTALL_DATA) ./files/www/desktop-entry.js $(1)/usr/share/kspeeder/www/desktop-entry.js; \
+		$(INSTALL_DATA) ./files/www/index.html $(1)/usr/share/kspeeder/www/index.html; \
+	fi
+	$(INSTALL_DATA) $(ISTOREENHANCE_LOGO) $(1)/usr/share/kspeeder/www/logo.png
+	ln -sf /usr/share/kspeeder/kspeeder-plugin.json $(1)/usr/share/linkeasefull/desktop-apps.d/20-kspeeder.json
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
