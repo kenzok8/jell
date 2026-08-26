@@ -289,7 +289,7 @@
 
   // Page-scoped lifecycle for the router (see .dev/docs/router.md);
   // a full load simply mounts once.
-  ((window.aurora ??= {}).patches ??= {})["admin-status-logs"] = {
+  (window.luciPatches ??= {})["admin-status-logs"] = {
     mount,
     unmount,
   };

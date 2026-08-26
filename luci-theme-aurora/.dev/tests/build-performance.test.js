@@ -31,11 +31,14 @@ test("production assets stay within raw-transfer budgets", () => {
   // actions, progress bar, visibility gate and contract check added ~3 KB
   // over the first cut; the total-transfer budget below moved by the same
   // amount. Mirrored in the perf skill's aurora-budgets.md.
-  assert.ok(router <= 15_000, "router-aurora.js exceeds 15 KB");
+  // 16K: the router now ships from @eamonxg/luci-theme-devkit — theme hooks
+  // as document events, the title format read off the document, and the
+  // inner-scroller restoration shared with shadcn (+0.8 KB raw, +0.3 KB gz).
+  assert.ok(router <= 16_000, "router-aurora.js exceeds 16 KB");
   assert.ok(logo <= 16_000, "logo.svg exceeds 16 KB");
   assert.ok(
-    main + menu + router + font + logo <= 267_500,
-    "admin assets exceed 267.5 KB",
+    main + menu + router + font + logo <= 268_500,
+    "admin assets exceed 268.5 KB",
   );
   assert.ok(login + font + logo <= 55_000, "login assets exceed 55 KB");
 });

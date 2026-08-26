@@ -180,19 +180,19 @@
 		{% if (_mainBgUrl): %}
 		<link rel="preload" as="image" href="{{ entityencode(_mainBgUrl, true) }}">
 		{% endif %}
-		<link rel="stylesheet" href="{{ media }}/main.css" data-aurora-shell>
+		<link rel="stylesheet" href="{{ media }}/main.css" data-luci-shell>
 		{% for (let patch in patch_files): %}
-		<link rel="stylesheet" href="{{ media }}/patches/{{ patch }}.css" data-aurora-patch="{{ patch }}">
+		<link rel="stylesheet" href="{{ media }}/patches/{{ patch }}.css" data-luci-patch="{{ patch }}">
 		{% endfor %}
 		{% for (let patch in patch_scripts): %}
-		<script defer src="{{ media }}/patches/{{ patch }}.js" data-aurora-patch="{{ patch }}"></script>
+		<script defer src="{{ media }}/patches/{{ patch }}.js" data-luci-patch="{{ patch }}"></script>
 		{% endfor %}
 		{% endif %}
 		{% if (font_preload): %}
 		<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ font_preload }}">
 		{% endif %}
 		{% if (font_css): %}
-		<style data-aurora-shell>{{ font_css }}</style>
+		<style data-luci-shell>{{ font_css }}</style>
 		{% endif %}
 		<link rel="icon" href="{{ media }}/images/{{ logo_svg }}?v={{ icon_cache_version }}" sizes="any" type="image/svg+xml">
 		{% if (favicon_png): %}
@@ -207,13 +207,13 @@
 		<meta name="apple-mobile-web-app-title" content="{{ striptags(boardinfo.hostname ?? 'Aurora') }}">
 		<meta name="mobile-web-app-capable" content="yes">
 		{% if (dispatched?.css): %}
-		<link rel="stylesheet" href="{{ resource }}/{{ dispatched.css }}" data-aurora-node-css="{{ entityencode(dispatched.css, true) }}">
+		<link rel="stylesheet" href="{{ resource }}/{{ dispatched.css }}" data-luci-node-css="{{ entityencode(dispatched.css, true) }}">
 		{% endif %}
 		{% if (css): %}
-		<style title="text/css" data-aurora-shell>{{ css }}</style>
+		<style title="text/css" data-luci-shell>{{ css }}</style>
 		{% endif %}
 		{% if (token_css_light || token_css_dark): %}
-		<style data-aurora-shell>
+		<style data-luci-shell>
 			:root { {{ token_css_light }} }
 			[data-darkmode="true"] { {{ token_css_dark }} }
 		</style>

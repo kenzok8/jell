@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@eamonxg/luci-theme-devkit':
+        specifier: ^0.3.0
+        version: 0.3.0(terser@5.46.0)(vite@7.3.1(@types/node@24.10.9)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0))
       '@eamonxg/luci-theme-tokens':
         specifier: ^2.0.0
         version: 2.0.0
@@ -43,6 +46,14 @@ importers:
         version: 7.3.1(@types/node@24.10.9)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0)
 
 packages:
+
+  '@eamonxg/luci-theme-devkit@0.3.0':
+    resolution: {integrity: sha512-yvPb7LX5SRxUlRlDDaSS6/xSdAso6lcv/B5vjaWs7mTNkVwX2NYbUTCgl06x3ncS9SMREl+b+3zcUOiV6Fd4vg==}
+    engines: {node: '>=20.19'}
+    hasBin: true
+    peerDependencies:
+      terser: '>=5'
+      vite: '>=6'
 
   '@eamonxg/luci-theme-tokens@2.0.0':
     resolution: {integrity: sha512-LSPR6fW5iDN0r4eEfLLVirIgjJxUN8L1uJ3hZDHZRPbHtRE8v21pJSMhZoQKerCXUJx3spZc3W3r9f+baw3Jqw==}
@@ -767,6 +778,11 @@ packages:
         optional: true
 
 snapshots:
+
+  '@eamonxg/luci-theme-devkit@0.3.0(terser@5.46.0)(vite@7.3.1(@types/node@24.10.9)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0))':
+    dependencies:
+      terser: 5.46.0
+      vite: 7.3.1(@types/node@24.10.9)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0)
 
   '@eamonxg/luci-theme-tokens@2.0.0':
     dependencies:

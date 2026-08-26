@@ -200,9 +200,9 @@ const SNAPSHOT = `(() => JSON.stringify({
   footer: !!document.querySelector('#view .cbi-page-actions'),
   readonly: L.env.nodespec?.readonly === true,
   perm: L.hasViewPermission(),
-  foreign: [...document.querySelectorAll('style, link[rel~="stylesheet"]')].filter(l => !document.getElementById('view')?.contains(l) && !l.hasAttribute('data-aurora-shell') && !l.hasAttribute('data-aurora-patch') && !l.hasAttribute('data-aurora-node-css')).map(l => l.tagName + (l.href ? ':' + l.href.replace(HOST, '') : '')),
-  status: document.getElementById('aurora-nav-status')?.textContent ?? null,
-  nodeCss: [...document.querySelectorAll('link[data-aurora-node-css]')].filter(l => !l.disabled).map(l => l.getAttribute('data-aurora-node-css')).sort().join(','),
+  foreign: [...document.querySelectorAll('style, link[rel~="stylesheet"]')].filter(l => !document.getElementById('view')?.contains(l) && !l.hasAttribute('data-luci-shell') && !l.hasAttribute('data-luci-patch') && !l.hasAttribute('data-luci-node-css')).map(l => l.tagName + (l.href ? ':' + l.href.replace(HOST, '') : '')),
+  status: document.getElementById('luci-nav-status')?.textContent ?? null,
+  nodeCss: [...document.querySelectorAll('link[data-luci-node-css]')].filter(l => !l.disabled).map(l => l.getAttribute('data-luci-node-css')).sort().join(','),
   viewChildren: document.getElementById('view')?.childElementCount ?? -1,
   viewIds: document.querySelectorAll('[id="view"]').length,
   h1: document.querySelector('#view h2, #maincontent > h2')?.textContent ?? null,
@@ -452,7 +452,7 @@ if (!ONLY || ONLY === "poison") {
 
 /* ---------- foreign sheets ---------- */
 if (!ONLY || ONLY === "sheets") {
-  const FOREIGN = `[...document.querySelectorAll('style, link[rel~="stylesheet"]')].filter(l => !document.getElementById('view')?.contains(l) && !l.hasAttribute('data-aurora-shell') && !l.hasAttribute('data-aurora-patch') && !l.hasAttribute('data-aurora-node-css')).length`;
+  const FOREIGN = `[...document.querySelectorAll('style, link[rel~="stylesheet"]')].filter(l => !document.getElementById('view')?.contains(l) && !l.hasAttribute('data-luci-shell') && !l.hasAttribute('data-luci-patch') && !l.hasAttribute('data-luci-node-css')).length`;
   const injecting = out.walk?.injectors?.map((i) => HOST + i.url) ?? [];
   if (!injecting.length && ONLY === "sheets")
     for (const url of PAGES.filter((u) => u !== START)) {
@@ -496,8 +496,8 @@ if (!ONLY || ONLY === "hygiene") {
   const home = await spaNavigate(p.sessionId, START);
   await waitViewSettled(p.sessionId); await sleep(1500);
   const r = JSON.parse(await evaljs(p.sessionId, `(async () => {
-    const barGone = !document.getElementById('aurora-nav-progress');
-    const status = document.getElementById('aurora-nav-status')?.textContent;
+    const barGone = !document.getElementById('luci-nav-progress');
+    const status = document.getElementById('luci-nav-status')?.textContent;
     const wasActive = L.Poll.active();
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
     document.dispatchEvent(new Event('visibilitychange'));
@@ -513,7 +513,7 @@ if (!ONLY || ONLY === "hygiene") {
 
 /* ---------- menu.d node css ---------- */
 if (!ONLY || ONLY === "nodecss") {
-  const LINKS = `JSON.stringify([...document.querySelectorAll('link[data-aurora-node-css]')].map(l => [l.getAttribute('data-aurora-node-css'), !l.disabled]))`;
+  const LINKS = `JSON.stringify([...document.querySelectorAll('link[data-luci-node-css]')].map(l => [l.getAttribute('data-luci-node-css'), !l.disabled]))`;
   let styled = null;
   for (const url of PAGES.filter((u) => u !== START)) {
     await fullLoad(p.sessionId, url);

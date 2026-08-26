@@ -35,7 +35,7 @@ Checklist (only what the diff touches):
   number.
 - **Patches**: file name is the `data-page` prefix; plain CSS; only `:root`
   vars (`--radius-base` maths, `--app-shadow-*`); a JS patch exposes
-  `window.aurora.patches[stem] = {mount, unmount}` and mounts once.
+  `window.luciPatches[stem] = {mount, unmount}` and mounts once.
 - **Packaging/CI**: `PKG_VERSION`/`PKG_RELEASE` bumped together; nothing
   in `htdocs/` hand-edited; a workflow's `on:` events include every event
   its job `if:` tests for.

@@ -9,9 +9,9 @@ Templates: `ucode/template/themes/aurora/{header,footer,sysauth}.ut`. Version: `
 
 ## Head order (`header.ut`) — do not reorder without a reason
 inline theme script (`setTheme`/`syncSwitchers` globals; `data-darkmode` before first paint)
-→ `main.css` `[data-aurora-shell]` → matching `patches/<prefix>.css` `[data-aurora-patch]`
+→ `main.css` `[data-luci-shell]` → matching `patches/<prefix>.css` `[data-luci-patch]`
 → `patches/<prefix>.js` (defer) → font preload + inline `@font-face` → icons/manifest
-→ `dispatched.css` `[data-aurora-node-css]` → `{{ css }}` → UCI token overrides
+→ `dispatched.css` `[data-luci-node-css]` → `{{ css }}` → UCI token overrides
 (`:root{--light_*→--*}` / `[data-darkmode=true]{--dark_*}`)
 → `admin/translations/<lang>` (sync) → `cbi.js` (sync). Nothing in `<head>` may use `L`.
 Footer: `L.require('menu-aurora').then(() => window.navigation && L.require('router-aurora'))`.
@@ -33,7 +33,7 @@ cross-file change (grep all three layers + tests).
 ## Router invariants (`router-aurora.js`, spec in `.dev/docs/router.md`)
 `contract()` lists every luci-base surface it needs — a missing one means MPA, not
 a broken page. `menu-aurora.js` must keep `syncRoute()` and `closeSurfaces()`. Page
-JS patches expose `window.aurora.patches[stem] = { mount, unmount }` and mount once at
+JS patches expose `window.luciPatches[stem] = { mount, unmount }` and mount once at
 eval. Same-URL navigations, hash changes, forms, downloads, expired sessions and a
 poisoned `<head>` are full loads. Teardown order: `poll.queue.length = 0; poll.stop();
 poll.start(); hideIndicator('poll-status'); clear view intervals/listeners; hideModal;
