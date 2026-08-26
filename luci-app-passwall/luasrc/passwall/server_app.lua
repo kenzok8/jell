@@ -34,7 +34,7 @@ local function ln_run(s, d, command, output)
 	return string.format("%s >%s 2>&1 &", d .. " " .. command, output)
 end
 
-local function remove_firewall_rules()
+local function remove_firewall_rules(defer_commit)
 	local to_delete = {}
 	uci:foreach("firewall", "rule", function(rule)
 		local name = rule[".name"]
@@ -46,9 +46,13 @@ local function remove_firewall_rules()
 		for _, name in ipairs(to_delete) do
 			cmd("uci delete firewall." .. name)
 		end
-		api.sh_uci_commit("firewall")
-		cmd("/etc/init.d/firewall reload >/dev/null 2>&1")
+		if not defer_commit then
+			api.sh_uci_commit("firewall")
+			cmd("/etc/init.d/firewall reload >/dev/null 2>&1")
+		end
+		return true
 	end
+	return false
 end
 
 local function start()
@@ -58,7 +62,7 @@ local function start()
 	end
 
 	-- 启动前清理所有旧防火墙规则
-	remove_firewall_rules()
+	local fw_changed = remove_firewall_rules(true)
 
 	cmd(string.format("mkdir -p %s %s", CONFIG_PATH, TMP_BIN_PATH))
 	cmd(string.format("touch %s", LOG_APP_FILE))
