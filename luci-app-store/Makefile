@@ -12,9 +12,9 @@ LUCI_DEPENDS:=+curl +tar +libuci-lua +mount-utils +luci-lib-taskd
 LUCI_EXTRA_DEPENDS:=luci-lib-taskd (>=1.0.19)
 LUCI_PKGARCH:=all
 
-PKG_VERSION:=0.2.0-r3
+PKG_VERSION:=0.2.1-r1
 # PKG_RELEASE MUST be empty for luci.mk
-PKG_RELEASE:=679
+PKG_RELEASE:=680
 
 ISTORE_UI_VERSION:=0.2.0
 ISTORE_UI_RELEASE:=2
