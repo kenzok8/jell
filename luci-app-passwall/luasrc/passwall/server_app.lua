@@ -180,7 +180,7 @@ local function start()
 				api.sh_uci_set("firewall", uid, "name", uid)
 				api.sh_uci_set("firewall", uid, "src", server.firewall_allow_src or "wan")
 				api.sh_uci_set("firewall", uid, "dest_port", port)
-				api.sh_uci_set("firewall", uid, "target", "ACCEPT")				
+				api.sh_uci_set("firewall", uid, "target", "ACCEPT")
 			end
 		end
 	end)
