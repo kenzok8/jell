@@ -1,34 +1,4 @@
-# --- Input validation ---
-validate_ttl(){
-	echo "$1" | grep -qE '^([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$' || {
-		logger -t ttl "Invalid TTL value: '$1' (must be 0-255)"; exit 1
-	}
-}
-
-validate_ports(){
-	# accepts: "all", "http", or comma-separated port numbers
-	case "$1" in
-		all|http|"") return 0 ;;
-	esac
-	echo "$1" | grep -qE '^[0-9]+(,[0-9]+)*$' || {
-		logger -t ttl "Invalid ports value: '$1'"; exit 1
-	}
-}
-
-validate_iface(){
-	# interface name: alphanumeric, dash, dot, underscore, max 15 chars
-	echo "$1" | grep -qE '^[a-zA-Z0-9._-]{1,15}$' || {
-		logger -t ttl "Invalid iface value: '$1'"; exit 1
-	}
-}
-
-validate_proxy(){
-	# IP:port or [IPv6]:port
-	echo "$1" | grep -qE '^(\[?[0-9a-fA-F:.]+\]?):([0-9]{1,5})$' || {
-		logger -t ttl "Invalid proxy value: '$1'"; exit 1
-	}
-}
-# --- End validation ---
+# IPTABLES backend
 
 method_ttl(){
 
@@ -73,6 +43,9 @@ method_proxy(){
 	validate_ports "$ports"
 	[ -n "$proxy" ] && validate_proxy "$proxy"
 	[ -n "$iface" ] && validate_iface "$iface"
+
+	# check nat66 module
+	[ -f /lib/modules/$(uname -r)/ip6table_nat.ko ] || IPT="iptables"
 
 	for T in $IPT; do
 		[ "$proxy" ] && {
@@ -123,13 +96,6 @@ method_proxy(){
 		esac
 	done
 }
-
-# check nat66 module
-if [ -f /lib/modules/$(uname -r)/ip6table_nat.ko ]; then
-	IPT="iptables ip6tables"
-else
-	IPT="iptables"
-fi
 	
 # Create and flush mangle table
 for T in $IPT; do
