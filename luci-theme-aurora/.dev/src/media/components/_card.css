@@ -47,6 +47,10 @@
 
   & div[style*="display:grid"] {
     @apply max-md:grid-cols-2! max-md:gap-3;
+
+    &:has(> .ifacebox) {
+      @apply place-items-center;
+    }
   }
 
   & .network-status-table {
@@ -63,7 +67,7 @@
 }
 
 .ifacebox {
-  @apply border-hairline bg-surface-overlay hover:border-hairline max-md:border-hairline relative inline-flex min-w-40 flex-col items-stretch overflow-visible rounded-2xl border text-center text-base leading-5 shadow-md hover:shadow-xl max-md:min-w-30 max-md:flex-1 max-md:rounded-3xl max-md:shadow-sm;
+  @apply border-hairline bg-surface-overlay hover:border-hairline max-md:border-hairline relative inline-flex min-w-28 flex-col items-stretch overflow-visible rounded-2xl border text-center text-base leading-5 shadow-md hover:shadow-xl max-md:min-w-30 max-md:flex-1 max-md:rounded-3xl max-md:shadow-sm;
 
   td & {
     @apply max-md:flex-row;
