@@ -67,7 +67,9 @@ the navigation model links to (menu + each page's tab strip) through the
 router, then full-loads the same URL and diffs title, `data-page`,
 `dispatchpath`, tab strip, active nav mark, footer presence and console
 errors — the report lists fallbacks (pages the router declined) and
-divergences separately, and 0 divergences is the merge gate. `timing` is
+divergences separately, and 0 divergences is the merge gate; a fallback on a
+node the router claims (a view class, or a template page that is a view
+shell) is reported as a divergence, so a regression there cannot pass. `timing` is
 click → view painted, median of `RUNS`, router warm/cold vs full load.
 `soak` samples heap, DOM nodes, listeners and the poll queue on the same
 page after each of 5 laps over 12 pages. `back` traverses a chain that

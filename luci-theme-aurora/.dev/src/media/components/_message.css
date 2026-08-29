@@ -2,11 +2,7 @@
   /* Radius matches `.cbi-section` (16px): the alert sits in the content layer,
      same width and edge alignment as the sections it stacks above. The larger
      radii in this theme belong to overlays (24px) and pills (32px). */
-  @apply bg-surface-sunken text-text border-hairline sticky top-14 z-30 mb-4 rounded-2xl border p-6 max-md:mx-0 max-md:mb-3 max-md:p-4;
-
-  &.modal {
-    @apply static top-auto;
-  }
+  @apply bg-surface-sunken text-text border-hairline mb-4 rounded-2xl border p-6 max-md:mx-0 max-md:mb-3 max-md:p-4;
 
   .modal & {
     @apply mb-0;

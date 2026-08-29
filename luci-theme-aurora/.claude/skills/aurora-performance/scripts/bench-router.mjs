@@ -13,7 +13,8 @@
  *   walk   every page the navigation model links to (menu + each page's
  *          tab strip): same-document navigate, then a full load of the same
  *          URL; compare title, data-page, dispatchpath, tab count, footer
- *          presence, view child count. Reports divergences and fallbacks.
+ *          presence, view child count. Reports divergences and fallbacks;
+ *          a fallback on a node the router claims counts as a divergence.
  *   timing click → view painted, median of RUNS: router (warm and cold)
  *          vs full load, same pages.
  *   soak   60 navigations over the walked pages; heap, DOM nodes, poll queue
@@ -65,6 +66,8 @@ const COOKIE = {
   path: "/",
 };
 const START = `${HOST}/cgi-bin/luci/admin/status/overview`;
+// Where a walk of START itself begins: a same-URL navigation is a reload by rule.
+const ALT_START = `${HOST}/cgi-bin/luci/admin/system/system`;
 
 const median = (v) => {
   const s = [...v].sort((a, b) => a - b);
@@ -280,10 +283,29 @@ if (!ONLY || ONLY === "walk") {
    const t0 = Date.now();
    try {
     consoleErrors.length = 0;
-    await fullLoad(p.sessionId, START);
+    await fullLoad(p.sessionId, url === START ? ALT_START : START);
     await evaljs(p.sessionId, "window.__sameDocMarker = 1");
     const nav = await spaNavigate(p.sessionId, url);
-    if (!nav.sameDoc) { fallbacks.push(url.replace(HOST, "")); continue; }
+    if (!nav.sameDoc) {
+      // The document is now the target itself: ask its router whether it
+      // claims this node (a view class, or a template page that is a view
+      // shell). A claimed node that fell back is a regression, not a fallback.
+      const claim = await evaljs(p.sessionId, `L.require('router-aurora').then(async (r) => {
+        // the menu tree arrives asynchronously; a document the router never
+        // boots on (call/cbi pages) has none, and cannot be judged from here
+        for (let i = 0; i < 100 && !r.tree; i++) await new Promise((res) => setTimeout(res, 50));
+        if (!r.tree) return 'unknown';
+        try {
+          const rt = r.route(${JSON.stringify(url)}, { intent: true });
+          if (!rt) return 'declined';
+          if (rt.className) return 'claimed';
+          return (await r.template(rt)) ? 'claimed' : 'declined';
+        } catch (e) { return 'error: ' + e; }
+      })`, true);
+      if (claim === "declined" || claim === "unknown") fallbacks.push(url.replace(HOST, "") + (claim === "unknown" ? " (router not booted there)" : ""));
+      else divergences.push({ url: url.replace(HOST, ""), diffs: [`fallback on a node the router claims (${claim})`] });
+      continue;
+    }
     await waitViewSettled(p.sessionId);
     await sleep(SETTLE);
     const soft = await snapshot(p.sessionId);
