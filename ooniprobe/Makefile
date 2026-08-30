@@ -17,14 +17,16 @@ PKG_HASH:=skip
 
 PKG_MAINTAINER:=Jan Pavlinec <jan.pavlinec1@gmail.com>
 PKG_LICENSE:=BSD-3-Clause
-PKG_LICENSE_FILES:=LICENSE.md
+PKG_LICENSE_FILES:=LICENSE
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/probe-cli-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
-GO_PKG:=github.com/ooni/probe-cli
+GO_PKG:=github.com/ooni/probe-cli/v3
+GO_PKG_BUILD_PKG:=$(GO_PKG)/cmd/ooniprobe
+GO_PKG_TAGS:=nouserauth
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk

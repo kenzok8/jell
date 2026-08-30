@@ -26,6 +26,7 @@ PKG_CONFIG_DEPENDS:=CONFIG_BUILD_NLS
 
 GO_PKG:=github.com/ethereum/go-ethereum
 GO_PKG_BUILD_PKG:=github.com/ethereum/go-ethereum/cmd/geth
+GO_PKG_TAGS:=untested_go_version
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
