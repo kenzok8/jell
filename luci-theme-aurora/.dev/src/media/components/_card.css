@@ -54,7 +54,7 @@
   }
 
   & .network-status-table {
-    @apply mb-3 flex flex-wrap justify-around gap-4 max-md:flex-col;
+    @apply mb-3 flex flex-nowrap justify-around gap-4 max-md:flex-col;
   }
 
   & .cbi-section-create {
@@ -69,8 +69,8 @@
 .ifacebox {
   @apply border-hairline bg-surface-overlay hover:border-hairline max-md:border-hairline relative inline-flex min-w-28 flex-col items-stretch overflow-visible rounded-2xl border text-center text-base leading-5 shadow-md hover:shadow-xl max-md:min-w-30 max-md:flex-1 max-md:rounded-3xl max-md:shadow-sm;
 
-  td & {
-    @apply max-md:flex-row;
+  #cbi-network-interface & {
+    @apply max-md:flex-row md:min-w-38;
   }
 
   & .ifacebox-head {
@@ -80,7 +80,7 @@
       @apply bg-[rgb(var(--zone-color-rgb),.75)]!;
     }
 
-    td & {
+    #cbi-network-interface & {
       @apply max-md:flex max-md:w-auto max-md:shrink-0 max-md:items-center max-md:justify-center max-md:rounded-l-3xl max-md:rounded-tr-none max-md:border-r max-md:border-b-0;
     }
 
@@ -102,14 +102,14 @@
        and balanced instead of spread apart. Icon-only cards (switch ports, the
        interfaces list) centre horizontally via `text-center`/`mx-auto`. The
        interfaces overview layers its richer layout under `.network-status-table`. */
-    @apply text-text flex w-full flex-1 flex-col items-stretch justify-center gap-1 rounded-b-2xl p-4 text-center max-md:rounded-b-3xl;
+    @apply text-text flex w-full flex-1 flex-col items-stretch justify-center gap-1 rounded-b-2xl p-3 text-center max-md:rounded-b-3xl;
 
-    td & {
+    #cbi-network-interface & {
       @apply max-md:flex-row max-md:items-center max-md:rounded-r-3xl max-md:rounded-bl-none max-md:py-2 max-md:pr-2 max-md:pl-4;
     }
 
     & > img {
-      @apply mx-auto;
+      @apply mx-auto w-5;
     }
     & > span {
       @apply text-text space-y-1.5 max-md:space-y-1 max-md:text-sm max-md:leading-5;
@@ -119,7 +119,7 @@
       }
 
       .cbi-tooltip-container + .cbi-tooltip-container {
-        @apply ml-2 max-md:ml-1.5;
+        @apply ml-1;
       }
 
       .cbi-tooltip {
@@ -131,17 +131,17 @@
       }
 
       & > .nowrap {
-        @apply not-last:mb-4 not-last:max-md:mb-3;
+        @apply not-last:mb-1;
       }
 
       & img {
-        @apply w-6 shrink-0 max-md:w-5;
+        @apply w-5 shrink-0;
       }
     }
 
     & > div {
       @apply block w-full space-y-0;
-      td & {
+      #cbi-network-interface & {
         @apply max-md:w-auto max-md:flex-1 max-md:space-y-1;
       }
     }
@@ -160,7 +160,7 @@
 
     & small {
       @apply block text-xs leading-4;
-      td & {
+      #cbi-network-interface & {
         @apply max-md:mt-0;
       }
     }
