@@ -2,6 +2,8 @@
 
 include $(TOPDIR)/rules.mk
 
+PKG_VERSION:=1.0.3-r1
+PKG_RELEASE:=16
 
 LUCI_TITLE:=LuCI support for xunyou
 LUCI_PKGARCH:=all
