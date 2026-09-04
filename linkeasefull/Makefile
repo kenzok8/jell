@@ -24,7 +24,7 @@ LINKEASE_RUNTIME_ARCH:=arm64
 PKG_HASH:=skip
 endif
 
-PKG_SOURCE_VERSION:=fac51f52603d00630be5cb8baff62f1a6547c967
+PKG_SOURCE_VERSION:=469e9a582af646e9d3df7aec4b31fcfda9e4a325
 PKG_SOURCE:=linkease-runtime-$(PKG_SOURCE_DATE)-linux-$(LINKEASE_RUNTIME_ARCH).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/linkeasefull-runtime-v$(PKG_SOURCE_DATE)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-runtime-$(PKG_SOURCE_DATE)-linux-$(LINKEASE_RUNTIME_ARCH)
