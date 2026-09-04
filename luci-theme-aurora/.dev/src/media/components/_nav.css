@@ -7,6 +7,10 @@
  * show/hide state only — never duplicate these recipes there.
  */
 
+.nav-row {
+  @apply focus-visible:ring-focus-ring flex w-full cursor-pointer appearance-none items-center border-0 bg-transparent text-left no-underline shadow-none transition-colors duration-150 select-none hover:no-underline focus-visible:ring-2 focus-visible:outline-none;
+}
+
 .nav-link {
   /* hover:no-underline: the global `a:hover { underline }` in _elements.css
      outranks a bare class (a:hover is 0,1,1), so nav rows must opt out at
@@ -21,25 +25,23 @@
 /* Direct destinations use the same selected state in both navigation modes:
    a filled brand pill, matching the active sublink. */
 .navigation-direct.is-active-page {
-  @apply text-brand hover:text-brand bg-brand-subtle font-medium;
+  @apply text-brand hover:text-brand bg-brand-subtle;
 }
 
-/* Category rows are group labels, not buttons: no hover surface, just a
-   text-color shift. Block highlights belong to child links exclusively.
-   appearance-none + border-0 + shadow-none strip the theme's global
-   <button> chrome (_button.css), which would otherwise box every row. */
-.nav-category {
-  @apply text-text-muted hover:text-text focus-visible:ring-focus-ring flex w-full cursor-pointer appearance-none items-center gap-2 rounded-lg border-0 bg-transparent px-3 py-2 text-left text-lg font-semibold tracking-wide shadow-none transition-colors duration-150 select-none focus-visible:ring-2 focus-visible:outline-none;
+:where(.sidebar-list) {
+  & .nav-row {
+    @apply text-text-muted hover:text-text;
+  }
+
+  & .navigation-direct {
+    @apply hover:bg-hover-faint;
+  }
 }
 
 .navigation-group-toggle {
   /* size-4.5 ≈ the row's text height — 3.5 read as undersized next to the
      text-lg category labels, on desktop and in the mobile drawer alike. */
   @apply after:size-4.5 after:shrink-0 after:bg-current after:opacity-55 after:transition-[transform,opacity] after:duration-[250ms] after:content-[''] after:[mask:var(--icon-arrow-right)_center/cover_no-repeat] hover:after:opacity-100;
-}
-
-.nav-category-label {
-  @apply min-w-0 flex-1 truncate;
 }
 
 /* An expanded group's label turns brand and its arrow rotates open. */
@@ -65,9 +67,8 @@
   @apply shrink-0 bg-current opacity-55 transition-opacity duration-150 [mask:var(--menu-icon,var(--icon-category))_center/contain_no-repeat];
 }
 
-/* Direct-row labels; group rows keep .nav-category-label. flex-1 also
-   holds the label against the drawer's justify-between rows. */
-.nav-label {
+.nav-label,
+.nav-category-label {
   @apply min-w-0 flex-1 truncate;
 }
 

@@ -68,9 +68,10 @@ test("shared navigation styles define active and expanded states", () => {
   assertIncludesUtilities(directActive, [
     "text-brand",
     "hover:text-brand",
-    "font-medium",
     "bg-brand-subtle",
   ]);
+  // Weight is the surface's call — the two run different scales.
+  assert.doesNotMatch(directActive, /font-(?:normal|medium|semibold|bold)/);
   // An expanded group's label turns brand and rotates its arrow open.
   assertIncludesUtilities(expandedToggle, ["after:rotate-90", "text-brand"]);
   // The active group keeps a brand label even when manually collapsed, so the
@@ -93,6 +94,55 @@ test("shared navigation styles define active and expanded states", () => {
   ]);
   // The left accent bar is gone — no before:* rail on the active sublink.
   assert.doesNotMatch(activeSublink, /before:/);
+});
+
+test("one first-level row recipe serves both kinds on both surfaces", () => {
+  const row = getBlock(navigationStyles, ".nav-row");
+
+  // Defined once, so a group toggle and a direct destination cannot come
+  // out with different frames (#97).
+  assertIncludesUtilities(row, [
+    "flex",
+    "w-full",
+    "items-center",
+    "appearance-none",
+    "border-0",
+    "bg-transparent",
+    "shadow-none",
+    "no-underline",
+  ]);
+  // Mode files consume it; no per-kind or per-surface box class survives.
+  assert.match(layoutStyles, /& \.sidebar-list \.nav-row \{/);
+  assert.match(overlayStyles, /& \.nav-row \{/);
+  assert.doesNotMatch(overlayStyles, /mobile-nav-link/);
+  assert.doesNotMatch(navigationStyles, /nav-category \{/);
+
+  // :where() keeps the resting treatment at (0,1,0), below every state.
+  const sidebarResting = getBlock(navigationStyles, ":where(.sidebar-list)");
+
+  assertIncludesUtilities(getBlock(sidebarResting, "& .nav-row"), [
+    "text-text-muted",
+    "hover:text-text",
+  ]);
+  assertIncludesUtilities(getBlock(sidebarResting, "& .navigation-direct"), [
+    "hover:bg-hover-faint",
+  ]);
+});
+
+test("the drawer collapses a group to nothing so the row rhythm is declared", () => {
+  const drawer = getBlock(overlayStyles, ".mobile-menu-overlay");
+  const list = getBlock(drawer, "& .mobile-nav-list");
+  const submenu = getBlock(drawer, "& .mobile-nav-submenu-list");
+
+  // The rhythm is the list's own gap, not a collapsed group's leftover box.
+  assertIncludesUtilities(list, ["max-md:gap-y-4"]);
+  // Full-bleed square rows must keep suppressing the shared selected fill.
+  assertIncludesUtilities(getBlock(drawer, "& .nav-row"), [
+    "max-md:bg-transparent",
+  ]);
+  // Direct child of the 0fr track: its own box outlives the collapse.
+  assertIncludesUtilities(submenu, ["max-md:m-0", "max-md:p-0"]);
+  assert.doesNotMatch(submenu, /max-md:(?:mb-|py-|mt-|mx-|pt-|pb-)/);
 });
 
 test("shared navigation styles own accordion animation without a guide rail", () => {
@@ -124,13 +174,24 @@ test("shared navigation styles own accordion animation without a guide rail", ()
 
 test("desktop sidebar styles only provide desktop navigation density", () => {
   const sidebar = getBlock(layoutStyles, 'body[data-nav-type="sidebar"]');
-  const direct = getBlock(sidebar, "& .sidebar-list .navigation-direct");
+  const row = getBlock(sidebar, "& .sidebar-list .nav-row");
   const icon = getBlock(sidebar, "& .sidebar-list .nav-icon");
   const submenu = getBlock(sidebar, "& .sidebar-submenu");
   const sublink = getBlock(sidebar, "& .sidebar-submenu .navigation-sublink");
 
-  // Direct rows are icon + label flex rows; the label span truncates.
-  assertIncludesUtilities(direct, ["flex", "items-center", "gap-2", "text-lg"]);
+  // Density for both first-level kinds at once.
+  assertIncludesUtilities(row, [
+    "gap-2",
+    "px-3",
+    "py-2",
+    "text-lg",
+    "font-semibold",
+    "tracking-wide",
+  ]);
+  // The frame is the shared recipe's; the mode file must not restate it.
+  assert.doesNotMatch(row, /(^|\s)(?:flex|items-center|w-full)($|\s|;)/);
+  // Nor colour: nesting under body[data-nav-type] would outrank the states.
+  assert.doesNotMatch(row, /text-text|text-brand|bg-/);
   assertIncludesUtilities(icon, ["size-4.5"]);
   // pl-6.5 hangs sublink text off the parent label (px-3 + icon + gap −
   // the sublink's own px-3), not the row edge.

@@ -398,9 +398,7 @@ return baseclass.extend({
   renderNavigationItem(item, mode) {
     const mobile = mode === "mobile";
     const itemClass = mobile ? "mobile-nav-item" : "";
-    const directClass = mobile
-      ? "navigation-direct mobile-nav-link"
-      : "navigation-direct nav-link";
+    const directClass = "navigation-direct nav-row";
 
     if (!item.hasChildren) {
       const attributes = {
@@ -427,9 +425,7 @@ return baseclass.extend({
       item.isActiveGroup ? "is-expanded" : "",
     ].filter(Boolean);
     const toggleAttributes = {
-      class: mobile
-        ? "navigation-group-toggle mobile-nav-link mobile-nav-toggle"
-        : "navigation-group-toggle nav-category",
+      class: "navigation-group-toggle nav-row",
       type: "button",
       "aria-expanded": item.isActiveGroup ? "true" : "false",
       "aria-controls": submenuId,

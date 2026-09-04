@@ -307,6 +307,7 @@ test("defines the shared navigation renderer and emits its common contract", () 
     "navigation-submenu-list",
     "navigation-sublink",
     "navigation-direct",
+    "nav-row",
     "is-active-group",
     "is-expanded",
     "is-active-page",
@@ -366,7 +367,7 @@ test("renders an active direct item with shared and mode-specific state", () => 
   assert.equal(item.getAttribute("class"), "mobile-nav-item");
   assert.equal(
     anchor.getAttribute("class"),
-    "navigation-direct mobile-nav-link is-active-page",
+    "navigation-direct nav-row is-active-page",
   );
   assert.equal(anchor.getAttribute("href"), "/admin/status");
   assert.equal(anchor.getAttribute("aria-current"), "page");
@@ -673,7 +674,7 @@ test("renders mobile items and logout repeatedly without duplicate listeners", (
   assert.equal(list.children.length, 2);
   assert.equal(
     list.children[0].children[0].getAttribute("class"),
-    "navigation-direct mobile-nav-link",
+    "navigation-direct nav-row",
   );
   assert.equal(
     list.children[1].getAttribute("class"),
@@ -728,7 +729,7 @@ test("renders sidebar items, logout, and translated crumbs without duplication",
   );
   assert.equal(
     list.children[1].children[0].getAttribute("class"),
-    "navigation-direct nav-link",
+    "navigation-direct nav-row",
   );
   assert.equal(footer.children.length, 1);
   assert.equal(footer.children[0].getAttribute("class"), "nav-link");

@@ -497,10 +497,8 @@ body[data-nav-type="sidebar"] {
     }
   }
 
-  & .sidebar-list .navigation-direct {
-    /* flex, matching .nav-category: icon + label on one row (the label
-       span owns the truncation). */
-    @apply flex items-center gap-2 text-lg;
+  & .sidebar-list .nav-row {
+    @apply gap-2 rounded-xl px-3 py-2 text-lg font-semibold tracking-wide;
   }
 
   & .sidebar-list .nav-icon {
