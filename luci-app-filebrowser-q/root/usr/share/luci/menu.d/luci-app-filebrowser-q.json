@@ -1,0 +1,14 @@
+{
+	"admin/services/filebrowser-q": {
+		"title": "FileBrowser Quantum",
+		"action": {
+			"order": 30,
+			"type": "view",
+			"path": "filebrowser-q"
+		},
+		"depends": {
+			"acl": [ "luci-app-filebrowser-q" ],
+			"uci": { "filebrowser-q": true }
+		}
+	}
+}

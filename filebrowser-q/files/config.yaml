@@ -1,0 +1,13 @@
+server:
+  port: 8989
+  database: "/etc/filebrowser-q/database.db"
+  sources:
+    - path: "/" # Do not use a root "/" directory or include the "/var" folder
+      config:
+        defaultEnabled: true
+auth:
+  adminUsername: admin
+  adminPassword: "admin"
+userDefaults:
+  ui:
+    locale: "zhCN"

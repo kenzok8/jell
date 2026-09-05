@@ -1,0 +1,60 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=10
+
+CONF="filebrowser-q"
+PROG="/usr/bin/filebrowser-q"
+CONF_PATH="/etc/filebrowser-q/config.yaml"
+PID_FILE="/var/run/filebrowser-q.pid"
+
+start() {
+    config_load "$CONF"
+
+    local enabled
+    config_get_bool enabled "config" "enabled" "0"
+    [ "$enabled" -eq "1" ] || return 1
+
+    local listen_port root_path root_name
+    config_get listen_port "config" "listen_port" "8989"
+    config_get root_path "config" "root_path" "/"
+
+    # 路径为 / 时 name 设为 root，否则留空
+    root_name=""
+    [ "$root_path" = "/" ] && root_name="root"
+
+    if [ ! -f "$CONF_PATH" ]; then
+        mkdir -p "$(dirname "$CONF_PATH")"
+        cat <<EOF > "$CONF_PATH"
+server:
+  port: $listen_port
+  database: "/etc/filebrowser-q/database.db"
+  sources:
+    - path: "$root_path"
+      name: "$root_name"
+      config:
+        defaultEnabled: true
+auth:
+  adminUsername: "admin"
+  adminPassword: "admin"
+userDefaults:
+  ui:
+    locale: "zhCN"
+EOF
+    else
+        grep -q " name:" "$CONF_PATH" || sed -i "s,.*- path:.*,&\n      name: \"\"," "$CONF_PATH"
+        sed -e "s/.*port:.*/  port: $listen_port/" \
+            -e "s,.*- path:.*,    - path: \"$root_path\"," \
+            -e "s/.*name:.*/      name: \"$root_name\"/" \
+            -i "$CONF_PATH"
+    fi
+
+    echo "Starting filebrowser..."
+    start-stop-daemon -S -q -b -m -p "$PID_FILE" -x "$PROG" -- -c "$CONF_PATH"
+}
+
+stop() {
+    kill -9 `pidof filebrowser-q | sed "s/$$//g"` 2>/dev/null
+    rm -f "$PID_FILE"
+    echo "filebrowser stopped"
+}

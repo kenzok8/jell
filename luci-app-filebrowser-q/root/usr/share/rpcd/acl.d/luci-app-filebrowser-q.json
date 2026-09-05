@@ -1,0 +1,14 @@
+{
+	"luci-app-filebrowser-q": {
+		"description": "Grant UCI access for luci-app-filebrowser-q",
+		"read": {
+			"ubus": {
+				"service": [ "list" ]
+			},
+			"uci": [ "filebrowser-q" ]
+		},
+		"write": {
+			"uci": [ "filebrowser-q" ]
+		}
+	}
+}

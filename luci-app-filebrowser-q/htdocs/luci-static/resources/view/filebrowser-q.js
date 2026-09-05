@@ -28,8 +28,8 @@ function renderStatus(isRunning, port) {
 return view.extend({
 	load: async function () {
 		const promises = await Promise.all([
-			L.resolveDefault(fs.stat('/var/run/filebrowser.pid'), null),
-			uci.load('filebrowser')
+			L.resolveDefault(fs.stat('/var/run/filebrowser-q.pid'), null),
+			uci.load('filebrowser-q')
 		]);
 	const data = {
 			isRunning: promises[0],
@@ -42,15 +42,15 @@ return view.extend({
 		let m, s, o;
 		let webport = (uci.get(data.conf, 'config', 'listen_port') || '8989');
 
-		m = new form.Map('filebrowser', _('FileBrowser'),
-			_('FileBrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files..') + '<br />'+
+		m = new form.Map('filebrowser-q', _('FileBrowser Quantum'),
+			_('The best free self-hosted web-based file manager.') + '<br />'+
 			_('Default login username is %s and password is %s.').format('<code>admin</code>', '<code>admin</code>'));
 
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
 		s.render = function() {
     		poll.add(function() {
-        		return fs.stat('/var/run/filebrowser.pid').then(function(stat) {
+        		return fs.stat('/var/run/filebrowser-q.pid').then(function(stat) {
             		let view = document.getElementById('service_status');
             		if (view) {
                 		view.innerHTML = renderStatus(stat, webport);
