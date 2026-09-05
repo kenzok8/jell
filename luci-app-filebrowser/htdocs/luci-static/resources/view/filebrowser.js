@@ -49,17 +49,24 @@ return view.extend({
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
 		s.render = function() {
-			poll.add(function() {
-				return Promise.resolve().then(function() {
-					let view = document.getElementById('service_status');
-					view.innerHTML = renderStatus(data.isRunning, webport);
-        });
-			});
+    		poll.add(function() {
+        		return fs.stat('/var/run/filebrowser.pid').then(function(stat) {
+            		let view = document.getElementById('service_status');
+            		if (view) {
+                		view.innerHTML = renderStatus(stat, webport);
+            		}
+        		}).catch(function() {
+            		let view = document.getElementById('service_status');
+            		if (view) {
+                		view.innerHTML = renderStatus(null, webport);
+            		}
+        		});
+    		});
 
-			return E('div', { class: 'cbi-section', id: 'status_bar' }, [
-				E('p', { id: 'service_status' }, _('Collecting data...'))
-			]);
-		}
+    return E('div', { class: 'cbi-section', id: 'status_bar' }, [
+        E('p', { id: 'service_status' }, _('Collecting data...'))
+    ]);
+};
 
 		s = m.section(form.NamedSection, 'config', 'filebrowser');
 
@@ -73,10 +80,6 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.option(form.Value, 'root_path', _('Root directory'));
-		o.default = '/';
-		o.rmempty = false;
-		
-		o = s.option(form.Value, 'base_url', _('Base url'));
 		o.default = '/';
 		o.rmempty = false;
 
