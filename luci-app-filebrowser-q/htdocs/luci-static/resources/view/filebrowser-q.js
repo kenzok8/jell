@@ -6,9 +6,21 @@
 'require view';
 'require fs';
 
+const callServiceList = rpc.declare({
+	object: 'service',
+	method: 'list',
+	params: ['name'],
+	expect: { '': {} }
+});
+
 function getServiceStatus() {
+	return L.resolveDefault(callServiceList('filebrowser-q'), {}).then(function(res) {
 		let isRunning = false;
+		try {
+			isRunning = res['filebrowser-q']['instances']['instance1']['running'];
+		} catch (e) { }
 		return isRunning;
+	});
 }
 
 function renderStatus(isRunning, port) {
@@ -26,16 +38,8 @@ function renderStatus(isRunning, port) {
 }
 
 return view.extend({
-	load: async function () {
-		const promises = await Promise.all([
-			L.resolveDefault(fs.stat('/var/run/filebrowser-q.pid'), null),
-			uci.load('filebrowser-q')
-		]);
-	const data = {
-			isRunning: promises[0],
-			conf: promises[1]
-		};
-	return data;
+	load() {
+		return uci.load('filebrowser-q');
 	},
 
 	render(data) {
@@ -49,24 +53,17 @@ return view.extend({
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
 		s.render = function() {
-    		poll.add(function() {
-        		return fs.stat('/var/run/filebrowser-q.pid').then(function(stat) {
-            		let view = document.getElementById('service_status');
-            		if (view) {
-                		view.innerHTML = renderStatus(stat, webport);
-            		}
-        		}).catch(function() {
-            		let view = document.getElementById('service_status');
-            		if (view) {
-                		view.innerHTML = renderStatus(null, webport);
-            		}
-        		});
-    		});
+			poll.add(function() {
+				return L.resolveDefault(getServiceStatus()).then(function(res) {
+					let view = document.getElementById('service_status');
+					view.innerHTML = renderStatus(res, webport);
+				});
+			});
 
-    return E('div', { class: 'cbi-section', id: 'status_bar' }, [
-        E('p', { id: 'service_status' }, _('Collecting data...'))
-    ]);
-};
+			return E('div', { class: 'cbi-section', id: 'status_bar' }, [
+				E('p', { id: 'service_status' }, _('Collecting data...'))
+			]);
+		}
 
 		s = m.section(form.NamedSection, 'config', 'filebrowser');
 
