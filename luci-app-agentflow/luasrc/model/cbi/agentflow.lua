@@ -34,15 +34,22 @@ for _, val in pairs(paths) do
 end
 data_dir.default = default_path
 
-local runtime_home = s:option(DummyValue, "_runtime_home", translate("Shared runtime home"))
-runtime_home.description = translate("AgentFlow and other runtime-aware applications share this HOME. It is derived from the selected Configs directory unless mise has an explicit runtime directory.")
-function runtime_home.cfgvalue(self, section)
-	local selected_data_dir = m.uci:get("agentflow", section, "data_dir") or default_path
-	local path = agentflow_model.runtime_home(selected_data_dir, home)
-	if path == "" then
-		return translate("Not configured")
+function m.on_after_commit(self)
+	local uci = require "luci.model.uci".cursor()
+	local runtime_dir = uci:get("mise", "main", "runtime_dir")
+	if runtime_dir ~= nil and runtime_dir ~= "" then
+		return
 	end
-	return path
+
+	local saved_data_dir = uci:get_first("agentflow", "agentflow", "data_dir", "")
+	runtime_dir = agentflow_model.runtime_dir(saved_data_dir)
+	if runtime_dir == nil then
+		return
+	end
+
+	if uci:set("mise", "main", "runtime_dir", runtime_dir) then
+		uci:commit("mise")
+	end
 end
 
 local port = s:option(Value, "port", translate("Listen port"))
