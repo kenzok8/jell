@@ -1,0 +1,25 @@
+name: New version check
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: 0 16 * * 5
+  push:
+    branches:
+      - master
+
+jobs:
+  check:
+    name: Check new version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: EkkoG/openwrt-packages-version-checker@main
+        env:
+          COMMIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ccding/go-stun
+          BRANCH: master
+          SOURCE_URL: https://codeload.github.com/ccding/go-stun/tar.gz/refs/tags/v{{version}}
+          

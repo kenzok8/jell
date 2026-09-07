@@ -1,24 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
-# Copyright (C) 2023-2025 Anya Lin <hukk1996@gmail.com>
+# Copyright (C) 2023-2026 Anya Lin <hukk1996@gmail.com>
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=go-stun
-PKG_UPSTREAM_VERSION:=0.1.4
-PKG_UPSTREAM_GITHASH:=d32c135f5e509d278e95ba9945849903f966a91f
-PKG_VERSION:=$(PKG_UPSTREAM_VERSION)~$(call version_abbrev,$(PKG_UPSTREAM_GITHASH))
-PKG_RELEASE:=10
+PKG_VERSION:=0.1.6
+PKG_RELEASE:=1
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/ccding/go-stun.git
-PKG_SOURCE_VERSION:=65c0568253e3a432f330b346d5ecad938d35d5aa
-PKG_MIRROR_HASH:=skip
-
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_UPSTREAM_VERSION)
-PKG_SOURCE:=$(PKG_SOURCE_SUBDIR)-$(PKG_SOURCE_VERSION).tar.gz
-
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/ccding/go-stun/tar.gz/refs/tags/v$(PKG_VERSION)?
+PKG_HASH:=skip
 
 PKG_MAINTAINER:=Anya Lin <hukk1996@gmail.com>
 PKG_LICENSE:=Apache-2.0
@@ -62,9 +54,6 @@ define Package/$(PKG_NAME)/install
 
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/$(PKG_NAME) $(1)/usr/bin/
-
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./uci-defaults $(1)/etc/uci-defaults/99_$(PKG_NAME)
 endef
 
 $(eval $(call GoBinPackage,$(PKG_NAME)))
