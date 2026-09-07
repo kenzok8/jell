@@ -40,6 +40,7 @@ var callPresetList = rpc.declare({
 var callFileView = rpc.declare({ object: 'luci.sysctl', method: 'file_view', params: [ 'path' ] });
 var callFileSet = rpc.declare({ object: 'luci.sysctl', method: 'file_set', params: [ 'path', 'key', 'value', 'disabled' ] });
 var callFileDelete = rpc.declare({ object: 'luci.sysctl', method: 'file_delete', params: [ 'path', 'key' ] });
+var callDupCheck = rpc.declare({ object: 'luci.sysctl', method: 'dup_check', params: [ 'key' ] });
 
 var KEY_RE = /^[A-Za-z0-9_][A-Za-z0-9_.\/-]*$/;
 
@@ -75,7 +76,8 @@ var LSC_CSS = [
 	'.lsc-root .cbi-button:hover { filter: brightness(1.06); }',
 	'.lsc-root h2, .lsc-root h3, .lsc-root h4, .lsc-root th, .lsc-root .lsc-badge, .lsc-root code, .lsc-root .lsc-muted, .lsc-root .cbi-section-descr, .lsc-root .lsc-card * { text-transform: none !important; }',
 	'.lsc-root .lsc-muted { color: #777; }',
-	'.lsc-root .cbi-page-actions { float: none !important; text-align: center !important; }'
+	'.lsc-root .cbi-page-actions { float: none !important; text-align: center !important; display: flex !important; flex-wrap: wrap; justify-content: center !important; align-items: center; gap: .5rem; }',
+	'.lsc-root .cbi-page-actions > br { display: none; }'
 ].join('\n');
 
 return view.extend({
@@ -179,6 +181,7 @@ return view.extend({
 		}, _('暂无自定义参数，点击下方“添加参数”开始。'));
 		this.editFormBox = E('div', { 'style': 'display:none' });
 		this.fileViewBox = E('div', { 'style': 'display:none' });
+		this.dupBox = E('div', { 'style': 'display:none' });
 		this.applyResultBox = E('div', { 'style': 'display:none' });
 		this.sourceChipsBox = E('div', { 'class': 'lsc-chips' });
 
@@ -205,11 +208,12 @@ return view.extend({
 		return E('div', { 'class': 'cbi-section' }, [
 			E('h3', {}, _('自定义参数')),
 			E('div', { 'class': 'cbi-section-descr' }, descr),
+			this.applyResultBox,
 			this.editFormBox,
 			this.tableWrapBox,
 			this.customEmptyBox,
 			this.fileViewBox,
-			this.applyResultBox,
+			this.dupBox,
 			E('div', { 'class': 'cbi-page-actions' }, [
 				E('button', {
 					'class': 'cbi-button cbi-button-add',
@@ -220,6 +224,11 @@ return view.extend({
 					'class': 'cbi-button cbi-button-apply',
 					'click': ui.createHandlerFn(this, 'applyConfig')
 				}, _('应用配置')),
+				' ',
+				E('button', {
+					'class': 'cbi-button',
+					'click': ui.createHandlerFn(this, 'showDupCheck')
+				}, _('检测重复')),
 				' ',
 				E('button', {
 					'class': 'cbi-button cbi-button-negative',
@@ -294,7 +303,11 @@ return view.extend({
 	},
 
 	showEditForm: function(entry) {
-		this.editing = (entry != null) ? entry : null;
+		/* "添加参数" button calls this with null -> use a blank new-entry
+		 * state, otherwise renderEditForm would bail out and the form would
+		 * never open (latent bug since v1.0, other entries always passed an
+		 * object so it never surfaced until now). */
+		this.editing = (entry != null) ? entry : { isNew: true };
 		this.editFromBrowse = (entry != null && entry.fromBrowse === true);
 		this.renderEditForm();
 
@@ -350,6 +363,20 @@ return view.extend({
 
 		saveBtn.addEventListener('click', function() { self.saveEditForm(keyInput, valInput, applyChk, disabledChk, errBox); });
 
+		var editDupBox = E('div', { 'style': 'display:none' });
+		this.editDupBox = editDupBox;
+
+		keyInput.addEventListener('input', function() {
+			if (self.editDupTimer != null)
+				window.clearTimeout(self.editDupTimer);
+
+			var v = keyInput.value;
+
+			self.editDupTimer = window.setTimeout(function() {
+				self.refreshEditDup((v || '').trim());
+			}, 400);
+		});
+
 		dom.content(this.editFormBox, [
 			E('div', { 'class': 'lsc-card' }, [
 				E('strong', {}, title),
@@ -369,6 +396,7 @@ return view.extend({
 					])
 				]),
 				E('div', { 'style': 'color:#666;margin-top:4px' }, note),
+				editDupBox,
 				errBox,
 				E('div', { 'style': 'margin-top:8px' }, [
 					saveBtn, ' ',
@@ -376,10 +404,19 @@ return view.extend({
 				])
 			])
 		]);
+
+		if (key != '')
+			this.refreshEditDup(key);
 	},
 
 	hideEditForm: function() {
 		this.editing = null;
+
+		if (this.editDupTimer != null) {
+			window.clearTimeout(this.editDupTimer);
+			this.editDupTimer = null;
+		}
+
 		this.renderEditForm();
 
 		/* edit was started from the browse section: scroll back there so the
@@ -390,6 +427,83 @@ return view.extend({
 			if (this.browseSectionBox != null && this.browseSectionBox.scrollIntoView)
 				this.browseSectionBox.scrollIntoView({ block: 'start' });
 		}
+	},
+
+	/* Summarize where a key is defined besides the custom config, and whether
+	 * any of those files load AFTER the custom config (=> would override it). */
+	summarizeDup: function(d) {
+		var customPath = '/etc/sysctl.d/99-luci-sysctl.conf';
+		var files = (this.statusData != null && this.statusData.files != null) ? this.statusData.files : [];
+		var paths = [];
+		var i;
+
+		for (i = 0; i < files.length; i++)
+			paths.push(files[i].path);
+
+		var customIdx = paths.indexOf(customPath);
+		var others = [];
+		var shadowed = false;
+
+		for (i = 0; i < d.entries.length; i++) {
+			var e = d.entries[i];
+
+			if (e.path == customPath)
+				continue;
+
+			others.push(e.path.replace('/etc/', '') + ' (' + e.value + ')');
+
+			if (!e.disabled && customIdx >= 0 && paths.indexOf(e.path) > customIdx)
+				shadowed = true;
+		}
+
+		return { others: others, shadowed: shadowed };
+	},
+
+	/* Inline warning inside the add/edit form: warn BEFORE saving that the
+	 * key is also defined in other config files (and whether those files
+	 * would override the custom entry). */
+	refreshEditDup: function(key) {
+		var self = this;
+		var box = this.editDupBox;
+
+		if (box == null)
+			return;
+
+		if (key == null || key == '' || !KEY_RE.test(key)) {
+			box.style.display = 'none';
+			dom.content(box, []);
+			return;
+		}
+
+		callDupCheck(key).then(function(res) {
+			var dups = (res != null && res.dups != null) ? res.dups : [];
+
+			if (dups.length == 0 || self.editing == null) {
+				box.style.display = 'none';
+				dom.content(box, []);
+				return;
+			}
+
+			var sum = self.summarizeDup(dups[0]);
+
+			if (sum.others.length == 0) {
+				box.style.display = 'none';
+				dom.content(box, []);
+				return;
+			}
+
+			var msg = sum.shadowed
+				? _('注意：该参数在自定义配置之后加载的文件中也有定义（%s），保存后会被覆盖、不会生效。请直接编辑对应文件或删除其同名条目。').format(sum.others.join('、'))
+				: _('该参数在其他文件中也有定义（%s）。自定义配置加载顺序靠后，保存后以这里的值为准。').format(sum.others.join('、'));
+
+			box.style.display = '';
+			dom.content(box, [
+				E('div', { 'style': (sum.shadowed ? 'color:#b3261e' : 'color:#a35a00') + ';margin-top:4px' }, msg)
+			]);
+		}).catch(function() {
+			box.style.display = 'none';
+			dom.content(box, []);
+		});
 	},
 
 	saveEditForm: function(keyInput, valInput, applyChk, disabledChk, errBox) {
@@ -458,14 +572,36 @@ return view.extend({
 			else if (applyNow && res.applied === false)
 				notes.push(E('p', { 'style': 'color:#a80' }, _('参数 %s 已写入配置，但运行时校验不一致，请检查取值格式。').format(key)));
 
+			var hasWarn = (res.rename_leftover != null) || (!res.exists) || (applyNow && (res.applied === 'readonly' || res.applied === false));
+			var saveAutoHide = hasWarn ? 8000 : 4000;
+
 			if (notes.length == 0)
 				notes.push(E('p', {}, (st.fromMain && isNew) ? _('已创建覆盖条目：%s。') : _('参数 %s 已保存。').format(key)));
 
 			self.hideEditForm();
 			self.reloadList();
 
-			dom.content(self.applyResultBox, [ E('div', { 'class': 'alert-message', 'style': 'margin:6px 0' }, notes) ]);
-			self.applyResultBox.style.display = '';
+			self.showApplyResult([ E('div', { 'class': 'alert-message', 'style': 'margin:6px 0' }, notes) ], saveAutoHide);
+
+			/* post-save heads-up: same key also defined in other files? */
+			callDupCheck(key).then(function(dres) {
+				var dups = (dres != null && dres.dups != null) ? dres.dups : [];
+
+				if (dups.length == 0)
+					return;
+
+				var sum = self.summarizeDup(dups[0]);
+
+				if (sum.others.length == 0)
+					return;
+
+				var msg = sum.shadowed
+					? _('注意：该参数在自定义配置之后加载的文件中也有定义（%s），你的取值会被覆盖。').format(sum.others.join('、'))
+					: _('该参数在其他文件中也有定义（%s），自定义配置加载靠后，以你的值为准。').format(sum.others.join('、'));
+
+					notes.push(E('p', { 'style': 'color:' + (sum.shadowed ? '#b3261e' : '#a35a00') }, msg));
+				self.showApplyResult([ E('div', { 'class': 'alert-message', 'style': 'margin:6px 0' }, notes) ], 8000);
+			}).catch(function() {});
 		}).catch(function(e) {
 			errBox.textContent = '';
 			errBox.appendChild(self.errorBox(_('保存失败：%s').format(e.message), self.backendErrorHint(e.message)));
@@ -486,6 +622,12 @@ return view.extend({
 			self.refreshCustomTable();
 			self.refreshPresetStatus();
 			self.refreshSourceChips();
+
+			/* re-render an open file panel so its "当前值" column reflects
+			 * the kernel state AFTER an apply/refresh (values were stale
+			 * otherwise, making applied settings look ineffective) */
+			if (self.fileViewPath != null)
+				self.renderFilePanel();
 		}).catch(function(e) {
 			ui.addNotification(null, E('p', {}, _('加载失败：%s').format(e.message)), 'error');
 		});
@@ -556,11 +698,44 @@ return view.extend({
 		});
 	},
 
+	/* Unified result-bar display: shows nodes, optional auto-hide after
+	 * autoHideMs (0 = stay until replaced). Re-calling resets the timer. */
+	showApplyResult: function(nodes, autoHideMs) {
+		if (this.applyResultTimer != null) {
+			window.clearTimeout(this.applyResultTimer);
+			this.applyResultTimer = null;
+		}
+
+		dom.content(this.applyResultBox, nodes);
+		this.applyResultBox.style.display = '';
+
+		if (autoHideMs > 0) {
+			var box = this.applyResultBox;
+
+			this.applyResultTimer = window.setTimeout(function() {
+				box.style.display = 'none';
+				dom.content(box, []);
+			}, autoHideMs);
+		}
+	},
+
+	hideApplyResult: function() {
+		if (this.applyResultTimer != null) {
+			window.clearTimeout(this.applyResultTimer);
+			this.applyResultTimer = null;
+		}
+
+		this.applyResultBox.style.display = 'none';
+		dom.content(this.applyResultBox, []);
+	},
+
 	applyConfig: function() {
 		var self = this;
 
-		dom.content(this.applyResultBox, [ E('p', { 'style': 'color:#777;padding:6px' }, _('正在应用全部配置，请稍候…')) ]);
-		this.applyResultBox.style.display = '';
+		this.showApplyResult([ E('p', { 'style': 'color:#777;padding:6px' }, _('正在应用全部配置，请稍候…')) ], 0);
+
+		if (this.applyResultBox.scrollIntoView)
+			this.applyResultBox.scrollIntoView({ block: 'nearest' });
 
 		return callApply().then(function(res) {
 			var errors = (res != null && res.errors != null) ? res.errors : [];
@@ -571,28 +746,55 @@ return view.extend({
 			}
 			else if (errors.length == 0) {
 				content = E('div', { 'class': 'alert-message', 'style': 'margin:6px 0' }, [
-					E('p', {}, _('全部配置已成功应用。'))
+					E('p', {}, _('全部配置已成功应用。')),
+					E('p', { 'style': 'color:#777;font-size:12px;margin:2px 0 0' }, _('（本提示将在数秒后自动消失）'))
 				]);
 			}
 			else {
 				var items = [];
 
-				for (var i = 0; i < errors.length; i++)
-					items.push(E('li', {}, [
-						E('strong', {}, errors[i].file),
-						E('pre', { 'style': 'white-space:pre-wrap;margin:4px 0' }, errors[i].output || '')
-					]));
+				for (var i = 0; i < errors.length; i++) {
+					var er = errors[i];
+					var parts = [ E('strong', {}, er.file) ];
+
+					/* real command errors (permission denied etc.) */
+					if (er.output)
+						parts.push(E('pre', { 'style': 'white-space:pre-wrap;margin:4px 0' }, er.output));
+
+					/* kernel did not accept these values (echo was silent,
+					 * but read-back differs) */
+					if (er.not_applied != null && er.not_applied.length > 0) {
+						var naItems = [];
+
+						for (var j = 0; j < er.not_applied.length; j++) {
+							var na = er.not_applied[j];
+
+							naItems.push(E('li', {}, _('%s：写入 %s，内核当前 %s').format(
+								na.key, na.value, na.current)));
+						}
+
+						parts.push(E('p', { 'style': 'margin:4px 0' },
+							_('以下参数内核未接受（可能被限制、随后被覆盖或需要重启生效）：')));
+						parts.push(E('ul', { 'style': 'margin:2px 0' }, naItems));
+					}
+
+					items.push(E('li', {}, parts));
+				}
 
 				content = E('div', { 'class': 'alert-message warning', 'style': 'margin:6px 0' }, [
-					E('p', {}, _('应用完成，以下文件存在报错（常见原因：参数不存在、只读或权限不足）：')),
+					E('p', {}, _('应用完成，以下内容需要留意（常见原因：参数不存在、只读、被内核拒绝或被其他文件覆盖）：')),
 					E('ul', {}, items)
 				]);
 			}
 
-			dom.content(self.applyResultBox, [ content ]);
+			self.showApplyResult([ content ], (res != null && res.code == 0 && errors.length == 0) ? 4000 : 0);
+
+			if (self.applyResultBox.scrollIntoView)
+				self.applyResultBox.scrollIntoView({ block: 'nearest' });
+
 			self.reloadList();
 		}).catch(function(e) {
-			dom.content(self.applyResultBox, [ self.errorBox(_('应用失败：%s').format(e.message), self.backendErrorHint(e.message)) ]);
+			self.showApplyResult([ self.errorBox(_('应用失败：%s').format(e.message), self.backendErrorHint(e.message)) ], 0);
 		});
 	},
 
@@ -676,7 +878,11 @@ return view.extend({
 				rows.push(E('tr', {}, [
 					E('td', {}, [ E('code', {}, (e.disabled ? '# ' : '') + e.key) ]),
 					E('td', {}, [ E('code', {}, e.value) ]),
-					E('td', {}, [ E('code', {}, (e.disabled || e.current == null) ? '—' : e.current) ]),
+					E('td', {}, [ E('code', {
+						/* value differs from kernel state: likely overridden by a
+						 * later config file (or write failed) -> highlight it */
+						'style': (!e.disabled && e.current != null && e.current != e.value) ? 'color:#a35a00;font-weight:600' : ''
+					}, (e.disabled || e.current == null) ? '—' : e.current) ]),
 					E('td', { 'style': 'white-space:nowrap' }, ops)
 				]));
 			}
@@ -812,6 +1018,139 @@ return view.extend({
 		this.fileEditing = null;
 		this.refreshSourceChips();
 		this.renderFilePanel();
+	},
+
+	/* ---------- duplicate-key detection & cleanup ---------- */
+
+	showDupCheck: function() {
+		var self = this;
+
+		this.dupBox.style.display = '';
+		dom.content(this.dupBox, [
+			E('h3', { 'style': 'text-align:center' }, _('同名参数检测')),
+			E('p', { 'style': 'color:#777;text-align:center' }, _('扫描中…'))
+		]);
+
+		if (this.dupBox.scrollIntoView)
+			this.dupBox.scrollIntoView({ block: 'start' });
+
+		callDupCheck('').then(function(res) {
+			self.renderDupResults((res != null && res.dups != null) ? res.dups : []);
+		}).catch(function(e) {
+			dom.content(self.dupBox, [
+				E('h3', { 'style': 'text-align:center' }, _('同名参数检测')),
+				self.errorBox(_('扫描失败：%s').format(e.message), self.backendErrorHint(e.message))
+			]);
+		});
+	},
+
+	hideDupCheck: function() {
+		this.dupBox.style.display = 'none';
+		dom.content(this.dupBox, []);
+	},
+
+	renderDupResults: function(dups) {
+		var self = this;
+		var rows = [];
+		var customPath = '/etc/sysctl.d/99-luci-sysctl.conf';
+		var collapseBtn = E('div', { 'style': 'text-align:center;margin-top:8px' }, [
+			E('button', { 'class': 'btn', 'click': ui.createHandlerFn(self, 'hideDupCheck') }, _('收起'))
+		]);
+
+		if (dups.length == 0) {
+			dom.content(this.dupBox, [
+				E('h3', { 'style': 'text-align:center' }, _('同名参数检测')),
+				E('p', { 'style': 'text-align:center;color:#777;padding:8px' },
+					_('未发现在多个文件中重复定义的参数。')),
+				collapseBtn
+			]);
+			return;
+		}
+
+		for (var i = 0; i < dups.length; i++) {
+			var d = dups[i];
+			var entRows = [];
+			var finalEntry = null;
+
+			for (var j = 0; j < d.entries.length; j++) {
+				var e = d.entries[j];
+
+				if (!e.disabled)
+					finalEntry = e;
+
+				entRows.push(E('div', {
+					'style': 'display:flex;align-items:center;justify-content:center;gap:8px;margin:3px 0'
+				}, [
+					E('code', {}, e.path.replace('/etc/', '')),
+					E('span', { 'style': 'color:#999' }, '='),
+					E('code', {}, e.value),
+					e.disabled
+						? badge(_('已禁用'), 'off')
+						: E('span', { 'style': 'color:#18794e;font-size:12px' }, _('生效来源')),
+					(e.path != customPath)
+						? E('button', {
+							'class': 'cbi-button cbi-button-remove',
+							'title': _('从该文件删除此条目'),
+							'click': ui.createHandlerFn(self, 'dupDeleteEntry', e, d.key)
+						}, _('删除'))
+						: E('span', { 'style': 'color:#34618e;font-size:12px' }, _('自定义'))
+				]));
+			}
+
+			/* files order == application order; compare against custom conf */
+			var files = (this.statusData != null && this.statusData.files != null) ? this.statusData.files : [];
+			var paths = [];
+
+			for (var k = 0; k < files.length; k++)
+				paths.push(files[k].path);
+
+			var customIdx = paths.indexOf(customPath);
+			var shadowed = (finalEntry != null && customIdx >= 0 && paths.indexOf(finalEntry.path) > customIdx);
+			var warnText = (shadowed && finalEntry != null)
+				? _('生效来源（%s）加载在自定义配置之后：“添加参数”里设置该参数不会生效，请直接编辑该文件或删除其同名条目。').format(finalEntry.path.replace('/etc/', ''))
+				: _('自定义配置加载顺序靠后，“添加参数”设置该参数时会覆盖以上取值。');
+
+			rows.push(E('tr', {}, [
+				E('td', {}, [ E('code', {}, d.key) ]),
+				E('td', {}, E('div', {}, entRows)),
+				E('td', { 'style': 'max-width:300px' }, E('div', {
+					'style': 'color:' + (shadowed ? '#b3261e' : '#666')
+				}, warnText))
+			]));
+		}
+
+		dom.content(this.dupBox, [
+			E('h3', { 'style': 'text-align:center' }, _('同名参数检测')),
+			E('p', { 'style': 'color:#666;margin:4px 0;text-align:center' },
+				_('以下参数在多个配置文件中重复定义，按应用顺序以最后一个为准：')),
+			E('div', { 'class': 'lsc-tablewrap' }, E('table', { 'class': 'lsc-table' }, [
+				E('thead', {}, E('tr', {}, [
+					E('th', {}, _('参数名')),
+					E('th', {}, _('各文件定义（按应用顺序）')),
+					E('th', {}, _('说明'))
+				])),
+				E('tbody', rows)
+			])),
+			collapseBtn
+		]);
+	},
+
+	dupDeleteEntry: function(e, key) {
+		var self = this;
+
+		return callFileDelete(e.path, key).then(function(res) {
+			if (res == null || res.code != 0) {
+				ui.addNotification(null,
+					E('p', {}, _('删除失败：%s').format((res != null && res.error) ? res.error : _('未知错误'))),
+					'error');
+				return;
+			}
+
+			self.reloadList();
+			self.showDupCheck();
+		}).catch(function(err) {
+			ui.addNotification(null, E('p', {}, _('删除失败：%s').format(err.message)), 'error');
+		});
 	},
 
 	/* ---------- section 2: online preset ---------- */
