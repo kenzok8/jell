@@ -7,7 +7,7 @@ PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/proot-me/proot.git
-PKG_SOURCE_VERSION:=53f3955e75074b44adcb15b7f1ff8215f55bf392
+PKG_SOURCE_VERSION:=65f3f7dbc20776d6ccc1f0b49e6d560161ea384f
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/python/python3-version.mk
