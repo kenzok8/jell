@@ -9,7 +9,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=glorytun
-PKG_RELEASE:=10
+PKG_RELEASE:=11
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_VERSION:=203c5f2223d7d5146d659b51159b2f02c2480d15
 PKG_SOURCE:=glorytun-$(PKG_VERSION).tar.gz
@@ -50,13 +50,10 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/glorytun $(1)/usr/sbin/$(PKG_NAME)
-	$(INSTALL_BIN) files/glorytun-irq-affinity.sh $(1)/usr/sbin/glorytun-irq-affinity.sh
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) init $(1)/etc/init.d/$(PKG_NAME)
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) glorytun.config $(1)/etc/config/glorytun
-	$(INSTALL_DIR) $(1)/etc/glorytun
-	$(INSTALL_DATA) files/glorytun-sysctl.conf $(1)/etc/glorytun/glorytun-sysctl.conf
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
