@@ -4,6 +4,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI shared OpenWrt auth bridge for LinkEase apps
 LUCI_PKGARCH:=all
+PKG_PROVIDES:=luci-lib-openwrtauth
 
 
 include $(TOPDIR)/feeds/luci/luci.mk
