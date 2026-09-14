@@ -10,7 +10,7 @@ PKG_ARCH_BAIDUSDK:=$(ARCH)
 
 PKG_NAME:=baidusdk
 PKG_VERSION:=1.0.3
-PKG_RELEASE:=540
+PKG_RELEASE:=541
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/linkease/istore-packages/releases/download/baidudrive/
 PKG_HASH:=skip
