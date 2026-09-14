@@ -280,5 +280,20 @@
       "^(?:hui zhou|huizhou) gaoshengda(?: |$)"
     ],
     "supplemental": true
+  },
+  {
+    "slug": "gigabyte",
+    "name": "GIGABYTE",
+    "patterns": [
+      "^giga ?byte technology(?: |$)"
+    ],
+    "supplemental": true
+  },
+  {
+    "slug": "vmware",
+    "name": "VMware",
+    "patterns": [
+      "^vmware(?: inc)?$"
+    ]
   }
 ]
