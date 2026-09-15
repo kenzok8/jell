@@ -2,8 +2,6 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_VERSION:=1.1.2-r20240822
-PKG_RELEASE:=18
 
 LUCI_TITLE:=LuCI support for heimdall
 LUCI_PKGARCH:=all
