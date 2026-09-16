@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=cloudreve
-PKG_VERSION:=4.18.0
+PKG_VERSION:=4.19.0
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
