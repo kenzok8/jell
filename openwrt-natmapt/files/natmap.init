@@ -450,6 +450,14 @@ service_triggers() {
 	procd_add_validation validate_section_natmap
 }
 
+boot() {
+	sleep $(uci -q get $NAME.@$GLOBALSECTION[0].boot_delay || echo 0)
+
+	network_flush_cache
+	define_nic
+	start "$@"
+}
+
 start_service() {
 	local sid="$1"
 

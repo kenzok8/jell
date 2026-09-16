@@ -11,13 +11,14 @@ address, so they stay local).
 
 | Metric | Budget | Track | Source |
 |---|---|---|---|
-| main.css (identity/raw) | ≤ 193 KB | size | production build, 2026-08 (191,899 B; +~2 KB custom-background mode, +~0.5 KB router progress bar / live region; the bar is now Turbo-shaped — width/opacity only, inserted per navigation) |
+| main.css (identity/raw) | ≤ 193 KB | size | production build, 2026-09-16 (189,650 B; −0.77 KB sidebar push as two transitions instead of run keyframes; +42 B replayed nav skips the fade; +~2 KB custom-background mode, +~0.5 KB router progress bar / live region; the bar is now Turbo-shaped — width/opacity only, inserted per navigation; −1.24 KB unblurred mega-menu curtain, delayed visibility, instant nav-pill colours) |
 | login.css (identity/raw) | ≤ 12 KB | size | production build, 2026-07 (10,935 B, token-pruned) |
-| menu-aurora.js (identity/raw) | ≤ 22 KB | size | production build, 2026-08 (21,809 B; +0.8 KB palette recents: record on pick, pure-LRU browse order, storage validation; +0.2 KB ">" logout command) |
+| menu-aurora.js (identity/raw) | ≤ 22 KB | size | production build, 2026-09-16 (21,362 B; −0.24 KB sidebar toggle is a class flip; −0.09 KB pre-paint nav cache, its crumb renderer moved into header.ut (the replay itself is per-response HTML, see below); +0.8 KB palette recents: record on pick, pure-LRU browse order, storage validation; +0.2 KB ">" logout command) |
 | router-aurora.js (identity/raw, Navigation-API browsers only) | ≤ 15 KB | size | production build, 2026-08 (14,844 B: template shells fetched, per-render listener teardown, timeout-as-failure, expiry gate, readonly folding, node css, wildcard actions, trickling progress bar, same-URL reload rule, visibility gate, contract check) |
 | Default logo (identity/raw) | ≤ 16 KB | size | production build, 2026-07 (15,057 B) |
-| Core admin cold theme assets (identity/raw) | ≤ 267.5 KB | size | main CSS + menu JS + router JS + default font + logo, 2026-08 (≈267.2 KB; the router is a one-time cost that removes per-click dispatcher work; +1.0 KB palette recents and logout command) |
+| Core admin cold theme assets (identity/raw) | ≤ 267.5 KB | size | main CSS + menu JS + router JS + default font + logo, 2026-09-16 (265,420 B; −1.1 KB sidebar push and nav cache; the router is a one-time cost that removes per-click dispatcher work; +1.0 KB palette recents and logout command; −1.24 KB mega-menu curtain) |
 | Login cold theme assets, excluding configured background (identity/raw) | ≤ 55 KB | size | login CSS + default font + logo, 2026-07 (49,572 B) |
+| Admin HTML inline scripts added per full load (identity, never cached) | — | size | header.ut, 2026-09-16: pre-paint nav replay ≈ +0.5 KB (mega-menu/dropdown) / ≈ +1.9 KB (sidebar, with the shared crumb renderer); login page +0.07 KB. Template shells the router fetches carry it too. |
 | Blocking requests before first paint | ≤ 4 | count | current waterfall |
 | Repeat-visit asset requests | ≈ 0 | count | target state; package-built CSS/JS URLs are versioned, but long-lived cache headers still need live verification |
 | TTFB, login page (device) | proposed: ≤ 130 ms | latency | local device baseline, 2026-07 |
@@ -42,6 +43,10 @@ Budget revisions require a new baseline entry under `../baselines/`.
 - Package-root `.DS_Store` metadata removed and covered by a regression test.
 - login.css pruned to its reachable custom properties at build time (the
   shared token sheet is admin-sized; the login page consumes a fraction).
+- Mega-menu curtain (2026-09-16): no backdrop blur, `visibility` delayed
+  instead of tweened, instant nav-pill colours; main.css −1,244 B. Device
+  trace, 4× CPU, median of 3: repaints 287 → 112, main-thread animations
+  33 → 8. With `--disable-gpu`, dropped frames per open went 3–5 → 0.
 
 - Client-side router (`router-aurora.js`, `.dev/docs/router.md`,
   2026-08-16): view/alias/firstchild/overview navigations become
