@@ -1,0 +1,62 @@
+#
+# This is free software, licensed under the GNU General Public License v3.
+# See /LICENSE for more information.
+#
+
+include $(TOPDIR)/rules.mk
+
+PKG_NAME:=caddy
+PKG_VERSION:=2.11.4.2
+PKG_RELEASE:=1
+
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/caddyserver/caddy.git
+PKG_SOURCE_DATE:=2026-07-25
+PKG_SOURCE_VERSION:=df77f8bde1a8d00f6c7043291325dd6b1f82742e
+PKG_MIRROR_HASH:=skip
+
+PKG_LICENSE:=GPL-3.0-or-later
+PKG_LICENSE_FILES:=LICENSE
+
+PKG_BUILD_DEPENDS:=golang/host upx/host
+PKG_BUILD_PARALLEL:=1
+PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
+
+GO_PKG:=github.com/caddyserver/caddy/v2/cmd
+GO_PKG_BUILD_PKG:=$(GO_PKG)/caddy
+GO_PKG_LDFLAGS:=-s -w
+GO_PKG_LDFLAGS_X:=github.com/caddyserver/caddy/v2.CustomVersion=v$(PKG_VERSION)
+
+include $(INCLUDE_DIR)/package.mk
+include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
+
+define Package/$(PKG_NAME)
+  TITLE:=Caddy is an open source web server
+  URL:=https://caddyserver.com
+  SECTION:=net
+  CATEGORY:=Network
+  SUBMENU:=Web Servers/Proxies
+  DEPENDS:=$(GO_ARCH_DEPENDS) +libpthread
+endef
+
+define Package/$(PKG_NAME)/description
+Caddy is an extensible server platform that uses TLS by default.
+endef
+
+define Build/Compile
+	$(call GoPackage/Build/Compile)
+	if ! grep -q "UPX!" $(GO_PKG_BUILD_BIN_DIR)/caddy; then \
+	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/caddy; \
+	fi
+	
+endef
+
+define Package/caddy/install
+	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
+	$(INSTALL_DIR) $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/caddy $(1)/usr/bin/caddy
+endef
+
+$(eval $(call GoBinPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,$(PKG_NAME)))
