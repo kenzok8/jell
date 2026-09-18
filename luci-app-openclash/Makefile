@@ -2,49 +2,20 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-openclash
 PKG_VERSION:=0.47.156
-PKG_RELEASE:=814
+PKG_RELEASE:=815
 PKG_MAINTAINER:=vernesong <https://github.com/vernesong/OpenClash>
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/$(PKG_NAME)/config
-	config PACKAGE_kmod-inet-diag
-	default y if PACKAGE_$(PKG_NAME)
-
-	config PACKAGE_luci-compat
-	default y if PACKAGE_$(PKG_NAME)
-
-	config PACKAGE_kmod-nft-tproxy
-	default y if PACKAGE_firewall4
-
-	config PACKAGE_kmod-ipt-nat
-	default y if ! PACKAGE_firewall4
-
-	config PACKAGE_iptables-mod-tproxy
-	default y if ! PACKAGE_firewall4
-
-	config PACKAGE_iptables-mod-extra
-	default y if ! PACKAGE_firewall4
-
-	config PACKAGE_dnsmasq_full_ipset
-	default y if ! PACKAGE_firewall4
-
-	config PACKAGE_dnsmasq_full_nftset
-	default y if PACKAGE_firewall4
-
-	config PACKAGE_ipset
-	default y if ! PACKAGE_firewall4
-endef
-
 define Package/$(PKG_NAME)
 	CATEGORY:=LuCI
 	SUBMENU:=3. Applications
 	TITLE:=LuCI support for clash
 	PKGARCH:=all
-	DEPENDS:=+dnsmasq-full +bash +curl +ca-bundle +ip-full \
-	+ruby +ruby-yaml +kmod-tun +unzip
+	DEPENDS:=+luci-compat +dnsmasq-full +bash +curl +ca-bundle +ip-full +ruby \
+		+ruby-yaml +kmod-inet-diag +kmod-nft-tproxy +kmod-tun +unzip
 	MAINTAINER:=vernesong
 endef
 
@@ -89,7 +60,7 @@ endef
 
 define Package/$(PKG_NAME)/prerm
 #!/bin/sh
-	[ -n "$(pidof clash)" ] && /etc/init.d/openclash stop 2>/dev/null
+	[ -n "$$(pidof clash)" ] && /etc/init.d/openclash stop 2>/dev/null
 	if [ -f "/etc/config/openclash" ] && [ ! -f "/tmp/openclash.bak" ]; then
 		cp -f "/etc/config/openclash" "/tmp/openclash.bak" >/dev/null 2>&1
 		cp -rf "/etc/openclash" "/tmp/openclash" >/dev/null 2>&1
@@ -101,9 +72,9 @@ endef
 
 define Package/$(PKG_NAME)/postrm
 #!/bin/sh
-	DEFAULT_DNSMASQ_CFGID="$$(uci -q show "dhcp.@dnsmasq[0]" | awk 'NR==1 {split($0, conf, /[.=]/); print conf[2]}' 2>/dev/null)"
-	if [ -f "/tmp/etc/dnsmasq.conf.$DEFAULT_DNSMASQ_CFGID" ]; then
-	   DNSMASQ_CONF_DIR="$$(awk -F '=' '/^conf-dir=/ {print $2}' "/tmp/etc/dnsmasq.conf.$DEFAULT_DNSMASQ_CFGID" 2>/dev/null)"
+	DEFAULT_DNSMASQ_CFGID="$$(uci -q show "dhcp.@dnsmasq[0]" | awk 'NR==1 {split($$0, conf, /[.=]/); print conf[2]}' 2>/dev/null)"
+	if [ -f "/tmp/etc/dnsmasq.conf.$$DEFAULT_DNSMASQ_CFGID" ]; then
+	   DNSMASQ_CONF_DIR="$$(awk -F '=' '/^conf-dir=/ {print $$2}' "/tmp/etc/dnsmasq.conf.$$DEFAULT_DNSMASQ_CFGID" 2>/dev/null)"
 	else
 	   DNSMASQ_CONF_DIR="/tmp/dnsmasq.d"
 	fi
@@ -116,9 +87,9 @@ define Package/$(PKG_NAME)/postrm
 	rm -rf /usr/share/openclash >/dev/null 2>&1
 	rm -rf /tmp/openclash_version_history.json >/dev/null 2>&1
     rm -rf /tmp/openclash_cdn_info.json >/dev/null 2>&1
-	rm -rf ${DNSMASQ_CONF_DIR}/dnsmasq_openclash_custom_domain.conf >/dev/null 2>&1
-	rm -rf ${DNSMASQ_CONF_DIR}/dnsmasq_openclash_chnroute_pass.conf >/dev/null 2>&1
-	rm -rf ${DNSMASQ_CONF_DIR}/dnsmasq_openclash_chnroute6_pass.conf >/dev/null 2>&1
+	rm -rf $${DNSMASQ_CONF_DIR}/dnsmasq_openclash_custom_domain.conf >/dev/null 2>&1
+	rm -rf $${DNSMASQ_CONF_DIR}/dnsmasq_openclash_chnroute_pass.conf >/dev/null 2>&1
+	rm -rf $${DNSMASQ_CONF_DIR}/dnsmasq_openclash_chnroute6_pass.conf >/dev/null 2>&1
 	rm -rf /tmp/etc/openclash >/dev/null 2>&1
 	rm -rf /tmp/openclash_announcement >/dev/null 2>&1
 	rm -rf /www/luci-static/resources/openclash >/dev/null 2>&1

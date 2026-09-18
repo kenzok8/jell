@@ -5,7 +5,7 @@
     local nixio = require("nixio")
 
 function miniupnpd_chk(devname,vif,enable)
-    local WAN_IF=mtkwifi.__trim(mtkwifi.read_pipe("uci -q get network.wan.device"))
+    local WAN_IF=mtkwifi.__trim(mtkwifi.read_pipe("uci -q get network.wan.ifname"))
 
     os.execute("rm -rf /etc/miniupnpd.conf")
     os.execute("iptables -t nat -F MINIUPNPD 1>/dev/null 2>&1")
