@@ -35,6 +35,7 @@ define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 [ -n "$${IPKG_INSTROOT}" ] || {
 	[ -f /tmp/pushbot/traffic_source ] && rm -f /tmp/pushbot/traffic_source
+	[ -f /tmp/pushbot/nlbw_check_round ] && rm -f /tmp/pushbot/nlbw_check_round
 	[ -f /tmp/pushbot/firewall_mode ] && rm -f /tmp/pushbot/firewall_mode
 	[ -f /tmp/pushbot/wlan_interface ] && rm -f /tmp/pushbot/wlan_interface
 	[ -f /tmp/pushbot/wireless_ifs ] && rm -f /tmp/pushbot/wireless_ifs
