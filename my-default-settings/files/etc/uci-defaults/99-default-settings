@@ -1,246 +1,149 @@
 #!/bin/sh
 
-sed -i "s/op.supes.top/dl.openwrt.ai/" /etc/opkg/distfeeds.conf
+# 1. 基础系统与组件链接修正
+sed -i 's|op.supes.top|dl.openwrt.ai|g' /etc/opkg/distfeeds.conf 2>/dev/null
+[ -x /bin/bash ] && sed -i 's|/bin/ash|/bin/bash|g' /etc/passwd 2>/dev/null && ln -sf /bin/bash /bin/sh 2>/dev/null
+[ -x /usr/bin/wget ] && [ ! -x /usr/bin/wget-ssl ] && ln -sf /usr/bin/wget /usr/bin/wget-ssl
+sed -i -e '/profile.d/d' /lib/upgrade/keep.d/base-files \
+       -e 's/git-.*-\(.*\)/git-\1/g' /usr/lib/lua/luci/version.lua 2>/dev/null
 
-[ -x /bin/bash ] && grep -q "/bin/ash" /etc/passwd && {
-    sed -i 's|/bin/ash|/bin/bash|g' "/etc/passwd"
-    ln -sf /bin/bash /bin/sh
-	touch /root/.bash_history
-	ln -sf /root/.bash_history /tmp/.busybox_ash_history
-}
-
+# 2. 版本与环境参数提取
 version=$(uci -q get base_config.@status[0].version)
+case "$version" in ''|*[!0-9]*) version=0 ;; esac
 
-hostname=$(uci -q get system.@system[0].hostname)
-[ -n "${hostname}" ] || hostname="Kwrt"
+for ip in $(uci -q get network.lan.ipaddr); do
+	case "$ip" in *.*) lan_ip="${ip%%/*}"; break ;; esac
+done
+lan_ip="${lan_ip:-10.0.0.1}"
 
-if [ "$(uci -q get dhcp.@dnsmasq[0].port)" != "53" ]; then
-	uci -q set dhcp.@dnsmasq[0].port='53'
-	uci commit dhcp
-fi
+[ -z "$(uci -q get system.@system[0].hostname)" ] && uci -q set system.@system[0].hostname='Kwrt'
+[ "$(uci -q get dropbear.main._direct)" != "1" ] && uci -q delete dropbear.main.Interface
+case "$(uci -q get uhttpd.main.index_page)" in *cgi-bin/luci*) ;; *) uci -q add_list uhttpd.main.index_page='cgi-bin/luci' ;; esac
 
-sed -i '/profile.d/d' /lib/upgrade/keep.d/base-files
+proc=$(grep -c '^processor' /proc/cpuinfo 2>/dev/null)
+[ "${proc:-0}" -gt 0 ] 2>/dev/null || proc=3
+sed -i "s/^threads =.*/threads = $proc/" /etc/uwsgi/vassals/luci-webui.ini 2>/dev/null
 
-if ! echo "$(uci -q get uhttpd.main.index_page)" | grep -q "cgi-bin/luci"; then
-	uci -q add_list uhttpd.main.index_page='cgi-bin/luci'
-	uci commit uhttpd
-fi
+# 3. 内存分级计算
+mem=0
+[ -r /proc/meminfo ] && read -r _ mem _ < /proc/meminfo
+case "$mem" in ''|*[!0-9]*) mem=0 ;; esac
 
-if [ "$(uci -q get dropbear.main._direct)" != "1" ] && [ -n "$(uci -q get dropbear.main.Interface)" ]; then
-	uci del dropbear.main.Interface
-	uci commit dropbear
-fi
+c=1024; nf=16384
+[ "$mem" -ge 65536 ]   && { c=2048;  nf=32768; }
+[ "$mem" -ge 131072 ]  && { c=4096;  nf=65536; }
+[ "$mem" -ge 262144 ]  && { c=8192;  nf=65536; }
+[ "$mem" -ge 524288 ]  && { c=10000; nf=131072; }
+[ "$mem" -ge 1048576 ] && { c=10000; nf=262144; }
 
-[ -x /usr/bin/wget ] && [ ! -x /usr/bin/wget-ssl ] && \
-	ln -s /usr/bin/wget /usr/bin/wget-ssl
+# 4. 首次开机参数统一批量预设
+if [ "$version" -lt 1 ]; then
+	uci -q batch <<-EOF
+		set luci.main.lang='auto'
+		set uhttpd.main.rfc1918_filter='0'
+		set uhttpd.main.redirect_https='0'
+		set uhttpd.main.script_timeout='120'
+		set upnpd.config.enabled='1'
+		set firewall.@defaults[0].flow_offloading='1'
+		set firewall.@defaults[0].flow_offloading_hw='1'
+		set fstab.@global[0].anon_mount='1'
+		set network.globals.packet_steering='1'
+		set nft-qos.default.limit_enable='0'
+		set system.@system[0].zonename='Asia/Shanghai'
+		set system.@system[0].timezone='CST-8'
+		set system.@system[0].ttylogin='1'
+		set system.@system[0].zram_size_mb='$((mem / 1024 / 3))'
+		del system.ntp.server
+		add_list system.ntp.server='ntp.aliyun.com'
+		add_list system.ntp.server='0.openwrt.pool.ntp.org'
+		set dhcp.@dnsmasq[0].port='53'
+		set dhcp.@dnsmasq[0].dns_redirect='1'
+		set dhcp.@dnsmasq[0].allservers='1'
+		del dhcp.@dnsmasq[0].noresolv
+		set dhcp.@dnsmasq[0].cachesize='$c'
+		set dhcp.@dnsmasq[0].dnsforwardmax='$c'
+		set dhcp.@dnsmasq[0].min_ttl='3600'
+		set dhcp.lan.force='1'
+		set dhcp._ta=domain
+		set dhcp._ta.name='time.android.com'
+		set dhcp._ta.ip='203.107.6.88'
+		set dhcp._ta.comments='time.android'
+	EOF
 
-sed -i "s/git-.*-\(.*\)/git-\1/g" /usr/lib/lua/luci/version.lua
+	(echo root; echo root) | passwd root >/dev/null 2>&1
+	[ -f /usr/share/rpcd/acl.d/luci-theme-argon.json ] && uci -q set luci.main.mediaurlbase='/luci-static/argon'
+	grep -q 'log-facility' /etc/dnsmasq.conf 2>/dev/null || echo "log-facility=/dev/null" >> /etc/dnsmasq.conf
 
-if [ -f /etc/uwsgi/vassals/luci-webui.ini ]; then
-	processor=$(grep -c 'processor' /proc/cpuinfo)
-	[ -n "$processor" ] && [ "$processor" -gt 0 ] || processor=3
-	sed -i "/^threads =/c\threads = $processor" /etc/uwsgi/vassals/luci-webui.ini
-fi
-
-if [ -f /etc/config/attendedsysupgrade ]; then
-	uci -q set attendedsysupgrade.server.url='https://openwrt.ai'
-	uci commit attendedsysupgrade
-fi
-
-if [ -z "$version" ] || [ "$version" -lt 1 ]; then
-	uci -q set luci.main.lang='auto'
-	if [ -f /usr/share/rpcd/acl.d/luci-theme-footstrap.json ]; then
-		uci -q set luci.main.mediaurlbase=/luci-static/footstrap
-	fi
-	uci commit luci
-	
-	if uci -q get system.@system[0] >/dev/null; then
-		uci -q set system.@system[0].zonename='Asia/Shanghai'
-		uci -q set system.@system[0].timezone='CST-8'
-		uci -q set system.@system[0].conloglevel='4'
-		uci -q set system.@system[0].cronloglevel='8'
-		uci -q set system.@system[0].ttylogin='1'
-		uci -q del system.ntp.server
-		uci -q add_list system.ntp.server='ntp.aliyun.com'
-		uci -q add_list system.ntp.server='0.openwrt.pool.ntp.org'
-		uci commit system
-	fi
-
-	uci -q set uhttpd.main.rfc1918_filter=0
-	uci -q set uhttpd.main.redirect_https=0
-	uci -q set uhttpd.main.script_timeout='120'
-	uci commit uhttpd
-	
-	uci -q set upnpd.config.enabled='1'
-	uci commit upnpd
-	
-	(echo "root"; sleep 1; echo "root") | /bin/busybox passwd root >/dev/null 2>&1 &
-
-	uci -q set firewall.@defaults[0].flow_offloading='1'
-	uci -q set firewall.@defaults[0].flow_offloading_hw='1'
-	uci commit firewall
-
-	uci -q set upnpd.config.enabled='1'
-	uci commit upnpd
-	
-	grep -q log-facility /etc/dnsmasq.conf || \
-		echo "log-facility=/dev/null" >> /etc/dnsmasq.conf
-
-	#kernel_version=$(uname -r)
-	#if [ -f "/lib/modules/$kernel_version/xt_FULLCONENAT.ko" ] || [ -f "/lib/modules/$kernel_version/nft_fullcone.ko" ]; then
-	#	uci -q set firewall.@defaults[0].fullcone='1'
-	#	uci commit firewall
-	#fi
-
-	uci -q set fstab.@global[0].anon_mount=1
-	uci commit fstab
- 
-	uci -q set network.globals.packet_steering=1
-	uci -q set network.@device[0].promisc=1
-	uci commit network
-  
-	uci -q set dhcp.@dnsmasq[0].dns_redirect='1'
-	uci -q set dhcp.@dnsmasq[0].allservers='1'
-	uci -q del dhcp.@dnsmasq[0].noresolv
-	uci -q set dhcp.@dnsmasq[0].cachesize='1500'
-	uci -q set dhcp.@dnsmasq[0].min_ttl='3600'
-	uci -q set dhcp.lan.force='1'
-	uci -q set dhcp.lan.ra='hybrid'
-	uci -q set dhcp.lan.ndp='hybrid'
-	uci -q set dhcp.lan.dhcpv6='hybrid'
-	uci commit dhcp
-
-	uci -q set nft-qos.default.limit_enable='0'
-	uci commit nft-qos
-fi
-
-# kB
-memtotal=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-if [ "$memtotal" -ge 1048576 ]; then
-	# > 1024M
-	cachesize=10000
-	dnsforwardmax=10000
-	nf_conntrack_max=262144
-elif [ "$memtotal" -ge 524288 ]; then
-	# <= 1024M
-	cachesize=10000
-	dnsforwardmax=10000
-	nf_conntrack_max=131072
-elif [ "$memtotal" -ge 262144 ]; then
-	# <= 512M
-	cachesize=8192
-	dnsforwardmax=8192
-	nf_conntrack_max=65536
-elif [ "$memtotal" -ge 131072 ]; then
-	# <= 256M
-	cachesize=4096
-	dnsforwardmax=4096
-	nf_conntrack_max=65536
-elif [ "$memtotal" -ge 65536 ]; then
-	# <= 128M
-	cachesize=2048
-	dnsforwardmax=2048
-	nf_conntrack_max=32768
-else
-	# < 64M
-	cachesize=1024
-	dnsforwardmax=1024
-	nf_conntrack_max=16384
-fi
-
-if [ -z "$version" ] || [ "$version" -lt 1 ]; then
-	uci -q get dhcp.@dnsmasq[0] || uci -q add dhcp dnsmasq
-	uci -q set dhcp.@dnsmasq[0].cachesize="$cachesize"
-	uci -q set dhcp.@dnsmasq[0].dnsforwardmax="$dnsforwardmax"
-	uci -q set dhcp.@dnsmasq[0].localservice='0'
-	uci -q set dhcp.@dnsmasq[0].localise_queries='1'
-	uci -q set dhcp.@dnsmasq[0].rebind_protection='0'
-	uci -q set dhcp.@dnsmasq[0].rebind_localhost='1'
-	uci commit dhcp
-
-	uci -q set system.@system[0].zram_size_mb="$((memtotal / 1024 / 3))"
-	uci commit system
-	
-	# sysctl overwrite
-	SYSCTL_LOCAL=/etc/sysctl.d/50-local.conf
 	mkdir -p /etc/sysctl.d
-	> "$SYSCTL_LOCAL"
-	echo "net.nf_conntrack_max=$nf_conntrack_max" >> "$SYSCTL_LOCAL"
-	echo "net.core.rmem_max=$nf_conntrack_max" >> "$SYSCTL_LOCAL"
+	printf "net.nf_conntrack_max=%s\nnet.core.rmem_max=%s\n" "$nf" "$nf" > /etc/sysctl.d/50-local.conf
 
-	if [ -n "$(command -v nginx)" ]; then
-		uci add wizard shortcuts
-		uci set wizard.@shortcuts[-1].shortcut='pw'
-		uci set wizard.@shortcuts[-1].to_url='http://10.0.0.1/cgi-bin/luci/admin/services/passwall'
-		uci set wizard.@shortcuts[-1].comments='passwall'
-		uci commit wizard
-
-		uci -q set nginx._sc_pw=server
-		uci -q set nginx._sc_pw.server_name="pw"
-		uci -q add_list nginx._sc_pw.listen="80"
-		uci -q add_list nginx._sc_pw.listen="443"
-		uci -q set nginx._sc_pw.return="302 http://10.0.0.1/cgi-bin/luci/admin/services/passwall"
-
-		uci -q set dhcp._sc_pw=domain
-		uci -q set dhcp._sc_pw.name="pw"
-		uci -q set dhcp._sc_pw.ip="10.0.0.1"
-		uci -q set dhcp._sc_pw.comments="PassWall"
-		uci commit dhcp
-	fi
-	
-	if [ -z "$(uci -q get dhcp._ta)" ]; then
-		uci -q set dhcp._ta=domain
-		uci -q set dhcp._ta.name="time.android.com"
-		uci -q set dhcp._ta.ip="203.107.6.88"
-		uci -q set dhcp._ta.comments="time.android"
-		uci commit dhcp
+	if command -v nginx >/dev/null 2>&1 && [ -z "$(uci -q get wizard.pw)" ]; then
+		uci -q batch <<-EOF
+			set wizard.pw=shortcuts
+			set wizard.pw.shortcut='pw'
+			set wizard.pw.to_url='http://${lan_ip}/cgi-bin/luci/admin/services/passwall'
+			set wizard.pw.comments='passwall'
+			set nginx._sc_pw=server
+			set nginx._sc_pw.server_name='pw'
+			add_list nginx._sc_pw.listen='80'
+			add_list nginx._sc_pw.listen='443'
+			set nginx._sc_pw.return='302 http://${lan_ip}/cgi-bin/luci/admin/services/passwall'
+			set dhcp._sc_pw=domain
+			set dhcp._sc_pw.name='pw'
+			set dhcp._sc_pw.ip='${lan_ip}'
+			set dhcp._sc_pw.comments='PassWall'
+		EOF
 	fi
 	version=1
 fi
 
-if [ -z "$(uci -q get dhcp.default_server)" ]; then
-	uci -q set dhcp.default_server=domain
-	uci -q set dhcp.default_server.name='kwrt'
-	uci -q set dhcp.default_server.ip='10.0.0.1'
-	uci -q set dhcp.default_server.comments='后台地址'
-	uci commit dhcp
+# 5. 默认后台域名映射与 Nginx 规则
+[ -z "$(uci -q get dhcp.default_server)" ] && uci -q batch <<-EOF
+	set dhcp.default_server=domain
+	set dhcp.default_server.name='kwrt'
+	set dhcp.default_server.ip='${lan_ip}'
+	set dhcp.default_server.comments='后台地址'
+EOF
+
+if command -v nginx >/dev/null 2>&1; then
+	[ -z "$(uci -q get nginx.default_server)" ] && uci -q batch <<-EOF
+		set nginx.default_server=server
+		set nginx.default_server.server_name='kwrt'
+		add_list nginx.default_server.listen='80 default_server'
+		add_list nginx.default_server.listen='[::]:80 default_server'
+		add_list nginx.default_server.include='conf.d/*.locations'
+		set nginx.default_server.access_log='off; # logd openwrt'
+	EOF
+
+	if [ -f /etc/nginx/conf.d/luci.locations ]; then
+		grep -q 'uwsgi_read_timeout' /etc/nginx/conf.d/luci.locations || sed -i '/include uwsgi_params;/a\\t\tuwsgi_read_timeout 300s;' /etc/nginx/conf.d/luci.locations
+		grep -q 'ubus_script_timeout' /etc/nginx/conf.d/luci.locations || sed -i '/ubus_parallel_req/a\        ubus_script_timeout 600;' /etc/nginx/conf.d/luci.locations
+	fi
+
+	if [ -f /etc/nginx/uci.conf.template ]; then
+		sed -i -e 's/128M/3072M/' -e 's/2 1k/4 512k/' /etc/nginx/uci.conf.template
+		grep -q 'client_body_buffer_size' /etc/nginx/uci.conf.template || sed -i '/large_client_header_buffers/a\\tclient_body_buffer_size 128K;' /etc/nginx/uci.conf.template
+	fi
 fi
 
-if [ -n "$(command -v nginx)" ]; then
-	if [ -z "$(uci -q get nginx.default_server)" ]; then
-		uci -q set nginx.default_server=server
-		uci -q set nginx.default_server.server_name='kwrt'
-		uci -q add_list nginx.default_server.listen='80 default_server'
-		uci -q add_list nginx.default_server.listen='[::]:80 default_server'
-		uci -q add_list nginx.default_server.include='conf.d/*.locations'
-		uci -q set nginx.default_server.access_log='off; # logd openwrt'
-		uci commit nginx
-	fi
-	
-	grep -q "uwsgi_read_timeout" /etc/nginx/conf.d/luci.locations 2>/dev/null || {
-		sed -i "s/include uwsgi_params;/include uwsgi_params;\n\t\tuwsgi_read_timeout 300s;/" /etc/nginx/conf.d/luci.locations
-		sed -i '/ubus_parallel_req/a\        ubus_script_timeout 600;' /etc/nginx/conf.d/luci.locations
-	}
+# 6. uWSGI 超时与 FullCone 探测（兼容 fw3/fw4）
+for ini in /etc/uwsgi/vassals/luci-*.ini; do
+	[ -f "$ini" ] && ! grep -q 'cgi-timeout' "$ini" && echo "cgi-timeout = 500" >> "$ini"
+done
+sed -i 's/limit-as = 1000/limit-as = 5000/g' /etc/uwsgi/vassals/luci-webui.ini 2>/dev/null
 
-	sed -i \
-		-e "s/client_max_body_size 128M/client_max_body_size 3072M/" \
-		-e "s/large_client_header_buffers 2 1k/large_client_header_buffers 4 512k/" \
-		/etc/nginx/uci.conf.template
-		
-	grep -q "client_body_buffer_size" /etc/nginx/uci.conf.template || \
-		sed -i "/large_client_header_buffers/a\	client_body_buffer_size 128K;" /etc/nginx/uci.conf.template
-fi
-
-rm -rf /tmp/luci-*
-uci -q set base_config.@status[0].version="$version"
-uci commit base_config
-
-grep -q "cgi-timeout" /etc/uwsgi/vassals/luci-*.ini 2>/dev/null || sed -i '$a cgi-timeout = 500' /etc/uwsgi/vassals/luci-*.ini
-sed -i "s/limit-as = 1000/limit-as = 5000/g" /etc/uwsgi/vassals/luci-webui.ini
-
-modprobe xt_FULLCONENAT || {
-	if ! iptables -L -t nat 2>/dev/null | grep -q "FULLCONENAT"; then
-		uci -q set firewall.@defaults[0].fullcone='0'
-		uci commit firewall
-	fi
+modprobe xt_FULLCONENAT >/dev/null 2>&1 || modprobe nft_fullcone >/dev/null 2>&1 || {
+	iptables -L -t nat 2>/dev/null | grep -q 'FULLCONENAT' || \
+	nft list ruleset 2>/dev/null | grep -q 'fullcone' || \
+	uci -q set firewall.@defaults[0].fullcone='0'
 }
+
+# 7. 更新版本状态、一次性提交所有 UCI 配置并安全退出
+[ -f /etc/config/base_config ] && {
+	uci -q get base_config.@status[0] >/dev/null || uci -q add base_config status >/dev/null
+	uci -q set base_config.@status[0].version="$version"
+}
+
+uci -q commit
+rm -rf /tmp/luci-*
+exit 0
