@@ -9,7 +9,7 @@ PKG_NAME:=luci-app-honk
 
 LUCI_TITLE:=LuCI support for honk
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+honk +luci-compat
+LUCI_DEPENDS:=+honk +luci-base +rpcd-mod-ucode
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

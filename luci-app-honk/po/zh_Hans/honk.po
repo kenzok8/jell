@@ -76,3 +76,34 @@ msgstr "更新时间（每天）"
 msgid "Format Code"
 msgstr "格式化代码"
 
+msgid "Zashboard"
+msgstr "控制面板"
+
+msgid "Dashboard"
+msgstr "控制面板"
+
+msgid "Clear logs"
+msgstr "清空日志"
+
+msgid "Logs cleared successfully."
+msgstr "日志已清空。"
+
+msgid "Failed to clear logs: "
+msgstr "清空日志失败："
+
+msgid "Configuration applied and service reloaded."
+msgstr "配置已生效并重载服务。"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Running Status"
+msgstr "运行状态"
+
+msgid "Formatted"
+msgstr "已格式化"
+
+msgid "Failed to format code: "
+msgstr "格式化代码失败："
+
+
