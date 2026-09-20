@@ -7,12 +7,12 @@ USE_PROCD=1
 clean_shortcuts() {
 	local sec
 	# 清理 nginx 中由 wizard 生成的 _sc_* server 节
-	for sec in $(uci -q show nginx | sed -n 's/^nginx\.\(_sc_[^=.]*\)=server$/\1/p'); do
+	for sec in $(uci -q show nginx 2>/dev/null | sed -n 's/^nginx\.\(_sc_[^=.]*\)=server$/\1/p'); do
 		uci -q delete nginx."$sec"
 	done
 
 	# 清理 dhcp (dnsmasq) 中由 wizard 生成的 _sc_* domain 节
-	for sec in $(uci -q show dhcp | sed -n 's/^dhcp\.\(_sc_[^=.]*\)=domain$/\1/p'); do
+	for sec in $(uci -q show dhcp 2>/dev/null | sed -n 's/^dhcp\.\(_sc_[^=.]*\)=domain$/\1/p'); do
 		uci -q delete dhcp."$sec"
 	done
 }
@@ -22,9 +22,9 @@ process_shortcut() {
 	local shortcut to_url comments lanaddr
 	local cfg="$1"
 
-	# 获取当前 LAN 口 IP，剔除掩码
-	lanaddr="$(uci -q get network.lan.ipaddr)"
-	[ -n "$lanaddr" ] && lanaddr="${lanaddr%%/*}"
+	# 获取当前 LAN 口 IP，支持 DSA 列表与 CIDR 掩码剔除
+	lanaddr="$(uci -q get network.lan.ipaddr | tr ' ' '\n' | head -n1)"
+	lanaddr="${lanaddr%%/*}"
 	[ -z "$lanaddr" ] && lanaddr="10.0.0.1"
 
 	config_get shortcut "$cfg" shortcut
@@ -32,20 +32,22 @@ process_shortcut() {
 	config_get comments "$cfg" comments
 
 	# 校验必要参数
-	[ -z "$shortcut" ] || [ -z "$to_url" ] && return 0
+	if [ -z "$shortcut" ] || [ -z "$to_url" ]; then
+		return 0
+	fi
 
-	# 1. 配置 Nginx 302 重定向 (仅在存在 /etc/nginx/uci.conf 时配置)
+	# 1. 配置 Nginx 302 重定向 (仅在存在 /etc/nginx/uci.conf 时配置，仅监听80，禁止未配证书监听443)
 	if [ -f /etc/nginx/uci.conf ]; then
 		uci -q set nginx._sc_$shortcut=server
 		uci -q set nginx._sc_$shortcut.server_name="$shortcut"
 		uci -q add_list nginx._sc_$shortcut.listen="80"
 		uci -q set nginx._sc_$shortcut.return="302 $to_url"
 
-	# 2. 配置 Dnsmasq (DHCP) 本地域名劫持
+		# 2. 配置 Dnsmasq (DHCP) 本地域名劫持
 		uci -q set dhcp._sc_$shortcut=domain
 		uci -q set dhcp._sc_$shortcut.name="$shortcut"
 		uci -q set dhcp._sc_$shortcut.ip="$lanaddr"
-	[ -n "$comments" ] && uci -q set dhcp._sc_$shortcut.comments="$comments"
+		[ -n "$comments" ] && uci -q set dhcp._sc_$shortcut.comments="$comments"
 	fi
 }
 
@@ -53,16 +55,16 @@ process_shortcut() {
 sethttps() {
 	local cfg="${1:-default}"
 	local https
-	config_get https "$cfg" https
+	config_get https "$cfg" https 0
 
-	if [ -f /etc/nginx/uci.conf ]; then
-		if [ -z "$(uci -q get nginx._redirect2ssl)" ]; then
-			uci -q set nginx._redirect2ssl=server
-			uci -q set nginx._redirect2ssl.server_name='_redirect2ssl'
-			uci -q set nginx._redirect2ssl.return='302 https://$host$request_uri'
-			uci -q set nginx._redirect2ssl.access_log='off; # logd openwrt'
-		fi
+	if [ -x /etc/init.d/nginx ] && [ -f /etc/nginx/uci.conf ]; then
 		if [ "x${https}" = "x1" ]; then
+			if [ -z "$(uci -q get nginx._redirect2ssl)" ]; then
+				uci -q set nginx._redirect2ssl=server
+				uci -q set nginx._redirect2ssl.server_name='_redirect2ssl'
+				uci -q set nginx._redirect2ssl.return='302 https://$host$request_uri'
+				uci -q set nginx._redirect2ssl.access_log='off; # logd openwrt'
+			fi
 			uci -q del nginx.default_server.listen
 			uci -q add_list nginx.default_server.listen='80'
 			uci -q add_list nginx.default_server.listen='[::]:80'
@@ -70,23 +72,21 @@ sethttps() {
 			uci -q add_list nginx._redirect2ssl.listen='80 default_server'
 			uci -q add_list nginx._redirect2ssl.listen='[::]:80 default_server'
 		else
-			uci -q del nginx._redirect2ssl.listen
-			uci -q add_list nginx._redirect2ssl.listen='80'
-			uci -q add_list nginx._redirect2ssl.listen='[::]:80'
+			uci -q delete nginx._redirect2ssl
 			uci -q del nginx.default_server.listen
 			uci -q add_list nginx.default_server.listen='80 default_server'
 			uci -q add_list nginx.default_server.listen='[::]:80 default_server'
 		fi
 		uci -q commit nginx
 		/etc/init.d/nginx reload >/dev/null 2>&1
-	elif [ -n "$(command -v lighttpd)" ]; then
+	elif [ -x /etc/init.d/lighttpd ] && [ -f /etc/lighttpd/conf.d/82-https.conf ]; then
 		if [ "x${https}" = "x1" ]; then
-			sed -i "s/	# url.redirect =/	url.redirect =/" /etc/lighttpd/conf.d/82-https.conf 2>/dev/null
+			sed -i "s/^[ \t]*#*[ \t]*url\.redirect[ \t]*=.*/\turl.redirect =/" /etc/lighttpd/conf.d/82-https.conf 2>/dev/null
 		else
-			sed -i "s/	url.redirect =/	# url.redirect =/" /etc/lighttpd/conf.d/82-https.conf 2>/dev/null
+			sed -i "s/^[ \t]*url\.redirect[ \t]*=.*/\t# url.redirect =/" /etc/lighttpd/conf.d/82-https.conf 2>/dev/null
 		fi
 		/etc/init.d/lighttpd reload >/dev/null 2>&1
-	else
+	elif [ -x /etc/init.d/uhttpd ]; then
 		if [ "x${https}" = "x1" ]; then
 			uci -q set uhttpd.main.redirect_https='1'
 		else
@@ -99,13 +99,11 @@ sethttps() {
 
 # 提交配置并平滑重载底层服务
 reload_services() {
-	# 提交并重载 dnsmasq
 	uci -q commit dhcp
 	if [ -x /etc/init.d/dnsmasq ]; then
 		/etc/init.d/dnsmasq reload >/dev/null 2>&1
 	fi
 
-	# 提交并重载 nginx (如果存在)
 	if [ -f /etc/nginx/uci.conf ] && [ -x /etc/init.d/nginx ]; then
 		uci -q commit nginx
 		/etc/init.d/nginx reload >/dev/null 2>&1
@@ -115,31 +113,38 @@ reload_services() {
 start_service() {
 	config_load wizard
 
-	# 1. 开机 CoreMark 跑分处理 (仅当配置开启且未完成过时后台运行)
+	# 1. 开机 CoreMark 跑分处理 (后台异步执行，杜绝阻塞系统启动与前端保存卡死)
 	local coremark
 	config_get coremark default coremark 0
-	if [ "$coremark" = "1" ] && [ -x /bin/coremark ] && [ -x /sbin/coremark ] && [ ! -f /etc/bench.log ] && [ ! -f /var/lock/opkg.lock ]; then
-			(sleep 5; /sbin/cpumark) &
+	if [ "$coremark" = "1" ]  && [ -x /bin/coremark ] && [ -x /sbin/coremark ] && [ ! -f /etc/bench.log ] && [ ! -f /var/lock/opkg.lock ]; then
+			(sleep 5;/sbin/coremark >/dev/null 2>&1) &
 	fi
 
-	# 2. 清理并重新配置所有 Shortcuts
+	# 2. 持久 Cookie 会话配置同步到 LuCI 底层系统
+	local cookie_p
+	config_get cookie_p default persistent_cookies 1
+	if [ -n "$cookie_p" ]; then
+		[ -z "$(uci -q get luci.sgi)" ] && uci -q set luci.sgi=sgi
+		uci -q set luci.sgi.persistent_cookies="$cookie_p"
+		uci -q commit luci
+	fi
+
+	# 3. 清理并重新配置所有 Shortcuts
 	clean_shortcuts
 	config_foreach process_shortcut shortcuts
 
-	# 3. 设置 HTTPS 重定向
+	# 4. 设置 HTTPS 重定向
 	sethttps default
 
-	# 4. 重载生效服务
+	# 5. 提交并重载生效服务
 	reload_services
 }
 
 stop_service() {
-	# 停止或禁用时清理劫持规则
 	clean_shortcuts
 	reload_services
 }
 
 service_triggers() {
-	# 监听 /etc/config/wizard 的变更，当在页面点击 Save & Apply 时自动 reload
 	procd_add_reload_trigger "wizard"
 }

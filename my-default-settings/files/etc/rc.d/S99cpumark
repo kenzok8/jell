@@ -5,7 +5,7 @@
 	sleep 5
 	while :; do
  		[ -f /var/lock/opkg.lock ] || {
-			/sbin/cpumark
+			/sbin/coremark
 			break;
 		}
 		sleep 1
