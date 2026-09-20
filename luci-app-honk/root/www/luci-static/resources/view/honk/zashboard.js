@@ -1,6 +1,7 @@
 'use strict';
 'require view';
 'require ui';
+'require poll';
 'require honk.common as honk';
 
 return view.extend({
@@ -10,7 +11,7 @@ return view.extend({
 
 	render: function() {
 		var currentInfo = null;
-		var pollTimer = null;
+		var downloadPollFn = null;
 		var iframeLoaded = false;
 
 		function getTargetHost(configHost) {
@@ -61,7 +62,7 @@ return view.extend({
 
 		// State 0: Loading
 		var stateLoading = E('div', { 'class': 'cbi-section', 'style': 'text-align: center; padding: 30px;' }, [
-			E('p', {}, E('em', {}, _('正在检测 Zashboard 与 Clash API 配置...')))
+			E('p', {}, E('em', {}, _('Checking Zashboard and Clash API configuration...')))
 		]);
 
 		// State 1: Unconfigured
@@ -71,34 +72,34 @@ return view.extend({
 			'class': 'cbi-button cbi-button-apply',
 			'click': function() {
 				btnQuickEnable.disabled = true;
-				btnQuickEnable.innerText = _('正在开启并重启 HONK...');
+				btnQuickEnable.innerText = _('Enabling and restarting HONK...');
 				honk.callHonkEnableClashApi().then(function(resp) {
 					btnQuickEnable.disabled = false;
-					btnQuickEnable.innerText = _('一键启用默认 Clash API 配置');
+					btnQuickEnable.innerText = _('One-click Enable Default Clash API');
 					if (resp && resp.success) {
-						quickEnableMsg.innerText = _('已成功启用！正在重启服务并初始化面板...');
+						quickEnableMsg.innerText = _('Successfully enabled! Restarting service and initializing dashboard...');
 						setTimeout(loadInfo, 2500);
 					} else {
-						ui.addNotification(null, E('p', _('启用失败：') + (resp ? resp.message : '未知错误')), 'error');
+						ui.addNotification(null, E('p', _('Failed to enable: ') + (resp ? resp.message : _('Unknown error'))), 'error');
 					}
 				}).catch(function(err) {
 					btnQuickEnable.disabled = false;
-					btnQuickEnable.innerText = _('一键启用默认 Clash API 配置');
-					ui.addNotification(null, E('p', _('启用失败：') + err.message), 'error');
+					btnQuickEnable.innerText = _('One-click Enable Default Clash API');
+					ui.addNotification(null, E('p', _('Failed to enable: ') + (err.message || err)), 'error');
 				});
 			}
-		}, _('一键启用默认 Clash API 配置'));
+		}, _('One-click Enable Default Clash API'));
 
 		var stateUnconfigured = E('div', { 'class': 'cbi-section', 'style': 'display: none;' }, [
-			E('h3', {}, _('Zashboard / Clash API 未配置')),
+			E('h3', {}, _('Zashboard / Clash API Unconfigured')),
 			E('div', { 'class': 'cbi-section-descr' },
-				_('HONK 尚未在配置文件中启用 Clash API。Zashboard 控制面板需要依赖 Clash API 提供的外部控制器端口与面板静态文件路径。')
+				_('HONK has not enabled Clash API in its configuration file. Zashboard requires external controller port and dashboard UI path.')
 			),
 			E('div', { 'class': 'alert-message warning', 'style': 'margin: 12px 0;' },
-				_('请在【全局设置】的配置文件中添加或取消注释 experimental.clash_api 语法块，并确保配置了 external_controller 和 external_ui。')
+				_('Please add or uncomment experimental.clash_api block in Global Settings, and ensure external_controller and external_ui are configured.')
 			),
 			E('div', { 'style': 'margin-top: 10px;' }, [
-				E('label', { 'class': 'cbi-value-title' }, E('strong', {}, _('参考配置示例（/etc/honk/config.dae）：'))),
+				E('label', { 'class': 'cbi-value-title' }, E('strong', {}, _('Example Configuration (/etc/honk/config.dae):'))),
 				E('pre', { 'style': 'padding: 10px; margin-top: 6px; border: 1px solid var(--border-color-medium, #ccc); border-radius: 4px;' },
 					"experimental {\n" +
 					"    clash_api {\n" +
@@ -111,7 +112,7 @@ return view.extend({
 				)
 			]),
 			E('div', { 'style': 'margin-top: 16px; display: flex; gap: 10px; align-items: center;' }, [
-				E('a', { 'href': L.url('admin/services/honk/global'), 'class': 'cbi-button' }, _('前往【全局设置】手动配置')),
+				E('a', { 'href': L.url('admin/services/honk/global'), 'class': 'cbi-button' }, _('Configure in Global Settings')),
 				btnQuickEnable,
 				quickEnableMsg
 			])
@@ -120,7 +121,7 @@ return view.extend({
 		// State 2: Missing UI
 		var metaUiDir = E('td', {}, '/etc/honk/zashboard');
 		var metaController = E('td', {}, '0.0.0.0:9090');
-		var metaSecret = E('td', {}, _('（未设置）'));
+		var metaSecret = E('td', {}, _('(Not set)'));
 
 		var radioGithub = E('input', { 'type': 'radio', 'class': 'cbi-input-radio', 'name': 'zash_dl_src', 'value': 'https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip', 'checked': 'checked' });
 		var radioMirror1 = E('input', { 'type': 'radio', 'class': 'cbi-input-radio', 'name': 'zash_dl_src', 'value': 'https://ghfast.top/https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip' });
@@ -131,7 +132,7 @@ return view.extend({
 
 		var dlLogBox = E('div', { 'class': 'zash-log-box' });
 		var dlProgressWrap = E('div', { 'style': 'display: none; margin: 12px 0;' }, [
-			E('div', { 'style': 'font-weight: bold; margin-bottom: 4px;' }, _('准备下载...')),
+			E('div', { 'style': 'font-weight: bold; margin-bottom: 4px;' }, _('Preparing download...')),
 			dlLogBox
 		]);
 
@@ -151,7 +152,7 @@ return view.extend({
 				if (radioCustom.checked) {
 					url = (inputCustomUrl.value || '').trim();
 					if (!url) {
-						ui.addNotification(null, E('p', _('请输入有效的下载 URL')), 'error');
+						ui.addNotification(null, E('p', _('Please enter a valid download URL')), 'error');
 						return;
 					}
 				} else if (radioMirror1.checked) {
@@ -163,40 +164,40 @@ return view.extend({
 				}
 
 				btnStartDownload.disabled = true;
-				btnStartDownload.innerText = _('正在处理...');
+				btnStartDownload.innerText = _('Processing...');
 				triggerDownload(url, dlLogBox, dlProgressWrap, function() {
 					btnStartDownload.disabled = false;
-					btnStartDownload.innerText = _('开始下载并安装 Zashboard');
+					btnStartDownload.innerText = _('Start Download & Install Zashboard');
 				});
 			}
-		}, _('开始下载并安装 Zashboard'));
+		}, _('Start Download & Install Zashboard'));
 
 		var stateMissingUi = E('div', { 'class': 'cbi-section', 'style': 'display: none;' }, [
-			E('h3', {}, _('未检测到 Zashboard 面板文件')),
+			E('h3', {}, _('Zashboard UI Files Not Found')),
 			E('div', { 'class': 'cbi-section-descr' },
-				_('Clash API 配置已就绪，但设定的外部控制面板目录中缺少面板文件。您可以点击下方按钮，使用 OpenWrt 原生轻量解压直接在线下载部署。')
+				_('Clash API is configured, but dashboard files are missing in the external UI directory. You can download and deploy it directly.')
 			),
 			E('table', { 'class': 'table', 'style': 'margin: 14px 0;' }, [
-				E('tr', {}, [ E('th', { 'style': 'width: 25%;' }, _('目标安装目录 (external_ui)')), metaUiDir ]),
-				E('tr', {}, [ E('th', {}, _('监听地址与端口')), metaController ]),
-				E('tr', {}, [ E('th', {}, _('API 认证密钥')), metaSecret ])
+				E('tr', {}, [ E('th', { 'style': 'width: 25%;' }, _('Target Directory (external_ui)')), metaUiDir ]),
+				E('tr', {}, [ E('th', {}, _('Listen Address & Port')), metaController ]),
+				E('tr', {}, [ E('th', {}, _('API Secret')), metaSecret ])
 			]),
 			E('div', { 'style': 'margin: 16px 0;' }, [
 				E('label', { 'style': 'font-weight: bold; display: block; margin-bottom: 8px;' },
-					_('下载版本与源（专为 OpenWrt 优化的无字体极简版，仅约 1MB）：')
+					_('Download Source (Optimized fontless dist for OpenWrt, ~1MB):')
 				),
 				E('div', { 'style': 'display: flex; flex-direction: column; gap: 8px;' }, [
 					E('label', { 'style': 'display: flex; align-items: center; gap: 8px; cursor: pointer;' }, [
-						radioGithub, E('span', {}, [ E('strong', {}, 'GitHub 官方 Release '), '(dist-no-fonts.zip, 极简推荐)' ])
+						radioGithub, E('span', {}, [ E('strong', {}, 'GitHub Release '), '(dist-no-fonts.zip)' ])
 					]),
 					E('label', { 'style': 'display: flex; align-items: center; gap: 8px; cursor: pointer;' }, [
-						radioMirror1, E('span', {}, [ E('strong', {}, '国内高速镜像 1 '), '(ghfast.top 加速)' ])
+						radioMirror1, E('span', {}, [ E('strong', {}, 'Mirror 1 '), '(ghfast.top)' ])
 					]),
 					E('label', { 'style': 'display: flex; align-items: center; gap: 8px; cursor: pointer;' }, [
-						radioMirror2, E('span', {}, [ E('strong', {}, '国内高速镜像 2 '), '(ghproxy.net 加速)' ])
+						radioMirror2, E('span', {}, [ E('strong', {}, 'Mirror 2 '), '(ghproxy.net)' ])
 					]),
 					E('label', { 'style': 'display: flex; align-items: center; gap: 8px; cursor: pointer;' }, [
-						radioCustom, E('span', {}, E('strong', {}, _('自定义 URL')))
+						radioCustom, E('span', {}, E('strong', {}, _('Custom URL')))
 					])
 				]),
 				customUrlWrap
@@ -208,24 +209,24 @@ return view.extend({
 		// State 3: Ready
 		var httpsAlert = E('div', { 'class': 'alert-message warning', 'style': 'display: none; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;' }, [
 			E('div', {}, [
-				E('strong', {}, _('检测到当前通过 HTTPS 访问 LuCI：')),
-				E('span', {}, _('现代浏览器可能会阻止直接加载 HTTP 协议的 Clash API 面板。如无法正常显示，请点击右侧按钮在新标签页打开。'))
+				E('strong', {}, _('HTTPS access detected: ')),
+				E('span', {}, _('Modern browsers may block HTTP iframe resources under HTTPS. If the dashboard fails to display, open it in a new tab.'))
 			]),
-			E('a', { 'href': '#', 'target': '_blank', 'class': 'cbi-button cbi-button-action', 'style': 'white-space: nowrap; margin-left: 10px;' }, '↗ ' + _('在新标签页打开'))
+			E('a', { 'href': '#', 'target': '_blank', 'class': 'cbi-button cbi-button-action', 'style': 'white-space: nowrap; margin-left: 10px;' }, '↗ ' + _('Open in New Tab'))
 		]);
 
 		var honkPortLabel = E('span', { 'class': 'honk_port_label' }, '9090');
 		var honkStopAlert = E('div', { 'class': 'alert-message warning', 'style': 'display: none; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;' }, [
 			E('div', {}, [
-				E('strong', {}, _('HONK 服务当前未运行：')),
-				E('span', {}, [ _('Clash API 端口（'), honkPortLabel, _('）尚未监听。启动服务后即可正常显示数据。') ])
+				E('strong', {}, _('HONK service is currently not running: ')),
+				E('span', {}, [ _('Clash API port ('), honkPortLabel, _(') is not listening. Start the service to display data.') ])
 			]),
-			E('a', { 'href': L.url('admin/services/honk/global'), 'class': 'cbi-button cbi-button-action', 'style': 'white-space: nowrap; margin-left: 10px;' }, _('前往启动 HONK'))
+			E('a', { 'href': L.url('admin/services/honk/global'), 'class': 'cbi-button cbi-button-action', 'style': 'white-space: nowrap; margin-left: 10px;' }, _('Start HONK'))
 		]);
 
-		var statusServicePill = E('span', { 'class': 'label success' }, _('运行中'));
+		var statusServicePill = E('span', { 'class': 'label success' }, _('Running'));
 		var statusEndpointPill = E('span', { 'class': 'label notice', 'style': 'font-family: monospace;' });
-		var btnExternalOpen = E('a', { 'href': '#', 'target': '_blank', 'class': 'cbi-button cbi-button-action', 'title': _('在新标签页中独立打开') }, '↗ ' + _('新标签页'));
+		var btnExternalOpen = E('a', { 'href': '#', 'target': '_blank', 'class': 'cbi-button cbi-button-action', 'title': _('Open independently in a new tab') }, '↗ ' + _('New Tab'));
 		var iframe = E('iframe', { 'id': 'zash_iframe', 'src': 'about:blank', 'allow': 'fullscreen; clipboard-read; clipboard-write' });
 
 		// Update Modal
@@ -238,7 +239,7 @@ return view.extend({
 		var modalLogBox = E('div', { 'class': 'zash-log-box' });
 		var modalProgressWrap = E('div', { 'style': 'display: none; margin-top: 12px;' }, [ modalLogBox ]);
 
-		var btnConfirmUpdate = E('button', { 'type': 'button', 'class': 'btn cbi-button cbi-button-action' }, _('开始更新'));
+		var btnConfirmUpdate = E('button', { 'type': 'button', 'class': 'btn cbi-button cbi-button-action' }, _('Start Update'));
 
 		btnConfirmUpdate.onclick = function() {
 			var url = modalRadioMirror.checked ? modalRadioMirror.value : modalRadioGithub.value;
@@ -252,25 +253,25 @@ return view.extend({
 		var btnUpdateDashboard = E('button', {
 			'type': 'button',
 			'class': 'btn cbi-button',
-			'title': _('更新至最新版 Zashboard'),
+			'title': _('Update to latest Zashboard'),
 			'click': function() {
 				modalProgressWrap.style.display = 'none';
 				modalLogBox.innerText = '';
 				btnConfirmUpdate.disabled = false;
 
-				ui.showModal(_('更新 Zashboard 面板'), [
+				ui.showModal(_('Update Zashboard Dashboard'), [
 					E('p', { 'class': 'cbi-section-descr' }, [
-						_('系统将下载最新的无字体极简版（dist-no-fonts.zip）并重新部署至目标目录：'),
+						_('The latest fontless version (dist-no-fonts.zip) will be downloaded and deployed to: '),
 						updateTargetLabel
 					]),
 					E('div', { 'class': 'cbi-value' }, [
-						E('label', { 'class': 'cbi-value-title' }, _('选择下载源')),
+						E('label', { 'class': 'cbi-value-title' }, _('Select download source')),
 						E('div', { 'class': 'cbi-value-field', 'style': 'display: flex; flex-direction: column; gap: 8px;' }, [
 							E('label', { 'style': 'display: flex; align-items: center; gap: 8px; cursor: pointer;' }, [
-								modalRadioGithub, E('span', {}, [ E('strong', {}, 'GitHub 官方 Release '), '(dist-no-fonts.zip)' ])
+								modalRadioGithub, E('span', {}, [ E('strong', {}, 'GitHub Release '), '(dist-no-fonts.zip)' ])
 							]),
 							E('label', { 'style': 'display: flex; align-items: center; gap: 8px; cursor: pointer;' }, [
-								modalRadioMirror, E('span', {}, [ E('strong', {}, '国内高速镜像 '), '(ghfast.top 加速)' ])
+								modalRadioMirror, E('span', {}, [ E('strong', {}, 'Mirror '), '(ghfast.top)' ])
 							])
 						])
 					]),
@@ -280,28 +281,28 @@ return view.extend({
 							'type': 'button',
 							'class': 'btn cbi-button',
 							'click': ui.hideModal
-						}, _('取消')),
+						}, _('Cancel')),
 						btnConfirmUpdate
 					])
 				]);
 			}
-		}, _('更新面板'));
+		}, _('Update Dashboard'));
 
 		var btnRefreshIframe = E('button', {
 			'type': 'button',
 			'class': 'btn cbi-button',
-			'title': _('刷新面板内容'),
+			'title': _('Refresh dashboard content'),
 			'click': function() {
 				if (currentInfo) {
 					iframe.src = buildZashboardUrl(currentInfo);
 				}
 			}
-		}, _('刷新'));
+		}, _('Refresh'));
 
 		var btnToggleFullscreen = E('button', {
 			'type': 'button',
 			'class': 'btn cbi-button',
-			'title': _('切换全屏显示'),
+			'title': _('Toggle fullscreen display'),
 			'click': function() {
 				if (!document.fullscreenElement) {
 					if (iframe.requestFullscreen) {
@@ -315,7 +316,7 @@ return view.extend({
 					}
 				}
 			}
-		}, _('全屏'));
+		}, _('Fullscreen'));
 
 		var stateReady = E('div', { 'style': 'display: none;' }, [
 			httpsAlert,
@@ -345,41 +346,60 @@ return view.extend({
 
 		function triggerDownload(url, logBox, progressWrap, onFinish) {
 			progressWrap.style.display = 'block';
-			logBox.innerText = _('正在初始化下载任务...\n');
+			logBox.innerText = _('Initializing download task...\n');
 
 			honk.callHonkDownloadZashboard(url).then(function(resp) {
 				if (!resp || !resp.success) {
-					logBox.innerText += _('触发下载失败：') + (resp ? resp.message : '未知错误') + '\n';
+					logBox.innerText += _('Failed to trigger download: ') + (resp ? resp.message : _('Unknown error')) + '\n';
 					if (onFinish) onFinish();
 					return;
 				}
 
-				if (pollTimer) clearInterval(pollTimer);
-				pollTimer = setInterval(function() {
-					honk.callHonkDownloadStatus().then(function(sResp) {
+				if (downloadPollFn) {
+					poll.remove(downloadPollFn);
+					downloadPollFn = null;
+				}
+
+				downloadPollFn = function() {
+					return honk.callHonkDownloadStatus().then(function(sResp) {
 						if (!sResp) return;
 						if (sResp.log) {
 							logBox.innerText = sResp.log;
 							logBox.scrollTop = logBox.scrollHeight;
 						}
 						if (sResp.status === 'SUCCESS') {
-							clearInterval(pollTimer);
-							pollTimer = null;
-							logBox.innerText += '\n✨ ' + _('安装完成！正在加载面板...');
+							poll.remove(downloadPollFn);
+							downloadPollFn = null;
+							logBox.innerText += '\n✨ ' + _('Installation complete! Loading dashboard...');
 							if (onFinish) onFinish();
 							setTimeout(loadInfo, 1200);
 						} else if (sResp.status === 'FAILED') {
-							clearInterval(pollTimer);
-							pollTimer = null;
-							logBox.innerText += '\n❌ ' + _('安装失败，请检查日志。');
+							poll.remove(downloadPollFn);
+							downloadPollFn = null;
+							logBox.innerText += '\n❌ ' + _('Installation failed. Please check logs.');
 							if (onFinish) onFinish();
 						}
 					});
-				}, 1000);
+				};
+
+				poll.add(downloadPollFn, 1);
 			}).catch(function(err) {
-				logBox.innerText += _('触发下载异常：') + err.message + '\n';
+				logBox.innerText += _('Download error: ') + (err.message || err) + '\n';
 				if (onFinish) onFinish();
 			});
+		}
+
+		function updateHonkRunningState(running, port) {
+			if (running) {
+				statusServicePill.className = 'label success';
+				statusServicePill.innerText = _('Running');
+				honkStopAlert.style.display = 'none';
+			} else {
+				statusServicePill.className = 'label warning';
+				statusServicePill.innerText = _('Not Running');
+				honkStopAlert.style.display = 'flex';
+				honkPortLabel.innerText = port || '9090';
+			}
 		}
 
 		function loadInfo() {
@@ -393,7 +413,7 @@ return view.extend({
 				if (!data.has_ui) {
 					metaUiDir.innerText = data.external_ui || '/etc/honk/zashboard';
 					metaController.innerText = data.external_controller || '0.0.0.0:9090';
-					metaSecret.innerText = data.secret ? _('已设置 (隐藏)') : _('未设置（留空）');
+					metaSecret.innerText = data.secret ? _('Configured (Hidden)') : _('Not configured (Empty)');
 					showState('missing_ui');
 					return;
 				}
@@ -404,16 +424,7 @@ return view.extend({
 				var port = data.port || '9090';
 				var fullUrl = buildZashboardUrl(data);
 
-				if (data.running) {
-					statusServicePill.className = 'label success';
-					statusServicePill.innerText = _('运行中');
-					honkStopAlert.style.display = 'none';
-				} else {
-					statusServicePill.className = 'label warning';
-					statusServicePill.innerText = _('未运行');
-					honkStopAlert.style.display = 'flex';
-					honkPortLabel.innerText = port;
-				}
+				updateHonkRunningState(data.running, port);
 
 				statusEndpointPill.innerText = targetHost + ':' + port;
 				btnExternalOpen.href = fullUrl;
@@ -439,6 +450,16 @@ return view.extend({
 		}
 
 		loadInfo();
+
+		// Background status check every 5 seconds for service running pill
+		poll.add(function() {
+			if (currentInfo && currentInfo.configured && currentInfo.has_ui) {
+				return honk.callHonkStatus().then(function(res) {
+					var isRunning = (res && res.running);
+					updateHonkRunningState(isRunning, currentInfo.port);
+				});
+			}
+		}, 5);
 
 		return E('div', { 'class': 'zash-wrap' }, [
 			style,

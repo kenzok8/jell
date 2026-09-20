@@ -39,7 +39,6 @@ process_shortcut() {
 		uci -q set nginx._sc_$shortcut=server
 		uci -q set nginx._sc_$shortcut.server_name="$shortcut"
 		uci -q add_list nginx._sc_$shortcut.listen="80"
-		uci -q add_list nginx._sc_$shortcut.listen="443"
 		uci -q set nginx._sc_$shortcut.return="302 $to_url"
 
 	# 2. 配置 Dnsmasq (DHCP) 本地域名劫持
@@ -56,7 +55,7 @@ sethttps() {
 	local https
 	config_get https "$cfg" https
 
-	if [ -n "$(command -v nginx)" ]; then
+	if [ -f /etc/nginx/uci.conf ]; then
 		if [ -z "$(uci -q get nginx._redirect2ssl)" ]; then
 			uci -q set nginx._redirect2ssl=server
 			uci -q set nginx._redirect2ssl.server_name='_redirect2ssl'
@@ -119,8 +118,8 @@ start_service() {
 	# 1. 开机 CoreMark 跑分处理 (仅当配置开启且未完成过时后台运行)
 	local coremark
 	config_get coremark default coremark 0
-	if [ "$coremark" = "1" ] && [ -x /bin/coremark ] && [ ! -f /etc/bench.log ] && [ ! -f /var/lock/opkg.lock ]; then
-			/sbin/cpumark
+	if [ "$coremark" = "1" ] && [ -x /bin/coremark ] && [ -x /sbin/coremark ] && [ ! -f /etc/bench.log ] && [ ! -f /var/lock/opkg.lock ]; then
+			(sleep 5; /sbin/cpumark) &
 	fi
 
 	# 2. 清理并重新配置所有 Shortcuts

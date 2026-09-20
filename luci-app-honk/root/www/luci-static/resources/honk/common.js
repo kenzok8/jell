@@ -4,6 +4,7 @@
 'require fs';
 'require ui';
 'require poll';
+'require dom';
 
 var callHonkStatus = rpc.declare({
 	object: 'luci.honk',
@@ -418,9 +419,15 @@ function renderStatusHeader() {
 		if (!tb) return;
 		if (data && data.running) {
 			var mem = data.memory ? ' (' + _('Memory Usage') + ': ' + data.memory + ')' : '';
-			tb.innerHTML = '<span style="color:var(--success, #22c55e); font-weight: bold;">' + _('HONK') + ' ' + _('RUNNING') + '</span> <span style="color:var(--text-muted, #888); font-size:0.9em;">' + mem + '</span>';
+			dom.content(tb, [
+				E('span', { 'style': 'color: var(--success, #22c55e); font-weight: bold;' }, _('HONK') + ' ' + _('RUNNING')),
+				' ',
+				E('span', { 'style': 'color: var(--text-muted, #888); font-size: 0.9em;' }, mem)
+			]);
 		} else {
-			tb.innerHTML = '<span style="color:var(--danger, #ef4444); font-weight: bold;">' + _('HONK') + ' ' + _('NOT RUNNING') + '</span>';
+			dom.content(tb, [
+				E('span', { 'style': 'color: var(--danger, #ef4444); font-weight: bold;' }, _('HONK') + ' ' + _('NOT RUNNING'))
+			]);
 		}
 	}
 
