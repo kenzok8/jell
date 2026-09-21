@@ -289,7 +289,7 @@ if [ -n "$CUSTOM_SSID" ]; then
     SSID="$CUSTOM_SSID"
 else
     SSID="$(uci -q get system.@system[0].hostname 2>/dev/null)"
-    [ -z "$SSID" ] && [ -r /proc/sys/kernel/hostname ] w&& SSID="$(cat /proc/sys/kernel/hostname)"
+    [ -z "$SSID" ] && [ -r /proc/sys/kernel/hostname ] && SSID="$(cat /proc/sys/kernel/hostname)"
     [ -z "$SSID" ] && SSID="Kwrt"
 fi
 
