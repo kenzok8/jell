@@ -207,7 +207,7 @@ return view.extend({
 		]);
 
 		// State 3: Ready
-		var httpsAlert = E('div', { 'class': 'alert-message warning', 'style': 'display: none; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;' }, [
+		var httpsAlert = E('div', { 'class': 'alert-message warning', 'style': 'display: none; margin-bottom: 10px; justify-content: space-between; align-items: center;' }, [
 			E('div', {}, [
 				E('strong', {}, _('HTTPS access detected:') + ' '),
 				E('span', {}, _('Modern browsers may block HTTP iframe resources under HTTPS. If the dashboard fails to display, open it in a new tab.'))
@@ -216,7 +216,7 @@ return view.extend({
 		]);
 
 		var honkPortLabel = E('span', { 'class': 'honk_port_label' }, '9090');
-		var honkStopAlert = E('div', { 'class': 'alert-message warning', 'style': 'display: none; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;' }, [
+		var honkStopAlert = E('div', { 'class': 'alert-message warning', 'style': 'display: none; margin-bottom: 10px; justify-content: space-between; align-items: center;' }, [
 			E('div', {}, [
 				E('strong', {}, _('HONK service is currently not running:') + ' '),
 				E('span', {}, [ _('Clash API port ('), honkPortLabel, _(') is not listening. Start the service to display data.') ])

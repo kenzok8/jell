@@ -756,8 +756,8 @@ return {
 		let files;
 		if (mgr == "apk") {
 			files = [
-				"luci-app-pushbot_" + ver + "-r" + rel + "_all.apk",
-				"luci-i18n-pushbot-zh-cn_" + ver + "-r" + rel + "_all.apk"
+				"luci-app-pushbot-" + ver + "-r" + rel + ".apk",
+				"luci-i18n-pushbot-zh-cn-" + ver + "-r" + rel + ".apk"
 			];
 		} else {
 			files = [
@@ -788,6 +788,7 @@ return {
 			+ "    if [ $? -eq 0 ] && [ -s \"${DEST}\" ]; then\n"
 			+ "      OK=$((OK+1))\n"
 			+ "      echo \"$((OK * 100 / TOTAL))\" > \"${PFILE}\"\n"
+			+ "      [ $OK -lt $TOTAL ] && sleep 1\n"
 			+ "      break\n"
 			+ "    fi\n"
 			+ "    rm -f \"${DEST}\"\n"
@@ -795,6 +796,7 @@ return {
 			+ "  done\n"
 			+ "done\n"
 			+ "if [ $OK -eq $TOTAL ]; then\n"
+			+ "  sleep 1\n"
 			+ "  echo 'done' > \"${PFILE}\"\n"
 			+ "else\n"
 			+ "  echo 'fail' > \"${PFILE}\"\n"
@@ -852,10 +854,24 @@ return {
 		let f = popen("cat " + ifile + " 2>/dev/null", "r");
 		if (f) { output = f.read("all"); f.close(); }
 		let done = false, success = false;
-		if (match(output, /\nok$/)) { done = true; success = true; }
-		else if (match(output, /\nfail$/)) { done = true; success = false; }
+		if (match(output, /(^|\n)ok\s*$/)) { done = true; success = true; }
+		else if (match(output, /(^|\n)fail\s*$/)) { done = true; success = false; }
 		http.prepare_content("application/json");
 		http.write_json({ done: done, success: success, output: output });
+	},
+
+	/* ── OTA: clear downloaded packages ── */
+	act_clear_packages: function() {
+		/* remove all possible package files from /tmp, no error if absent */
+		let patterns = [
+			"/tmp/luci-app-pushbot-*.apk",
+			"/tmp/luci-i18n-pushbot-zh-cn-*.apk",
+			"/tmp/luci-app-pushbot_*_all.ipk",
+			"/tmp/luci-i18n-pushbot-zh-cn_*_all.ipk"
+		];
+		system("rm -f " + join(" ", patterns) + " 2>/dev/null");
+		http.prepare_content("application/json");
+		http.write_json({ ok: true });
 	},
 
 	/* compatibility: index — no-op, menu registration is handled by menu.d JSON */
