@@ -6,7 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for fastnet
-LUCI_DEPENDS:=+fastnet +luci-lib-linkeaseauth
+LUCI_DEPENDS:=+fastnet +luci-lib-linkeaseauth +linkease-app-entry
 LUCI_PKGARCH:=all
 LUCI_MINIFY_CSS:=0
 LUCI_MINIFY_JS:=0

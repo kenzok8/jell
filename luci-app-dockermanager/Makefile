@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for Docker Manager
-LUCI_DEPENDS:=+dockermanager +luci-lib-linkeaseauth
+LUCI_DEPENDS:=+dockermanager +luci-lib-linkeaseauth +linkease-app-entry
 LUCI_PKGARCH:=all
 
 
