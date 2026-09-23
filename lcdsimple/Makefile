@@ -6,7 +6,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lcdsimple
 PKG_VERSION:=1.0.3
-PKG_RELEASE:=384
+PKG_RELEASE:=385
 
 include $(INCLUDE_DIR)/package.mk
 
