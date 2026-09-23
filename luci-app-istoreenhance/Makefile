@@ -6,9 +6,8 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for KSpeeder
-LUCI_DEPENDS:=+istoreenhance
+LUCI_DEPENDS:=+istoreenhance +luci-lib-linkeaseauth
 LUCI_PKGARCH:=all
-# PKG_RELEASE MUST be empty for luci.mk
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

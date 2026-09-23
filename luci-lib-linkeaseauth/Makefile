@@ -2,7 +2,7 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=LuCI shared OpenWrt auth bridge for LinkEase apps
+LUCI_TITLE:=LuCI shared integration for LinkEase apps
 LUCI_PKGARCH:=all
 
 
