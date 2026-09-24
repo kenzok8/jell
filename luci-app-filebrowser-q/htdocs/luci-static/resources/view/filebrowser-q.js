@@ -44,7 +44,7 @@ return view.extend({
 
 	render(data) {
 		let m, s, o;
-		let webport = (uci.get(data.conf, 'config', 'listen_port') || '8989');
+		let webport = (uci.get(data, 'config', 'listen_port') || '8787');
 
 		m = new form.Map('filebrowser-q', _('FileBrowser Quantum'),
 			_('The best free self-hosted web-based file manager.') + '<br />'+
