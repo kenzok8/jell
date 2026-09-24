@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_FASTNET:=$(ARCH)
 
 PKG_NAME:=fastnet
-PKG_VERSION:=linkease-app-entry-runtime-v3.0.21
+PKG_VERSION:=linkease-app-entry-runtime-v3.0.22
 PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
