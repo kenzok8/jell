@@ -529,10 +529,10 @@ o:depends({ protocol = "tuic" })
 o:depends({ protocol = "hysteria2" })
 
 o = s:option(Value, "tls_pinSHA256", translate("TLS Chain Fingerprint (SHA256)"))
-o:depends({ tls = true, tls_allowInsecure = false })
-o:depends({ protocol = "hysteria", tls_allowInsecure = false })
-o:depends({ protocol = "tuic", tls_allowInsecure = false })
-o:depends({ protocol = "hysteria2", tls_allowInsecure = false })
+o:depends({ tls = true })
+o:depends({ protocol = "hysteria" })
+o:depends({ protocol = "tuic" })
+o:depends({ protocol = "hysteria2" })
 o.description = translate("Once set, connects only when the server’s chain fingerprint matches.") ..
 		string.format("<a href='javascript:void(0)' onclick='javascript:fetchCertSha256(this)'>%s</a>", "→ " .. translate("Fetch Manually"))
 

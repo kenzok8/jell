@@ -3,6 +3,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-sysctl
+PKG_VERSION:=1.7.1
+PKG_RELEASE:=1
 
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=luci-app-sysctl contributors
