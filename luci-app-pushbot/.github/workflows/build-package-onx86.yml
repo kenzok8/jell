@@ -263,7 +263,7 @@ jobs:
             done
           fi
 
-      - name: Clean old releases (keep 20)
+      - name: Clean old releases (keep 30)
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -273,8 +273,8 @@ jobs:
             | sort -r > /tmp/releases.txt
           TOTAL=$(wc -l < /tmp/releases.txt)
           echo "当前 release 数: ${TOTAL}"
-          if [ "$TOTAL" -gt 20 ]; then
-            tail -n +21 /tmp/releases.txt | while read -r line; do
+          if [ "$TOTAL" -gt 30 ]; then
+            tail -n +31 /tmp/releases.txt | while read -r line; do
               TAG=$(echo "$line" | cut -d' ' -f2-)
               # 不删除刚创建的 tag
               [ "$TAG" = "${{ env.TAG }}" ] && continue
@@ -283,7 +283,7 @@ jobs:
             done
           fi
 
-      - name: Clean old workflow runs (keep 10)
+      - name: Clean old workflow runs (keep 15)
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -299,7 +299,7 @@ jobs:
             select(.value.id != ($self|tonumber)) |
             .key as $i | .value.id as $id |
             (.value.created_at | fromdateiso8601) as $ct |
-            if (($now - $ct) / 86400 > 180) or ($i >= 10) then "\($id)" else empty end
+            if (($now - $ct) / 86400 > 180) or ($i >= 15) then "\($id)" else empty end
           ' /tmp/runs.json | while read -r RID; do
             echo "删除 run: ${RID}"
             curl -s -X DELETE -H "Authorization: Bearer ${GITHUB_TOKEN}" \
