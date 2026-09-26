@@ -98,6 +98,14 @@ if [ "$version" -lt 1 ]; then
 fi
 
 if command -v nginx >/dev/null 2>&1; then
+	[ -z "$(uci -q get nginx.default_server)" ] && uci -q batch <<-EOF
+		set nginx.default_server=server
+		set nginx.default_server.server_name='kwrt'
+		add_list nginx.default_server.listen='80 default_server'
+		add_list nginx.default_server.listen='[::]:80 default_server'
+		add_list nginx.default_server.include='conf.d/*.locations'
+		set nginx.default_server.access_log='off; # logd openwrt'
+	EOF
 	if [ -f /etc/nginx/conf.d/luci.locations ]; then
 		grep -q 'uwsgi_read_timeout' /etc/nginx/conf.d/luci.locations || sed -i '/include uwsgi_params;/a\\t\tuwsgi_read_timeout 300s;' /etc/nginx/conf.d/luci.locations
 		grep -q 'ubus_script_timeout' /etc/nginx/conf.d/luci.locations || sed -i '/ubus_parallel_req/a\        ubus_script_timeout 600;' /etc/nginx/conf.d/luci.locations
