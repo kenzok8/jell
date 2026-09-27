@@ -1243,6 +1243,17 @@ table > tr:last-child {
 	margin: auto 0;
 }
 
+.nft-rules .th,
+.nft-rules .td:not(.center) {
+    text-align: left;
+}
+
+.nft-rules .ifacebadge > em {
+    width: auto;
+    height: auto;
+    padding-left: 0;
+}
+
 .cbi-section-table-row {
     text-align: center;
 }
@@ -4095,6 +4106,7 @@ input[name="nslookup"] {
 
 
 .navbar {
+    display: flex;
     z-index: 200;
 	overflow: hidden;
 	position: fixed;
@@ -4110,10 +4122,9 @@ input[name="nslookup"] {
   }
   
   .navbar a {
-	  float: left;
+	  flex: 1;
 	  text-align: center;
 	  padding: 8px 0;
-	  width: 20%;
 	  text-decoration: none;
 	  max-width: 100px;
   }
