@@ -18,7 +18,7 @@ RESOLV_HONK="/tmp/resolv.conf.honk"
 
 set_chmod_640() {
     mkdir -p /etc/honk/config.d
-    chmod -R 640 /etc/honk/ 2>/dev/null || true
+    chmod -R u=rwX,g=rX,o= /etc/honk 2>/dev/null || true
 }
 
 cleanup_netns() {
