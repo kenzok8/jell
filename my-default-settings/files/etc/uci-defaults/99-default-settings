@@ -59,6 +59,9 @@ if [ "$version" -lt 1 ]; then
 		set dhcp.@dnsmasq[0].port='53'
 		set dhcp.@dnsmasq[0].dns_redirect='1'
 		set dhcp.@dnsmasq[0].allservers='1'
+		set dhcp.@dnsmasq[0].localservice='0'
+		set dhcp.@dnsmasq[0].rebind_protection='0'
+		set dhcp.@dnsmasq[0].rebind_localhost='1'
 		del dhcp.@dnsmasq[0].noresolv
 		set dhcp.@dnsmasq[0].cachesize='$c'
 		set dhcp.@dnsmasq[0].dnsforwardmax='$c'
