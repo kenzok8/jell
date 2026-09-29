@@ -46,6 +46,10 @@ if [ "$version" -lt 1 ]; then
 		set upnpd.config.enabled='1'
 		set firewall.@defaults[0].flow_offloading='1'
 		set firewall.@defaults[0].flow_offloading_hw='1'
+		set firewall.firewall_user=include
+		set firewall.firewall_user.path='/etc/firewall.user'
+		set firewall.firewall_user.type='script'
+		set firewall.firewall_user.reload='1'
 		set fstab.@global[0].anon_mount='1'
 		set network.globals.packet_steering='1'
 		set nft-qos.default.limit_enable='0'
