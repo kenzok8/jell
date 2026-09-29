@@ -36,6 +36,13 @@ c=1024; nf=16384
 [ "$mem" -ge 524288 ]  && { c=10000; nf=131072; }
 [ "$mem" -ge 1048576 ] && { c=10000; nf=262144; }
 
+if ! grep -q '/etc/firewall.user' /etc/config/firewall 2>/dev/null; then
+	uci -q set firewall.firewall_user=include
+	uci -q set firewall.firewall_user.path='/etc/firewall.user'
+	uci -q set firewall.firewall_user.type='script'
+	uci -q set firewall.firewall_user.reload='1'
+fi
+
 # 4. 首次开机参数统一批量预设
 if [ "$version" -lt 1 ]; then
 	uci -q batch <<-EOF
@@ -46,10 +53,6 @@ if [ "$version" -lt 1 ]; then
 		set upnpd.config.enabled='1'
 		set firewall.@defaults[0].flow_offloading='1'
 		set firewall.@defaults[0].flow_offloading_hw='1'
-		set firewall.firewall_user=include
-		set firewall.firewall_user.path='/etc/firewall.user'
-		set firewall.firewall_user.type='script'
-		set firewall.firewall_user.reload='1'
 		set fstab.@global[0].anon_mount='1'
 		set network.globals.packet_steering='1'
 		set nft-qos.default.limit_enable='0'
