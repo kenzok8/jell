@@ -102,7 +102,10 @@ const CSS = [
 	'.dd-adv:not(.dd-closed) .dd-adv-chevron{transform:rotate(90deg)}',
 	'.dd-adv-body{margin-top:8px;padding:2px 4px 4px}',
 	'.dd-adv.dd-closed .dd-adv-body{display:none}',
-	'.dd-editor{width:100%;min-height:460px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;line-height:1.5;box-sizing:border-box;resize:vertical;border-radius:6px 6px 0 0}',
+	/* display:block kills the ~5px inline-block baseline gap that made the
+	   overlay pre (inset:0) ~5px taller than the textarea — the two layers'
+	   scrollbars and glyphs would otherwise drift apart on mobile */
+	'.dd-editor{display:block;width:100%;min-height:460px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;line-height:1.5;box-sizing:border-box;resize:vertical;border-radius:6px 6px 0 0}',
 	/* syntax-highlight overlay: a <pre> sits behind a transparent <textarea>.
 	   both share identical box metrics so glyphs line up; the textarea stays the
 	   real editor (caret, selection, insert-at-cursor, jump-to-line all native) */

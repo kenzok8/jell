@@ -195,7 +195,7 @@ return view.extend({
 			{ tab: 'firmware', type: form.Flag, id: 'cookie_p', title: _('Persistent Cookie Session'), desc: _('Maintain persistent login sessions in the web browser.') },
 			{ tab: 'firmware', type: form.Flag, id: 'https', title: _('Enforce HTTPS Access'), desc: _('Automatically redirect HTTP requests to secure HTTPS.') },
 			{ tab: 'firmware', type: form.ListValue, id: 'landing_page', title: _('Landing Dashboard Mode'),
-			  choices: { 'default': _('Default'), routerdog: _('RouterDog'), nas: _('NAS'), 'next-nas': _('Next-NAS'), router: _('Router') } }
+			  choices: { 'auto': _('Auto'), 'overview': _('Overview'), 'dashboard': _('Dashboard'), routerdog: _('RouterDog'), nas: _('NAS'), 'next-nas': _('Next-NAS'), router: _('Router') } }
 		];
 
 		// 无线配置根据设备硬件动态追加
