@@ -1,39 +1,71 @@
 module("luci.controller.wizard", package.seeall)
 
-local uci = luci.model.uci.cursor()
 local http = require "luci.http"
 
 function index()
-    entry({"admin", "index"}, call("landing_page"), _("Home") , 0).dependent = false
+    entry({"admin", "index"}, call("landing_page"), _("Home"), 0).dependent = false
 
-    -- 2. 核心：直接改写 admin 根节点的调度目标
-    -- 这样当用户访问 /admin、登录后跳转或访问根目录时，无需经过 firstchild()，直接执行 landing_page()
+    -- 直接改写 admin 根节点的调度目标
     local admin = node("admin")
     if admin then
         admin.target = call("landing_page")
     end
 end
 
+local function check_wifi(uci)
+    local has_wifi = false
+    pcall(function()
+        uci:foreach("wireless", "wifi-device", function(s)
+            has_wifi = true
+            return false -- 检测到任意 wifi-device 即终止遍历
+        end)
+    end)
+    return has_wifi
+end
+
+local function is_running(proc)
+    return luci.sys.call(string.format("pgrep %s >/dev/null", proc)) == 0
+end
+
 function landing_page()
-	local landing_page = uci:get("wizard", "default", "landing_page")
-	if (luci.sys.call("pgrep routergo >/dev/null") == 0 and landing_page == "routerdog") then
-		http.redirect(luci.dispatcher.build_url("admin","routerdog"));
-	elseif luci.sys.call("pgrep quickstart >/dev/null") == 0 then
-		if landing_page == "nas" then
-			http.redirect(luci.dispatcher.build_url("admin","istorex","nas"));
-		elseif landing_page == "next-nas" then
-			http.redirect(luci.dispatcher.build_url("admin","istorex","next-nas"));
-		elseif landing_page == "router" then
-			http.redirect(luci.dispatcher.build_url("admin","istorex","router"));
-		else
-			http.redirect(luci.dispatcher.build_url("admin","quickstart"));
-		end
-	else
-		if (landing_page == "dashboard") then
-			http.redirect(luci.dispatcher.build_url("admin","status","dashboard"))
-		else
-			http.redirect(luci.dispatcher.build_url("admin", "status", "overview"))
-		end
+    local uci = luci.model.uci.cursor()
+    local page = uci:get("wizard", "default", "landing_page")
+    local target = {"admin", "status", "overview"}
+
+    -- 1. 默认/自动模式
+    if not page or page == "auto" then
+        if is_running("quickstart") then
+            target = {"admin", "quickstart"}
+        elseif is_running("routergo") then
+            target = {"admin", "routerdog"}
+        elseif check_wifi(uci) then
+            target = {"admin", "status", "dashboard"}
+        else
+            target = {"admin", "status", "overview"}
+        end
+
+    -- 2. 常规指定页面
+    elseif page == "overview" then
+        target = {"admin", "status", "overview"}
+    elseif page == "dashboard" then
+        target = {"admin", "status", "dashboard"}
+
+    -- 3. Routerdog 模式（优先比对字符串，命中再检测进程）
+    elseif page == "routerdog" and is_running("routergo") then
+        target = {"admin", "routerdog"}
+
+    -- 4. iStoreOS / iStoreX 增强页面（仅在 quickstart 运行时有效）
+    elseif is_running("quickstart") then
+        local istore_routes = {
+            istoreos   = {"admin", "quickstart"},
+            nas        = {"admin", "istorex", "nas"},
+            ["next-nas"] = {"admin", "istorex", "next-nas"},
+            router     = {"admin", "istorex", "router"}
+        }
+        if istore_routes[page] then
+            target = istore_routes[page]
+        end
     end
-		
+
+    http.redirect(luci.dispatcher.build_url(unpack(target)))
 end
