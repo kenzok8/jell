@@ -11,8 +11,8 @@ PKG_ARCH_LINKEASE:=$(ARCH)
 
 PKG_NAME:=linkease-common-bin
 # use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
-PKG_SOURCE_DATE:=1.7.5
-PKG_RELEASE:=5
+PKG_SOURCE_DATE:=1.7.6
+PKG_RELEASE:=1
 
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
@@ -28,7 +28,7 @@ else ifeq ($(ARCH),mipsel)
 ARCH_HEXCODE=1b0c
 endif
 
-PKG_SOURCE_VERSION:=9aab90a165d1fe1d9cb95ebbd333a19267dd7af6
+PKG_SOURCE_VERSION:=de317ec2842328ed089a74c360c7599f382ec62a
 PKG_SOURCE:=linkease-common-bin-$(PKG_SOURCE_DATE)-linux-$(PKG_ARCH_LINKEASE).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/linkease-runtime-v$(PKG_SOURCE_DATE)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-common-bin-$(PKG_SOURCE_DATE)-linux-$(PKG_ARCH_LINKEASE)
@@ -67,3 +67,12 @@ define Package/$(PKG_NAME)/install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
+
+# OpenWrt 24.10 does not expose a package-level REPLACES variable in
+# package-pack.mk. Preserve the generated control stanza and append the
+# versioned ownership hand-off required for legacy monolithic LinkEase packages.
+LINKEASE_COMMON_BIN_GENERATED_CONTROL:=$(Package/$(PKG_NAME)/CONTROL)
+define Package/$(PKG_NAME)/CONTROL
+$(LINKEASE_COMMON_BIN_GENERATED_CONTROL)
+Replaces: linkease (<< 1.7.6~)
+endef

@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=torrserver
-PKG_VERSION:=MatriX.145
+PKG_VERSION:=MatriX.145.1
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/YouROK/TorrServer.git
-PKG_SOURCE_VERSION:=2c7fa43b9ac64a9eda27314c0b6791518497f188
+PKG_SOURCE_VERSION:=5b294b0b5386ba790347738ac3f80121688f5feb
 PKG_MIRROR_HASH:=skip
 
 PKG_MAINTAINER:=Konstantine Shevlakov <shevlakov@132lan.ru>

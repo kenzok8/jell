@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_BAIDUDRIVE:=$(ARCH)
 
 PKG_NAME:=baidudrive
-PKG_VERSION:=kai-runtime-v0.0.25
+PKG_VERSION:=linkease-runtime-v1.7.6
 PKG_RELEASE:=2
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/baidudrive-runtime-v$(PKG_VERSION)/

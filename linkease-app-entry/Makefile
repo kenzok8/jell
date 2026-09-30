@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=linkease-app-entry
 # This lightweight runtime is released independently from the full desktop.
-PKG_VERSION:=kai-runtime-v0.0.25
+PKG_VERSION:=linkease-runtime-v1.7.6
 PKG_RELEASE:=1
 
 ARCH_HEXCODE:=
@@ -22,7 +22,7 @@ LINKEASE_RUNTIME_ARCH:=arm64
 PKG_HASH:=skip
 endif
 
-PKG_SOURCE_VERSION:=19c81b111a2b26f180422e0e5ab929f8b155abde
+PKG_SOURCE_VERSION:=de317ec2842328ed089a74c360c7599f382ec62a
 PKG_SOURCE:=linkease-app-entry-runtime-$(PKG_VERSION)-linux-$(LINKEASE_RUNTIME_ARCH).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/linkease-app-entry-runtime-v$(PKG_VERSION)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-app-entry-runtime-$(PKG_VERSION)-linux-$(LINKEASE_RUNTIME_ARCH)

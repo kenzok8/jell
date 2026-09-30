@@ -11,3 +11,10 @@ LUCI_MINIFY_JS:=0
 include $(TOPDIR)/feeds/luci/luci.mk
 
 # call BuildPackage - OpenWrt buildroot signature
+
+# Hand shared UI files over from legacy monolithic luci-app-linkease packages.
+LINKEASEFILE_GENERATED_CONTROL:=$(Package/luci-lib-linkeasefile/CONTROL)
+define Package/luci-lib-linkeasefile/CONTROL
+$(LINKEASEFILE_GENERATED_CONTROL)
+Replaces: luci-app-linkease (<< 2.1.70-r4)
+endef
