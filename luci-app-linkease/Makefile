@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LuCI support for linkease
 LUCI_DEPENDS:=+linkease +luci-lib-linkeasefile
-LUCI_EXTRA_DEPENDS:=luci-lib-linkeasefile (>= 2.1.70-r4)
+LUCI_EXTRA_DEPENDS:=luci-lib-linkeasefile (>=2.1.70-r4)
 LUCI_PKGARCH:=all
 # PKG_RELEASE MUST be empty for luci.mk
 LUCI_MINIFY_CSS:=0
