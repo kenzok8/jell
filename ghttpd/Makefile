@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_ghttpd:=$(ARCH)
 
 PKG_NAME:=ghttpd
-PKG_VERSION:=0.0.3
+PKG_VERSION:=0.0.5
 PKG_RELEASE:=1
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/Carseason/openwrt-packages/releases/download/prebuilt/
@@ -53,7 +53,7 @@ define Package/$(PKG_NAME)/postrm
 #!/bin/sh
 for service in uhttpd nginx; do
 	[ -x "/etc/init.d/$$service" ] || continue
-	"/etc/init.d/$$service" enabled && "/etc/init.d/$$service" restart
+	"/etc/init.d/$$service" restart
 done
 exit 0
 endef
