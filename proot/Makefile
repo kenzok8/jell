@@ -2,12 +2,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=proot
-PKG_VERSION:=5.4.1
+PKG_VERSION:=5.5.0
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/proot-me/proot.git
-PKG_SOURCE_VERSION:=d4b49e2243dee34e41c13dfeca6a3d07e9cf0f00
+PKG_SOURCE_VERSION:=25dc6a3134891f98a79f57ce1c2c1b23ff15cad1
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/python/python3-version.mk
