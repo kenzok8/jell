@@ -10,7 +10,7 @@ PKG_RELEASE:=1
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_DATE:=2021-12-05
 PKG_SOURCE_URL:=https://github.com/persmule/amule-dlp.antiLeech.git
-PKG_SOURCE_VERSION:=1b14ed828ed227933333de31ffb8e24e6c10451c
+PKG_SOURCE_VERSION:=bc3ae6a86c958dab1bde9c2cea51b523530aec4b
 PKG_MIRROR_HASH:=skip
 
 PKG_FIXUP:=autoreconf
