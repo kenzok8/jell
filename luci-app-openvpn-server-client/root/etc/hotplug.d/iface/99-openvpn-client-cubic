@@ -1,0 +1,5 @@
+#!/bin/sh
+
+case "$ACTION" in
+    ifup|ifupdate) /usr/libexec/openvpn-client-cubic-route update >/dev/null 2>&1 ;;
+esac

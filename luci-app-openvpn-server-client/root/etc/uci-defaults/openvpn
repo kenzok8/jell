@@ -1,5 +1,71 @@
 #!/bin/sh
 
+if ! uci -q get openvpn.myvpn >/dev/null; then
+	uci -q batch <<-EOF >/dev/null
+		set openvpn.myvpn=openvpn
+		set openvpn.myvpn.enabled='0'
+		set openvpn.myvpn.proto='tcp4'
+		set openvpn.myvpn.dev='tun'
+		set openvpn.myvpn.topology='subnet'
+		set openvpn.myvpn.server='10.8.0.0 255.255.255.0'
+		set openvpn.myvpn.comp_lzo='adaptive'
+		set openvpn.myvpn.ca='/etc/openvpn/pki/ca.crt'
+		set openvpn.myvpn.dh='/etc/openvpn/pki/dh.pem'
+		set openvpn.myvpn.cert='/etc/openvpn/pki/server.crt'
+		set openvpn.myvpn.key='/etc/openvpn/pki/server.key'
+		set openvpn.myvpn.persist_key='1'
+		set openvpn.myvpn.persist_tun='1'
+		set openvpn.myvpn.max_clients='88'
+		set openvpn.myvpn.keepalive='10 120'
+		set openvpn.myvpn.verb='3'
+		set openvpn.myvpn.status='/var/log/openvpn_status.log'
+		set openvpn.myvpn.log='/tmp/openvpn.log'
+		set openvpn.myvpn.port='1194'
+		set openvpn.myvpn.ddns='myserver.f3322.net'
+		set openvpn.myvpn.auth_user_pass_verify='/etc/openvpn/server/checkpsw.sh via-env'
+		set openvpn.myvpn.script_security='3'
+		add_list openvpn.myvpn.push='route 192.168.9.0 255.255.255.0'
+		add_list openvpn.myvpn.push='comp-lzo adaptive'
+		add_list openvpn.myvpn.push='redirect-gateway def1 bypass-dhcp'
+		add_list openvpn.myvpn.push='dhcp-option DNS 192.168.9.1'
+		commit openvpn
+	EOF
+fi
+
+if ! uci -q get openvpn.client1 >/dev/null; then
+	uci -q batch <<-EOF >/dev/null
+		set openvpn.client1=openvpn
+		set openvpn.client1.enabled='0'
+		set openvpn.client1.config='/etc/openvpn/client1.conf'
+		commit openvpn
+	EOF
+fi
+
+if ! uci -q get openvpn.client2 >/dev/null; then
+	uci -q batch <<-EOF >/dev/null
+		set openvpn.client2=openvpn
+		set openvpn.client2.enabled='0'
+		set openvpn.client2.config='/etc/openvpn/client2.conf'
+		commit openvpn
+	EOF
+fi
+
+if ! uci -q get openvpn.pwd1 >/dev/null; then
+	uci -q batch <<-EOF >/dev/null
+		set openvpn.pwd1=openvpnpassword
+		set openvpn.pwd1.pwdfile='/etc/openvpn/pass.txt'
+		commit openvpn
+	EOF
+fi
+
+if ! uci -q get openvpn.pwd2 >/dev/null; then
+	uci -q batch <<-EOF >/dev/null
+		set openvpn.pwd2=openvpnpassword
+		set openvpn.pwd2.pwdfile='/etc/openvpn/pass2.txt'
+		commit openvpn
+	EOF
+fi
+
 openvpn_port="$(uci -q get openvpn.myvpn.port)"
 [ -z "$openvpn_port" ] && openvpn_port=1194
 

@@ -48,6 +48,11 @@ o = sl:taboption("base", Flag, "enabled", translate("Enable Instance"))
 o.default = o.disabled
 o.rmempty = false
 
++o = sl:taboption("base", Flag, "tcp_cubic", translate("Use CUBIC for outer TCP"))
+o.default = o.disabled
+o.rmempty = false
+o.description = translate("For TCP client profiles only. Uses the current route to each remote endpoint and keeps the system congestion control unchanged.")
+
 o = sl:taboption("base", Value, "config", translate("Config File Path"))
 o.readonly = true
 o.placeholder = translate("Auto-generated based on instance identifier")
@@ -60,7 +65,7 @@ end
 
 o = sl:taboption("config_file", TextValue, "_config_content")
 o.title = translate("OpenVPN Configuration (.ovpn/.conf)")
-o.description = translate("Paste the content of the .ovpn or .conf file here. This will be saved to the path shown in 'Base Settings'.")
+o.description = translate("Paste the content of the .ovpn or .conf file here. This will be saved to the path shown in 'Base Settings'.") .. " " .. translate("If DCO hangs on this device, add disable-dco on its own line before reconnecting.")
 o.rows = 15
 o.wrap = "off"
 o.rmempty = true
@@ -171,6 +176,12 @@ sp.on_remove = function(self, section)
 end
 
 m2.on_commit = function(self)
+    sys.call("/etc/init.d/openvpn-client-cubic enable >/dev/null 2>&1")
+    local route_result = sys.call("/etc/init.d/openvpn-client-cubic restart >/dev/null 2>&1")
+    if route_result ~= 0 then
+        self.message = translate("Could not prepare the CUBIC route for the OpenVPN client.")
+        return
+    end
     local result = sys.call("/etc/init.d/openvpn reload")
     if result ~= 0 then
         self.message = translate("Failed to reload OpenVPN service.")

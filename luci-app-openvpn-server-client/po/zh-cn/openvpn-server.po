@@ -216,3 +216,104 @@ msgstr "这将允许服务器获取更多关于客户端的信息，比如硬件
 
 msgid "Disabling DCO provides better compatibility but disables acceleration."
 msgstr "禁用DCO可以提供更好的兼容性，但会关闭加速功能。"
+
+# ---- DCO / compression related (added) ----
+
+msgid "Allow Compression"
+msgstr "允许压缩"
+
+msgid "Allow compression, DCO can only be used when set to NO. asym is compatible mode."
+msgstr "允许压缩。只有设为 NO 时才能使用 DCO 加速；asym 为兼容模式。"
+
+msgid "Base Settings"
+msgstr "基本设置"
+
+msgid "Better compatibility but no acceleration. This device does NOT support DCO (kernel module ovpn.ko is missing); unchecking has no effect."
+msgstr "兼容性更好但不走加速。本机不支持 DCO（缺少内核模块 ovpn.ko），取消勾选也不会生效。"
+
+msgid "Better compatibility but no acceleration. This device supports DCO: uncheck to enable it (compression will be turned off automatically)."
+msgstr "兼容性更好但不走加速。本机支持 DCO：取消勾选即可启用（会同时自动关闭压缩）。"
+
+msgid "COMPRESSION CONFIG CONFLICT"
+msgstr "压缩配置冲突"
+
+msgid "Client"
+msgstr "客户端"
+
+msgid "Client Config File Content"
+msgstr "客户端配置内容"
+
+msgid "Collecting data..."
+msgstr "正在收集数据…"
+
+msgid "Config File Path"
+msgstr "配置文件路径"
+
+msgid "Configure authentication files for OpenVPN client instances."
+msgstr "为 OpenVPN 客户端实例配置认证文件。"
+
+msgid "DCO ACTIVE"
+msgstr "DCO 加速中"
+
+msgid "DCO DISABLED"
+msgstr "DCO 已关闭"
+
+msgid "DCO INACTIVE (COMPRESSION CONFLICT)"
+msgstr "DCO 未生效（压缩冲突）"
+
+msgid "DCO NOT SUPPORTED"
+msgstr "DCO 不支持"
+
+msgid "DCO kernel module"
+msgstr "DCO 内核模块"
+
+msgid "Failed to reload OpenVPN service."
+msgstr "OpenVPN 服务重载失败。"
+
+msgid "NOT RUNNING"
+msgstr "未运行"
+
+msgid "OpenVPN Cert"
+msgstr "OpenVPN 证书"
+
+msgid "OpenVPN Client Authentication"
+msgstr "OpenVPN 客户端认证"
+
+msgid "OpenVPN built with DCO"
+msgstr "openvpn 编译支持 DCO"
+
+msgid "RUNNING"
+msgstr "运行中"
+
+msgid "Start"
+msgstr "启动"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "allow-compression=no and comp_lzo cannot coexist, openvpn will refuse to start."
+msgstr "allow-compression=no 与 comp_lzo 不能共存，openvpn 会拒绝启动。"
+
+msgid "client-to-client"
+msgstr "客户端互通（client-to-client）"
+
+msgid "client_cert_not_required"
+msgstr "客户端免证书（client_cert_not_required）"
+
+msgid "comp_lzo"
+msgstr "LZO 压缩（comp_lzo）"
+
+msgid "disable dco"
+msgstr "关闭 DCO"
+
+msgid "duplicate_cn"
+msgstr "允许重复 CN（duplicate_cn）"
+
+msgid "proto"
+msgstr "传输协议"
+
+msgid "push peer info"
+msgstr "推送客户端信息（push_peer_info）"
+
+msgid "username_as_common_name"
+msgstr "用户名作为 CN（username_as_common_name）"

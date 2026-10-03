@@ -33,6 +33,42 @@ end
 
 local major, minor, patch, lzo = get_openvpn_info()
 
+-- DCO 是否真正可用: 需要内核模块 ovpn.ko (只有 openvpn 编译支持还不够)
+local function dco_supported()
+	local fs = require "nixio.fs"
+	local krel = luci.sys.exec("uname -r"):gsub("%s+$", "")
+	return (fs.access("/sys/module/ovpn") or fs.access("/lib/modules/" .. krel .. "/ovpn.ko")) and true or false
+end
+local dco_ok = dco_supported()
+
+-- 打开页面时顺手修复历史遗留的不一致配置:
+--   1) allow-compression=no 与 comp_lzo 不能共存 (openvpn 会拒绝启动)
+--   2) 启用 DCO 时不能有压缩 (否则 DCO 静默失效, 不加速)
+if (major > 2) or (major == 2 and minor >= 5) or dco_ok then
+	local cur = require("luci.model.uci").cursor()
+	cur:foreach("openvpn", "openvpn", function(sec)
+		local name = sec[".name"]
+		local ac, lzo, dis = sec.allow_compression, sec.comp_lzo, sec.disable_dco
+		local need_fix = false
+
+		if dco_ok and dis ~= "1" then
+			-- DCO 已启用: 压缩必须关掉
+			if ac ~= "no" or (lzo ~= nil and lzo ~= "") then
+				need_fix = true
+			end
+		elseif ac == "no" and lzo then
+			-- 致命冲突: allow-compression=no 与 comp_lzo 共存
+			need_fix = true
+		end
+
+		if need_fix then
+			cur:set("openvpn", name, "allow_compression", "no")
+			cur:delete("openvpn", name, "comp_lzo")
+			cur:commit("openvpn")
+		end
+	end)
+end
+
 mp = Map("openvpn", "OpenVPN Server",translate("An easy config OpenVPN Server Web-UI"))
 
 mp:section(SimpleSection).template  = "openvpn/openvpn_status"
@@ -72,7 +108,16 @@ proto.default ="tcp4"
 
 if (major > 2) or (major == 2 and minor >= 6) then
 disable_dco = s:taboption("basic",Flag,"disable_dco", translate("disable dco"))
-disable_dco.description = translate("Disabling DCO provides better compatibility but disables acceleration.")
+if dco_ok then
+disable_dco.description = translate("Better compatibility but no acceleration. This device supports DCO: uncheck to enable it (compression will be turned off automatically).")
+else
+disable_dco.description = translate("Better compatibility but no acceleration. This device does NOT support DCO (kernel module ovpn.ko is missing); unchecking has no effect.")
+end
+
+-- DCO 与压缩互斥: 启用 DCO 时必须关闭压缩, 否则 openvpn 会静默退回用户态,
+-- DCO 等于没开。
+-- 注意: Flag 取消勾选时 LuCI 不会调用 write, 所以实际修正放在 on_after_commit
+-- (那个钩子每次保存都会执行, 已验证)。
 end
 
 if (major > 2) or (major == 2 and minor >= 5) then
@@ -83,6 +128,26 @@ allow_compression:value("yes")
 allow_compression:value("no")
 allow_compression.default="asym"
 allow_compression.description = translate("Allow compression, DCO can only be used when set to NO. asym is compatible mode.")
+
+-- 修复 allow_compression 与 comp_lzo 的冲突:
+--   openvpn 2.5+ 在两者同时存在时会直接拒绝启动, 报:
+--     "Options error: Compression is not allowed since allow-compression is set to 'stub-only'"
+--   CBI 的 depends 只会把 comp_lzo 隐藏, 并不会删除 UCI 里已有的值,
+--   于是把 Allow Compression 改成 no 再保存, openvpn 就起不来了。
+--   这里在写入 allow_compression=no 时同步删除 comp_lzo。
+local _allow_compression_write = allow_compression.write
+allow_compression.write = function(self, section, value)
+	local c = require("luci.model.uci").cursor()
+	-- DCO 已启用时不允许再开压缩 (DCO 与压缩互斥), 直接强制为 no
+	if dco_ok and c:get("openvpn", section, "disable_dco") ~= "1" then
+		value = "no"
+	end
+	_allow_compression_write(self, section, value)
+	if value == "no" then
+		c:delete("openvpn", section, "comp_lzo")
+		c:commit("openvpn")
+	end
+end
 
 push_peer_info = s:taboption("basic",Flag,"push_peer_info", translate("push peer info"))
 push_peer_info.description = translate("This will allow the server to know more info about the client like HWADDR, very useful for managing IoT devices.")
@@ -107,6 +172,17 @@ comp_lzo:depends("comp_lzo", "adaptive")
 comp_lzo.default="adaptive"
 end
 comp_lzo.description = translate("Using LZO compression, it does not support versions above 2.5.X, does not support DCO; if your version number is greater than this version, select NO to disable it.")
+-- 反向保护: 只要 allow_compression 已经是 no, 就绝不写入 comp_lzo
+if (major > 2) or (major == 2 and minor >= 5) then
+	local _comp_lzo_write = comp_lzo.write
+	comp_lzo.write = function(self, section, value)
+		local ac = require("luci.model.uci").cursor():get("openvpn", section, "allow_compression")
+		if ac == "no" then
+			return
+		end
+		_comp_lzo_write(self, section, value)
+	end
+end
 end
 
 auth_user_pass_verify = s:taboption("basic",Value,"auth_user_pass_verify", translate("user password verify"))
@@ -252,6 +328,20 @@ end
 local comp_lzo_val = uci:get("openvpn", "myvpn", "comp_lzo")
 
 function mp.on_after_commit(self)
+  -- 保存后统一修正 DCO / 压缩 的互斥关系。
+  -- Flag 取消勾选(启用 DCO)时 LuCI 不会走 write, 所以在这里处理
+  -- (on_after_commit 每次保存都会执行)。
+  local c = require("luci.model.uci").cursor()
+  if dco_ok and c:get("openvpn", "myvpn", "disable_dco") ~= "1" then
+    local ac  = c:get("openvpn", "myvpn", "allow_compression")
+    local lzo = c:get("openvpn", "myvpn", "comp_lzo")
+    if ac ~= "no" or (lzo ~= nil and lzo ~= "") then
+      c:set("openvpn", "myvpn", "allow_compression", "no")
+      c:delete("openvpn", "myvpn", "comp_lzo")
+      c:commit("openvpn")
+    end
+  end
+
   os.execute("uci set firewall.openvpn.dest_port=$(uci get openvpn.myvpn.port) && uci commit firewall &&  /etc/init.d/firewall restart")
   os.execute("/etc/init.d/openvpn restart")
   if comp_lzo_val == "no" then

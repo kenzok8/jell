@@ -2,14 +2,44 @@
 XHR.poll(3, '<%=url([[admin]], [[services]], [[openvpn-server]], [[status]])%>', null,
 	function(x, data) {
 		var tb = document.getElementById('openvpn_status');
-		if (data && tb) {
-			if (data.running) {
-				var links = '<em><b><font color=green>OpenVPN <%:RUNNING%></font></b></em>';
-				tb.innerHTML = links;
-			} else {
-				tb.innerHTML = '<em><b><font color=red>OpenVPN <%:NOT RUNNING%></font></b></em>';
-			}
+		if (!(data && tb)) return;
+
+		var s = '';
+
+		/* OpenVPN 运行状态 */
+		s += data.running
+			? '<em><b><font color="#27ae60">OpenVPN <%:RUNNING%></font></b></em>'
+			: '<em><b><font color="#e74c3c">OpenVPN <%:NOT RUNNING%></font></b></em>';
+
+		s += ' &nbsp;·&nbsp; ';
+
+		/* DCO 状态 */
+		if (data.dco_active) {
+			s += '<em><b><font color="#27ae60"><%:DCO ACTIVE%></font></b></em>';
+		} else if (!data.dco_supported) {
+			s += '<em><b><font color="#95a5a6"><%:DCO NOT SUPPORTED%></font></b></em>';
+		} else if (data.dco_disabled) {
+			s += '<em><b><font color="#95a5a6"><%:DCO DISABLED%></font></b></em>';
+		} else {
+			s += '<em><b><font color="#e67e22"><%:DCO INACTIVE (COMPRESSION CONFLICT)%></font></b></em>';
 		}
+
+		/* 压缩配置冲突 */
+		if (data.conflict) {
+			s += ' &nbsp;·&nbsp; <em><b><font color="#e74c3c"><%:COMPRESSION CONFIG CONFLICT%></font></b></em>';
+		}
+
+		/* 明细 */
+		var d = [];
+		d.push('<%:DCO kernel module%>: ' + (data.dco_kernel ? '✔' : '✘'));
+		d.push('<%:OpenVPN built with DCO%>: ' + (data.dco_build ? '✔' : '✘'));
+		d.push('allow-compression: ' + (data.allow_compression || '-'));
+		d.push('comp_lzo: ' + (data.comp_lzo || '-'));
+		if (data.conflict) {
+			d.push('<font color="#e74c3c"><%:allow-compression=no and comp_lzo cannot coexist, openvpn will refuse to start.%></font>');
+		}
+
+		tb.innerHTML = s + '<br><small style="color:#7f8c8d">' + d.join(' &nbsp;|&nbsp; ') + '</small>';
 	}
 );
 //]]>
