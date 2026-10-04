@@ -1132,10 +1132,10 @@ local default_file_tree = {
 }
 
 local function get_api_json(url)
-	local gh_proxy = uci_get_c("@global_app[0]", "github_proxy") or "0"
+	local gh_proxy = uci_get_c("@global_app[0]", "gh_proxy_url") or ""
 	local return_code, content
-	if gh_proxy == "1" then
-		url = "https://gh-proxy.org/" .. url
+	if gh_proxy ~= "" then
+		url = gh_proxy .. url
 		return_code, content = curl_base(url, nil, curl_args)
 	else
 		return_code, content = curl_auto(url, nil, curl_args)
@@ -1232,7 +1232,7 @@ function to_check(arch, app_name)
 	}
 end
 
-function to_download(app_name, url, size)
+function to_download(app_name, url, size, task_id)
 	local result = check_path(app_name)
 	if result.code ~= 0 then
 		return result
@@ -1244,7 +1244,13 @@ function to_download(app_name, url, size)
 
 	remove("/tmp/" .. app_name .. "_download.*")
 
-	local tmp_file = trim(util.exec("mktemp -u -t " .. app_name .. "_download.XXXXXX"))
+	local tmp_file
+	if task_id and task_id:match("^[%w_-]+$") then
+		tmp_file = "/tmp/" .. app_name .. "_download." .. task_id
+		remove(tmp_file)
+	else
+		tmp_file = trim(util.exec("mktemp -u -t " .. app_name .. "_download.XXXXXX"))
+	end
 
 	if size then
 		local kb1 = get_free_space("/tmp")
@@ -1256,10 +1262,10 @@ function to_download(app_name, url, size)
 	local _curl_args = clone(curl_args)
 	table.insert(_curl_args, "--speed-limit 51200 --speed-time 15 --max-time 300")
 
-	local gh_proxy = uci_get_c("@global_app[0]", "github_proxy") or "0"
+	local gh_proxy = uci_get_c("@global_app[0]", "gh_proxy_url") or ""
 	local return_code, result
-	if gh_proxy == "1" then
-		url = "https://gh-proxy.org/" .. url
+	if gh_proxy ~= "" then
+		url = gh_proxy .. url
 		return_code, result = curl_base(url, tmp_file, _curl_args)
 	else
 		return_code, result = curl_auto(url, tmp_file, _curl_args)
@@ -1275,6 +1281,23 @@ function to_download(app_name, url, size)
 	end
 
 	return {code = 0, file = tmp_file, zip = com[app_name].zipped }
+end
+
+function to_download_progress(app_name, task_id, total_size)
+	if not com[app_name] or type(task_id) ~= "string" or not task_id:match("^[%w_-]+$") then
+		return {code = 1, error = i18n.translate("Invalid download task.")}
+	end
+
+	total_size = tonumber(total_size) or 0
+	local tmp_file = "/tmp/" .. app_name .. "_download." .. task_id
+	local downloaded = tonumber(fs.stat(tmp_file, "size")) or 0
+	local percent
+	if total_size > 0 then
+		-- The download request has not completed yet, so leave 100% for its success callback.
+		percent = math.min(99, math.floor(downloaded * 100 / total_size))
+	end
+
+	return {code = 0, downloaded = downloaded, total = total_size, percent = percent}
 end
 
 function to_extract(app_name, file, subfix)
@@ -1425,10 +1448,10 @@ end
 function to_check_self()
 	local url = "https://raw.githubusercontent.com/Openwrt-Passwall/openwrt-passwall/main/luci-app-passwall/Makefile"
 	local tmp_file = "/tmp/passwall_makefile"
-	local gh_proxy = uci_get_c("@global_app[0]", "github_proxy") or "0"
+	local gh_proxy = uci_get_c("@global_app[0]", "gh_proxy_url") or ""
 	local return_code, result
-	if gh_proxy == "1" then
-		url = "https://gh-proxy.org/" .. url
+	if gh_proxy ~= "" then
+		url = gh_proxy .. url
 		return_code, result = curl_base(url, tmp_file, curl_args)
 	else
 		return_code, result = curl_auto(url, tmp_file, curl_args)
