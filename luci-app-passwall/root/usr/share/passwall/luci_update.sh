@@ -6,14 +6,10 @@ manager="$3"
 force="$4"
 
 if [ "$manager" = apk ]; then
-	apk add --allow-untrusted "$dir/luci-app-${CONFIG}.apk" "$dir/luci-i18n-${CONFIG}-zh-cn.apk"
+	extra=""
+	[ "$force" = 1 ] && extra="--force-reinstall --force-overwrite"
+	apk add --allow-untrusted $extra "$dir/luci-app-${CONFIG}.apk" "$dir/luci-i18n-${CONFIG}-zh-cn.apk"
 	result=$?
-	if [ "$result" = 0 ] && [ "$force" = 1 ]; then
-		apk mkndx --allow-untrusted --pkgname-spec '${name}.apk' -o "$dir/Packages.adb" \
-			"$dir/luci-app-${CONFIG}.apk" "$dir/luci-i18n-${CONFIG}-zh-cn.apk" &&
-		apk --allow-untrusted --repository "$dir/Packages.adb" fix --reinstall "luci-app-${CONFIG}" "luci-i18n-${CONFIG}-zh-cn"
-		result=$?
-	fi
 else
 	extra=""
 	[ "$force" = 1 ] && extra="--force-reinstall"
