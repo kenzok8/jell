@@ -74,7 +74,7 @@ if [ "$version" -lt 1 ]; then
 	EOF
 
 	(echo root; echo root) | passwd root >/dev/null 2>&1
-	[ -f /usr/share/rpcd/acl.d/luci-theme-argon.json ] && uci -q set luci.main.mediaurlbase='/luci-static/argon'
+	[ -f /usr/share/rpcd/acl.d/luci-theme-vantage.json ] && uci -q set luci.main.mediaurlbase='/luci-static/vantage'
 	grep -q 'log-facility' /etc/dnsmasq.conf 2>/dev/null || echo "log-facility=/dev/null" >> /etc/dnsmasq.conf
 
 	mkdir -p /etc/sysctl.d
