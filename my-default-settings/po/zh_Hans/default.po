@@ -207,3 +207,24 @@ msgstr "自动共享"
 
 msgid "Auto share local disk which connected"
 msgstr "自动匿名共享路由器所连接的硬盘"
+
+msgid "downloaded"
+msgstr "总下载"
+
+msgid "uploaded"
+msgstr "总上传"
+
+msgid "download"
+msgstr "下载"
+
+msgid "upload"
+msgstr "上传"
+
+msgid "UPTIME"
+msgstr "已运行"
+
+msgid "STORAGE"
+msgstr "存储"
+
+msgid "RAM"
+msgstr "内存"
