@@ -8,6 +8,7 @@ USE_PROCD=1
 
 . /usr/lib/unbound/iptools.sh
 . /lib/functions/network.sh
+. /usr/lib/mptcp/init_helpers.sh
 
 restart_scheduler_dependent_services() {
 	local proxy vpn
@@ -799,11 +800,13 @@ start_service() {
 		config_foreach add_route6 route6
 		[ -z "$intf" ] && set_multipath
 	
-		# If no master is defined, one interface is defined as master
+		# If the master interface is disabled, another one is set as master.
+		# Not when no interface is set as master: the interfaces then share
+		# the balancing routes evenly, instead of 100 to 1 for a master.
 		if [ "$master" = "" ] && [ -z "$intf" ]; then
 			intfmaster="$mptcpmintf"
-			[ "$intfmaster" != "" ] && [ -z "$(uci -q show network | grep \"multipath='master'\")" ] && {
-				logger -t "MPTCP" "No master multipath defined, setting it to $intfmaster"
+			[ "$intfmaster" != "" ] && mptcp_has_master_multipath && {
+				logger -t "MPTCP" "Master multipath interface disabled, setting it to $intfmaster"
 				uci -q set network.${intfmaster}.multipath="master"
 				uci -q set openmptcprouter.${intfmaster}.multipath="master"
 			}
@@ -824,8 +827,12 @@ start_service() {
 
 stop_service() {
 	local pin_dir="/sys/fs/bpf/mptcp"
+	# Deleting the pinned link unregisters the scheduler, as in
+	# global_multipath_settings: "bpftool struct_ops unregister" takes a map
+	# id or name, not a pinned path, so it failed and the pins were kept.
 	for pin in "$pin_dir"/*; do
-		[ -e "$pin" ] && bpftool struct_ops unregister pinned "$pin" >/dev/null 2>&1 && rm -f "$pin"
+		[ -e "$pin" ] || continue
+		rm -f "$pin"
 	done
 }
 
