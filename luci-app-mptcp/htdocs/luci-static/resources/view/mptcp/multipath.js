@@ -43,30 +43,33 @@ return view.extend({
 	 *  Helpers                                                            *
 	 * ------------------------------------------------------------------ */
 
+	/* The same colours as the status page (stringToColour() in
+	 * openmptcprouter/wanstatus.js), so that a WAN has one colour on both
+	 * pages; "total" is this page's own line. They are written in hex
+	 * because the WAN card's badge appends an alpha byte to them, which
+	 * turns a colour name into an invalid value. */
 	_ifaceColor: function(name) {
 		var fixed = {
-			'total': 'OrangeRed',
-			'wan1':  'DeepSkyBlue',
-			'wan2':  'SeaGreen',
-			'wan3':  'PaleGreen',
-			'wan4':  'PowderBlue',
-			'wan5':  'Salmon',
-			'wan6':  'LightGreen',
-			'wan7':  'PaleTurquoise',
-			'wan':   'FireBrick'
+			total: '#ff4500',   /* OrangeRed */
+			wan1: '#8a2be2',    /* BlueViolet */
+			wan2: '#00bfff',    /* DeepSkyBlue */
+			wan3: '#90ee90',    /* LightGreen */
+			wan4: '#b0e0e6',    /* PowderBlue */
+			wan5: '#98fb98',    /* PaleGreen */
+			wan6: '#9acd32',    /* YellowGreen */
+			wan7: '#2e8b57',    /* SeaGreen */
+			wan8: '#4682b4'     /* SteelBlue */
 		};
-		/* prefix match: wan1x should still get wan1's colour */
-		var keys = Object.keys(fixed).sort(function(a, b) { return b.length - a.length; });
-		for (var i = 0; i < keys.length; i++)
-			if (name.indexOf(keys[i]) === 0) return fixed[keys[i]];
-		/* deterministic hash fallback */
+		if (fixed[name]) return fixed[name];
 		var h = 0;
-		for (var j = 0; j < name.length; j++)
-			h = Math.imul(31, h) + name.charCodeAt(j) | 0;
-		var c = '#';
-		for (var k = 0; k < 3; k++)
-			c += ('00' + ((h >> (k * 8)) & 0xFF).toString(16)).slice(-2);
-		return c;
+		for (var i = 0; i < (name || '').length; i++)
+			h = ((h << 5) - h) + name.charCodeAt(i);
+		var color = '#';
+		for (var j = 0; j < 3; j++) {
+			var v = (h >> (j * 8)) & 0xFF;
+			color += ('00' + v.toString(16)).slice(-2);
+		}
+		return color;
 	},
 
 	_bwLabel: function(bytes, br) {

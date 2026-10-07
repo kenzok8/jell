@@ -1,4 +1,0 @@
-#!/bin/sh
-
-/etc/init.d/openvpn-client-cubic enable
-exit 0

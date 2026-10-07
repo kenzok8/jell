@@ -12,7 +12,6 @@ define Package/luci-app-nvr
 	SUBMENU:=3. Applications
 	TITLE:=LuCI Support for Network Video Recorder
 	PKGARCH:=all
-	DEPENDS:=+ffmpeg
 endef
 
 define Build/Prepare
