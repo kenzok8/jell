@@ -11,7 +11,7 @@ PKG_ARCH_ISTOREENHANCE:=$(ARCH)
 
 PKG_NAME:=istoreenhance
 # use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
-PKG_SOURCE_DATE:=0.8.1
+PKG_SOURCE_DATE:=0.8.3
 PKG_RELEASE:=1
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
@@ -41,7 +41,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Network
 	SUBMENU:=Web Servers/Proxies
 	TITLE:=iStoreEnhance - Fix some net issues for istore
-	DEPENDS:=@(arm||x86_64||aarch64) +linkease-app-entry
+	DEPENDS:=@(arm||x86_64||aarch64) +linkease-app-entry +ks-cli
 	PKGARCH:=all
 	URL:=https://www.kspeeder.com/
 endef
