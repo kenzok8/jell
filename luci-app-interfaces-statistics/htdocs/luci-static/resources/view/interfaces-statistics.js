@@ -59,12 +59,12 @@ return view.extend({
 	update() {
 		return this.callNetDevice().then(ifacesData => {
 			this.setIfacesData(ifacesData);
-		}).catch(e => ui.addNotification(null, E('p', {}, e.message)));
+		}).catch(e => ui.addNotification(null, E('p', {}, e.message), 'warning'));
 	},
 
 	load() {
 		return this.callNetDevice().catch(
-			e => ui.addNotification(null, E('p', {}, e.message)));
+			e => ui.addNotification(null, E('p', {}, e.message), 'warning'));
 	},
 
 	render(ifacesData) {
