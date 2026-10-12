@@ -9,7 +9,7 @@ PKG_NAME:=natmapt
 PKG_UPSTREAM_VERSION:=20260214
 PKG_UPSTREAM_GITHASH:=
 PKG_VERSION:=$(PKG_UPSTREAM_VERSION)$(if $(PKG_UPSTREAM_GITHASH),~$(call version_abbrev,$(PKG_UPSTREAM_GITHASH)))
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 SCRIPTS_VERSION:=0.2026.01.24
 
 PKG_SOURCE_SUBDIR:=$(PKG_UPSTREAM_NAME)-$(PKG_UPSTREAM_VERSION)
@@ -45,6 +45,7 @@ define Package/natmapt
   TITLE:=TCP/UDP port mapping tool for full cone NAT
   URL:=https://github.com/heiher/natmap
   DEPENDS:=+curl +jsonfilter +bash
+  PROVIDES:=natmap
 endef
 
 MAKE_FLAGS += REV_ID="$(PKG_VERSION)"

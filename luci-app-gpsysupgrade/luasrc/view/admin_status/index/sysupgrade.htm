@@ -2,8 +2,8 @@
 local fs = require "nixio.fs"
 local uci = require 'luci.model.uci'.cursor()
 
-if fs.access('/etc/config/wizard') then
-	autoupgrade_fm = uci:get('wizard', 'default', 'autoupgrade_fm')
+if fs.access('/etc/config/luci') then
+	autoupgrade_fm = uci:get('luci', 'main', 'autoupgrade_fm')
 end
 if autoupgrade_fm == '1' then
 -%>

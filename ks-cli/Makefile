@@ -5,7 +5,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_KS_CLI:=$(ARCH)
 
 PKG_NAME:=ks-cli
-PKG_VERSION:=0.8.3
+PKG_VERSION:=0.8.4
 PKG_RELEASE:=1
 
 PKG_SOURCE:=ks-cli-binary-$(PKG_VERSION).tar.gz

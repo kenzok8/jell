@@ -8,7 +8,7 @@ sed -i -e '/profile.d/d' /lib/upgrade/keep.d/base-files \
        -e 's/git-.*-\(.*\)/git-\1/g' /usr/lib/lua/luci/version.lua 2>/dev/null
 
 # 2. 版本与环境参数提取
-version=$(uci -q get base_config.@status[0].version)
+version=$(uci -q get system.@status[0].version)
 case "$version" in ''|*[!0-9]*) version=0 ;; esac
 
 for ip in $(uci -q get network.lan.ipaddr); do
@@ -133,9 +133,9 @@ modprobe xt_FULLCONENAT >/dev/null 2>&1 || modprobe nft_fullcone >/dev/null 2>&1
 }
 
 # 7. 更新版本状态、一次性提交所有 UCI 配置并安全退出
-[ -f /etc/config/base_config ] && {
-	uci -q get base_config.@status[0] >/dev/null || uci -q add base_config status >/dev/null
-	uci -q set base_config.@status[0].version="$version"
+[ -f /etc/config/system ] && {
+	uci -q get system.@status[0] >/dev/null || uci -q add system status >/dev/null
+	uci -q set system.@status[0].version="$version"
 }
 
 uci -q commit

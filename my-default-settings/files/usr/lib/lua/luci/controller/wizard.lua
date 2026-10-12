@@ -29,7 +29,7 @@ end
 
 function landing_page()
     local uci = luci.model.uci.cursor()
-    local page = uci:get("wizard", "default", "landing_page")
+    local page = uci:get("luci", "main", "landing_page")
     local target = {"admin", "status", "overview"}
 
     -- 1. 默认/自动模式

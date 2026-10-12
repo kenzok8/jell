@@ -56,7 +56,7 @@ done
 # -------------------------------------------------------------
 # 既未强制重新配置，又无自定义参数，且已配置过时直接跳过
 if [ $FORCE -eq 0 ] && [ -z "$CUSTOM_SSID" ] && [ $HAS_PASSWD -eq 0 ]; then
-    if [ "$(uci -q get base_config.@status[0].wifi 2>/dev/null)" = "1" ]; then
+    if [ "$(uci -q get system.@status[0].wifi 2>/dev/null)" = "1" ]; then
         log_info "WiFi 已配置完成，无需重复执行。"
         exit 0
     fi
@@ -226,10 +226,9 @@ done
 # -------------------------------------------------------------
 uci commit wireless 2>/dev/null
 
-if uci -q get base_config.@status[0] >/dev/null 2>&1; then
-    uci -q set base_config.@status[0].wifi=1
-    uci commit base_config 2>/dev/null
-fi
+uci -q get system.@status[0] >/dev/null || uci -q add system status >/dev/null
+uci -q set system.@status[0].wifi=1
+uci commit system 2>/dev/null
 
 wifi reload 2>/dev/null || /sbin/wifi reload 2>/dev/null
 
