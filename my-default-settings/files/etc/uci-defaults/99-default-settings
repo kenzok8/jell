@@ -8,8 +8,7 @@ sed -i -e '/profile.d/d' /lib/upgrade/keep.d/base-files \
        -e 's/git-.*-\(.*\)/git-\1/g' /usr/lib/lua/luci/version.lua 2>/dev/null
 
 # 2. 版本与环境参数提取
-version=$(uci -q get system.@status[0].version)
-case "$version" in ''|*[!0-9]*) version=0 ;; esac
+version=$(uci -q get system.@status[0].version || uci -q get base_config.@status[0].version || echo '0')
 
 for ip in $(uci -q get network.lan.ipaddr); do
 	case "$ip" in *.*) lan_ip="${ip%%/*}"; break ;; esac
@@ -74,7 +73,7 @@ if [ "$version" -lt 1 ]; then
 	EOF
 
 	(echo root; echo root) | passwd root >/dev/null 2>&1
-	[ -f /usr/share/rpcd/acl.d/luci-theme-vantage.json ] && uci -q set luci.main.mediaurlbase='/luci-static/vantage'
+	[ -d /usr/share/ucode/luci/template/themes/vantage ] && uci -q set luci.main.mediaurlbase='/luci-static/vantage'
 	grep -q 'log-facility' /etc/dnsmasq.conf 2>/dev/null || echo "log-facility=/dev/null" >> /etc/dnsmasq.conf
 
 	mkdir -p /etc/sysctl.d
