@@ -37,6 +37,21 @@ _mptcp_limit() {
 	esac
 }
 
+# Persist the sysctl $1=$2 in zzz_openmptcprouter.conf. procd reloads mptcp on
+# every interface event, and "sed -i" rewrote the file on flash each time,
+# the value unchanged: it is only edited when a line of that key differs.
+_sysctl_conf_set() {
+	local conf=/etc/sysctl.d/zzz_openmptcprouter.conf
+	if grep -q "^$1=" "$conf" 2>/dev/null && ! grep "^$1=" "$conf" | grep -qvx "$1=$2"; then
+		return 0
+	fi
+	if grep -q "$1" "$conf" 2>/dev/null; then
+		sed -i "s:^$1=[0-1]*:$1=$2:" "$conf"
+	else
+		echo "$1=$2" >> "$conf"
+	fi
+}
+
 restart_scheduler_dependent_services() {
 	local proxy vpn
 	proxy="$(uci -q get openmptcprouter.settings.proxy)"
@@ -145,11 +160,7 @@ global_multipath_settings() {
 	# Global MPTCP configuration
 	if [ -f /proc/sys/net/mptcp/mptcp_enabled ]; then
 		sysctl -qew net.mptcp.mptcp_enabled="$multipath_status"
-		if grep -q net.mptcp.mptcp_enabled /etc/sysctl.d/zzz_openmptcprouter.conf; then
-			sed -i "s:^net.mptcp.mptcp_enabled=[0-1]*:net.mptcp.mptcp_enabled=${multipath_status}:" /etc/sysctl.d/zzz_openmptcprouter.conf
-		else
-			echo "net.mptcp.mptcp_enabled=${multipath_status}" >> /etc/sysctl.d/zzz_openmptcprouter.conf
-		fi
+		_sysctl_conf_set net.mptcp.mptcp_enabled "$multipath_status"
 		[ -z "$mptcp_path_manager" ] || sysctl -qew net.mptcp.mptcp_path_manager="$mptcp_path_manager"
 		if [ -n "$mptcp_scheduler" ]; then
 			local prev_sched="$(cat /proc/sys/net/mptcp/mptcp_scheduler 2>/dev/null)"
@@ -170,11 +181,7 @@ global_multipath_settings() {
 		[ -z "$mptcp_version" ] || sysctl -qew net.mptcp.mptcp_version="$mptcp_version"
 	elif [ -f /proc/sys/net/mptcp/enabled ]; then
 		sysctl -qew net.mptcp.enabled="$multipath_status"
-		if grep -q net.mptcp.enabled /etc/sysctl.d/zzz_openmptcprouter.conf; then
-			sed -i "s:^net.mptcp.enabled=[0-1]*:net.mptcp.enabled=${multipath_status}:" /etc/sysctl.d/zzz_openmptcprouter.conf
-		else
-			echo "net.mptcp.enabled=${multipath_status}" >> /etc/sysctl.d/zzz_openmptcprouter.conf
-		fi
+		_sysctl_conf_set net.mptcp.enabled "$multipath_status"
 		# The kernel takes at most 8 for each limit (MPTCP_PM_ADDR_MAX) and
 		# refuses the whole command when one is above, so a single value too
 		# high left both limits at whatever they were
@@ -282,7 +289,9 @@ interface_max_metric() {
 			EOF
 			;;
 		lan)
-			sed -i 's:50 lan:9999 lan:g' /etc/iproute2/rt_tables
+			# only when needed: this runs on every reload, sed -i writes flash
+			grep -q '50 lan' /etc/iproute2/rt_tables 2>/dev/null && \
+				sed -i 's:50 lan:9999 lan:g' /etc/iproute2/rt_tables
 			;;
 		loopback)
 			;;
@@ -380,8 +389,48 @@ _prune_wan_routes() {
 		done
 }
 
+# config_foreach callback: device_section is the "config device" section of
+# the device $2
+_find_device_section() {
+	local name
+	config_get name "$1" name
+	[ -n "$name" ] && [ "$name" = "$2" ] && device_section="$1"
+}
+
+# config_foreach callback: _multipath_dev_found is set when the interface $1,
+# not $3, is in MPTCP (on, master or backup) on the device $2
+_check_multipath_device() {
+	local sec="$1" dev="$2" self="$3" mode disabled sdev
+	[ "$sec" = "$self" ] && return 0
+	[ -n "$_multipath_dev_found" ] && return 0
+	case "$sec" in *_6) return 0 ;; esac
+	config_get disabled "$sec" disabled
+	[ "$disabled" = "1" ] && return 0
+	config_get mode "$sec" multipath
+	[ -n "$mode" ] || mode="$(uci -q get openmptcprouter.${sec}.multipath)"
+	case "$mode" in on|master|backup) ;; *) return 0 ;; esac
+	network_get_device sdev "$sec"
+	[ -z "$sdev" ] && network_get_physdev sdev "$sec"
+	[ -z "$sdev" ] && sdev=$(ifstatus "$sec" | jsonfilter -q -e '@["l3_device"]')
+	[ -z "$sdev" ] && config_get sdev "$sec" ifname
+	case "$sdev" in *@*) sdev=$(ifstatus "$sec" | jsonfilter -q -e '@["device"]') ;; esac
+	[ -n "$sdev" ] && [ "$sdev" = "$dev" ] && _multipath_dev_found=1
+	return 0
+}
+
+# Whether another interface than $2 has MPTCP on the device $1. A second
+# interface on a WAN's device (a wan6 on @wan2, a static alias) is "off"
+# itself, and turning MPTCP off for it removed the WAN's endpoints on every
+# reload: until the WAN's own turn put them back, or for good when the WAN
+# came first.
+_device_used_by_multipath() {
+	_multipath_dev_found=""
+	config_foreach _check_multipath_device interface "$1" "$2"
+	[ -n "$_multipath_dev_found" ]
+}
+
 interface_multipath_settings() {
-	local mode iface proto metric ip4table qdisc
+	local mode iface proto metric ip4table qdisc device_section
 	local config="$1"
 	local intf="$2"
 	# DHCPv6 companion interfaces (<intf>_6) share the parent's device:
@@ -400,6 +449,17 @@ interface_multipath_settings() {
 	config_get txqueuelen "$config" txqueuelen
 	config_get qdisc "$config" qdisc
 	case "$iface" in *@*) iface=$(ifstatus "$config" | jsonfilter -q -e '@["device"]') ;; esac
+	# LuCI's device dialog writes the qdisc, the TX queue length and the
+	# offloads to the "config device" section of the device: only the
+	# interface's own options were read, so those were never applied and the
+	# queue length was put back to 1000 over the one netifd had set. The
+	# device's value wins, the interface's is the fallback.
+	device_section=""
+	[ -n "$iface" ] && config_foreach _find_device_section device "$iface"
+	[ -n "$device_section" ] && {
+		config_get txqueuelen "$device_section" txqueuelen "$txqueuelen"
+		config_get qdisc "$device_section" qdisc "$qdisc"
+	}
 	if [ "$(uci -q get openmptcprouter.${config}.metric)" = "" ] || [ "$(uci -q get openmptcprouter.${config}.metric)" = "1" ]; then
 		count=$((count+1))
 		metric=$count
@@ -430,7 +490,8 @@ interface_multipath_settings() {
 	[ -n "$iface" ] && {
 		local offload val
 		for offload in gro gso lro ufo tso; do
-			val=$(uci -q get network.${config}.${offload})
+			config_get val "$config" "$offload"
+			[ -n "$device_section" ] && config_get val "$device_section" "$offload" "$val"
 			[ "$val" = "1" ] && ethtool -K $iface $offload on >/dev/null 2>&1
 			[ "$val" = "0" ] && ethtool -K $iface $offload off >/dev/null 2>&1
 		done
@@ -787,7 +848,8 @@ interface_multipath_settings() {
 		elif ([ "$mode" = "master" ] || [ "$mode" = "on" ]) && { [ -z "$(multipath $iface | grep default)" ] || ! multipath -i "$iface" "$id"; }; then
 			logger -t "MPTCP" "Set $iface to $mode from $(multipath $iface)"
 			multipath "$iface" "on" "$id"
-		elif ([ "$mode" = "off" ] || [ -z "$mode" ]) && [ -z "$(multipath $iface | grep deactivated)" ]; then
+		elif ([ "$mode" = "off" ] || [ -z "$mode" ]) && [ -z "$(multipath $iface | grep deactivated)" ] && \
+			! _device_used_by_multipath "$iface" "$config"; then
 			logger -t "MPTCP" "Set $iface to $mode from $(multipath $iface)"
 			multipath "$iface" "$mode" "$id"
 		elif [ "$mode" = "backup" ] && { [ -z "$(multipath $iface | grep backup)" ] || ! multipath -i "$iface" "$id"; }; then
