@@ -10,8 +10,8 @@ PKG_ARCH_LINKEASE:=$(ARCH)
 
 PKG_NAME:=linkeasefull
 # use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
-PKG_SOURCE_DATE:=3.0.22
-PKG_RELEASE:=2
+PKG_SOURCE_DATE:=3.0.23
+PKG_RELEASE:=1
 
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
@@ -24,7 +24,7 @@ LINKEASE_RUNTIME_ARCH:=arm64
 PKG_HASH:=skip
 endif
 
-PKG_SOURCE_VERSION:=a4caf01538992789e44cbfb1cabd66471495aaed
+PKG_SOURCE_VERSION:=d95e24fb96418077475c8aea19d9edc3f8316434
 PKG_SOURCE:=linkease-runtime-$(PKG_SOURCE_DATE)-linux-$(LINKEASE_RUNTIME_ARCH).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/linkeasefull-runtime-v$(PKG_SOURCE_DATE)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-runtime-$(PKG_SOURCE_DATE)-linux-$(LINKEASE_RUNTIME_ARCH)
