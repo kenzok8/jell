@@ -2486,3 +2486,18 @@ msgstr "Задает список поддерживаемых наборов ш
 
 msgid "This username already exists."
 msgstr "Это имя пользователя уже существует."
+
+msgid "MASQUE Path"
+msgstr "Путь MASQUE"
+
+msgid "Custom HTTP Headers"
+msgstr "Пользовательские HTTP-заголовки"
+
+msgid "MASQUE Address"
+msgstr "Адрес туннеля MASQUE"
+
+msgid "WARP Device Private Key"
+msgstr "Приватный ключ устройства WARP"
+
+msgid "WARP Endpoint Public Key"
+msgstr "Публичный ключ сервера WARP"

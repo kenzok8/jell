@@ -2477,3 +2477,18 @@ msgstr "配置支援的密碼套件列表。"
 
 msgid "This username already exists."
 msgstr "該用戶名已存在。"
+
+msgid "MASQUE Path"
+msgstr "MASQUE 路徑"
+
+msgid "Custom HTTP Headers"
+msgstr "自訂 HTTP 請求標頭"
+
+msgid "MASQUE Address"
+msgstr "MASQUE 隧道位址"
+
+msgid "WARP Device Private Key"
+msgstr "WARP 裝置私鑰"
+
+msgid "WARP Endpoint Public Key"
+msgstr "WARP 伺服器公鑰"

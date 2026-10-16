@@ -2475,3 +2475,18 @@ msgstr "该用户名已存在。"
 msgid "Update Options"
 msgstr "更新选项"
 
+msgid "MASQUE Path"
+msgstr "MASQUE 路径"
+
+msgid "Custom HTTP Headers"
+msgstr "自定义 HTTP 请求头"
+
+msgid "MASQUE Address"
+msgstr "MASQUE 隧道地址"
+
+msgid "WARP Device Private Key"
+msgstr "WARP 设备私钥"
+
+msgid "WARP Endpoint Public Key"
+msgstr "WARP 服务端公钥"
+
