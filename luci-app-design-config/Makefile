@@ -1,14 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0-only
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-design-config
+PKG_PO_VERSION:=$(PKG_VERSION)-r$(PKG_RELEASE)
+PKG_LICENSE:=GPL-2.0-only
 
-PKG_MAINTAINER:=gngpp <gngppz@gmail.com>
-
-LUCI_TITLE:=LuCI page for Design Config
+LUCI_TITLE:=Design Theme Configuration
+LUCI_DEPENDS:=+luci-theme-design
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+luci-compat
 
-define Package/$(PKG_NAME)/conffiles
+define Package/luci-app-design-config/conffiles
 /etc/config/design
 endef
 
