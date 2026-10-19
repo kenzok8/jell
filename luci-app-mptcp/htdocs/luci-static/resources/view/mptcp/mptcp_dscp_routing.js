@@ -1,6 +1,7 @@
 'use strict';
 'require form';
 'require uci';
+'require rpc';
 
 /*
  * Copyright (C) 2026 Ycarus (Yannick Chabanois) <contact@openmptcprouter.com> for OpenMPTCProuter
@@ -33,6 +34,13 @@ var DSCP_CLASSES = [
 	['af43', 'AF43 (38)'],
 	['ef',  _('EF (46) - Voice')]
 ];
+
+// mqvpn's state through rpcd: the ACL does not grant the mqvpn config (PSK)
+var callMqvpnState = rpc.declare({
+	object: 'luci.mptcp',
+	method: 'mqvpn_state',
+	expect: { '': {} }
+});
 
 // Same WAN filter as this app's own mptcp.js "Interfaces Settings"
 // section: excludes the pseudo-interfaces that are never a real WAN.
@@ -76,21 +84,22 @@ return L.view.extend({
 	load: function() {
 		return Promise.all([
 			uci.load('network'),
-			// mqvpn may not be installed at all -- resolve to null instead
-			// of rejecting the whole page's load() in that case.
-			L.resolveDefault(uci.load('mqvpn'), null)
+			// mqvpn may not be installed at all -- resolve to "disabled"
+			// instead of rejecting the whole page's load() in that case.
+			L.resolveDefault(callMqvpnState(), {})
 		]);
 	},
 
-	render: function() {
+	render: function(data) {
 		var m, s, o;
+		var mqvpn = (data && data[1]) || {};
 
 		var mptcpScheduler = normalizeSchedulerValue(uci.get('network', 'globals', 'mptcp_scheduler'));
 		var mptcpHasDscpScheduler = (mptcpScheduler === 'bpf_dscp');
 		var mptcpHasWeightScheduler = (mptcpScheduler === 'bpf_weight' || mptcpScheduler === 'bpf_weight_rr' || mptcpScheduler === 'bpf_burstweight');
 
-		var mqvpnEnabled = (uci.get('mqvpn', 'settings', 'enable') === '1');
-		var mqvpnScheduler = uci.get('mqvpn', 'multipath', 'scheduler');
+		var mqvpnEnabled = (mqvpn.enabled === true);
+		var mqvpnScheduler = mqvpn.scheduler;
 		// mqvpn has no scheduler value dedicated to DSCP the way MPTCP has
 		// bpf_dscp -- 007-mqvpn-dscp pushes the DSCP mask unconditionally
 		// whenever mqvpn is enabled, regardless of which scheduler is
@@ -170,8 +179,10 @@ return L.view.extend({
 			o = s.option(form.Value, 'multipath_weight', _('Weight'),
 				_('A weight >100 makes a WAN more attractive, a weight <100 makes it less attractive. Max 256.'));
 			o.datatype = 'uinteger';
-			o.rmempty = false;
-			o.default = 100;
+			// a placeholder, not a default: a default made every Save write
+			// multipath_weight='100' on each WAN that had none (unset is 100)
+			o.placeholder = '100';
+			o.rmempty = true;
 		}
 
 		return m.render();
