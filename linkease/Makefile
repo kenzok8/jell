@@ -28,7 +28,7 @@ else ifeq ($(ARCH),mipsel)
 ARCH_HEXCODE=1b0c
 endif
 
-PKG_SOURCE_VERSION:=2572bfec2db676a6ae80e0d4796f98fd0c418914
+PKG_SOURCE_VERSION:=cd4c1927bf45af35a9151f6c486c106492e8a927
 PKG_SOURCE:=linkease-bin-$(PKG_SOURCE_DATE)-linux-$(PKG_ARCH_LINKEASE).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/linkease-runtime-v$(PKG_SOURCE_DATE)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-bin-$(PKG_SOURCE_DATE)-linux-$(PKG_ARCH_LINKEASE)

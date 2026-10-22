@@ -1,23 +1,24 @@
 diff -rNu a/cmd/caddy/main.go b/cmd/caddy/main.go
---- a/cmd/caddy/main.go	2026-10-05 19:08:11.018943038 +0800
-+++ b/cmd/caddy/main.go	2026-10-05 19:09:06.294002272 +0800
-@@ -35,6 +35,8 @@
+--- a/cmd/caddy/main.go	2026-10-21 19:49:32.000000000 +0800
++++ b/cmd/caddy/main.go	2026-10-22 19:33:51.051613200 +0800
+@@ -35,6 +35,9 @@
  
  	// plug in Caddy modules here
  	_ "github.com/caddyserver/caddy/v2/modules/standard"
 +	_ "github.com/mholt/caddy-webdav"
 +	_ "github.com/aksdb/caddy-cgi/v2"
++	_ "github.com/mholt/caddy-l4"
  )
  
  func main() {
 diff -rNu a/go.mod b/go.mod
---- a/go.mod	2026-10-05 19:08:11.019675873 +0800
-+++ b/go.mod	2026-10-05 19:13:21.604995028 +0800
+--- a/go.mod	2026-10-21 19:49:32.000000000 +0800
++++ b/go.mod	2026-10-22 19:40:34.352886981 +0800
 @@ -1,6 +1,6 @@
  module github.com/caddyserver/caddy/v2
  
 -go 1.26.0
-+go 1.27.1
++go 1.27.3
  
  require (
  	cel.dev/cel-go v0.32.0
@@ -34,20 +35,21 @@ diff -rNu a/go.mod b/go.mod
  	github.com/cloudflare/circl v1.6.5
  	github.com/dunglas/go-urlpattern v1.0.0
  	github.com/dunglas/httpsfv v1.1.1
-@@ -20,8 +22,12 @@
+@@ -20,8 +22,13 @@
  	github.com/google/uuid v1.6.0
  	github.com/klauspost/compress v1.20.1
  	github.com/klauspost/cpuid/v2 v2.4.0
 +	github.com/libdns/libdns v1.1.1
  	github.com/mholt/acmez/v3 v3.1.7
++	github.com/mholt/caddy-l4 v0.1.2
 +	github.com/mholt/caddy-webdav v0.0.0-20260127042217-fa2f366b0d75
 +	github.com/pires/go-proxyproto v0.15.0
  	github.com/prometheus/client_golang v1.24.1
 +	github.com/prometheus/client_model v0.6.3
  	github.com/quic-go/quic-go v0.63.0
+ 	github.com/quic-go/webtransport-go v0.13.0
  	github.com/smallstep/certificates v0.30.2
- 	github.com/smallstep/nosql v0.8.0
-@@ -32,6 +38,7 @@
+@@ -33,6 +40,7 @@
  	github.com/tailscale/tscert v0.0.0-20251216020129-aea342f6d747
  	github.com/yuin/goldmark v1.8.6
  	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
@@ -55,7 +57,7 @@ diff -rNu a/go.mod b/go.mod
  	go.opentelemetry.io/contrib/bridges/prometheus v0.71.0
  	go.opentelemetry.io/contrib/exporters/autoexport v0.71.0
  	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
-@@ -39,6 +46,7 @@
+@@ -40,6 +48,7 @@
  	go.opentelemetry.io/otel v1.46.0
  	go.opentelemetry.io/otel/sdk v1.46.0
  	go.opentelemetry.io/otel/sdk/metric v1.46.0
@@ -63,15 +65,15 @@ diff -rNu a/go.mod b/go.mod
  	go.step.sm/crypto v0.91.0
  	go.uber.org/automaxprocs v1.6.0
  	go.uber.org/zap v1.28.0
-@@ -47,6 +55,7 @@
+@@ -48,6 +57,7 @@
  	golang.org/x/crypto/x509roots/fallback v0.0.0-20260929172509-b39ff6d641ec
- 	golang.org/x/net v0.59.0
+ 	golang.org/x/net v0.60.0
  	golang.org/x/sync v0.23.0
 +	golang.org/x/sys v0.48.0
  	golang.org/x/term v0.46.0
  	golang.org/x/time v0.16.0
  	gopkg.in/yaml.v3 v3.0.1
-@@ -59,15 +68,33 @@
+@@ -60,15 +70,34 @@
  	cloud.google.com/go/compute/metadata v0.9.1 // indirect
  	dario.cat/mergo v1.0.2 // indirect
  	filippo.io/bigmod v0.1.0 // indirect
@@ -94,6 +96,7 @@ diff -rNu a/go.mod b/go.mod
 +	github.com/dgryski/go-farm v0.0.0-20240924180020-3414d57e47da // indirect
  	github.com/dlclark/regexp2/v2 v2.8.0 // indirect
 +	github.com/felixge/httpsnoop v1.1.0 // indirect
++	github.com/fsnotify/fsnotify v1.10.1 // indirect
  	github.com/fxamacker/cbor/v2 v2.9.4 // indirect
  	github.com/go-jose/go-jose/v3 v3.0.5 // indirect
  	github.com/go-jose/go-jose/v4 v4.1.5 // indirect
@@ -105,7 +108,7 @@ diff -rNu a/go.mod b/go.mod
  	github.com/google/certificate-transparency-go v1.3.3 // indirect
  	github.com/google/go-tpm v0.9.8 // indirect
  	github.com/google/go-tspi v0.3.0 // indirect
-@@ -75,20 +102,43 @@
+@@ -76,20 +105,44 @@
  	github.com/googleapis/enterprise-certificate-proxy v0.3.22 // indirect
  	github.com/googleapis/gax-go/v2 v2.25.0 // indirect
  	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
@@ -145,11 +148,12 @@ diff -rNu a/go.mod b/go.mod
  	github.com/smallstep/scep v0.0.0-20260331191114-261f960a40d1 // indirect
 +	github.com/spf13/cast v1.10.0 // indirect
  	github.com/tailscale/go-winio v0.0.0-20231025203758-c4f33415bf55 // indirect
++	github.com/things-go/go-socks5 v0.1.1 // indirect
 +	github.com/urfave/cli v1.22.17 // indirect
  	github.com/x448/float16 v0.8.4 // indirect
  	github.com/zeebo/blake3 v0.2.4 // indirect
  	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-@@ -100,6 +150,7 @@
+@@ -101,6 +154,7 @@
  	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.22.0 // indirect
  	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.46.0 // indirect
  	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.46.0 // indirect
@@ -157,7 +161,7 @@ diff -rNu a/go.mod b/go.mod
  	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0 // indirect
  	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.46.0 // indirect
  	go.opentelemetry.io/otel/exporters/prometheus v0.68.0 // indirect
-@@ -107,71 +158,19 @@
+@@ -108,71 +162,19 @@
  	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.46.0 // indirect
  	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.46.0 // indirect
  	go.opentelemetry.io/otel/log v0.22.0 // indirect
@@ -235,8 +239,8 @@ diff -rNu a/go.mod b/go.mod
  	howett.net/plist v1.0.1 // indirect
  )
 diff -rNu a/go.sum b/go.sum
---- a/go.sum	2026-10-05 19:08:11.020664130 +0800
-+++ b/go.sum	2026-10-05 19:13:21.604995028 +0800
+--- a/go.sum	2026-10-21 19:49:32.000000000 +0800
++++ b/go.sum	2026-10-22 19:40:34.352886981 +0800
 @@ -42,6 +42,8 @@
  github.com/Masterminds/sprig/v3 v3.3.0/go.mod h1:Zy1iXRYNqNLUolqCpL4uhk6SHUMAOSCzdgBfDb35Lz0=
  github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
@@ -246,12 +250,32 @@ diff -rNu a/go.sum b/go.sum
  github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
  github.com/alecthomas/assert/v2 v2.11.0/go.mod h1:Bze95FyfUr7x34QZrjL+XP+0qgp/zg8yS+TtBj1WA3k=
  github.com/alecthomas/chroma/v2 v2.2.0/go.mod h1:vf4zrexSH54oEjJ7EdB65tGNHmH3pGZmVkgTP5RHvAs=
-@@ -248,6 +250,8 @@
+@@ -153,6 +155,8 @@
+ github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
+ github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
+ github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
++github.com/fsnotify/fsnotify v1.10.1 h1:b0/UzAf9yR5rhf3RPm9gf3ehBPpf0oZKIjtpKrx59Ho=
++github.com/fsnotify/fsnotify v1.10.1/go.mod h1:TLheqan6HD6GBK6PrDWyDPBaEV8LspOxvPSjC+bVfgo=
+ github.com/fxamacker/cbor/v2 v2.9.4 h1:xwjVlxEMR3S605oUlgBjKLTTeGFciYPGYCtF/35LKGo=
+ github.com/fxamacker/cbor/v2 v2.9.4/go.mod h1:vM4b+DJCtHn+zz7h3FFp/hDAI9WNWCsZj23V5ytsSxQ=
+ github.com/go-chi/chi/v5 v5.3.2 h1:5YQkICvTCSZ25hoRsyJazN0scjzKGiu4VAUc7H1o1nY=
+@@ -248,6 +252,10 @@
  github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d/go.mod h1:01TrycV0kFyexm33Z7vhZRXopbI8J3TDReVlkTgMUxE=
  github.com/mholt/acmez/v3 v3.1.7 h1:XTqpuUcRdRoIBuDoI+M4mCnRnPTPN4rqH3Mb723Rg4U=
  github.com/mholt/acmez/v3 v3.1.7/go.mod h1:Lwv6P/czh/AOq+c99tAzP68/VP92s+8y+hDs4FCgxvo=
++github.com/mholt/caddy-l4 v0.1.2 h1:23rhxVar8F5Sl7sYKDgEReI1yT//+e8J7EtMwO2yJpU=
++github.com/mholt/caddy-l4 v0.1.2/go.mod h1:GTPu5/ptOkOhsH2DJKk+MxTqViSCLA+j8YL4wcpmmOs=
 +github.com/mholt/caddy-webdav v0.0.0-20260127042217-fa2f366b0d75 h1:PXPTUbQD59ErghFla/V4czJeRdwURX1VicmMtLsiw/E=
 +github.com/mholt/caddy-webdav v0.0.0-20260127042217-fa2f366b0d75/go.mod h1:Btj3NBe2qQGXsg1T8QDqfovMACGLUBH1tFqFJBF52cA=
  github.com/miekg/dns v1.1.73 h1:uhT8nJxmTrPJYClxVxTCX+CVn6qnzSiybRk72Z6DgrE=
  github.com/miekg/dns v1.1.73/go.mod h1:RW2Obtfd5NZHvOFe3zYG0W8koWOQtAzyHaLo8vASBuQ=
  github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
+@@ -363,6 +371,8 @@
+ github.com/tailscale/go-winio v0.0.0-20231025203758-c4f33415bf55/go.mod h1:4k4QO+dQ3R5FofL+SanAUZe+/QfeK0+OIuwDIRu2vSg=
+ github.com/tailscale/tscert v0.0.0-20251216020129-aea342f6d747 h1:RnBbFMmodYzhC6adOjTbtUQXyzV8dcvKYbolzs6Qch0=
+ github.com/tailscale/tscert v0.0.0-20251216020129-aea342f6d747/go.mod h1:ejPAJui3kVK4u5TgMtqtXlWf5HnKh9fLy5kvpaeuas0=
++github.com/things-go/go-socks5 v0.1.1 h1:48hy9cHEXPKeG91G/g4n8zW4uynzPUQy/FkcrJ7r5AY=
++github.com/things-go/go-socks5 v0.1.1/go.mod h1:1YBHVYG7Oli5ae+Pwkp630cPAwY1pjUPmohO1n0Emg0=
+ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
+ github.com/urfave/cli v1.22.17 h1:SYzXoiPfQjHBbkYxbew5prZHS1TOLT3ierW8SYLqtVQ=
+ github.com/urfave/cli v1.22.17/go.mod h1:b0ht0aqgH/6pBYzzxURyrM4xXNgsoT/n2ZzwQiEhNVo=
