@@ -1,0 +1,50 @@
+name: release-packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build packages
+    uses: ./.github/workflows/build-packages.yml
+
+  release:
+    name: Create release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: Release ${{ inputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            Install the matching package on your router:
+            - `luci-theme-material3-*.apk` -> OpenWrt LuCI 25.12+
+
+              ```sh
+              apk add --allow-untrusted luci-theme-material3-*.apk
+              ```
+            - `luci-theme-material3_*.ipk` -> OpenWrt LuCI 23.05~24.10
+
+              ```sh
+              opkg install luci-theme-material3_*.ipk
+              ```
+          files: |
+            *.ipk
+            *.apk

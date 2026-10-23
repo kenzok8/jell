@@ -1,11 +1,14 @@
 {
 	"luci-app-guest-wifi": {
-		"description": "Grant UCI access for luci-app-guest-wifi",
+		"description": "Grant access to guest-wifi configuration",
 		"read": {
-			"uci": [ "guest-wifi" ]
+			"uci": [ "wireless" ],
+			"ubus": {
+				"iwinfo": [ "devices", "info", "assoclist" ]
+			}
 		},
 		"write": {
-			"uci": [ "guest-wifi" ]
+			"uci": [ "wireless" ]
 		}
 	}
 }

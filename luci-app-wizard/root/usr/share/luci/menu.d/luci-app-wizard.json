@@ -1,0 +1,14 @@
+{
+	"admin/system/wizard": {
+		"title": "Setup Wizard",
+		"order": 1,
+		"action": {
+			"type": "view",
+			"path": "wizard/initsetup"
+		},
+		"depends": {
+			"acl": [ "luci-app-wizard" ],
+			"uci": { "wizard": true }
+		}
+	}
+}

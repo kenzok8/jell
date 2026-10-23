@@ -1,0 +1,592 @@
+<%-
+local rowcnt = 0
+
+local function rowstyle()
+	rowcnt = rowcnt + 1
+	if rowcnt % 2 == 0 then
+		return " cbi-rowstyle-1"
+	end
+	return " cbi-rowstyle-2"
+end
+
+local function width(o)
+	if o.width then
+		if type(o.width) == "number" then
+			return ' style="width:%dpx"' % o.width
+		end
+		return ' style="width:%s"' % o.width
+	end
+	return ""
+end
+-%>
+<script type="text/javascript">//<![CDATA[
+	function ssrPost(url, data, callback) {
+		if (window.XHR && typeof window.XHR.post === 'function') {
+			return window.XHR.post(url, data, callback);
+		}
+
+		var xhr = new XMLHttpRequest();
+		var payload = [];
+		var key;
+		for (key in (data || {})) {
+			if (Object.prototype.hasOwnProperty.call(data, key)) {
+				payload.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key] == null ? '' : data[key]));
+			}
+		}
+
+		xhr.open('POST', url, true);
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+		xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState !== 4) return;
+
+			var rv = null;
+			try {
+				rv = JSON.parse(xhr.responseText || 'null');
+			} catch (e) {}
+
+			if (callback) callback(xhr, rv);
+		};
+		xhr.send(payload.join('&'));
+	}
+
+	window.ssrUpdateSubscribeItem = window.ssrUpdateSubscribeItem || function(btn) {
+		if (!btn) return false;
+
+		var sid = btn.getAttribute('data-sid') || '';
+		var title = btn.getAttribute('data-title') || '';
+		var original = btn.getAttribute('data-original-value') || btn.value || 'Update';
+
+		btn.disabled = true;
+		btn.value = '<%:Updating...%>';
+		window.ssrSubscribeRun = window.ssrSubscribeRun || function(_, done) {
+			if (done) done();
+		};
+		window.ssrSubscribeRun({
+			sid: sid,
+			title: title
+		}, function() {
+			btn.disabled = false;
+			btn.value = original;
+		});
+		return false;
+	};
+
+	function saveAllSubscribeItems(btn) {
+		// var btn = document.querySelector('#ssr-subscribe-toolbar .cbi-button-save');
+		if (!btn) return;
+
+		var originalText = btn.value;
+		btn.disabled = true;
+		btn.value = '<%:Saving...%>';
+
+		var fieldsMap = {};
+		var allInputs = document.querySelectorAll('[name^="cbid.shadowsocksr."]');
+		allInputs.forEach(function(input) {
+			var match = input.name.match(/^cbid\.shadowsocksr\.([^.]+)\.(url|alias|enabled)$/);
+			if (!match) return;
+
+			var sid = match[1];
+			var field = match[2];
+			if (!fieldsMap[sid]) fieldsMap[sid] = {};
+			if (field === 'enabled') {
+				fieldsMap[sid][field] = input.checked ? '1' : '0';
+			} else {
+				fieldsMap[sid][field] = input.value;
+			}
+		});
+
+		var promises = [];
+		for (var sid in fieldsMap) {
+			var fields = fieldsMap[sid];
+			for (var field in fields) {
+				var value = fields[field];
+				var promise = new Promise(function(resolve, reject) {
+					ssrPost(
+							'<%=luci.dispatcher.build_url("admin", "services", "shadowsocksr", "toggle_subscribe_item_enabled")%>',
+							{ sid: sid, field: field, value: value },
+						function(x, rv) {
+							if (rv && Number(rv.ret) === 1) {
+								resolve();
+							} else {
+								reject(new Error('<%:Save failed:%> ' + sid + '.' + field + ': ' + (rv && rv.error ? rv.error : '<%:Unknown error%>')));
+							}
+						}
+					);
+				});
+				promises.push(promise);
+			}
+		}
+
+		if (promises.length === 0) {
+			btn.disabled = false;
+			btn.value = originalText;
+			alert('<%:No subscription items found%>');
+			return;
+		}
+
+		Promise.all(promises).then(function() {
+			btn.disabled = false;
+			btn.value = originalText;
+			alert('<%:All settings saved successfully.%>');
+		}).catch(function(err) {
+			btn.disabled = false;
+			btn.value = originalText;
+			alert('<%:Save failed:%>' + err.message);
+		});
+	}
+
+	function deleteSubscribeItem(btn) {
+		var sid = btn.getAttribute('data-sid');
+		if (!sid) return;
+		if (!confirm('<%:Are you sure you want to delete subscribe link: %s ?%>'.replace('%s', sid))) return;
+
+		btn.disabled = true;
+		ssrPost('<%=luci.dispatcher.build_url("admin", "services", "shadowsocksr", "delete_subscribe_item")%>',
+			{ sid: sid },
+			function(x, rv) {
+				btn.disabled = false;
+				if (rv && rv.ret === 1) {
+					var row = btn.closest('tr');
+					if (row) row.remove();
+					var table = document.querySelector('#cbi-shadowsocksr-server_subscribe_item .cbi-section-table');
+					if (table.querySelectorAll('.cbi-section-table-row:not(.cbi-section-table-titles)').length === 0) {
+						var placeholder = document.createElement('tr');
+						placeholder.className = 'tr cbi-section-table-row placeholder';
+						placeholder.innerHTML = '<td class="td" colspan="4"><em><%:This section contains no values yet%></em></td>';
+						table.appendChild(placeholder);
+					}
+				} else {
+					alert('<%:Delete failed:%> ' + (rv ? rv.error : '<%:Unknown error%>'));
+				}
+			}
+		);
+	}
+
+	function createSubscribeCell(sid, name, title, widget, html) {
+		var td = document.createElement('td');
+		td.className = 'td cbi-value-field';
+		td.setAttribute('data-name', name);
+		if (widget) td.setAttribute('data-widget', widget);
+		if (title) td.setAttribute('data-title', title);
+
+		var wrap = document.createElement('div');
+		wrap.id = 'cbi-shadowsocksr-' + sid + '-' + name;
+		wrap.innerHTML = html;
+		td.appendChild(wrap);
+		return td;
+	}
+
+	function createFallbackRow(sid) {
+		var newRow = document.createElement('tr');
+		newRow.className = 'tr cbi-section-table-row cbi-rowstyle-1';
+
+		newRow.appendChild(createSubscribeCell(sid, 'enabled', '<%:Enable%>', 'Flag',
+			'<input type="hidden" value="0" name="cbi.cbe.shadowsocksr.' + sid + '.enabled" />' +
+			'<input class="cbi-input-checkbox" type="checkbox" value="1" name="cbid.shadowsocksr.' + sid + '.enabled" id="cbid.shadowsocksr.' + sid + '.enabled" />'));
+		newRow.appendChild(createSubscribeCell(sid, 'alias', '<%:Alias%>', 'Value',
+			'<input class="cbi-input-text" type="text" name="cbid.shadowsocksr.' + sid + '.alias" id="cbid.shadowsocksr.' + sid + '.alias" value="" />'));
+		newRow.appendChild(createSubscribeCell(sid, 'url', '<%:Subscribe URL%>', 'Value',
+			'<input class="cbi-input-text" type="text" name="cbid.shadowsocksr.' + sid + '.url" id="cbid.shadowsocksr.' + sid + '.url" value="" />'));
+
+		var actions = document.createElement('td');
+		actions.className = 'td cbi-section-table-cell nowrap cbi-section-actions';
+		actions.innerHTML = '<div class="ssr-subscribe-actions">' +
+			'<input class="btn cbi-button cbi-button-save" type="button" value="<%:Save%>" title="<%:Save%>" onclick="saveAllSubscribeItems(this)" />' +
+			'<input class="btn cbi-button cbi-button-remove" type="button" value="<%:Delete%>" data-sid="' + sid + '" onclick="deleteSubscribeItem(this); return false;" />' +
+			'<input type="button" class="btn cbi-button cbi-button-apply" value="<%:Update%>" data-original-value="<%:Update%>" data-sid="' + sid + '" data-title="Subscribe" onclick="return window.ssrUpdateSubscribeItem(this)" />' +
+			'</div>';
+		newRow.appendChild(actions);
+		return newRow;
+	}
+
+	function createEmptyRow(sid) {
+		var templateRow = document.querySelector('#cbi-shadowsocksr-server_subscribe_item .cbi-section-table-row:not(.cbi-section-table-titles):not(.placeholder)');
+		var newRow = templateRow ? templateRow.cloneNode(true) : createFallbackRow(sid);
+		newRow.id = 'cbi-shadowsocksr-' + sid;
+
+		var inputs = newRow.querySelectorAll('input');
+		inputs.forEach(function(input) {
+			if (input.name) {
+				input.name = input.name.replace(/(cbid|cbi\.cbe)\.shadowsocksr\.[^.]+\./, '$1.shadowsocksr.' + sid + '.');
+			}
+			if (input.id) {
+				input.id = input.id.replace(/(cbid|cbi)-shadowsocksr-[^-]+-/, '$1-shadowsocksr-' + sid + '-');
+				input.id = input.id.replace(/(cbid|cbi\.cbe)\.shadowsocksr\.[^.]+\./, '$1.shadowsocksr.' + sid + '.');
+			}
+			if (input.type === 'checkbox') {
+				input.checked = false;
+				input.defaultChecked = false;
+			} else if (input.type === 'text' || input.type === 'url') {
+				input.value = '';
+				input.defaultValue = '';
+			}
+			input.disabled = false;
+		});
+
+		newRow.querySelectorAll('[id^="cbi-shadowsocksr-"]').forEach(function(node) {
+			node.id = node.id.replace(/cbi-shadowsocksr-[^-]+-/, 'cbi-shadowsocksr-' + sid + '-');
+		});
+
+		var delBtn = newRow.querySelector('.cbi-button-remove');
+		if (delBtn) {
+			delBtn.setAttribute('data-sid', sid);
+			delBtn.removeAttribute('onclick');
+			delBtn.onclick = function(e) { deleteSubscribeItem(this); return false; };
+		}
+		var updateBtn = newRow.querySelector('.cbi-button-apply');
+		if (updateBtn) {
+			updateBtn.setAttribute('data-sid', sid);
+		}
+		return newRow;
+	}
+
+	function addSubscribeItem() {
+		var btn = document.getElementById('ssr-add-btn');
+		if (!btn) return;
+
+		btn.disabled = true;
+		btn.value = '<%:Adding...%>';
+
+		ssrPost(
+			'<%=luci.dispatcher.build_url("admin", "services", "shadowsocksr", "add_subscribe_item")%>',
+			{},
+			function(x, rv) {
+				btn.disabled = false;
+				btn.value = '<%:Add%>';
+				if (rv && rv.ret === 1 && rv.sid) {
+					var newRow = createEmptyRow(rv.sid);
+					if (newRow) {
+						var aliasInput = newRow.querySelector('input[name$=".alias"]');
+						if (aliasInput) {
+							aliasInput.value = rv.alias || '';
+							aliasInput.defaultValue = rv.alias || '';
+						}
+						var urlInput = newRow.querySelector('input[name$=".url"]');
+						if (urlInput) {
+							urlInput.value = rv.url || '';
+							urlInput.defaultValue = rv.url || '';
+						}
+						var enabledInput = newRow.querySelector('input[type="checkbox"]');
+						if (enabledInput) {
+							var checked = (rv.enabled === '1');
+							enabledInput.checked = checked;
+							enabledInput.defaultChecked = checked;
+						}
+						var table = document.querySelector('#cbi-shadowsocksr-server_subscribe_item .cbi-section-table');
+						var placeholder = table.querySelector('.placeholder');
+						if (placeholder) placeholder.remove();
+						table.appendChild(newRow);
+					}
+				} else {
+					alert('<%:Add failed:%> ' + (rv && rv.error ? rv.error : '<%:Unknown error%>'));
+				}
+			}
+		);
+	}
+
+//]]></script>
+<div class="cbi-section cbi-tblsection" id="cbi-<%=self.config%>-<%=self.sectiontype%>">
+	<% if self.title and #self.title > 0 then -%>
+		<h3><%=self.title%></h3>
+	<%- end %>
+	<%- if self.sortable then -%>
+		<input type="hidden" id="cbi.sts.<%=self.config%>.<%=self.sectiontype%>" name="cbi.sts.<%=self.config%>.<%=self.sectiontype%>" value="" />
+	<%- end -%>
+	<div class="cbi-section-descr"><%=self.description%></div>
+	<table class="table cbi-section-table">
+		<tr class="tr cbi-section-table-titles anonymous">
+			<% for _, node in ipairs(self.children) do if not node.optional and node.option ~= "_update" then -%>
+				<th class="th cbi-section-table-cell"<%=width(node) .. attr("data-widget", node.typename or "")%>><%=node.title%></th>
+			<% end end -%>
+			<th class="th cbi-section-table-cell cbi-section-actions" style="width:1%"><%:Actions%></th>
+		</tr>
+
+		<%
+			local isempty = true
+			for i, section in ipairs(self:cfgsections()) do
+				isempty = false
+				local colorclass = rowstyle()
+				local scope = {
+					valueheader = "cbi/cell_valueheader",
+					valuefooter = "cbi/cell_valuefooter"
+				}
+		-%>
+		<tr class="tr cbi-section-table-row<%=colorclass%>" id="cbi-<%=self.config%>-<%=section%>">
+			<%
+				for _, node in ipairs(self.children) do
+					if not node.optional and node.option ~= "_update" then
+						node:render(section, scope)
+					end
+				end
+				local alias = self.map:get(section, "alias") or string.format("Subscribe %s", section:sub(-4))
+				local update_title = "Subscribe: " .. tostring(alias)
+			-%>
+			<td class="td cbi-section-table-cell nowrap cbi-section-actions">
+				<div class="ssr-subscribe-actions">
+					<input class="btn cbi-button cbi-button-save" type="button" value="<%:Save%>" title="<%:Save%>" onclick="saveAllSubscribeItems(this)" />
+					<input class="btn cbi-button cbi-button-remove" type="button" value="<%:Delete%>" data-sid="<%=section%>" onclick="deleteSubscribeItem(this); return false;" />
+					<input
+						type="button"
+						class="btn cbi-button cbi-button-apply"
+						value="<%:Update%>"
+						data-original-value="<%:Update%>"
+						<%=attr("data-sid", section) .. attr("data-title", update_title)%>
+						onclick="return window.ssrUpdateSubscribeItem(this)"
+					/>
+				</div>
+			</td>
+			</tr>
+		<%- end -%>
+
+		<%- if isempty then -%>
+		<tr class="tr cbi-section-table-row placeholder">
+			<td class="td" colspan="4"><em><%:This section contains no values yet%></em></td>
+		</tr>
+		<%- end -%>
+	</table>
+</div>
+
+<div class="cbi-section-create cbi-tblsection-create ssr-subscribe-toolbar" id="ssr-subscribe-toolbar">
+	<input class="btn cbi-button cbi-button-add" type="button" value="<%:Add%>" id="ssr-add-btn" title="<%:Add%>" />
+	<input class="btn cbi-button cbi-button-save" type="button" value="<%:Save%>" title="<%:Save%>" onclick="saveAllSubscribeItems(this)" />
+	<!-- <input class="btn cbi-button cbi-button-save ssr-subscribe-save-settings" type="submit" value="<%:Save%>" title="<%:Save%>" name="cbi.apply" /> -->
+	<div class="ssr-subscribe-toolbar-slot ssr-subscribe-toolbar-slot-delete"></div>
+	<div class="ssr-subscribe-toolbar-slot ssr-subscribe-toolbar-slot-update"></div>
+</div>
+
+<script type="text/javascript">//<![CDATA[
+	(function() {
+		function styleActionButton(btn, extraClass) {
+			if (!btn) return;
+			btn.classList.remove('cbi-button-apply', 'cbi-button-reset');
+			btn.classList.add('cbi-button-add');
+			if (extraClass) btn.classList.add(extraClass);
+		}
+
+		function mountSubscribeActions() {
+			var toolbar = document.getElementById('ssr-subscribe-toolbar');
+			var subscribeSection = document.getElementById('cbi-shadowsocksr-server_subscribe');
+			if (!toolbar || !subscribeSection) return;
+			if (toolbar.getAttribute('data-ssr-subscribe-actions-ready') === '1') return;
+
+			var deleteSlot = toolbar.querySelector('.ssr-subscribe-toolbar-slot-delete');
+			var updateSlot = toolbar.querySelector('.ssr-subscribe-toolbar-slot-update');
+			var updateRow = subscribeSection.querySelector('.cbi-value[id$="-subscribe"]');
+			var deleteRow = subscribeSection.querySelector('.cbi-value[id$="-delete"]');
+			if (!deleteSlot || !updateSlot || !updateRow || !deleteRow) return;
+
+			var modalWrap = updateRow.querySelector('#ssr-subscribe-modal-wrap');
+			if (modalWrap) {
+				var updateBtn = modalWrap.querySelector('input[type="submit"]');
+				styleActionButton(updateBtn, 'ssr-subscribe-update-all');
+				updateSlot.appendChild(modalWrap);
+			}
+
+			var deleteBtn = deleteRow.querySelector('input[type="submit"]');
+			if (deleteBtn) {
+				styleActionButton(deleteBtn, 'ssr-subscribe-delete-all');
+				deleteSlot.appendChild(deleteBtn);
+			}
+
+			updateRow.style.display = 'none';
+			deleteRow.style.display = 'none';
+			toolbar.setAttribute('data-ssr-subscribe-actions-ready', '1');
+		}
+
+		function bindAddButton() {
+			var addBtn = document.getElementById('ssr-add-btn');
+			if (addBtn && !addBtn.getAttribute('data-bound')) {
+				addBtn.addEventListener('click', addSubscribeItem);
+				addBtn.setAttribute('data-bound', '1');
+			}
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', function() {
+				mountSubscribeActions();
+				bindAddButton();
+			});
+			window.addEventListener('load', function() {
+				mountSubscribeActions();
+				bindAddButton();
+			});
+		} else {
+			window.setTimeout(mountSubscribeActions, 0);
+			window.setTimeout(bindAddButton, 0);
+		}
+	})();
+//]]></script>
+
+<style type="text/css">
+	#ssr-subscribe-toolbar {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		width: 100%;
+	}
+
+	#ssr-subscribe-toolbar > .btn.cbi-button-add,
+	#ssr-subscribe-toolbar > .btn.cbi-button-save {
+		margin: 0;
+	}
+
+	#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot-delete,
+	#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot-update {
+		display: flex;
+		align-items: center;
+	}
+
+	#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot-delete {
+		margin-left: auto;
+	}
+
+	#ssr-subscribe-toolbar #ssr-subscribe-modal-wrap,
+	#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot input.btn {
+		display: flex;
+		align-items: center;
+	}
+
+	#ssr-subscribe-toolbar #ssr-subscribe-modal-wrap {
+		margin: 0 0 0 12px;
+	}
+
+	#ssr-subscribe-toolbar .ssr-subscribe-delete-all {
+		margin-right: 0 !important;
+	}
+
+	#ssr-subscribe-toolbar > .btn.cbi-button-add,
+	#ssr-subscribe-toolbar > .btn.cbi-button-save,
+	#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot .btn {
+		min-height: 2.1rem;
+		padding-top: 0.18rem;
+		padding-bottom: 0.18rem;
+	}
+
+	#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot .btn.cbi-button-add {
+		margin: 0;
+		width: auto;
+		max-width: 100%;
+		justify-content: center;
+		text-align: center;
+	}
+
+	#ssr-subscribe-toolbar .ssr-subscribe-delete-all {
+		background: #5f6874 !important;
+		border-color: #5f6874 !important;
+		color: #fff !important;
+	}
+
+	/* 电脑端按钮间距 */
+	#cbi-shadowsocksr-server_subscribe_item .ssr-subscribe-actions {
+		display: flex;
+		flex-direction: row;
+		gap: 2px;          /* 按钮之间增加 8px 间距 */
+		align-items: center;
+		white-space: nowrap;
+	}
+
+	/* 移除电脑端默认外边距，统一由 gap 控制间距 */
+	#cbi-shadowsocksr-server_subscribe_item .ssr-subscribe-actions .btn {
+		margin: 0 !important;
+	}
+
+	/* 清除手机端伪元素问题（出现断层显示）*/
+	@media screen and (max-width: 1152px) {
+		td[data-title]::after {
+			content: none !important;
+			display: none !important;
+			background: none !important;
+		}
+	}
+
+	@media (max-width: 900px) {
+		#ssr-subscribe-toolbar {
+			flex-wrap: wrap;
+		}
+
+		#ssr-subscribe-toolbar > .btn.cbi-button-add,
+		#ssr-subscribe-toolbar > .btn.cbi-button-save,
+		#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot-delete,
+		#ssr-subscribe-toolbar .ssr-subscribe-toolbar-slot-update {
+			margin-left: 0;
+		}
+
+		/* 订阅列表 table 卡片化 */
+		#cbi-shadowsocksr-server_subscribe_item .cbi-section-table,
+		#cbi-shadowsocksr-server_subscribe_item .cbi-section-table tbody,
+		#cbi-shadowsocksr-server_subscribe_item .cbi-section-table tr,
+		#cbi-shadowsocksr-server_subscribe_item .cbi-section-table td {
+			display: block !important;
+			width: 100% !important;
+			box-sizing: border-box;
+		}
+
+		/* 隐藏表头 */
+		#cbi-shadowsocksr-server_subscribe_item .cbi-section-table-titles {
+			display: none !important;
+		}
+
+		/* 操作列，将 td 容器调整为 100% */
+		#cbi-shadowsocksr-server_subscribe_item .cbi-section-table td.cbi-section-actions {
+			width: 100% !important;
+			max-width: 100% !important;
+			min-width: 0 !important;
+			display: block !important;
+			box-sizing: border-box !important;
+		}
+
+		/* 重置操作列内可能存在的 div 包装层，强行让其拉满 100% */
+		#cbi-shadowsocksr-server_subscribe_item .td.cbi-section-actions > div {
+			display: flex !important;
+			width: 100% !important;
+			max-width: 100% !important;
+			box-sizing: border-box !important;
+		}
+
+		/* 按钮区域 */
+		#cbi-shadowsocksr-server_subscribe_item .ssr-subscribe-actions {
+			display: flex !important;
+			gap: 8px !important;
+			width: 100% !important;
+			max-width: 100% !important;
+			box-sizing: border-box !important;
+		}
+
+		/* 保存、删除、更新 三个按钮均分 */
+		#cbi-shadowsocksr-server_subscribe_item .ssr-subscribe-actions .btn,
+		#cbi-shadowsocksr-server_subscribe_item .td.cbi-section-actions .btn {
+			flex: 1 1 0% !important;
+			width: 100% !important;
+			margin: 0 !important;
+			white-space: nowrap !important;
+			text-align: center !important;
+		}
+
+		/* 修复手机端卡片化布局中 placeholder 行的显示问题 */
+		#cbi-shadowsocksr-server_subscribe_item .placeholder td {
+			display: table-cell !important;
+		}
+
+		#ssr-subscribe-modal {
+			top: 8px;
+			left: 8px;
+			width: calc(100vw - 16px);
+			max-height: calc(100vh - 24px);
+			min-height: min(420px, calc(100vh - 24px));
+			padding: 10px 12px 12px;
+			transform: none;
+			border-radius: 8px;
+		}
+
+		#ssr-subscribe-modal-header {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		
+		#ssr-subscribe-log {
+			max-height: calc(100vh - 260px);
+			min-height: 280px;
+		}
+	}
+</style>
