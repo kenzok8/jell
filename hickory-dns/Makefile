@@ -8,7 +8,7 @@ HICKORY_COMMIT:=b304bcffe78f8ecd3b8d1667e2785abe3d10aae4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/hickory-dns/hickory-dns/tar.gz/b304bcffe78f8ecd3b8d1667e2785abe3d10aae4?
-PKG_HASH:=skip
+PKG_HASH:=696f0c028124e20a6316c9746068fad7ae0c04c83e06434f2c2323c415c2e087
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-b304bcffe78f8ecd3b8d1667e2785abe3d10aae4
 
@@ -30,11 +30,6 @@ _mcpu_parts:=$(subst +,$(_space),$(_mcpu))
 _cpu_base:=$(firstword $(_mcpu_parts))
 _cpu_feats:=$(subst $(_space),$(_comma),$(addprefix +,$(wordlist 2,99,$(_mcpu_parts))))
 PKG_RUST_CPU_FLAGS:=$(if $(_cpu_base),-Ctarget-cpu=$(_cpu_base)$(if $(_cpu_feats), -Ctarget-feature=$(_cpu_feats)))
-# ring 0.17 在 x86 上强制要求 SSE2；OpenWrt i586 rust target 默认没开，
-# 而 i386_pentium4 (Pentium 4) 实际支持 SSE2，显式打开以通过 ring 的编译期断言
-ifeq ($(ARCH_PACKAGES),i386_pentium4)
-  PKG_RUST_CPU_FLAGS+= -Ctarget-feature=+sse,+sse2
-endif
 
 define Package/hickory-dns
   SECTION:=net
