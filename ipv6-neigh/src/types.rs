@@ -45,15 +45,14 @@ pub(crate) struct LanPrefix {
 /// State tracked for each (hostname, ip) pair that has been successfully registered in DNS.
 ///
 /// Timestamp semantics:
-/// - `last_confirmed`: updated ONLY by netlink Reachable events — true reachability signal
-/// - `last_dns_synced`: updated on DNS push / re-push success — DNS consistency, not reachability
-/// - `last_probe_sent`: updated when an ICMP probe is sent by the scheduler
-/// - `next_probe_due`: computed by the scheduler; next time this entry should be probed
+/// - last_confirmed: updated only by netlink Reachable events (or the periodic
+///   dump when the kernel reports Reachable) -- true reachability signal
+/// - next_probe_due: computed by the scheduler; next time this entry should be probed
 pub(crate) struct RegisteredEntry {
     pub(crate) hostname: String,
+    /// MAC address from the neighbour entry; used to detect DHCP hostname renames.
+    pub(crate) mac: String,
     pub(crate) last_confirmed: Instant,
-    pub(crate) last_dns_synced: Instant,
-    pub(crate) last_probe_sent: Instant,
     pub(crate) next_probe_due: Instant,
     pub(crate) ifindex: u32,
 }
@@ -62,12 +61,9 @@ pub(crate) struct RegisteredEntry {
 pub(crate) struct GuaKeepaliveEntry {
     pub(crate) addr: Ipv6Addr,
     pub(crate) ifindex: u32,
-    /// When this GUA was first observed -- used to select the "newest" address per host.
-    pub(crate) first_seen: Instant,
-    /// Last time this address was confirmed REACHABLE by the kernel.
+    /// Last time this address was confirmed REACHABLE by the kernel or the
+    /// periodic neighbour dump.
     pub(crate) last_confirmed: Instant,
-    /// Last time an ICMP probe was sent for this entry.
-    pub(crate) last_probe_sent: Instant,
     /// Next time this entry is due for probing (computed by scheduler).
     pub(crate) next_probe_due: Instant,
 }
@@ -75,8 +71,8 @@ pub(crate) struct GuaKeepaliveEntry {
 /// Compute a stable jitter offset for a (mac, ip) pair within the given interval window.
 /// Uses a deterministic hash so the phase is preserved across daemon restarts.
 ///
-/// `interval_secs` must be > 0; passing 0 will panic (the caller is expected to
-/// guard this via `initial_next_probe_due()` which returns a far-future sentinel).
+/// interval_secs must be > 0; passing 0 will panic (the caller is expected to
+/// guard this via initial_next_probe_due() which returns a far-future sentinel).
 pub(crate) fn stable_jitter_offset(mac: &str, ip: &str, interval_secs: u64) -> Duration {
     assert!(
         interval_secs > 0,
@@ -87,6 +83,33 @@ pub(crate) fn stable_jitter_offset(mac: &str, ip: &str, interval_secs: u64) -> D
     let mut hasher = DefaultHasher::new();
     mac.hash(&mut hasher);
     ip.hash(&mut hasher);
-    let offset_ms = hasher.finish() % (interval_secs * 1000) ;
+    let offset_ms = hasher.finish() % interval_secs.saturating_mul(1000);
     Duration::from_millis(offset_ms)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn format_mac_pads_and_joins() {
+        assert_eq!(format_mac(&[0x44, 0x23, 0x7c]), "44:23:7c");
+        assert_eq!(format_mac(&[0x00, 0x0a]), "00:0a");
+        assert_eq!(format_mac(&[]), "");
+    }
+
+    #[test]
+    fn jitter_is_deterministic_and_in_range() {
+        let a = stable_jitter_offset("aa:bb:cc:dd:ee:ff", "fd0f::1", 15);
+        let b = stable_jitter_offset("aa:bb:cc:dd:ee:ff", "fd0f::1", 15);
+        assert_eq!(a, b);
+        assert!(a < Duration::from_secs(15));
+    }
+
+    #[test]
+    fn jitter_differs_for_different_pairs() {
+        let a = stable_jitter_offset("aa:bb:cc:dd:ee:ff", "fd0f::1", 3600);
+        let b = stable_jitter_offset("aa:bb:cc:dd:ee:fe", "fd0f::1", 3600);
+        assert_ne!(a, b);
+    }
 }

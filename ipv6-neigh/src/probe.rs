@@ -8,10 +8,17 @@ use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 
 use crate::types::GuaKeepaliveEntry;
 
-/// Maximum registered (ULA/DNS-published) probes per 1-second tick.
-pub(crate) const MAX_REGISTERED_PROBES_PER_TICK: usize = 1;
-/// Maximum GUA keepalive probes per 1-second tick.
-pub(crate) const MAX_GUA_PROBES_PER_TICK: usize = 1;
+/// Maximum probes to send on one 1-second scheduler tick.
+///
+/// Keeps the packet rate bounded while still allowing every entry to be
+/// serviced within its configured interval: an interval of N seconds with M
+/// entries needs ceil(M / N) probes per second.
+fn per_tick_budget(entry_count: usize, interval_secs: u64) -> usize {
+    if interval_secs == 0 || entry_count == 0 {
+        return 0;
+    }
+    (entry_count as u64).div_ceil(interval_secs).max(1) as usize
+}
 
 fn compute_icmpv4_checksum(packet: &mut [u8]) {
     packet[2] = 0;
@@ -150,8 +157,8 @@ impl Prober {
 /// Run one tick of the per-IP stable-jitter probe scheduler.
 ///
 /// Iterates both registered (ULA/DNS-published) and GUA-keepalive entries,
-/// sending at most `MAX_REGISTERED_PROBES_PER_TICK` and `MAX_GUA_PROBES_PER_TICK`
-/// probes respectively to entries whose `next_probe_due` has elapsed.
+/// sending at most the per-tick budget (derived from the number of entries and
+/// the configured interval) to entries whose next_probe_due has elapsed.
 /// After sending, `next_probe_due` is advanced by the entry's interval
 /// (preserving the stable phase where possible).
 ///
@@ -172,12 +179,13 @@ pub(crate) fn run_probe_scheduler(
     // Sort due entries by next_probe_due so the most urgent are served
     // first, avoiding HashMap iteration-order starvation.
     if probe_interval > 0 {
+        let budget = per_tick_budget(registered.len(), probe_interval);
         let mut due: Vec<_> = registered
             .iter_mut()
             .filter(|(_, e)| e.next_probe_due <= now)
             .collect();
         due.sort_by_key(|(_, e)| e.next_probe_due);
-        for ((_hostname, ip_str), entry) in due.into_iter().take(MAX_REGISTERED_PROBES_PER_TICK) {
+        for ((_hostname, ip_str), entry) in due.into_iter().take(budget) {
             let ok = match ip_str.parse::<Ipv6Addr>() {
                 Ok(addr) => prober.send_icmpv6_echo(addr, entry.ifindex).is_ok(),
                 Err(_) => match ip_str.parse::<Ipv4Addr>() {
@@ -186,7 +194,6 @@ pub(crate) fn run_probe_scheduler(
                 },
             };
             if ok {
-                entry.last_probe_sent = now;
                 // Preserve stable phase: advance from original due time.
                 // If the entry is severely overdue (e.g. daemon blocked),
                 // reset to now to avoid a long catch-up while loop.
@@ -211,7 +218,9 @@ pub(crate) fn run_probe_scheduler(
     // Collect due entries across hosts, sort by urgency to avoid starvation.
     if keepalive_enabled && keepalive_interval > 0 {
         let mut due_gua: Vec<(String, usize, Instant)> = Vec::new();
+        let mut tracked = 0usize;
         for (mac, entries) in gua_keepalive.iter() {
+            tracked += entries.len().min(keepalive_gua_per_host);
             for (i, entry) in entries.iter().enumerate().take(keepalive_gua_per_host) {
                 if entry.next_probe_due <= now {
                     due_gua.push((mac.clone(), i, entry.next_probe_due));
@@ -219,26 +228,25 @@ pub(crate) fn run_probe_scheduler(
             }
         }
         due_gua.sort_by_key(|(_, _, t)| *t);
-        due_gua.truncate(MAX_GUA_PROBES_PER_TICK);
+        due_gua.truncate(per_tick_budget(tracked, keepalive_interval));
 
         for (mac, idx, _) in &due_gua {
-            if let Some(entries) = gua_keepalive.get_mut(mac.as_str()) {
-                if let Some(entry) = entries.get_mut(*idx) {
-                    if prober.send_icmpv6_echo(entry.addr, entry.ifindex).is_ok() {
-                        entry.last_probe_sent = now;
-                        let interval = Duration::from_secs(keepalive_interval);
-                        if now.duration_since(entry.next_probe_due) > interval.saturating_mul(4) {
-                            entry.next_probe_due = now + interval;
-                        } else {
-                            while entry.next_probe_due <= now {
-                                entry.next_probe_due += interval;
-                            }
-                        }
-                        sent_total += 1;
+            if let Some(entries) = gua_keepalive.get_mut(mac.as_str())
+                && let Some(entry) = entries.get_mut(*idx)
+            {
+                if prober.send_icmpv6_echo(entry.addr, entry.ifindex).is_ok() {
+                    let interval = Duration::from_secs(keepalive_interval);
+                    if now.duration_since(entry.next_probe_due) > interval.saturating_mul(4) {
+                        entry.next_probe_due = now + interval;
                     } else {
-                        // Send failed — back off briefly.
-                        entry.next_probe_due = now + Duration::from_secs(5);
+                        while entry.next_probe_due <= now {
+                            entry.next_probe_due += interval;
+                        }
                     }
+                    sent_total += 1;
+                } else {
+                    // Send failed — back off briefly.
+                    entry.next_probe_due = now + Duration::from_secs(5);
                 }
             }
         }
@@ -262,10 +270,34 @@ pub(crate) fn prune_gua_keepalive(
     gua_keepalive.retain(|_, entries| {
         // Remove timed-out entries first.
         entries.retain(|e| now.duration_since(e.last_confirmed) < timeout);
-        // Keep only the newest `per_host` entries (first_seen desc; maintained by insert order).
+        // Keep only the newest per_host entries (insertion order: newest at index 0).
         if entries.len() > per_host {
             entries.truncate(per_host);
         }
         !entries.is_empty()
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn per_tick_budget_meets_interval() {
+        assert_eq!(per_tick_budget(0, 15), 0);
+        assert_eq!(per_tick_budget(9, 0), 0);
+        assert_eq!(per_tick_budget(9, 15), 1);
+        assert_eq!(per_tick_budget(15, 15), 1);
+        assert_eq!(per_tick_budget(16, 15), 2);
+        assert_eq!(per_tick_budget(30, 15), 2);
+        assert_eq!(per_tick_budget(100, 15), 7);
+        assert_eq!(per_tick_budget(1, 3600), 1);
+    }
+
+    #[test]
+    fn icmpv4_checksum_known_vector() {
+        let mut packet = [8u8, 0, 0, 0, 0x12, 0x34, 0x00, 0x01];
+        compute_icmpv4_checksum(&mut packet);
+        assert_eq!(&packet[2..4], &[0xe5, 0xca]);
+    }
 }

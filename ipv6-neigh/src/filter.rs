@@ -67,3 +67,49 @@ pub(crate) fn ipv6_in_prefix(addr: Ipv6Addr, prefix: &LanPrefix) -> bool {
 pub(crate) fn ipv6_passes_active_prefix(addr: Ipv6Addr, active_prefixes: &[LanPrefix]) -> bool {
     active_prefixes.is_empty() || active_prefixes.iter().any(|p| ipv6_in_prefix(addr, p))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::LanPrefix;
+
+    fn prefix(addr: &str, prefix_len: u8) -> LanPrefix {
+        LanPrefix {
+            addr: addr.parse().unwrap(),
+            prefix_len,
+        }
+    }
+
+    #[test]
+    fn ipv6_in_prefix_boundaries() {
+        let p = prefix("fd0f:7a7c:a8c9::", 60);
+        assert!(ipv6_in_prefix("fd0f:7a7c:a8c9::1".parse().unwrap(), &p));
+        assert!(ipv6_in_prefix("fd0f:7a7c:a8c9:f::1".parse().unwrap(), &p));
+        assert!(!ipv6_in_prefix(
+            "fd0f:7a7c:a8ca::1".parse().unwrap(),
+            &p
+        ));
+        assert!(ipv6_in_prefix(
+            "2001:db8::1".parse().unwrap(),
+            &prefix("::", 0)
+        ));
+        assert!(ipv6_in_prefix(
+            "fd0f::1".parse().unwrap(),
+            &prefix("fd0f::1", 128)
+        ));
+        assert!(!ipv6_in_prefix(
+            "fd0f::2".parse().unwrap(),
+            &prefix("fd0f::1", 128)
+        ));
+    }
+
+    #[test]
+    fn address_classes() {
+        assert!(if_ipv6_in_private_subnet(&"fd0f::1".parse().unwrap()));
+        assert!(!if_ipv6_in_private_subnet(&"2409::1".parse().unwrap()));
+        assert!(is_gua_ipv6(&"2409::1".parse().unwrap()));
+        assert!(!is_gua_ipv6(&"fd0f::1".parse().unwrap()));
+        assert!(is_link_local_ipv6(&"fe80::1".parse().unwrap()));
+        assert!(!is_link_local_ipv6(&"fd0f::1".parse().unwrap()));
+    }
+}

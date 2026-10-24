@@ -1,6 +1,11 @@
 use serde_json::Value;
 use std::collections::HashMap;
+use std::net::Ipv6Addr;
 use std::path::Path;
+
+use log::warn;
+
+use crate::filter::if_ipv6_in_private_subnet;
 
 pub fn call_ubus(obj_path: &str, method: &str) -> Result<Value, Box<dyn std::error::Error>> {
     let socket = Path::new("/var/run/ubus/ubus.sock");
@@ -10,8 +15,20 @@ pub fn call_ubus(obj_path: &str, method: &str) -> Result<Value, Box<dyn std::err
     Ok(parsed)
 }
 
+/// DHCP lease data used by the daemon.
+///
+/// hostnames is the legacy MAC -> DNS-label map (IPv4 leases first, IPv6
+/// leases fill gaps).  preferred_v6 records the DHCPv6-assigned ULA per MAC;
+/// it is only a tie-breaker for AAAA selection and never publishes an address
+/// that has not been seen in the neighbour table.
+#[derive(Default)]
+pub struct Leases {
+    pub hostnames: HashMap<String, String>,
+    pub preferred_v6: HashMap<String, Ipv6Addr>,
+}
+
 /// Decode a hex string (e.g. "44237cdcb75b") to raw bytes and format via
-/// the shared `types::format_mac`, producing "44:23:7c:dc:b7:5b".
+/// the shared types::format_mac, producing "44:23:7c:dc:b7:5b".
 fn hex_to_mac(hex: &str) -> String {
     let bytes: Vec<u8> = hex
         .as_bytes()
@@ -41,8 +58,9 @@ fn sanitize_hostname(raw: &str) -> String {
         .filter(|s| !s.is_empty())
         .collect::<Vec<&str>>()
         .join("-");
-    // Truncate to 63 chars (max DNS label length)
-    collapsed.chars().take(63).collect()
+    // Truncate to 63 chars (max DNS label length), then strip a trailing '-'.
+    let truncated: String = collapsed.chars().take(63).collect();
+    truncated.trim_end_matches('-').to_owned()
 }
 
 /// Extract a MAC address from a DHCPv6 DUID string.
@@ -68,10 +86,7 @@ fn mac_from_duid(duid: &str) -> Option<String> {
     Some(hex_to_mac(mac_hex))
 }
 
-// get mac to hostname mapping
-pub fn get_lease() -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
-    // dhcpv6 does not use mac address, so we only need to get ipv4 leases
-    let leases = call_ubus("dhcp", "ipv4leases")?;
+fn parse_ipv4_leases(leases: &Value) -> Result<HashMap<String, String>, String> {
     let devices = leases["device"]
         .as_object()
         .ok_or("missing 'device' in ipv4leases response")?;
@@ -99,33 +114,182 @@ pub fn get_lease() -> Result<HashMap<String, String>, Box<dyn std::error::Error>
         }
     }
 
-    // Supplement with IPv6 leases: extract MAC from DUID when available.
-    // IPv4 entries take precedence; only fill in missing MACs here.
-    if let Ok(v6leases) = call_ubus("dhcp", "ipv6leases")
-        && let Some(devices) = v6leases["device"].as_object() {
-            for (_device, device_data) in devices {
-                let Some(leases) = device_data["leases"].as_array() else {
-                    continue;
-                };
-                for lease in leases {
-                    let Some(duid) = lease["duid"].as_str() else {
+    Ok(result)
+}
+
+/// Merge DHCPv6 lease data: fill missing hostnames and record the assigned ULA
+/// (preferred address) per MAC.  IPv4 mappings take precedence.
+fn merge_ipv6_leases(leases: &mut Leases, v6leases: &Value) {
+    let Some(devices) = v6leases["device"].as_object() else {
+        return;
+    };
+
+    for (_device, device_data) in devices {
+        let Some(items) = device_data["leases"].as_array() else {
+            continue;
+        };
+        for lease in items {
+            let Some(duid) = lease["duid"].as_str() else {
+                continue;
+            };
+            let Some(mac) = mac_from_duid(duid) else {
+                continue;
+            };
+
+            // Prefer the first ULA address in the lease; GUA and PD entries are
+            // ignored (PD is a prefix, not a host address).
+            if let Some(addrs) = lease["ipv6-addr"].as_array() {
+                for addr in addrs {
+                    let Some(addr) = addr["address"]
+                        .as_str()
+                        .and_then(|s| s.parse::<Ipv6Addr>().ok())
+                    else {
                         continue;
                     };
-                    let Some(hostname) = lease["hostname"].as_str() else {
-                        continue;
-                    };
-                    let hostname = sanitize_hostname(hostname);
-                    if hostname.is_empty() {
-                        continue;
+                    if if_ipv6_in_private_subnet(&addr) {
+                        leases.preferred_v6.entry(mac.clone()).or_insert(addr);
+                        break;
                     }
-                    let Some(mac) = mac_from_duid(duid) else {
-                        continue;
-                    };
-                    // IPv4 mapping takes precedence
-                    result.entry(mac).or_insert(hostname);
                 }
             }
-        }
 
-    Ok(result)
+            let Some(hostname) = lease["hostname"].as_str() else {
+                continue;
+            };
+            let hostname = sanitize_hostname(hostname);
+            if hostname.is_empty() {
+                continue;
+            }
+            // IPv4 mapping takes precedence
+            leases.hostnames.entry(mac).or_insert(hostname);
+        }
+    }
+}
+
+// get mac to hostname mapping and DHCPv6 preferred ULA mapping
+pub fn get_lease() -> Result<Leases, String> {
+    let mut leases = Leases::default();
+
+    let v4 = call_ubus("dhcp", "ipv4leases")
+        .map_err(|e| format!("ipv4leases: {e}"))
+        .and_then(|v| parse_ipv4_leases(&v));
+    let v6 = call_ubus("dhcp", "ipv6leases").map_err(|e| format!("ipv6leases: {e}"));
+
+    match (v4, v6) {
+        (Ok(v4), Ok(v6)) => {
+            leases.hostnames = v4;
+            merge_ipv6_leases(&mut leases, &v6);
+            Ok(leases)
+        }
+        (Ok(v4), Err(e)) => {
+            warn!("{e}; continuing with IPv4 leases only");
+            leases.hostnames = v4;
+            Ok(leases)
+        }
+        (Err(e), Ok(v6)) => {
+            warn!("{e}; continuing with IPv6 leases only");
+            merge_ipv6_leases(&mut leases, &v6);
+            Ok(leases)
+        }
+        (Err(e4), Err(e6)) => Err(format!("{e4}; {e6}")),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn sanitize_hostname_lowercases_and_replaces() {
+        assert_eq!(sanitize_hostname("HONOR-Magic7-Pro"), "honor-magic7-pro");
+        assert_eq!(
+            sanitize_hostname("yeelink-light-lamp4_MIBT7381"),
+            "yeelink-light-lamp4-mibt7381"
+        );
+        assert_eq!(sanitize_hostname("a__b"), "a-b");
+        assert_eq!(sanitize_hostname("-a--b-"), "a-b");
+        assert_eq!(sanitize_hostname(""), "");
+    }
+
+    #[test]
+    fn sanitize_hostname_truncates_without_trailing_hyphen() {
+        let long = format!("{}-x", "a".repeat(62));
+        let out = sanitize_hostname(&long);
+        assert_eq!(out.len(), 62);
+        assert!(!out.ends_with('-'));
+    }
+
+    #[test]
+    fn mac_from_duid_llt_and_ll() {
+        // DUID-LLT: type 1, hw 1, time 00314241ba, mac 30c5997dd5ae
+        assert_eq!(
+            mac_from_duid("00010100314241ba30c5997dd5ae").as_deref(),
+            Some("30:c5:99:7d:d5:ae")
+        );
+        // DUID-LL: type 3, hw 1, mac 001132123456
+        assert_eq!(
+            mac_from_duid("00030001001132123456").as_deref(),
+            Some("00:11:32:12:34:56")
+        );
+        assert_eq!(mac_from_duid("000200010011"), None);
+        assert_eq!(mac_from_duid("zzzz"), None);
+    }
+
+    #[test]
+    fn parse_ipv4_leases_skips_empty_hostnames() {
+        let v = json!({
+            "device": {
+                "br-lan": {
+                    "leases": [
+                        {"mac": "2844f43b97cf", "hostname": "HONOR-Magic7-Pro"},
+                        {"mac": "dca3a21fbabb", "hostname": ""},
+                        {"mac": "e4fe4394229a"}
+                    ]
+                }
+            }
+        });
+        let leases = parse_ipv4_leases(&v).unwrap();
+        assert_eq!(leases.len(), 1);
+        assert_eq!(leases.get("28:44:f4:3b:97:cf").unwrap(), "honor-magic7-pro");
+    }
+
+    #[test]
+    fn merge_ipv6_leases_prefers_ula_and_keeps_v4_name() {
+        let v = json!({
+            "device": {
+                "br-lan": {
+                    "leases": [
+                        {
+                            "duid": "00010100314241ba30c5997dd5ae",
+                            "hostname": "DESKTOP-GRL54SM",
+                            "ipv6-addr": [
+                                {"address": "2409:8a55:2228:8530::ff3"},
+                                {"address": "fd0f:7a7c:a8c9::ff3"}
+                            ]
+                        },
+                        {
+                            "duid": "000300012844f43b97cf",
+                            "hostname": "",
+                            "ipv6-prefix": [
+                                {"address": "fd0f:7a7c:a8c9:1::", "prefix-length": 64}
+                            ]
+                        }
+                    ]
+                }
+            }
+        });
+        let mut leases = Leases::default();
+        leases
+            .hostnames
+            .insert("30:c5:99:7d:d5:ae".to_string(), "v4name".to_string());
+        merge_ipv6_leases(&mut leases, &v);
+
+        assert_eq!(leases.hostnames.get("30:c5:99:7d:d5:ae").unwrap(), "v4name");
+        assert_eq!(
+            leases.preferred_v6.get("30:c5:99:7d:d5:ae"),
+            Some(&"fd0f:7a7c:a8c9::ff3".parse::<Ipv6Addr>().unwrap())
+        );
+        assert!(!leases.preferred_v6.contains_key("28:44:f4:3b:97:cf"));
+    }
 }

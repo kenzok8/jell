@@ -12,12 +12,9 @@ use crate::filter::if_ipv6_in_private_subnet;
 
 const TCP_TIMEOUT: Duration = Duration::from_secs(5);
 
-fn check_response(
-    response: &Message,
-    allowed: &[ResponseCode],
-) -> Result<(), Box<dyn std::error::Error>> {
+fn check_response(response: &Message) -> Result<(), Box<dyn std::error::Error>> {
     let code = response.metadata.response_code;
-    if code == ResponseCode::NoError || allowed.contains(&code) {
+    if code == ResponseCode::NoError {
         Ok(())
     } else {
         Err(format!("DNS server returned {code:?}").into())
@@ -87,9 +84,9 @@ impl DnsUpdater {
             rrset.add_rdata(rdata);
             let msg = update_message::append(rrset, self.zone.clone(), false, false);
             let response = self.send_tcp(msg).await?;
-            check_response(&response, &[])?;
+            check_response(&response)?;
         } else {
-            check_response(&response, &[])?;
+            check_response(&response)?;
         }
         Ok(())
     }
@@ -106,7 +103,7 @@ impl DnsUpdater {
         rrset.add_rdata(rdata);
         let msg = update_message::delete_by_rdata(rrset, self.zone.clone(), false);
         let response = self.send_tcp(msg).await?;
-        check_response(&response, &[])?;
+        check_response(&response)?;
         Ok(())
     }
 
@@ -179,13 +176,13 @@ impl DnsUpdater {
         let del_record = Record::update0(ptr_name.clone(), 0, RecordType::PTR);
         let del_msg = update_message::delete_rrset(del_record, rev_zone.clone(), false);
         let del_resp = self.send_tcp(del_msg).await?;
-        check_response(&del_resp, &[])?;
+        check_response(&del_resp)?;
         // Add the new PTR.
         let mut rrset = RecordSet::with_ttl(ptr_name, RecordType::PTR, ttl);
         rrset.add_rdata(RData::PTR(PtrRData(target)));
         let msg = update_message::append(rrset, rev_zone, false, false);
         let response = self.send_tcp(msg).await?;
-        check_response(&response, &[])?;
+        check_response(&response)?;
         Ok(())
     }
 
@@ -209,7 +206,41 @@ impl DnsUpdater {
         let record = Record::update0(ptr_name, 0, RecordType::PTR);
         let msg = update_message::delete_rrset(record, rev_zone, false);
         let response = self.send_tcp(msg).await?;
-        check_response(&response, &[])?;
+        check_response(&response)?;
+        Ok(())
+    }
+
+    /// Delete a PTR record only when it still points at hostname.
+    ///
+    /// RFC 2136 delete-by-rdata removes a specific PTR target; if the reverse
+    /// name now points at a different hostname (e.g. after a DHCP rename), the
+    /// update is a no-op and the new target is left untouched.
+    pub async fn delete_ptr_if_target(
+        &self,
+        addr: IpAddr,
+        hostname: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let (ptr_name, rev_zone) = match addr {
+            IpAddr::V4(ip) => {
+                let Some(zone) = self.find_ipv4_ptr_zone(ip).cloned() else {
+                    return Ok(());
+                };
+                (ipv4_ptr_name(ip), zone)
+            }
+            IpAddr::V6(ip) if if_ipv6_in_private_subnet(&ip) => {
+                let Some(zone) = self.ula_ptr_zone.clone() else {
+                    return Ok(());
+                };
+                (ipv6_ptr_name(ip), zone)
+            }
+            _ => return Ok(()),
+        };
+        let target = Name::from_ascii(hostname)?.append_domain(&self.zone)?;
+        let mut rrset = RecordSet::new(ptr_name, RecordType::PTR, 0);
+        rrset.add_rdata(RData::PTR(PtrRData(target)));
+        let msg = update_message::delete_by_rdata(rrset, rev_zone, false);
+        let response = self.send_tcp(msg).await?;
+        check_response(&response)?;
         Ok(())
     }
 
@@ -400,4 +431,65 @@ fn extract_hostname(name: &Name, zone: &Name) -> Option<String> {
     }
     let suffix = format!(".{z}");
     n.strip_suffix(&suffix).map(|s| s.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ipv4_ptr_name_is_reversed_octets() {
+        assert_eq!(
+            ipv4_ptr_name(Ipv4Addr::new(192, 168, 3, 5)).to_ascii(),
+            "5.3.168.192.in-addr.arpa."
+        );
+    }
+
+    #[test]
+    fn ipv4_zone_name_handles_prefixes() {
+        assert_eq!(
+            ipv4_zone_name(Ipv4Addr::new(10, 0, 0, 0), 24).to_ascii(),
+            "0.0.10.in-addr.arpa."
+        );
+        assert_eq!(
+            ipv4_zone_name(Ipv4Addr::new(172, 16, 0, 0), 16).to_ascii(),
+            "16.172.in-addr.arpa."
+        );
+        assert_eq!(
+            ipv4_zone_name(Ipv4Addr::new(192, 168, 0, 0), 8).to_ascii(),
+            "192.in-addr.arpa."
+        );
+    }
+
+    #[test]
+    fn ipv6_ptr_name_ends_with_reversed_prefix() {
+        let addr: Ipv6Addr = "fd0f:7a7c:a8c9::1".parse().unwrap();
+        let name = ipv6_ptr_name(addr).to_ascii();
+        assert!(
+            name.ends_with("9.c.8.a.c.7.a.7.f.0.d.f.ip6.arpa."),
+            "{name}"
+        );
+        assert!(name.contains("1.0.0.0."), "{name}");
+    }
+
+    #[test]
+    fn extract_hostname_requires_direct_child() {
+        let zone = Name::from_ascii("lan.").unwrap();
+        assert_eq!(
+            extract_hostname(&Name::from_ascii("foo.lan.").unwrap(), &zone).as_deref(),
+            Some("foo")
+        );
+        assert_eq!(
+            extract_hostname(&Name::from_ascii("a.b.lan.").unwrap(), &zone).as_deref(),
+            Some("a.b")
+        );
+        assert_eq!(
+            extract_hostname(&Name::from_ascii("lan.").unwrap(), &zone),
+            None
+        );
+        assert_eq!(
+            extract_hostname(&Name::from_ascii("foo.example.").unwrap(), &zone),
+            None
+        );
+    }
 }

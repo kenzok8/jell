@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::net::{IpAddr, Ipv6Addr};
 use std::time::{Duration, Instant};
 
@@ -91,6 +91,129 @@ pub(crate) async fn do_delete_dns(
     }
 }
 
+/// Whether the host already has max (or more) ULA AAAA entries registered.
+pub(crate) fn ula_at_limit(
+    registered: &HashMap<(String, String), RegisteredEntry>,
+    hostname: &str,
+    max: usize,
+) -> bool {
+    max > 0
+        && registered
+            .keys()
+            .filter(|(h, ip)| {
+                h == hostname
+                    && ip.parse::<Ipv6Addr>()
+                        .is_ok_and(|a| if_ipv6_in_private_subnet(&a))
+            })
+            .count()
+            >= max
+}
+
+/// Whether new_addr should replace an already-registered ULA address.
+///
+/// True only when new_addr is the DHCPv6-assigned address for this MAC and
+/// that address is not already among the host's registered ULA entries.
+pub(crate) fn prefers_new_ula(
+    mac: &str,
+    new_addr: Ipv6Addr,
+    registered: &HashMap<(String, String), RegisteredEntry>,
+    preferred_v6: &HashMap<String, Ipv6Addr>,
+) -> bool {
+    let Some(preferred) = preferred_v6.get(mac).copied() else {
+        return false;
+    };
+    if preferred != new_addr {
+        return false;
+    }
+    !registered
+        .iter()
+        .any(|((_, ip), entry)| entry.mac == mac && ip.parse::<Ipv6Addr>().ok() == Some(preferred))
+}
+
+/// Entries whose MAC now maps to a different hostname in the lease table.
+fn renamed_keys(
+    registered: &HashMap<(String, String), RegisteredEntry>,
+    leases: &HashMap<String, String>,
+) -> Vec<((String, String), String)> {
+    registered
+        .iter()
+        .filter_map(|(key, entry)| {
+            let current = leases.get(&entry.mac)?;
+            (current != &entry.hostname).then(|| (key.clone(), current.clone()))
+        })
+        .collect()
+}
+
+/// Delete the A/AAAA for a renamed host and remove its PTR only when it still
+/// points at the old name.
+async fn delete_renamed_record(
+    hostname: &str,
+    inet: &NeighbourAddress,
+    updater: &DnsUpdater,
+) -> bool {
+    let result = match inet {
+        NeighbourAddress::Inet6(addr) => updater.delete_aaaa(hostname, *addr).await,
+        NeighbourAddress::Inet(addr) => updater.delete_a(hostname, *addr).await,
+        _ => return true,
+    };
+    let ip = match inet {
+        NeighbourAddress::Inet6(addr) => IpAddr::V6(*addr),
+        NeighbourAddress::Inet(addr) => IpAddr::V4(*addr),
+        _ => return true,
+    };
+    match result {
+        Ok(()) => {
+            if let Err(e) = updater.delete_ptr_if_target(ip, hostname).await {
+                warn!("PTR cleanup failed for {} ({}): {}", hostname, ip, e);
+            }
+            true
+        }
+        Err(e) => {
+            warn!(
+                "rename cleanup: failed to delete {} -> {:?}: {}",
+                hostname, inet, e
+            );
+            false
+        }
+    }
+}
+
+/// Remove DNS records for a host whose DHCP hostname changed.
+///
+/// The new (hostname, ip) key must already be registered before the old one is
+/// removed, so a rename does not create a DNS gap.  Failed deletes are retried
+/// on the next reconcile.
+pub(crate) async fn prune_renamed(
+    registered: &mut HashMap<(String, String), RegisteredEntry>,
+    leases: &HashMap<String, String>,
+    updater: &DnsUpdater,
+) {
+    for (old_key, new_hostname) in renamed_keys(registered, leases) {
+        let ip_str = old_key.1.clone();
+        let Ok(ip) = ip_str.parse::<IpAddr>() else {
+            continue;
+        };
+        if !registered.contains_key(&(new_hostname.clone(), ip_str.clone())) {
+            continue;
+        }
+        let Some(entry) = registered.get(&old_key) else {
+            continue;
+        };
+        let old_hostname = entry.hostname.clone();
+        let inet = match ip {
+            IpAddr::V6(addr) => NeighbourAddress::Inet6(addr),
+            IpAddr::V4(addr) => NeighbourAddress::Inet(addr),
+        };
+        if delete_renamed_record(&old_hostname, &inet, updater).await {
+            registered.remove(&old_key);
+            info!(
+                "rename cleanup: removed {} -> {} (new name {})",
+                old_hostname, ip_str, new_hostname
+            );
+        }
+    }
+}
+
 /// Enforce the per-host ULA AAAA limit.  If `host` already has `max` or more ULA AAAA
 /// records in `registered`, remove the oldest (by `last_confirmed`) and delete from DNS.
 /// Returns the number of existing ULA AAAA records for this host (after pruning).
@@ -146,7 +269,7 @@ pub(crate) async fn prune_ula_for_host(
 
 /// Reconcile the in-memory `registered` map against the live DNS zone obtained via AXFR.
 ///
-/// Three corrections are made on each call:
+/// Corrections are made on each call:
 /// 1. **Stale records** -- DNS records that fail prefix/subnet filtering are deleted
 ///    immediately (they belong to a prefix that is no longer active on the router).
 /// 2. **DNS orphans** -- records present in DNS but absent from `registered`.
@@ -155,6 +278,7 @@ pub(crate) async fn prune_ula_for_host(
 /// 3. **Registered orphans** -- entries in `registered` that are missing from DNS (e.g.
 ///    because hickory-dns restarted and lost its in-memory state).  These are re-pushed
 ///    via DNS UPDATE so the zone stays consistent.
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn reconcile_dns(
     updater: &DnsUpdater,
     registered: &mut HashMap<(String, String), RegisteredEntry>,
@@ -166,9 +290,11 @@ pub(crate) async fn reconcile_dns(
     router_ifindex: u32,
     orphan_since: &mut HashMap<(String, String), Instant>,
     grace_period: Duration,
-    last_axfr_hostnames: &mut std::collections::HashSet<String>,
+    last_axfr_hostnames: &mut HashSet<String>,
+    reachable_ips: Option<&HashSet<String>>,
 ) {
-    use std::collections::HashSet;
+    // Drop DNS records for hostnames that changed while keeping the new name.
+    prune_renamed(registered, leases, updater).await;
 
     let now = Instant::now();
 
@@ -332,10 +458,26 @@ pub(crate) async fn reconcile_dns(
         .retain(|key, _| dns_keys.contains(key));
 
     // --- Registered orphans (in registered but not in DNS) ---
-    for ((hostname, ip_str), entry) in registered.iter_mut() {
+    for ((hostname, ip_str), entry) in registered.iter() {
         if dns_keys.contains(&(hostname.clone(), ip_str.clone())) {
             continue;
         }
+        // Never re-push a record whose hostname is already stale.
+        if let Some(current) = leases.get(&entry.mac)
+            && current != hostname
+        {
+            continue;
+        }
+        if let Some(reachable) = reachable_ips
+            && !reachable.contains(ip_str)
+        {
+            trace!(
+                "reconcile: skip re-push {} -> {} (not currently Reachable)",
+                hostname, ip_str
+            );
+            continue;
+        }
+
         trace!(
             "reconcile: registered orphan {} -> {}, re-pushing",
             hostname, ip_str
@@ -356,13 +498,110 @@ pub(crate) async fn reconcile_dns(
                             hostname, ip_str, e
                         );
                     }
-                // DNS sync success — update last_dns_synced, NOT last_confirmed.
-                entry.last_dns_synced = Instant::now();
             }
             Err(e) => warn!(
                 "reconcile: failed to re-push {} {}: {}",
                 hostname, ip_str, e
             ),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn entry(hostname: &str, mac: &str) -> RegisteredEntry {
+        RegisteredEntry {
+            hostname: hostname.to_owned(),
+            mac: mac.to_owned(),
+            last_confirmed: Instant::now(),
+            next_probe_due: Instant::now(),
+            ifindex: 1,
+        }
+    }
+
+    #[test]
+    fn renamed_keys_only_returns_changed_macs() {
+        let mut registered = HashMap::new();
+        registered.insert(
+            ("old".to_string(), "10.0.0.5".to_string()),
+            entry("old", "aa:aa:aa:aa:aa:aa"),
+        );
+        registered.insert(
+            ("same".to_string(), "10.0.0.6".to_string()),
+            entry("same", "bb:bb:bb:bb:bb:bb"),
+        );
+        registered.insert(
+            ("orphan".to_string(), "10.0.0.7".to_string()),
+            entry("orphan", "cc:cc:cc:cc:cc:cc"),
+        );
+
+        let mut leases = HashMap::new();
+        leases.insert("aa:aa:aa:aa:aa:aa".to_string(), "new".to_string());
+        leases.insert("bb:bb:bb:bb:bb:bb".to_string(), "same".to_string());
+
+        let keys = renamed_keys(&registered, &leases);
+        assert_eq!(keys.len(), 1);
+        assert_eq!(keys[0].0 .0, "old");
+        assert_eq!(keys[0].1, "new");
+    }
+
+    #[test]
+    fn prefers_new_ula_cases() {
+        let preferred_addr: Ipv6Addr = "fd0f:7a7c:a8c9::ff3".parse().unwrap();
+        let other_addr: Ipv6Addr = "fd0f:7a7c:a8c9::1234".parse().unwrap();
+        let mut preferred = HashMap::new();
+        preferred.insert("aa:aa:aa:aa:aa:aa".to_string(), preferred_addr);
+
+        let empty = HashMap::new();
+        assert!(prefers_new_ula(
+            "aa:aa:aa:aa:aa:aa",
+            preferred_addr,
+            &empty,
+            &preferred
+        ));
+        assert!(!prefers_new_ula(
+            "aa:aa:aa:aa:aa:aa",
+            other_addr,
+            &empty,
+            &preferred
+        ));
+        assert!(!prefers_new_ula(
+            "bb:bb:bb:bb:bb:bb",
+            preferred_addr,
+            &empty,
+            &preferred
+        ));
+
+        let mut registered = HashMap::new();
+        registered.insert(
+            ("h".to_string(), preferred_addr.to_string()),
+            entry("h", "aa:aa:aa:aa:aa:aa"),
+        );
+        assert!(!prefers_new_ula(
+            "aa:aa:aa:aa:aa:aa",
+            preferred_addr,
+            &registered,
+            &preferred
+        ));
+    }
+
+    #[test]
+    fn ula_at_limit_counts_only_ula_for_host() {
+        let mut registered = HashMap::new();
+        registered.insert(
+            ("h".to_string(), "fd0f:7a7c:a8c9::1".to_string()),
+            entry("h", "aa:aa:aa:aa:aa:aa"),
+        );
+        registered.insert(
+            ("h".to_string(), "10.0.0.5".to_string()),
+            entry("h", "aa:aa:aa:aa:aa:aa"),
+        );
+
+        assert!(ula_at_limit(&registered, "h", 1));
+        assert!(!ula_at_limit(&registered, "h", 2));
+        assert!(!ula_at_limit(&registered, "other", 1));
+        assert!(!ula_at_limit(&registered, "h", 0));
     }
 }
