@@ -82,11 +82,11 @@ mod tests {
 
     #[test]
     fn ipv6_in_prefix_boundaries() {
-        let p = prefix("fd0f:7a7c:a8c9::", 60);
-        assert!(ipv6_in_prefix("fd0f:7a7c:a8c9::1".parse().unwrap(), &p));
-        assert!(ipv6_in_prefix("fd0f:7a7c:a8c9:f::1".parse().unwrap(), &p));
+        let p = prefix("fd12:3456:789a::", 60);
+        assert!(ipv6_in_prefix("fd12:3456:789a::1".parse().unwrap(), &p));
+        assert!(ipv6_in_prefix("fd12:3456:789a:f::1".parse().unwrap(), &p));
         assert!(!ipv6_in_prefix(
-            "fd0f:7a7c:a8ca::1".parse().unwrap(),
+            "fd12:3456:789b::1".parse().unwrap(),
             &p
         ));
         assert!(ipv6_in_prefix(

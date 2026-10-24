@@ -27,8 +27,8 @@ pub struct Leases {
     pub preferred_v6: HashMap<String, Ipv6Addr>,
 }
 
-/// Decode a hex string (e.g. "44237cdcb75b") to raw bytes and format via
-/// the shared types::format_mac, producing "44:23:7c:dc:b7:5b".
+/// Decode a hex string (e.g. "020000000003") to raw bytes and format via
+/// the shared types::format_mac, producing "02:00:00:00:00:03".
 fn hex_to_mac(hex: &str) -> String {
     let bytes: Vec<u8> = hex
         .as_bytes()
@@ -65,7 +65,7 @@ fn sanitize_hostname(raw: &str) -> String {
 
 /// Extract a MAC address from a DHCPv6 DUID string.
 /// Supports DUID-LLT (type 1) and DUID-LL (type 3) with any hardware type.
-/// Returns the colon-separated MAC, e.g. "30:c5:99:7d:d5:ae".
+/// Returns the colon-separated MAC, e.g. "02:00:00:00:00:02".
 fn mac_from_duid(duid: &str) -> Option<String> {
     // All chars must be hex digits
     if !duid.chars().all(|c| c.is_ascii_hexdigit()) {
@@ -202,10 +202,10 @@ mod tests {
 
     #[test]
     fn sanitize_hostname_lowercases_and_replaces() {
-        assert_eq!(sanitize_hostname("HONOR-Magic7-Pro"), "honor-magic7-pro");
+        assert_eq!(sanitize_hostname("Example-Host-A"), "example-host-a");
         assert_eq!(
-            sanitize_hostname("yeelink-light-lamp4_MIBT7381"),
-            "yeelink-light-lamp4-mibt7381"
+            sanitize_hostname("Example-Lamp_MIBT0001"),
+            "example-lamp-mibt0001"
         );
         assert_eq!(sanitize_hostname("a__b"), "a-b");
         assert_eq!(sanitize_hostname("-a--b-"), "a-b");
@@ -222,10 +222,10 @@ mod tests {
 
     #[test]
     fn mac_from_duid_llt_and_ll() {
-        // DUID-LLT: type 1, hw 1, time 00314241ba, mac 30c5997dd5ae
+        // DUID-LLT: type 1, hw 1, time 00314241ba, mac 020000000002
         assert_eq!(
-            mac_from_duid("00010100314241ba30c5997dd5ae").as_deref(),
-            Some("30:c5:99:7d:d5:ae")
+            mac_from_duid("00010100314241ba020000000002").as_deref(),
+            Some("02:00:00:00:00:02")
         );
         // DUID-LL: type 3, hw 1, mac 001132123456
         assert_eq!(
@@ -242,7 +242,7 @@ mod tests {
             "device": {
                 "br-lan": {
                     "leases": [
-                        {"mac": "2844f43b97cf", "hostname": "HONOR-Magic7-Pro"},
+                        {"mac": "020000000001", "hostname": "Example-Host-A"},
                         {"mac": "dca3a21fbabb", "hostname": ""},
                         {"mac": "e4fe4394229a"}
                     ]
@@ -251,7 +251,7 @@ mod tests {
         });
         let leases = parse_ipv4_leases(&v).unwrap();
         assert_eq!(leases.len(), 1);
-        assert_eq!(leases.get("28:44:f4:3b:97:cf").unwrap(), "honor-magic7-pro");
+        assert_eq!(leases.get("02:00:00:00:00:01").unwrap(), "example-host-a");
     }
 
     #[test]
@@ -261,18 +261,18 @@ mod tests {
                 "br-lan": {
                     "leases": [
                         {
-                            "duid": "00010100314241ba30c5997dd5ae",
-                            "hostname": "DESKTOP-GRL54SM",
+                            "duid": "00010100314241ba020000000002",
+                            "hostname": "EXAMPLE-DESKTOP",
                             "ipv6-addr": [
-                                {"address": "2409:8a55:2228:8530::ff3"},
-                                {"address": "fd0f:7a7c:a8c9::ff3"}
+                                {"address": "2001:db8:1:2::ff3"},
+                                {"address": "fd12:3456:789a::ff3"}
                             ]
                         },
                         {
-                            "duid": "000300012844f43b97cf",
+                            "duid": "00030001020000000001",
                             "hostname": "",
                             "ipv6-prefix": [
-                                {"address": "fd0f:7a7c:a8c9:1::", "prefix-length": 64}
+                                {"address": "fd12:3456:789a:1::", "prefix-length": 64}
                             ]
                         }
                     ]
@@ -282,14 +282,14 @@ mod tests {
         let mut leases = Leases::default();
         leases
             .hostnames
-            .insert("30:c5:99:7d:d5:ae".to_string(), "v4name".to_string());
+            .insert("02:00:00:00:00:02".to_string(), "v4name".to_string());
         merge_ipv6_leases(&mut leases, &v);
 
-        assert_eq!(leases.hostnames.get("30:c5:99:7d:d5:ae").unwrap(), "v4name");
+        assert_eq!(leases.hostnames.get("02:00:00:00:00:02").unwrap(), "v4name");
         assert_eq!(
-            leases.preferred_v6.get("30:c5:99:7d:d5:ae"),
-            Some(&"fd0f:7a7c:a8c9::ff3".parse::<Ipv6Addr>().unwrap())
+            leases.preferred_v6.get("02:00:00:00:00:02"),
+            Some(&"fd12:3456:789a::ff3".parse::<Ipv6Addr>().unwrap())
         );
-        assert!(!leases.preferred_v6.contains_key("28:44:f4:3b:97:cf"));
+        assert!(!leases.preferred_v6.contains_key("02:00:00:00:00:01"));
     }
 }

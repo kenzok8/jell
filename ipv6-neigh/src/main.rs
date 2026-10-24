@@ -1087,8 +1087,8 @@ mod tests {
     fn gua_upsert_refreshes_and_inserts_newest_first() {
         let mut map = HashMap::new();
         let now = Instant::now();
-        let first: Ipv6Addr = "2409:8a55:2228:8530::1".parse().unwrap();
-        let second: Ipv6Addr = "2409:8a55:2228:8530::2".parse().unwrap();
+        let first: Ipv6Addr = "2001:db8:1:2::1".parse().unwrap();
+        let second: Ipv6Addr = "2001:db8:1:2::2".parse().unwrap();
 
         upsert_gua_entry(&mut map, "aa:bb", first, 2, now, 120);
         assert_eq!(map["aa:bb"].len(), 1);

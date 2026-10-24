@@ -549,8 +549,8 @@ mod tests {
 
     #[test]
     fn prefers_new_ula_cases() {
-        let preferred_addr: Ipv6Addr = "fd0f:7a7c:a8c9::ff3".parse().unwrap();
-        let other_addr: Ipv6Addr = "fd0f:7a7c:a8c9::1234".parse().unwrap();
+        let preferred_addr: Ipv6Addr = "fd12:3456:789a::ff3".parse().unwrap();
+        let other_addr: Ipv6Addr = "fd12:3456:789a::1234".parse().unwrap();
         let mut preferred = HashMap::new();
         preferred.insert("aa:aa:aa:aa:aa:aa".to_string(), preferred_addr);
 
@@ -591,7 +591,7 @@ mod tests {
     fn ula_at_limit_counts_only_ula_for_host() {
         let mut registered = HashMap::new();
         registered.insert(
-            ("h".to_string(), "fd0f:7a7c:a8c9::1".to_string()),
+            ("h".to_string(), "fd12:3456:789a::1".to_string()),
             entry("h", "aa:aa:aa:aa:aa:aa"),
         );
         registered.insert(

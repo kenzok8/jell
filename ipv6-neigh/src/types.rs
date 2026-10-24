@@ -14,7 +14,7 @@ pub(crate) const fn nl_mgrp(group: u32) -> u32 {
     if group == 0 { 0 } else { 1 << (group - 1) }
 }
 
-/// Format raw MAC bytes as colon-separated hex string, e.g. "44:23:7c:dc:b7:5b".
+/// Format raw MAC bytes as colon-separated hex string, e.g. "02:00:00:00:00:03".
 /// Shared across modules to avoid duplicate formatting logic.
 pub(crate) fn format_mac(mac: &[u8]) -> String {
     let mut s = String::with_capacity(mac.len() * 3);
@@ -93,7 +93,7 @@ mod tests {
 
     #[test]
     fn format_mac_pads_and_joins() {
-        assert_eq!(format_mac(&[0x44, 0x23, 0x7c]), "44:23:7c");
+        assert_eq!(format_mac(&[0x02, 0x00, 0x00]), "02:00:00");
         assert_eq!(format_mac(&[0x00, 0x0a]), "00:0a");
         assert_eq!(format_mac(&[]), "");
     }

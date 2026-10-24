@@ -463,10 +463,10 @@ mod tests {
 
     #[test]
     fn ipv6_ptr_name_ends_with_reversed_prefix() {
-        let addr: Ipv6Addr = "fd0f:7a7c:a8c9::1".parse().unwrap();
+        let addr: Ipv6Addr = "fd12:3456:789a::1".parse().unwrap();
         let name = ipv6_ptr_name(addr).to_ascii();
         assert!(
-            name.ends_with("9.c.8.a.c.7.a.7.f.0.d.f.ip6.arpa."),
+            name.ends_with("a.9.8.7.6.5.4.3.2.1.d.f.ip6.arpa."),
             "{name}"
         );
         assert!(name.contains("1.0.0.0."), "{name}");
