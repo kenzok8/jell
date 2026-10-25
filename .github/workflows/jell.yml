@@ -131,7 +131,6 @@ jobs:
         git_clone https://github.com/sirpdboy/luci-app-cupsd cupsd1 && mv -n cupsd1/{luci-app-cupsd,cups} ./ ; rm -rf cupsd1
         #git_clone https://github.com/QiuSimons/luci-app-honk wrt-honk && mv -n wrt-honk/*honk ./ ; rm -rf wrt-honk
         git_clone https://github.com/kenzok8/openwrt-honk openwrt-honk && mv -n openwrt-honk/*honk ./; rm -rf openwrt-honk
-        git_clone https://github.com/kenzok8/openwrt-tower openwrt-tower && mv -n openwrt-tower/*tower ./; rm -rf openwrt-tower
         git_clone https://github.com/sbwml/luci-app-mosdns openwrt-mos && mv -n openwrt-mos/{*mosdns,geo2txt} ./; rm -rf openwrt-mos
         git_clone https://github.com/sbwml/luci-app-mentohust mentohust1 && mvdir mentohust1
         git_clone https://github.com/sbwml/package_kernel_tcp-brutal
