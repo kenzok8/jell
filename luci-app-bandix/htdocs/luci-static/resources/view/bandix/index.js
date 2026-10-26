@@ -4,6 +4,7 @@
 'require uci';
 'require rpc';
 'require poll';
+'require bandix.devices as devices';
 
 // 颜色常量定义
 var BANDIX_COLOR_UPLOAD = '#f97316';     // 橙色 - 上传/上行
@@ -504,6 +505,20 @@ return view.extend({
 
     render: function (data) {
 
+        var deviceSelection = devices.create({
+            writable: !!L.hasViewPermission(),
+            confirm: function (title, message, callback) { showConfirmDialog(title, message, callback); },
+            refresh: function () {
+                return fetchAllTrafficQuotas(true).then(function () {
+                    return updateDeviceData();
+                }).then(function () {
+                    updateTrafficStatistics();
+                }).catch(function (error) {
+                    ui.addNotification(null, E('p', {}, _('Unable to fetch data') + ': ' + (error.message || error)), 'error');
+                });
+            }
+        });
+
         // 生成样式字符串的函数
         function generateStyles(colorScheme) {
             var scheme = colorScheme || 'light';
@@ -685,6 +700,68 @@ return view.extend({
                 width: 100%;
                 table-layout: fixed;
             }
+
+            .bandix-device-checkbox::before,
+            .bandix-device-checkbox::after {
+                content: none !important;
+                display: none !important;
+            }
+
+            .bandix-container input.bandix-device-checkbox {
+                border: 1px solid rgba(100, 116, 139, 0.55) !important;
+                border-radius: 4px !important;
+                background-color: transparent !important;
+                background-image: none !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                transition: border-color 0.15s ease, background-color 0.15s ease;
+            }
+
+            .bandix-container.theme-dark input.bandix-device-checkbox {
+                border-color: rgba(148, 163, 184, 0.65) !important;
+            }
+
+            .bandix-container input.bandix-device-checkbox:hover:not(:disabled),
+            .bandix-container input.bandix-device-checkbox:focus-visible {
+                border-color: #3b82f6 !important;
+            }
+
+            .bandix-container input.bandix-device-checkbox:focus-visible {
+                outline: 2px solid rgba(59, 130, 246, 0.5);
+                outline-offset: 2px;
+            }
+
+            .bandix-container input.bandix-device-checkbox:checked,
+            .bandix-container input.bandix-device-checkbox:indeterminate {
+                border-color: #3b82f6 !important;
+                background-color: #3b82f6 !important;
+                background-repeat: no-repeat !important;
+                background-position: center !important;
+                background-size: 12px 12px !important;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6l2.3 2.3 4.7-4.6' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+            }
+
+            .bandix-container input.bandix-device-checkbox:indeterminate {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6h6' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+            }
+
+            .bandix-container input.bandix-device-checkbox:disabled {
+                opacity: 0.45;
+                cursor: default;
+            }
+
+            @media (forced-colors: active) {
+                .bandix-container input.bandix-device-checkbox {
+                    appearance: auto !important;
+                    -webkit-appearance: checkbox !important;
+                    background-image: none !important;
+                }
+            }
+
+            .bandix-table th,
+            .bandix-table td {
+                box-sizing: border-box;
+            }
             
             .bandix-table th {
                 padding: 10px 16px;
@@ -795,6 +872,16 @@ return view.extend({
             .bandix-table th:nth-child(5),
             .bandix-table td:nth-child(5) {
                 width: 16.5%;
+            }
+
+            .device-info-selection {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .device-info-selection .device-info {
+                min-width: 0;
             }
             
             .device-actions {
@@ -1639,11 +1726,28 @@ return view.extend({
                 }
                 
                 .device-card {
+                    display: grid;
+                    grid-template-columns: 16px minmax(0, 1fr);
+                    align-items: start;
+                    column-gap: 6px;
                     border: 1px solid rgba(0, 0, 0, 0.1);
                     border-radius: 8px;
                     padding: 12px;
                     margin-bottom: 12px;
                     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                }
+
+                .device-card-selection {
+                    grid-column: 1;
+                    grid-row: 1;
+                    display: flex;
+                    justify-content: center;
+                    padding-top: 4px;
+                }
+
+                .device-card > :not(.device-card-selection) {
+                    grid-column: 2;
+                    min-width: 0;
                 }
                 
                 
@@ -2959,8 +3063,11 @@ return view.extend({
 
             // 主要内容卡片
             E('div', { 'class': 'cbi-section' }, [
-                E('h3', { 'class': 'history-header', 'style': 'display: flex; align-items: center; justify-content: space-between;' }, [
-                    E('span', {}, _('Device List')),
+                E('h3', { 'class': 'history-header', 'style': 'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px' }, [
+                    E('div', { style: 'display:flex;align-items:center;flex-wrap:wrap;gap:16px' }, [
+                        E('span', { style: 'white-space:nowrap' }, _('Device List')),
+                        deviceSelection.toolbar
+                    ]),
                     E('div', { 'class': 'device-toolbar' }, [
                         E('div', { 'class': 'device-group' }, [
                             E('span', { 'class': 'device-group-label' }, _('Period')),
@@ -5372,21 +5479,14 @@ return view.extend({
             return timeDiff <= offlineThreshold;
         }
 
-        function channelToBand(ch) {
-            var c = Number(ch);
-            if (c < 1) return null;
-            if (c <= 14) return '2.4 GHz';
-            if (c <= 165) return '5 GHz';
-            if (c <= 233) return '6 GHz';
+        function wifiBand(device) {
+            if (device.conn !== 'wifi') return null;
+            var frequency = Number(device.w_freq);
+            if (!Number.isInteger(frequency)) return null;
+            if (frequency >= 2400 && frequency < 2500) return { label: '2.4 GHz', css: 'g24' };
+            if (frequency >= 4900 && frequency < 5925) return { label: '5 GHz', css: 'g5' };
+            if (frequency >= 5925 && frequency <= 7125) return { label: '6 GHz', css: 'g6' };
             return null;
-        }
-
-        function channelToBandClass(ch) {
-            var c = Number(ch);
-            if (c <= 14) return 'g24';
-            if (c <= 165) return 'g5';
-            if (c <= 233) return 'g6';
-            return '';
         }
 
         function buildDeviceUplinkChBadges(device) {
@@ -5394,16 +5494,15 @@ return view.extend({
             if (device.uplink && String(device.uplink).trim() !== '') {
                 badges.push(E('span', { 'class': 'device-uplink-badge', 'title': _('Interface') }, device.uplink.trim()));
             }
-            if (device.w_ch && Number(device.w_ch) > 0) {
+            if (device.conn === 'wifi' && Number(device.w_ch) > 0) {
                 var ch = Number(device.w_ch);
-                var band = channelToBand(ch);
-                var bandClass = channelToBandClass(ch);
-                if (band && bandClass) {
-                    badges.push(E('span', {
-                        'class': 'device-ch-badge device-ch-' + bandClass,
-                        'title': _('WiFi Channel') + ' ' + ch
-                    }, band));
-                }
+                var band = wifiBand(device);
+                var title = _('WiFi Channel') + ' ' + ch;
+                if (band) title += ' · ' + Number(device.w_freq) + ' MHz';
+                badges.push(E('span', {
+                    'class': 'device-ch-badge ' + (band ? 'device-ch-' + band.css : 'device-uplink-badge'),
+                    'title': title
+                }, band ? band.label : _('WiFi Channel') + ' ' + ch));
             }
             return badges;
         }
@@ -5411,9 +5510,9 @@ return view.extend({
         function formatDeviceUplinkCh(device) {
             var parts = [];
             if (device.uplink && String(device.uplink).trim() !== '') parts.push(device.uplink.trim());
-            if (device.w_ch && Number(device.w_ch) > 0) {
-                var band = channelToBand(Number(device.w_ch));
-                if (band) parts.push(band);
+            if (device.conn === 'wifi' && Number(device.w_ch) > 0) {
+                var band = wifiBand(device);
+                parts.push(band ? band.label : _('WiFi Channel') + ' ' + Number(device.w_ch));
             }
             return parts.join(' · ');
         }
@@ -5984,6 +6083,7 @@ return view.extend({
 
                 var stats = result;
                 if (!stats || !stats.d) {
+                    deviceSelection.setDevices([]);
                     if (trafficDiv) {
                         trafficDiv.innerHTML = '<div class="error">' + _('Unable to fetch data') + '</div>';
                     }
@@ -6266,6 +6366,7 @@ return view.extend({
 
                 // 应用排序
                 filteredDevices = sortDevices(filteredDevices, currentSortBy, currentSortOrder);
+                deviceSelection.setDevices(filteredDevices);
 
                 // 检查是否有任何设备有 IPv6 地址
                 var hasAnyIPv6 = filteredDevices.some(function (device) {
@@ -6375,7 +6476,10 @@ return view.extend({
                     var row = E('tr', {}, [
                         // 设备信息
                         E('td', {}, [
-                            E('div', { 'class': 'device-info' }, deviceInfoElements)
+                            E('div', { 'class': 'device-info-selection' }, [
+                                deviceSelection.checkbox(device),
+                                E('div', { 'class': 'device-info' }, deviceInfoElements)
+                            ])
                         ]),
 
                         // LAN 流量
@@ -6563,6 +6667,7 @@ return view.extend({
 
                     // 创建移动端卡片
                     var card = E('div', { 'class': 'device-card' }, [
+                        E('div', { 'class': 'device-card-selection' }, [deviceSelection.checkbox(device)]),
                         // 卡片头部
                         E('div', { 'class': 'device-card-header' }, [
                             E('div', { 'class': 'device-card-name' }, [
