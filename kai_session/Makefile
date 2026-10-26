@@ -31,11 +31,11 @@ define Package/$(PKG_NAME)
 	SUBMENU:=
 	TITLE:=KAI_SESSION
 	DEPENDS:=+libstdcpp
-	URL:=https://github.com/Carseason/openwrt-packages
+	URL:=https://github.com/linkease/istore-ai-helper
 endef
 
 define Package/$(PKG_NAME)/description
-  KAI
+  The OpenCode engine and offline ripgrep runtime for KAI.
 endef
 
 define Package/$(PKG_NAME)/conffiles

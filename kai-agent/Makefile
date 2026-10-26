@@ -17,7 +17,7 @@ define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=System
 	TITLE:=KAI OpenCode Agent bundle
-	URL:=https://github.com/linkease/linkease-skills
+	URL:=https://github.com/linkease/kai-skills
 endef
 
 define Package/$(PKG_NAME)/description
