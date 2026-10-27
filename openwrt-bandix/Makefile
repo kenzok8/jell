@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bandix
-PKG_VERSION:=0.12.11
+PKG_VERSION:=0.12.12
 PKG_RELEASE:=1
 
 PKG_LICENSE:=Apache-2.0
@@ -13,7 +13,7 @@ include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/rust/rust-values.mk
 
 # 二进制文件的文件名和URL
-RUST_BANDIX_VERSION:=0.12.11
+RUST_BANDIX_VERSION:=0.12.12
 RUST_BINARY_FILENAME:=bandix-$(RUST_BANDIX_VERSION)-$(RUSTC_TARGET_ARCH).tar.gz
 
 
@@ -65,6 +65,15 @@ else
 	PKG_HASH:=skip
 endif
 
+# Build an unreleased service with an SDK without changing published hashes:
+# make package/bandix/compile BANDIX_LOCAL_BINARY=/absolute/path/to/bandix
+BANDIX_LOCAL_BINARY?=
+ifneq ($(strip $(BANDIX_LOCAL_BINARY)),)
+  PKG_SOURCE:=
+  PKG_SOURCE_URL:=
+  PKG_FILE_DEPENDS+=$(BANDIX_LOCAL_BINARY)
+endif
+
 define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=Network
@@ -78,7 +87,7 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)/bin
-	gzip -dc "$(DL_DIR)/$(PKG_SOURCE)" | tar -C $(PKG_BUILD_DIR)/bin --strip-components=1 -xf -
+	$(if $(strip $(BANDIX_LOCAL_BINARY)),$(INSTALL_BIN) "$(BANDIX_LOCAL_BINARY)" $(PKG_BUILD_DIR)/bin/bandix,gzip -dc "$(DL_DIR)/$(PKG_SOURCE)" | tar -C $(PKG_BUILD_DIR)/bin --strip-components=1 -xf -)
 	$(Build/Patch)
 endef
 
