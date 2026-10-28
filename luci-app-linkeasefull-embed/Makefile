@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-linkeasefull-embed
 PKG_VERSION:=1.2.0-r1
-PKG_RELEASE:=40
+PKG_RELEASE:=41
 
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
