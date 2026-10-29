@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=honk
-PKG_VERSION:=2026.10.29-r6
+PKG_VERSION:=2026.10.29-r7
 PKG_RELEASE:=2
 
 # Pinned honk-core revision (Glassyiris/honk feat/native-api), cross-compiled by
