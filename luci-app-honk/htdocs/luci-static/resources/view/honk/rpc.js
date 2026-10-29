@@ -30,7 +30,7 @@ const callRestart = rpc.declare({ object: 'honk', method: 'restart', expect: { '
 const callSettings = rpc.declare({
 	object: 'honk',
 	method: 'settings',
-	params: [ 'lan_network', 'listen_port', 'boot_enabled', 'clash_api_enabled', 'clash_api_port', 'clash_api_secret' ],
+	params: [ 'lan_network', 'listen_port', 'clash_api_enabled', 'clash_api_port', 'clash_api_secret' ],
 	expect: { '': {} }
 });
 
@@ -357,7 +357,7 @@ function tokenMessage(token) {
 		lan_network_unavailable: _('The selected LAN network is unavailable.'),
 		listen_port_occupied: _('The listen port is already in use.'),
 		clash_api_port_occupied: _('The Clash API port is already in use.'),
-		invalid_clash_api_settings: _('Enter a different Clash API port and a secret of 6–128 letters, numbers, dots, underscores or hyphens.'),
+		invalid_clash_api_settings: _('Enter a different Clash API port and a secret of 8–128 letters, numbers, dots, underscores or hyphens.'),
 		invalid_listen_port: _('The listen port is invalid.'),
 		initialize_before_enabling_service: _('Complete initial setup before enabling Honk.'),
 		system_config_unavailable: _('Honk system configuration is unavailable.'),
