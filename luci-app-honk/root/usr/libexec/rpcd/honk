@@ -59,7 +59,7 @@ lock_owner_invalid() {
 }
 
 status() {
-	local enabled initialized boot_enabled running api_url api_ready core_version doona_version kernel lan_network listen_port errors listen clash_api_enabled clash_api_port clash_api_secret clash_api_url clash_api_ready clash_ui_ready clash_secret_set config_mode api_enabled core_ready config_pending manual_runtime clash_listen_addr
+	local enabled initialized boot_enabled running api_url api_ready core_version core_commit doona_version kernel lan_network listen_port errors listen clash_api_enabled clash_api_port clash_api_secret clash_api_url clash_api_ready clash_ui_ready clash_secret_set config_mode api_enabled core_ready config_pending manual_runtime clash_listen_addr
 	config_load honk
 	config_get_bool enabled main enabled 0
 	config_get_bool initialized main initialized 0
@@ -146,6 +146,8 @@ status() {
 	if [ "$running" = 1 ] && honk_lifecycle_api_owned "$managed_pid"; then api_ready=1; else api_ready=0; fi
 	core_version=$($CORE --version 2>/dev/null | sed -n '1p')
 	[ -n "$core_version" ] || core_version=unknown
+	# --version 只是构建时注入的版本串，真正的上游代码看 provenance.json
+	core_commit=$(jsonfilter -i /usr/share/honk/provenance.json -e '@.core.commit' 2>/dev/null)
 	doona_version=$(sed -n 's/^Version: //p' /usr/share/doona/SOURCE 2>/dev/null | head -n 1)
 	[ -n "$doona_version" ] || doona_version=unknown
 	kernel=$(uname -r)
@@ -178,6 +180,7 @@ status() {
 	json_add_boolean clash_ui_ready "$clash_ui_ready"
 	json_add_string clash_api_url "$clash_api_url"
 	json_add_string core_version "$core_version"
+	json_add_string core_commit "$core_commit"
 	json_add_string doona_version "$doona_version"
 	json_add_string kernel "$kernel"
 	json_add_string lan_network "$lan_network"
@@ -553,8 +556,17 @@ add_subscription() {
 	json_get_var sub_name name
 	json_get_var sub_url url
 
+	# 名字允许中文和空格：内核的 tag 支持引号写法，我们只在写入时决定要不要加引号。
+	# 但单引号、反斜杠、换行会破坏 dae 的字符串，必须拒绝。
 	case "$sub_name" in
-		''|*[!A-Za-z0-9_-]*) emit_result false subscription_invalid; return 1 ;;
+		'') emit_result false subscription_invalid; return 1 ;;
+		*\'*|*\\*) emit_result false subscription_invalid; return 1 ;;
+	esac
+	[ "$(printf '%s' "$sub_name" | tr -d '\n\r')" = "$sub_name" ] || { emit_result false subscription_invalid; return 1; }
+	[ "$(printf '%s' "$sub_name" | wc -c)" -le 64 ] || { emit_result false subscription_invalid; return 1; }
+	case "$sub_name" in
+		*[!A-Za-z0-9_-]*) sub_tag="'$sub_name'" ;;
+		*) sub_tag=$sub_name ;;
 	esac
 	case "$sub_url" in
 		http://*|https://*) ;;
@@ -567,14 +579,14 @@ add_subscription() {
 	require_managed_mode || return 1
 	original_hash=$(sha256sum "$cfg" | awk '{print $1}')
 
-	if grep -qE "^[[:space:]]*${sub_name}:[[:space:]]*['\"]" "$cfg"; then
+	if grep -qF "$sub_tag:" "$cfg" || grep -qF "'$sub_name':" "$cfg"; then
 		emit_result false subscription_invalid_or_conflicting
 		return 1
 	fi
 
 	candidate=$(mktemp /etc/honk/.config.dae.XXXXXX) || { emit_result false config_write_failed; return 1; }
 
-	if ! awk -v name="$sub_name" -v url="$sub_url" '
+	if ! awk -v name="$sub_tag" -v url="$sub_url" '
 		/^subscription[[:space:]]*\{/ {
 			print
 			printf "    %s: \047%s\047 {\n        interval: 86400s\n        route: direct\n    }\n", name, url
@@ -811,6 +823,34 @@ restore_prepare() {
 	fi
 	rm -f "$RESTORE_PATH"
 	emit_result true prepared
+}
+
+# 忘记密码：清掉核心里的管理员记录，并让 LuCI 重新显示首次设置。
+# 只删管理员，不动订阅/分组/路由；需要先停服务（内核自己也会拒绝运行中的 reset）。
+reset_admin() {
+	begin_mutation
+	if pidof honk-core >/dev/null 2>&1; then
+		honk_lifecycle_stop 30 || { emit_result false service_stop_failed_rolled_back; return 1; }
+	fi
+	reset_data_dir=$(sed -n "s/^[[:space:]]*data_dir:[[:space:]]*'\([^']*\)'.*/\1/p" /etc/honk/system.dae 2>/dev/null | head -n 1)
+	[ -n "$reset_data_dir" ] || reset_data_dir=/etc/honk
+	case "$reset_data_dir" in /*) ;; *) reset_data_dir=/etc/honk ;; esac
+	if [ -f "$reset_data_dir/state/honk.db" ]; then
+		reset_backup=$(mktemp /etc/honk/.state-backup.XXXXXX) || { emit_result false config_write_failed; return 1; }
+		cp -p "$reset_data_dir/state/honk.db" "$reset_backup" || { rm -f "$reset_backup"; emit_result false config_write_failed; return 1; }
+	fi
+	if ! reset_output=$("$CORE" --config /etc/honk/config.dae --data-dir "$reset_data_dir" admin reset 2>&1); then
+		[ -n "${reset_backup:-}" ] && rm -f "$reset_backup"
+		logger -t honk "administrator reset failed: $reset_output" 2>/dev/null || :
+		emit_result false administrator_reset_failed
+		return 1
+	fi
+	if ! uci set honk.main.initialized=0 || ! uci set honk.main.enabled=0 || ! uci commit honk || ! chmod 0600 /etc/config/honk; then
+		emit_result false config_write_failed
+		return 1
+	fi
+	rm -f "${reset_backup:-}"
+	emit_result true administrator_reset
 }
 
 config_read() {
@@ -1109,7 +1149,7 @@ config_use_managed() {
 
 case "$1" in
 list)
-		echo '{"status":{},"check":{},"initialize":{"username":"String","password":"String"},"start":{},"stop":{},"restart":{},"settings":{"lan_network":"String","listen_port":"Integer","boot_enabled":"Boolean","clash_api_enabled":"Boolean","clash_api_port":"Integer","clash_api_secret":"String"},"add_subscription":{"name":"String","url":"String"},"probe_subscription":{"url":"String"},"add_nodes":{"links":"String"},"import_dae":{},"config_read":{},"config_draft_read":{},"lan_candidates":{},"config_validate":{"content":"String"},"config_save":{"content":"String"},"config_apply":{},"config_use_managed":{},"repair":{},"backup":{},"restore":{},"restore_prepare":{},"reset":{},"job_status":{"job_id":"String"},"logs":{"source":"String","level":"String","limit":"Integer"},"update_check":{},"update_apply":{}}'
+		echo '{"status":{},"check":{},"initialize":{"username":"String","password":"String"},"start":{},"stop":{},"restart":{},"settings":{"lan_network":"String","listen_port":"Integer","boot_enabled":"Boolean","clash_api_enabled":"Boolean","clash_api_port":"Integer","clash_api_secret":"String"},"add_subscription":{"name":"String","url":"String"},"probe_subscription":{"url":"String"},"reset_admin":{},"add_nodes":{"links":"String"},"import_dae":{},"config_read":{},"config_draft_read":{},"lan_candidates":{},"config_validate":{"content":"String"},"config_save":{"content":"String"},"config_apply":{},"config_use_managed":{},"repair":{},"backup":{},"restore":{},"restore_prepare":{},"reset":{},"job_status":{"job_id":"String"},"logs":{"source":"String","level":"String","limit":"Integer"},"update_check":{},"update_apply":{}}'
 		;;
 	call)
 		case "$2" in
@@ -1127,6 +1167,9 @@ list)
 				;;
 			probe_subscription)
 				probe_subscription
+				;;
+			reset_admin)
+				reset_admin
 				;;
 			add_subscription)
 				add_subscription

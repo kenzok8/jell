@@ -452,6 +452,35 @@
 	white-space: nowrap;
 }
 
+/* 配置页的标签栏：一排切换，只显示当前板块 */
+.honk-tabs-wrap {
+	margin: 4px 0 14px;
+}
+
+.honk-page .honk-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	max-width: 100%;
+}
+
+.honk-page .honk-tabs .honk-seg-btn:disabled {
+	opacity: 0.32;
+	cursor: not-allowed;
+}
+
+/* Argon 暗色：分段控件默认的选中态是纯白药丸，在深色背景上非常刺眼，
+   这里改成"比底色亮一点"的层次 + 主题前景色。 */
+html[data-darkmode="true"] .honk-page .honk-seg {
+	background: rgba(255, 255, 255, 0.07);
+}
+
+html[data-darkmode="true"] .honk-page .honk-seg-btn.is-active,
+html[data-darkmode="true"] .honk-page .honk-seg-btn[aria-selected="true"] {
+	background: rgba(255, 255, 255, 0.16);
+	color: inherit;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
 /* ---------- iOS toggle switch (boot-enabled checkbox) ---------- */
 
 .honk-page input[type="checkbox"] {

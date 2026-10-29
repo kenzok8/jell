@@ -1587,14 +1587,14 @@ msgstr "The temporary configuration upload is unavailable. Try again."
 msgid "The configuration file exceeds the 2 MiB limit."
 msgstr "The configuration file exceeds the 2 MiB limit."
 
-msgid "已经初始化过了，请用原来的账号登录 Doona；忘记密码到「维护」执行系统恢复。"
-msgstr "已经初始化过了，请用原来的账号登录 Doona；忘记密码到「维护」执行系统恢复。"
+msgid "已经初始化过了，请用原来的账号登录 Doona。忘记密码的处理方式：先停止 Honk，再执行 honk-core admin reset（只删除管理员记录、重新开放首次设置，不动订阅和规则），然后回到本页重新初始化。"
+msgstr "已经初始化过了，请用原来的账号登录 Doona。忘记密码的处理方式：先停止 Honk，再执行 honk-core admin reset（只删除管理员记录、重新开放首次设置，不动订阅和规则），然后回到本页重新初始化。"
 
 msgid "创建 Doona 管理员失败，请到「维护 → 日志」查看核心日志。"
 msgstr "创建 Doona 管理员失败，请到「维护 → 日志」查看核心日志。"
 
-msgid "用户名或密码不符合要求：用户名只能用字母数字，密码至少 6 位且不含空格。"
-msgstr "用户名或密码不符合要求：用户名只能用字母数字，密码至少 6 位且不含空格。"
+msgid "用户名只能包含字母、数字、下划线、点、连字符（不超过 64 个字符）；密码长度必须是 8 到 128 个字符，可以包含空格。"
+msgstr "用户名只能包含字母、数字、下划线、点、连字符（不超过 64 个字符）；密码长度必须是 8 到 128 个字符，可以包含空格。"
 
 msgid "请先停止 Honk 服务再初始化。"
 msgstr "请先停止 Honk 服务再初始化。"
@@ -1851,5 +1851,62 @@ msgstr "初始化失败。"
 msgid "System check: %s"
 msgstr "系统检查结果：%s"
 
-msgid "The system check found nothing, so this may be a temporary failure: retry, and check the logs if it repeats."
-msgstr "系统检查没有发现问题。若反复失败，请到「维护 → 日志」查看核心日志并把提示里的错误码发给维护者。"
+msgid "The system check passed. If it keeps failing, check the core log under Maintenance → Logs and report the code above."
+msgstr "系统检查通过。若反复失败，请到「维护 → 日志」查看核心日志并把上面的错误码发给维护者。"
+
+msgid "Username may only contain letters, digits, underscore, dot or hyphen (max 64 characters)."
+msgstr "用户名只能包含字母、数字、下划线、点、连字符，最长 64 个字符。"
+
+msgid "The password must be between 8 and 128 characters."
+msgstr "密码长度必须在 8 到 128 个字符之间。"
+
+msgid "Username: letters, digits, underscore, dot or hyphen (max 64 characters). Password: 8 to 128 characters."
+msgstr "用户名：字母、数字、下划线、点、连字符（最长 64 个字符）。密码：8 到 128 个字符。"
+
+msgid "The system check did not finish. Retry, or check the core log under Maintenance → Logs."
+msgstr "系统检查没有跑完，请重试；或到「维护 → 日志」查看核心日志。"
+
+msgid "The system check did not finish (interface timeout or error). Retry, or check the core log under Maintenance → Logs."
+msgstr "系统检查没有跑完（接口超时或出错），请重试；或到「维护 → 日志」查看核心日志。"
+
+msgid "系统检查没有发现问题。若反复失败，请到「维护 → 日志」查看核心日志并把提示里的错误码发给维护者。"
+msgstr "系统检查通过。若反复失败，请到「维护 → 日志」查看核心日志并把上面的错误码发给维护者。"
+
+msgid "Reset administrator"
+msgstr "重置管理员"
+
+msgid "Clear the Honk administrator account so the first-setup page opens again? Subscriptions, nodes and routing are kept. Honk will be stopped."
+msgstr "清掉 Honk 管理员账号、让首次设置页面重新出现？订阅、节点与路由都会保留；Honk 会被停止。"
+
+msgid "Resetting the administrator…"
+msgstr "正在重置管理员…"
+
+msgid "Administrator cleared. Open the Overview page and run the first setup again."
+msgstr "管理员已清空，请到「概览」页重新完成首次设置。"
+
+msgid "Could not reset the administrator."
+msgstr "无法重置管理员。"
+
+msgid "Administrator reset."
+msgstr "管理员已重置。"
+
+msgid "administrator_reset_failed"
+msgstr "重置管理员失败，请查看核心日志。"
+
+msgid "Core is running; stop Honk before resetting the administrator."
+msgstr "核心正在运行，请先停止 Honk 再重置管理员。"
+
+msgid "The subscription could not be added: the name must be 1-64 characters without single quotes, and the URL must be a valid http(s) link."
+msgstr "无法添加订阅：名称 1-64 个字符且不能含单引号；链接必须是有效的 http(s) 地址。"
+
+msgid "Import config"
+msgstr "导入配置"
+
+msgid "Edit config"
+msgstr "编辑配置"
+
+msgid "Paste Clash YAML, Surge INI, Base64 or share links. They are parsed locally into nodes and appended to /etc/honk/config.dae."
+msgstr "粘贴 Clash YAML、Surge INI、Base64 或分享链接，会在本地解析成节点并追加到 /etc/honk/config.dae。"
+
+msgid "Doona opens after Honk starts."
+msgstr "启动 Honk 后即可打开 Doona。"

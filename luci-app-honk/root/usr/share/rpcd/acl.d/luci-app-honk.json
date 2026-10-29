@@ -72,6 +72,7 @@
 					"import_dae",
 					"config_validate",
 					"config_save",
+					"reset_admin",
 					"repair",
 					"backup",
 					"restore",
