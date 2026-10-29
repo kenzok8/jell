@@ -232,6 +232,16 @@ return view.extend({
 			clashPortInput.value = status.clash_api_port ? String(status.clash_api_port) : '9090';
 
 			card.appendChild(E('h3', { 'class': 'honk-card-title' }, _('Service settings')));
+			/* Manual mode owns the whole runtime from config.dae, so the backend
+			   rejects these settings. Disable them here instead of failing on save. */
+			const manualMode = status.config_mode === 'manual';
+			if (manualMode) {
+				[ networkSelect, portInput, bootEnabledInput, clashEnabledInput, clashPortInput, clashSecretInput ].forEach(function(input) {
+					input.disabled = true;
+				});
+				save.disabled = true;
+				card.appendChild(E('p', { 'class': 'honk-note honk-mode-hint' }, _('Manual mode: these settings belong to config.dae, so they are read-only here. Restore managed mode on the Configuration page to change them.')));
+			}
 			if (!(data.networks || []).length)
 				networkSelect.appendChild(E('option', { 'value': '' }, _('No network interfaces found')));
 			form.appendChild(field(_('LAN network'), networkSelect));
@@ -336,9 +346,18 @@ return view.extend({
 					currentStatus = updatedStatus;
 					renderSetup(updatedStatus);
 					renderStatus(updatedStatus, null);
-				}).catch(function() {
+				}).catch(function(error) {
 					password.value = '';
-					message.textContent = _('Initialization failed. Check the system status.');
+					/* 以前这里把错误整个吞掉，用户只看到「初始化失败」。现在先给出
+					   具体错误码的中文说明，再顺手跑一遍系统检查，把缺什么列出来。 */
+					message.textContent = honk.errorMessage(error, _('Initialization failed.'));
+					return honk.check().catch(function() { return null; }).then(function(check) {
+						const issues = (check && Array.isArray(check.errors)) ? check.errors : [];
+						if (issues.length)
+							message.textContent += ' ' + _('System check: %s').format(issues.map(honk.statusIssue).join('; '));
+						else
+							message.textContent += ' ' + _('The system check found nothing, so this may be a temporary failure: retry, and check the logs if it repeats.');
+					});
 				}).finally(function() {
 					setupBusy = false;
 					submit.disabled = false;
