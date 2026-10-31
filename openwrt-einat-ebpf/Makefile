@@ -65,8 +65,8 @@ TARGET_PATH_PKG:=$(LLVM_PATH):$(TARGET_PATH_PKG)
 
 # Platform-specific features
 # $(TOPDIR)/feeds/packages/lang/rust/rust-values.mk
-# RUST_ARCH_DEPENDS:=@(aarch64||arm||i386||i686||mips||mipsel||mips64||mips64el||powerpc64||riscv64||x86_64)
-EINAT_EBPF_RUST_ARCH_DEPENDS:=@(aarch64||arm||i386||i686||powerpc64||riscv64||x86_64) # Architectures other than x86_64 and aarch64 have not been tested.
+# RUST_ARCH_DEPENDS:=@(aarch64||arm||i386||loongarch64||mips||mips64||mips64el||mipsel||powerpc||powerpc64||riscv64||x86_64)
+EINAT_EBPF_RUST_ARCH_DEPENDS:=@(aarch64||arm||i386||loongarch64||powerpc||powerpc64||riscv64||x86_64) # Architectures other than x86_64 and aarch64 have not been tested.
 
 define Package/$(PKG_NAME)
   SECTION:=net
