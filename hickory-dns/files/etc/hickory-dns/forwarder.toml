@@ -7,32 +7,26 @@ group = "nogroup"
 
 [[zones]]
 zone = "localhost"
-zone_type = "Primary"
 file = "/etc/hickory-dns/localhost.zone"
 
 [[zones]]
 zone = "0.0.127.in-addr.arpa"
-zone_type = "Primary"
 file = "/etc/hickory-dns/127.0.0.1.zone"
 
 [[zones]]
 zone = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa"
-zone_type = "Primary"
 file = "/etc/hickory-dns/ipv6_1.zone"
 
 [[zones]]
 zone = "255.in-addr.arpa"
-zone_type = "Primary"
 file = "/etc/hickory-dns/255.zone"
 
 [[zones]]
 zone = "0.in-addr.arpa"
-zone_type = "Primary"
 file = "/etc/hickory-dns/0.zone"
 
 [[zones]]
 zone = "lan"
-zone_type = "Primary"
 axfr_policy = "AllowAll"
 
 [zones.stores]
@@ -49,7 +43,6 @@ fudge = 300
 
 [[zones]]
 zone = "d.f.ip6.arpa"
-zone_type = "Primary"
 axfr_policy = "AllowAll"
 
 [zones.stores]
@@ -66,7 +59,6 @@ fudge = 300
 
 [[zones]]
 zone = "0.0.10.in-addr.arpa"
-zone_type = "Primary"
 axfr_policy = "AllowAll"
 
 [zones.stores]
@@ -83,7 +75,6 @@ fudge = 300
 
 [[zones]]
 zone = "3.168.192.in-addr.arpa"
-zone_type = "Primary"
 axfr_policy = "AllowAll"
 
 [zones.stores]
@@ -100,7 +91,6 @@ fudge = 300
 
 [[zones]]
 zone = "."
-zone_type = "External"
 
 [[zones.stores]]
 type = "forward"
@@ -124,30 +114,30 @@ edns_payload_len = 1232
 ip = "2400:3200:baba::1"
 trust_negative_responses = true
 connections = [
-    { protocol = { type = "quic", server_name = "dns.alidns.com" } },
-    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } }
+    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } },
+    { protocol = { type = "quic", server_name = "dns.alidns.com" } }
 ]
 
 [[zones.stores.name_servers]]
 ip = "2400:3200::1"
 trust_negative_responses = true
 connections = [
-    { protocol = { type = "quic", server_name = "dns.alidns.com" } },
-    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } }
+    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } },
+    { protocol = { type = "quic", server_name = "dns.alidns.com" } }
 ]
 
 [[zones.stores.name_servers]]
 ip = "223.5.5.5"
 trust_negative_responses = true
 connections = [
-    { protocol = { type = "quic", server_name = "dns.alidns.com" } },
-    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } }
+    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } },
+    { protocol = { type = "quic", server_name = "dns.alidns.com" } }
 ]
 
 [[zones.stores.name_servers]]
 ip = "223.6.6.6"
 trust_negative_responses = true
 connections = [
-    { protocol = { type = "quic", server_name = "dns.alidns.com" } },
-    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } }
+    { protocol = { type = "h3", server_name = "dns.alidns.com", path = "/dns-query", disable_grease = false } },
+    { protocol = { type = "quic", server_name = "dns.alidns.com" } }
 ]
