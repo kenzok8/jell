@@ -331,9 +331,49 @@ logs() {
 	rm -f "$log_file"
 }
 
+# 剥掉本机直连区块内部的行，仅供判定使用；候选配置写回时区块原样保留。
+# 出厂默认本来就是 fallback: direct，启动脚本往里写本机地址后逐字比较必然失败。
+strip_local_direct() {
+	awk -v begin='    # honk:local-direct-begin' -v end='    # honk:local-direct-end' '
+		$0 == begin {
+			if (skip) bad = 1
+			b++
+			skip = 1
+			print
+			next
+		}
+		$0 == end {
+			if (!skip) bad = 1
+			e++
+			skip = 0
+			print
+			next
+		}
+		skip { next }
+		{ print }
+		END { if (bad || skip || b != 1 || e != 1) exit 1 }
+	' "$1"
+}
+
+# 标记缺失、重复或不成对时一律不认定为出厂配置，避免误改用户出口。
+is_factory_config() {
+	local current=$1 factory=/usr/share/honk/default-config.dae a b rc
+	[ -f "$factory" ] && [ ! -L "$factory" ] || return 1
+	a=$(mktemp /tmp/honk-route.XXXXXX) || return 1
+	b=$(mktemp /tmp/honk-route.XXXXXX) || { rm -f "$a"; return 1; }
+	if strip_local_direct "$current" > "$a" && strip_local_direct "$factory" > "$b"; then
+		cmp -s "$a" "$b"
+		rc=$?
+	else
+		rc=1
+	fi
+	rm -f "$a" "$b"
+	return "$rc"
+}
+
 promote_default_route() {
 	local current=$1 candidate=$2 dns_block
-	if cmp -s "$current" /usr/share/honk/default-config.dae; then
+	if is_factory_config "$current"; then
 		sed 's/^    fallback: direct$/    fallback: proxy/' "$candidate" > "$candidate.route" || return 1
 	elif [ "$(sha256sum "$current" | awk '{print $1}')" = 83d1cc32bfe5b44ecae4b05c2c82c81ce9a36ab29f391d1e1d1d6b4993e17d2b ]; then
 		# The r1 package had only an include and a direct fallback. Preserve the
