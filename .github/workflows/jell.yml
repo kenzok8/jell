@@ -111,7 +111,7 @@ jobs:
         git_clone https://github.com/rchen14b/luci-theme-glass
         git_clone https://github.com/sirpdboy/luci-app-advancedplus
         git_clone https://github.com/sirpdboy/luci-app-autotimeset
-        git_clone https://github.com/sirpdboy/luci-app-lucky oplucky && mvdir oplucky
+        git_clone https://github.com/gdy666/luci-app-lucky oplucky && mvdir oplucky
         git_clone https://github.com/sirpdboy/luci-app-partexp partexp && mvdir partexp
         git_clone https://github.com/sirpdboy/luci-app-ddns-go ddns-go1 && mvdir ddns-go1
         git_clone https://github.com/sirpdboy/luci-app-netspeedtest speedtest && rm -rf speedtest/{iperf*,演示.gif};mvdir speedtest
