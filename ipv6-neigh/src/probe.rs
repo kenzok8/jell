@@ -4,9 +4,12 @@ use std::num::NonZeroU32;
 use std::sync::atomic::{AtomicU16, Ordering};
 use std::time::{Duration, Instant};
 
+use log::{trace, warn};
+use netlink_packet_route::neighbour::NeighbourState;
+use rtnetlink::Handle;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 
-use crate::types::GuaKeepaliveEntry;
+use crate::types::{GuaKeepaliveEntry, parse_mac};
 
 /// Maximum probes to send on one 1-second scheduler tick.
 ///
@@ -154,17 +157,46 @@ impl Prober {
     }
 }
 
+/// Install or refresh a neighbour entry as STALE with the given link-layer
+/// address, so the kernel resolves this GUA with a unicast NS instead of a
+/// multicast NS (some clients ignore multicast NS for addresses in a new
+/// prefix).
+async fn ensure_neighbour(
+    handle: &Handle,
+    ifindex: u32,
+    addr: Ipv6Addr,
+    mac: &str,
+) -> Result<(), String> {
+    if ifindex == 0 {
+        return Err("ifindex 0".to_string());
+    }
+    let lla = parse_mac(mac).ok_or_else(|| format!("invalid mac {mac}"))?;
+    handle
+        .neighbours()
+        .add(ifindex, std::net::IpAddr::V6(addr))
+        .state(NeighbourState::Stale)
+        .link_layer_address(&lla)
+        .replace()
+        .execute()
+        .await
+        .map_err(|e| e.to_string())
+}
+
 /// Run one tick of the per-IP stable-jitter probe scheduler.
 ///
 /// Iterates both registered (ULA/DNS-published) and GUA-keepalive entries,
 /// sending at most the per-tick budget (derived from the number of entries and
 /// the configured interval) to entries whose next_probe_due has elapsed.
-/// After sending, `next_probe_due` is advanced by the entry's interval
-/// (preserving the stable phase where possible).
+/// GUA entries first get their neighbour entry refreshed via rtnetlink, then
+/// receive the usual ICMPv6 echo. After a successful probe, `next_probe_due`
+/// is advanced by the entry's interval (preserving the stable phase where
+/// possible).
 ///
-/// Returns the total number of probes sent (registered + GUA).
-pub(crate) fn run_probe_scheduler(
+/// Returns the total number of successful probes (registered + GUA).
+#[allow(clippy::too_many_arguments)]
+pub(crate) async fn run_probe_scheduler(
     prober: &Prober,
+    handle: &Handle,
     registered: &mut HashMap<(String, String), crate::types::RegisteredEntry>,
     gua_keepalive: &mut HashMap<String, Vec<GuaKeepaliveEntry>>,
     probe_interval: u64,
@@ -234,19 +266,44 @@ pub(crate) fn run_probe_scheduler(
             if let Some(entries) = gua_keepalive.get_mut(mac.as_str())
                 && let Some(entry) = entries.get_mut(*idx)
             {
-                if prober.send_icmpv6_echo(entry.addr, entry.ifindex).is_ok() {
-                    let interval = Duration::from_secs(keepalive_interval);
-                    if now.duration_since(entry.next_probe_due) > interval.saturating_mul(4) {
-                        entry.next_probe_due = now + interval;
-                    } else {
-                        while entry.next_probe_due <= now {
-                            entry.next_probe_due += interval;
+                // Refresh the neighbour entry before probing: the echo then
+                // travels after a unicast NS resolution using the known MAC.
+                let result = match ensure_neighbour(handle, entry.ifindex, entry.addr, mac).await {
+                    Ok(()) => prober
+                        .send_icmpv6_echo(entry.addr, entry.ifindex)
+                        .map(|_| ())
+                        .map_err(|e| e.to_string()),
+                    Err(e) => Err(e),
+                };
+                match result {
+                    Ok(()) => {
+                        let interval = Duration::from_secs(keepalive_interval);
+                        if now.duration_since(entry.next_probe_due) > interval.saturating_mul(4) {
+                            entry.next_probe_due = now + interval;
+                        } else {
+                            while entry.next_probe_due <= now {
+                                entry.next_probe_due += interval;
+                            }
                         }
+                        entry.warned = false;
+                        trace!(
+                            "gua keepalive: neighbour refreshed, echo sent addr={} mac={} ifindex={}",
+                            entry.addr, mac, entry.ifindex
+                        );
+                        sent_total += 1;
                     }
-                    sent_total += 1;
-                } else {
-                    // Send failed — back off briefly.
-                    entry.next_probe_due = now + Duration::from_secs(5);
+                    Err(err) => {
+                        // Both steps are retried every tick; warn only once per
+                        // failure streak to keep the log readable.
+                        if !entry.warned {
+                            warn!(
+                                "gua keepalive failed addr={} mac={} ifindex={}: {err}",
+                                entry.addr, mac, entry.ifindex
+                            );
+                            entry.warned = true;
+                        }
+                        entry.next_probe_due = now + Duration::from_secs(5);
+                    }
                 }
             }
         }

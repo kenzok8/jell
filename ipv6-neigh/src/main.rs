@@ -87,11 +87,15 @@ struct Cli {
     #[clap(long)]
     router_alias: Option<String>,
 
-    /// Periodically probe the newest GUA per host to maintain NUD/Wi-Fi reachability (without publishing to DNS)
+    /// Periodically keep the newest GUA per host reachable: install/refresh its
+    /// neighbour entry from the known MAC (so resolution uses a unicast NS) and
+    /// send an ICMPv6 echo, without publishing to DNS
     #[clap(long)]
     keepalive_gua: bool,
 
-    /// Probe interval in seconds for GUA keepalive (only used with --keepalive-gua)
+    /// Keepalive interval in seconds for GUA addresses; each due tick refreshes
+    /// the neighbour entry with the known MAC and then sends an ICMPv6 echo
+    /// (only used with --keepalive-gua)
     #[clap(long, default_value = "120")]
     keepalive_gua_interval: u64,
 
@@ -209,6 +213,7 @@ fn upsert_gua_entry(
                 ifindex,
                 last_confirmed: now,
                 next_probe_due: initial_next_probe_due(now, mac, &addr.to_string(), interval),
+                warned: false,
             },
         );
     }
@@ -650,7 +655,8 @@ async fn main() -> anyhow::Result<()> {
         t.tick().await;
     }
 
-    // GUA keepalive timer: now only runs pruning (probes are handled by the scheduler).
+    // GUA keepalive timer: only runs pruning; the per-IP scheduler refreshes
+    // neighbour entries and sends the keepalive probes.
     let mut gua_keepalive_timer: Option<time::Interval> = (keepalive_gua && keepalive_gua_interval > 0)
         .then(|| time::interval(Duration::from_secs(keepalive_gua_interval)));
     if let Some(ref mut t) = gua_keepalive_timer {
@@ -820,13 +826,15 @@ async fn main() -> anyhow::Result<()> {
                 prober.drain_replies(128);
                 let sent = run_probe_scheduler(
                     &prober,
+                    &handle,
                     &mut registered,
                     &mut gua_keepalive,
                     probe_interval,
                     keepalive_gua_interval,
                     keepalive_gua,
                     keepalive_gua_per_host,
-                );
+                )
+                .await;
                 if sent > 0 {
                     trace!("scheduler: sent {} probes", sent);
                 }

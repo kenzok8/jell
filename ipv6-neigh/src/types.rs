@@ -27,6 +27,24 @@ pub(crate) fn format_mac(mac: &[u8]) -> String {
     s
 }
 
+/// Parse a colon-separated MAC address ("aa:bb:cc:dd:ee:ff", either case)
+/// into its six raw bytes. Returns `None` for malformed input.
+pub(crate) fn parse_mac(s: &str) -> Option<[u8; 6]> {
+    let mut out = [0u8; 6];
+    let mut parts = s.split(':');
+    for byte in out.iter_mut() {
+        let part = parts.next()?;
+        if part.len() != 2 {
+            return None;
+        }
+        *byte = u8::from_str_radix(part, 16).ok()?;
+    }
+    if parts.next().is_some() {
+        return None;
+    }
+    Some(out)
+}
+
 #[derive(Debug)]
 pub(crate) struct Neigh {
     pub(crate) ifindex: u32,
@@ -66,6 +84,9 @@ pub(crate) struct GuaKeepaliveEntry {
     pub(crate) last_confirmed: Instant,
     /// Next time this entry is due for probing (computed by scheduler).
     pub(crate) next_probe_due: Instant,
+    /// Set once a failure has been logged for the current failure streak so
+    /// the scheduler does not spam the log on every tick.
+    pub(crate) warned: bool,
 }
 
 /// Compute a stable jitter offset for a (mac, ip) pair within the given interval window.
@@ -96,6 +117,44 @@ mod tests {
         assert_eq!(format_mac(&[0x02, 0x00, 0x00]), "02:00:00");
         assert_eq!(format_mac(&[0x00, 0x0a]), "00:0a");
         assert_eq!(format_mac(&[]), "");
+    }
+
+    #[test]
+    fn parse_mac_lowercase() {
+        assert_eq!(
+            parse_mac("aa:bb:cc:dd:ee:ff"),
+            Some([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])
+        );
+    }
+
+    #[test]
+    fn parse_mac_uppercase() {
+        assert_eq!(
+            parse_mac("AA:BB:CC:DD:EE:FF"),
+            Some([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])
+        );
+        assert_eq!(
+            parse_mac("02:00:00:00:00:03"),
+            Some([0x02, 0x00, 0x00, 0x00, 0x00, 0x03])
+        );
+    }
+
+    #[test]
+    fn parse_mac_rejects_missing_segment() {
+        assert_eq!(parse_mac("aa:bb:cc:dd:ee"), None);
+        assert_eq!(parse_mac(""), None);
+    }
+
+    #[test]
+    fn parse_mac_rejects_non_hex() {
+        assert_eq!(parse_mac("aa:bb:cc:dd:ee:gg"), None);
+        assert_eq!(parse_mac("aa:bb:cc:dd:ee:f"), None);
+    }
+
+    #[test]
+    fn parse_mac_rejects_too_long() {
+        assert_eq!(parse_mac("aa:bb:cc:dd:ee:ff:00"), None);
+        assert_eq!(parse_mac("aa:bb:cc:dd:ee:fff"), None);
     }
 
     #[test]
