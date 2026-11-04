@@ -45,6 +45,25 @@ pub(crate) fn parse_mac(s: &str) -> Option<[u8; 6]> {
     Some(out)
 }
 
+/// Whether a GUA neighbour is eligible for keepalive tracking.
+///
+/// Unlike DNS publication (REACHABLE only), keepalive tracks every NUD state in
+/// which the kernel still considers the device usable: a merely STALE/DELAY/
+/// PROBE device is alive, and dropping it would lose the unicast-NS fast path
+/// for a new-prefix GUA.  PERMANENT/NOARP entries are static admin state, while
+/// FAILED/INCOMPLETE/NONE carry no usable reachability.  FAILED notifications
+/// usually arrive without a link-layer address, hence the empty-MAC guard.
+pub(crate) fn should_track_gua(state: NeighbourState, mac: &str) -> bool {
+    !mac.is_empty()
+        && matches!(
+            state,
+            NeighbourState::Reachable
+                | NeighbourState::Stale
+                | NeighbourState::Delay
+                | NeighbourState::Probe
+        )
+}
+
 #[derive(Debug)]
 pub(crate) struct Neigh {
     pub(crate) ifindex: u32,
@@ -170,5 +189,42 @@ mod tests {
         let a = stable_jitter_offset("aa:bb:cc:dd:ee:ff", "fd0f::1", 3600);
         let b = stable_jitter_offset("aa:bb:cc:dd:ee:fe", "fd0f::1", 3600);
         assert_ne!(a, b);
+    }
+
+    #[test]
+    fn should_track_gua_accepts_live_states() {
+        for state in [
+            NeighbourState::Reachable,
+            NeighbourState::Stale,
+            NeighbourState::Delay,
+            NeighbourState::Probe,
+        ] {
+            assert!(should_track_gua(state, "aa:bb:cc:dd:ee:ff"));
+        }
+    }
+
+    #[test]
+    fn should_track_gua_rejects_empty_mac() {
+        for state in [
+            NeighbourState::Reachable,
+            NeighbourState::Stale,
+            NeighbourState::Delay,
+            NeighbourState::Probe,
+        ] {
+            assert!(!should_track_gua(state, ""));
+        }
+    }
+
+    #[test]
+    fn should_track_gua_rejects_dead_states() {
+        for state in [
+            NeighbourState::Failed,
+            NeighbourState::Permanent,
+            NeighbourState::Noarp,
+            NeighbourState::Incomplete,
+            NeighbourState::None,
+        ] {
+            assert!(!should_track_gua(state, "aa:bb:cc:dd:ee:ff"));
+        }
     }
 }

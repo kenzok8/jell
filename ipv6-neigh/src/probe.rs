@@ -171,15 +171,19 @@ async fn ensure_neighbour(
         return Err("ifindex 0".to_string());
     }
     let lla = parse_mac(mac).ok_or_else(|| format!("invalid mac {mac}"))?;
-    handle
+    let request = handle
         .neighbours()
         .add(ifindex, std::net::IpAddr::V6(addr))
         .state(NeighbourState::Stale)
         .link_layer_address(&lla)
         .replace()
-        .execute()
-        .await
-        .map_err(|e| e.to_string())
+        .execute();
+    // Never let a stuck netlink request block the single-threaded select loop:
+    // a 2s timeout maps onto the regular failure path (5s backoff + warn once).
+    match tokio::time::timeout(Duration::from_secs(2), request).await {
+        Ok(result) => result.map_err(|e| e.to_string()),
+        Err(_) => Err("timeout".to_string()),
+    }
 }
 
 /// Run one tick of the per-IP stable-jitter probe scheduler.
@@ -312,8 +316,15 @@ pub(crate) async fn run_probe_scheduler(
     sent_total
 }
 
-/// Remove GUA keepalive entries that haven't been confirmed REACHABLE within 3x the
-/// keepalive interval, and drop excess entries beyond `per_host` (oldest first).
+/// Remove GUA keepalive entries that haven't been confirmed within
+/// `max(3x keepalive interval, 600s)`, and drop excess entries beyond
+/// `per_host` (oldest first).
+///
+/// The 600s floor matters: the interval is 30s by default (below the kernel's
+/// gc_stale_time), so 3x the interval alone would be only 90s and would prune
+/// devices that are alive but have not produced a REACHABLE confirmation
+/// recently.  Keeping an entry a little too long only costs one redundant
+/// probe; pruning a live one costs a multicast-NS round trip.
 ///
 /// This runs on a timer tick, not the per-IP probe scheduler — it does batch cleanup
 /// across all hosts at once.
@@ -322,7 +333,7 @@ pub(crate) fn prune_gua_keepalive(
     keepalive_interval: u64,
     per_host: usize,
 ) {
-    let timeout = Duration::from_secs(keepalive_interval.saturating_mul(3));
+    let timeout = Duration::from_secs(keepalive_interval.saturating_mul(3).max(600));
     let now = Instant::now();
     gua_keepalive.retain(|_, entries| {
         // Remove timed-out entries first.
