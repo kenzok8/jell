@@ -65,12 +65,16 @@ if [ -n "$NOTIFY" ]; then
 fi
 if [ -n "$DDNS" ]; then
 	_hostype="$(jsonfilter -qs "$DDNS_PARAM" -e '@["hostype"]')"
+	_content="$(jsonfilter -qs "$DDNS_PARAM" -e '@["txt_content"]')"
 	_svcparams="$(jsonfilter -qs "$DDNS_PARAM" -e '@["https_svcparams"]')"
-	_svcparams="$(echo "$_svcparams" | sed -E "s,\s*(port=\d*|$), port=${port},")" # port
+	_content="$(echo "$_content" | sed "s,{{port}},${port},")"                                          # port
+	_svcparams="$(echo "$_svcparams" | sed -E "s,\s*(port=\d*|$), port=${port},")"                      # port
+	_content="$(echo "$_content" | sed "s,{{ip}},${ip},")"                                              # ip
 	[ "$_hostype" = A ]    && _svcparams="$(echo "$_svcparams" | sed -E "s|\b(ipv4hint=)\S*|\1${ip}|")" # ipv4hint
 	[ "$_hostype" = AAAA ] && _svcparams="$(echo "$_svcparams" | sed -E "s|\b(ipv6hint=)\S*|\1${ip}|")" # ipv6hint
 	json_init
 	json_load "$DDNS_PARAM"
+	json_add_string txt_content "$_content"
 	json_add_string https_svcparams "$_svcparams"
 	json_add_string ip "$ip"
 	json_add_int port "$port"
