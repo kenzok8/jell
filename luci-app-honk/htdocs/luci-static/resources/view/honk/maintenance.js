@@ -523,8 +523,11 @@ return view.extend({
 		health.appendChild(E('p', { 'class': 'honk-note' }, _('Repair replaces missing or damaged Honk system files and does not overwrite user configuration.')));
 
 		page.appendChild(E('div', { 'class': 'honk-header' }, [
-			E('h2', {}, _('Maintenance')),
-			E('p', { 'class': 'honk-header-sub' }, _('Package updates, config backup and system recovery for the Honk installation.'))
+			E('img', { 'class': 'honk-header-logo', 'src': L.resource('view/honk/logo.png'), 'alt': '' }),
+			E('div', { 'class': 'honk-header-text' }, [
+				E('h2', {}, _('Maintenance')),
+				E('p', { 'class': 'honk-header-sub' }, _('Package updates, config backup and system recovery for the Honk installation.'))
+			])
 		]));
 		page.appendChild(recoveryMessage);
 		page.appendChild(dataSection);
