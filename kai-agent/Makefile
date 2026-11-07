@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=kai-agent
-PKG_VERSION:=linkease-app-entry-runtime-v3.0.23
+PKG_VERSION:=fastnet-runtime-v0.8.0
 PKG_RELEASE:=10
 PKG_SOURCE:=kai-agent-bundle-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/kai-runtime-v$(PKG_VERSION)/

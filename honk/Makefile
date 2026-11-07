@@ -5,8 +5,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=honk
-PKG_VERSION:=2026.11.07
-PKG_RELEASE:=1
+PKG_VERSION:=2026.11.08
+PKG_RELEASE:=2
 
 # Pinned honk-core revision (upstream daeuniverse/honk main), cross-compiled by
 # ci/build-core.sh. Every release run publishes its core archives under an
