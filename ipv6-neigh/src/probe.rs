@@ -223,7 +223,24 @@ pub(crate) async fn run_probe_scheduler(
         due.sort_by_key(|(_, e)| e.next_probe_due);
         for ((_hostname, ip_str), entry) in due.into_iter().take(budget) {
             let ok = match ip_str.parse::<Ipv6Addr>() {
-                Ok(addr) => prober.send_icmpv6_echo(addr, entry.ifindex).is_ok(),
+                Ok(addr) => {
+                    // Refresh the neighbour entry with the known MAC before the
+                    // echo: a missing entry would fall back to a multicast NS,
+                    // which some clients ignore, leaving the entry FAILED and the
+                    // published record flapping.  Failure here is not fatal; the
+                    // echo below still runs with the previous behaviour.
+                    if let Err(e) =
+                        ensure_neighbour(handle, entry.ifindex, addr, &entry.mac).await
+                    {
+                        trace!(
+                            "registered probe: neighbour refresh failed for {} ({}): {}",
+                            addr,
+                            entry.mac,
+                            e
+                        );
+                    }
+                    prober.send_icmpv6_echo(addr, entry.ifindex).is_ok()
+                }
                 Err(_) => match ip_str.parse::<Ipv4Addr>() {
                     Ok(addr) => prober.send_icmpv4_echo(addr, entry.ifindex).is_ok(),
                     Err(_) => false,
