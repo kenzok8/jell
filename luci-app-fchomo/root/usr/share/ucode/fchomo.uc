@@ -249,13 +249,13 @@ export function parseListener(cfg) {
 			} : null
 			/*{
 			}*/
-		] : ((cfg.type in ['mieru', 'anytls', 'tuic', 'hysteria2']) ? {
+		] : (cfg.type in ['mieru', 'anytls', 'tuic', 'hysteria2']) ? {
 			/* Mieru / AnyTLS / Hysteria2 */
 			...arrToObj([[cfg.username, cfg.password]]),
 
 			/* Tuic */
 			...arrToObj([[cfg.uuid, cfg.password]])
-		} : null),
+		} : null,
 
 		/* Shadowsocks */
 		cipher: cfg.shadowsocks_chipher,
@@ -288,6 +288,7 @@ export function parseListener(cfg) {
 		/* Snell */
 		psk: cfg.snell_psk,
 		version: cfg.snell_version,
+		mode: cfg.snell_mode,
 
 		/* VMess / VLESS */
 		decryption: cfg.vless_decryption === '1' ? parseVlessEncryption(cfg.vless_encryption_hmpayload, 'server') : null,
