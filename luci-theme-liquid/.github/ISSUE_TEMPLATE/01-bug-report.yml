@@ -1,0 +1,74 @@
+name: "🐛 Bug 报告"
+description: "主题样式异常、布局错乱、功能不工作"
+title: "[Bug] 简短的缺陷描述"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🌐 **中英双语提交均可** — Issues and communication in both Chinese and English are welcome.
+        感谢你花时间报告这个 Bug！请尽量填写完整以下信息，方便快速定位。
+  - type: input
+    id: openwrt_version
+    attributes:
+      label: "🖥️ OpenWrt 版本号"
+      description: "固件版本，如 R2026-08-08 / 23.05.5 / snapshot（不确定填『未知』）"
+      placeholder: "例如：R2026-08-08 或 23.05.5 或 未知"
+    validations:
+      required: true
+  - type: input
+    id: luci_version
+    attributes:
+      label: "🧩 LuCI 版本号"
+      description: "LuCI 版本（可在 系统→软件包 或页面页脚看到；不确定填『未知』）"
+      placeholder: "例如：git-25.123.45678-abcdefg 或 未知"
+    validations:
+      required: true
+  - type: input
+    id: firmware_source
+    attributes:
+      label: "📦 固件仓库来源（可选）"
+      description: "固件来源：官方发行版填版本（如 OpenWrt 23.05 / immortalwrt 24.10）；自编译请填 OpenWrt 源码仓库（如 github.com/coolsnowwolf/lede）"
+      placeholder: "例如：immortalwrt 24.10 或 源码仓库 https://github.com/xxx/op"
+    validations:
+      required: false
+  - type: input
+    id: theme_version
+    attributes:
+      label: "🎨 主题版本"
+      description: "当前安装的 liquid 主题版本号（页面页脚可见，如 0.5-r3）"
+      placeholder: "例如：0.5-r3"
+    validations:
+      required: true
+  - type: input
+    id: browser_device
+    attributes:
+      label: "🌐 浏览器/设备"
+      description: "浏览器与设备（影响样式问题排查，如 Chrome 桌面 / 安卓手机自带浏览器）"
+      placeholder: "例如：Chrome 126 桌面 / 安卓 Edge"
+    validations:
+      required: true
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: "📝 问题描述"
+      description: "发生了什么？期望是什么行为？实际是什么行为？"
+      placeholder: "描述问题的具体表现、触发步骤、影响范围…"
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📷 图片/截图"
+      description: "请提供截图或录屏（问题界面、对比效果等），图片能帮助快速判断"
+      placeholder: "拖拽图片到此处，或粘贴截图链接"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "🔍 浏览器控制台报错（可选）"
+      description: "F12 控制台的报错信息（若有）"
+      placeholder: "粘贴 console 报错…"
+    validations:
+      required: false
