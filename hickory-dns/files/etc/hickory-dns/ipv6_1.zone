@@ -7,4 +7,4 @@ $TTL 3D
                                 86400)  ; Minimum TTL
                         NS      ns.lan.
 
-1                       PTR     localhost.
+@                       PTR     localhost.

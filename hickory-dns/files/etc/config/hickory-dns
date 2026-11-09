@@ -1,0 +1,13 @@
+config hickory-dns 'main'
+	option enabled '1'
+
+	# netifd interface whose addresses are published as the router's own
+	# A/AAAA records and aliases. Only this interface is used for that;
+	# reverse zones are generated for every interface (see below).
+	option iface 'lan'
+
+	# One reverse zone is generated for every IPv4 address on every
+	# interface that is not loopback and does not carry the default route.
+	# Add subnets that are not configured on any interface here; CIDR
+	# notation, /8 /16 /24 boundaries.
+	# list subnet '192.168.1.0/24'

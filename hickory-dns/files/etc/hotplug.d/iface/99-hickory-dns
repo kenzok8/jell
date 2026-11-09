@@ -2,13 +2,17 @@
 
 . /lib/functions.sh
 
-IF_TO_WATCH="wan_6"
+IF_TO_WATCH="lan wan_6"
 SERVICE="hickory-dns"
 DELAY=5
 LOCK_DIR="/tmp/hickory-hotplug.lock"
 TAG="hickory-hotplug"
 
-[ "$INTERFACE" = "$IF_TO_WATCH" ] || exit 0
+case " $IF_TO_WATCH " in
+    *" $INTERFACE "*) ;;
+    *) exit 0 ;;
+esac
+
 [ "$ACTION" = "ifup" ] || exit 0
 
 /etc/init.d/${SERVICE} enabled || {

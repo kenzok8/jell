@@ -14,7 +14,7 @@ zone = "0.0.127.in-addr.arpa"
 file = "/etc/hickory-dns/127.0.0.1.zone"
 
 [[zones]]
-zone = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa"
+zone = "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa"
 file = "/etc/hickory-dns/ipv6_1.zone"
 
 [[zones]]
@@ -25,6 +25,123 @@ file = "/etc/hickory-dns/255.zone"
 zone = "0.in-addr.arpa"
 file = "/etc/hickory-dns/0.zone"
 
+# RFC 6303 empty zones: answer reverse lookups for addresses this router does
+# not serve locally instead of forwarding them to the upstream resolver.
+
+[[zones]]
+zone = "10.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "168.192.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "16.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "17.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "18.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "19.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "20.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "21.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "22.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "23.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "24.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "25.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "26.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "27.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "28.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "29.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "30.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "31.172.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "254.169.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "2.0.192.in-addr.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "8.e.f.ip6.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "9.e.f.ip6.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "a.e.f.ip6.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "b.e.f.ip6.arpa"
+file = "/etc/hickory-dns/empty.zone"
+
+# RFC 6761 / RFC 7686: never resolved by a public resolver, so keep them local.
+
+[[zones]]
+zone = "onion"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "invalid"
+file = "/etc/hickory-dns/empty.zone"
+
+[[zones]]
+zone = "test"
+file = "/etc/hickory-dns/empty.zone"
+
 [[zones]]
 zone = "lan"
 axfr_policy = "AllowAll"
@@ -32,6 +149,22 @@ axfr_policy = "AllowAll"
 [zones.stores]
 type = "sqlite"
 zone_path = "/etc/hickory-dns/lan.zone"
+journal_path = ":memory:"
+allow_update = true
+
+[[zones.stores.tsig_keys]]
+name = "update-key."
+key_file = "/etc/hickory-dns/update.key"
+algorithm = "hmac-sha256"
+fudge = 300
+
+[[zones]]
+zone = "c.f.ip6.arpa"
+axfr_policy = "AllowAll"
+
+[zones.stores]
+type = "sqlite"
+zone_path = "/etc/hickory-dns/c.f.ip6.arpa.zone"
 journal_path = ":memory:"
 allow_update = true
 
@@ -57,37 +190,9 @@ key_file = "/etc/hickory-dns/update.key"
 algorithm = "hmac-sha256"
 fudge = 300
 
-[[zones]]
-zone = "0.0.10.in-addr.arpa"
-axfr_policy = "AllowAll"
-
-[zones.stores]
-type = "sqlite"
-zone_path = "/etc/hickory-dns/0.0.10.zone"
-journal_path = ":memory:"
-allow_update = true
-
-[[zones.stores.tsig_keys]]
-name = "update-key."
-key_file = "/etc/hickory-dns/update.key"
-algorithm = "hmac-sha256"
-fudge = 300
-
-[[zones]]
-zone = "3.168.192.in-addr.arpa"
-axfr_policy = "AllowAll"
-
-[zones.stores]
-type = "sqlite"
-zone_path = "/etc/hickory-dns/3.168.192.zone"
-journal_path = ":memory:"
-allow_update = true
-
-[[zones.stores.tsig_keys]]
-name = "update-key."
-key_file = "/etc/hickory-dns/update.key"
-algorithm = "hmac-sha256"
-fudge = 300
+# The LAN reverse zones (one per subnet) are generated at start-up by
+# /etc/init.d/hickory-dns and appended after this file, so they are not
+# listed here.
 
 [[zones]]
 zone = "."
@@ -97,13 +202,13 @@ type = "forward"
 
 [zones.stores.options]
 edns0 = true
-ip_strategy = "Ipv6AndIpv4"
 cache_size = 8192
 use_hosts_file = "Always"
 num_concurrent_reqs = 1
 server_ordering_strategy = "RoundRobin"
 timeout = 2
-attempts = 3
+attempts = 1
+enable_per_name_server_metrics = true
 positive_min_ttl = 60
 negative_min_ttl = 30
 negative_max_ttl = 300

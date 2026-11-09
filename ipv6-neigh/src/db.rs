@@ -28,8 +28,11 @@ pub(crate) struct DnsUpdater {
     signer: TSigner,
     /// (network as u32, prefix_len, reverse zone name) for IPv4 PTR
     ipv4_ptr_zones: Vec<(u32, u8, Name)>,
-    /// Reverse zone for ULA IPv6 (d.f.ip6.arpa)
-    ula_ptr_zone: Option<Name>,
+    /// Whether ULA IPv6 PTR records are published.
+    ///
+    /// fc00::/7 spans two reverse zones, `c.f.ip6.arpa` (fc00::/8) and
+    /// `d.f.ip6.arpa` (fd00::/8), so the zone is derived per address.
+    ula_ptr_enabled: bool,
 }
 
 impl DnsUpdater {
@@ -39,13 +42,14 @@ impl DnsUpdater {
             zone,
             signer,
             ipv4_ptr_zones: vec![],
-            ula_ptr_zone: None,
+            ula_ptr_enabled: false,
         }
     }
 
     /// Configure reverse PTR zones.
     /// `ipv4_subnets`: list of (network_addr, prefix_len); /8, /16, /24 boundaries supported.
-    /// `ula`: if true, enables ULA PTR via `d.f.ip6.arpa`.
+    /// `ula`: if true, enables ULA PTR via `c.f.ip6.arpa` (fc00::/8) and
+    /// `d.f.ip6.arpa` (fd00::/8).
     pub fn with_ptr_zones(mut self, ipv4_subnets: &[(Ipv4Addr, u8)], ula: bool) -> Self {
         self.ipv4_ptr_zones = ipv4_subnets
             .iter()
@@ -58,7 +62,7 @@ impl DnsUpdater {
             })
             .collect();
         if ula {
-            self.ula_ptr_zone = Some(Name::from_ascii("d.f.ip6.arpa.").expect("always valid"));
+            self.ula_ptr_enabled = true;
         }
         self
     }
@@ -75,6 +79,19 @@ impl DnsUpdater {
         ttl: u32,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let name = Name::from_ascii(hostname)?.append_domain(&self.zone)?;
+        self.upsert_record_at(name, rtype, rdata, ttl).await
+    }
+
+    /// Create-or-append a record at an already-qualified owner name.
+    ///
+    /// Used for the zone apex, which cannot be expressed as a hostname label.
+    async fn upsert_record_at(
+        &self,
+        name: Name,
+        rtype: RecordType,
+        rdata: RData,
+        ttl: u32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let mut rrset = RecordSet::with_ttl(name.clone(), rtype, ttl);
         rrset.add_rdata(rdata.clone());
         let msg = update_message::create(rrset, self.zone.clone(), false);
@@ -129,6 +146,31 @@ impl DnsUpdater {
             .await
     }
 
+    /// Create or append an AAAA record at the zone apex (`<zone>.` itself).
+    pub async fn upsert_apex_aaaa(
+        &self,
+        addr: Ipv6Addr,
+        ttl: u32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        self.upsert_record_at(
+            self.zone.clone(),
+            RecordType::AAAA,
+            RData::AAAA(addr.into()),
+            ttl,
+        )
+        .await
+    }
+
+    /// Create or append an A record at the zone apex (`<zone>.` itself).
+    pub async fn upsert_apex_a(
+        &self,
+        addr: Ipv4Addr,
+        ttl: u32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        self.upsert_record_at(self.zone.clone(), RecordType::A, RData::A(addr.into()), ttl)
+            .await
+    }
+
     /// Delete a specific AAAA record.
     pub async fn delete_aaaa(
         &self,
@@ -164,7 +206,7 @@ impl DnsUpdater {
                 (ipv4_ptr_name(ip), zone)
             }
             IpAddr::V6(ip) if if_ipv6_in_private_subnet(&ip) => {
-                let Some(zone) = self.ula_ptr_zone.clone() else {
+                let Some(zone) = self.ula_reverse_zone(ip) else {
                     return Ok(());
                 };
                 (ipv6_ptr_name(ip), zone)
@@ -196,7 +238,7 @@ impl DnsUpdater {
                 (ipv4_ptr_name(ip), zone)
             }
             IpAddr::V6(ip) if if_ipv6_in_private_subnet(&ip) => {
-                let Some(zone) = self.ula_ptr_zone.clone() else {
+                let Some(zone) = self.ula_reverse_zone(ip) else {
                     return Ok(());
                 };
                 (ipv6_ptr_name(ip), zone)
@@ -228,7 +270,7 @@ impl DnsUpdater {
                 (ipv4_ptr_name(ip), zone)
             }
             IpAddr::V6(ip) if if_ipv6_in_private_subnet(&ip) => {
-                let Some(zone) = self.ula_ptr_zone.clone() else {
+                let Some(zone) = self.ula_reverse_zone(ip) else {
                     return Ok(());
                 };
                 (ipv6_ptr_name(ip), zone)
@@ -257,6 +299,11 @@ impl DnsUpdater {
             })
             .max_by_key(|(_, prefix_len, _)| *prefix_len)
             .map(|(_, _, name)| name)
+    }
+
+    /// Reverse zone for a ULA address, or `None` when ULA PTR is disabled.
+    fn ula_reverse_zone(&self, addr: Ipv6Addr) -> Option<Name> {
+        self.ula_ptr_enabled.then(|| ula_reverse_zone_name(addr))
     }
 
     /// Send a DNS message over TCP and read the response.
@@ -405,6 +452,19 @@ fn ipv6_ptr_name(addr: Ipv6Addr) -> Name {
     Name::from_ascii(format!("{}ip6.arpa.", nibbles)).expect("always valid")
 }
 
+/// Derive the reverse zone name for a ULA (fc00::/7) address.
+///
+/// fc00::/7 is split across two reverse zones: `fc00::/8` reverses into
+/// `c.f.ip6.arpa` and `fd00::/8` into `d.f.ip6.arpa`.
+fn ula_reverse_zone_name(addr: Ipv6Addr) -> Name {
+    let label = if addr.octets()[0] & 0x01 == 0 {
+        "c"
+    } else {
+        "d"
+    };
+    Name::from_ascii(format!("{label}.f.ip6.arpa.")).expect("always valid")
+}
+
 /// Derive the reverse zone name for an IPv4 subnet (only /8, /16, /24 boundaries).
 fn ipv4_zone_name(net: Ipv4Addr, prefix_len: u8) -> Name {
     let o = net.octets();
@@ -470,6 +530,14 @@ mod tests {
             "{name}"
         );
         assert!(name.contains("1.0.0.0."), "{name}");
+    }
+
+    #[test]
+    fn ula_reverse_zone_follows_first_byte() {
+        let fc: Ipv6Addr = "fc12:3456:789a::1".parse().unwrap();
+        let fd: Ipv6Addr = "fd12:3456:789a::1".parse().unwrap();
+        assert_eq!(ula_reverse_zone_name(fc).to_ascii(), "c.f.ip6.arpa.");
+        assert_eq!(ula_reverse_zone_name(fd).to_ascii(), "d.f.ip6.arpa.");
     }
 
     #[test]

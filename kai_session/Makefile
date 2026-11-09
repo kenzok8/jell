@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_kai_session:=$(ARCH)
 
 PKG_NAME:=kai_session
-PKG_VERSION:=fastnet-runtime-v0.8.0
+PKG_VERSION:=fastnet-runtime-v0.8.1
 PKG_RELEASE:=10
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/kai-runtime-v$(PKG_VERSION)/

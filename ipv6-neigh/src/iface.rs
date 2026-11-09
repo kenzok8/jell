@@ -101,7 +101,8 @@ pub(crate) async fn register_router_addresses(
     handle: Handle,
     iface: &str,
     hostname: &str,
-    extra_alias: Option<&str>,
+    aliases: &[String],
+    register_apex: bool,
     updater: &DnsUpdater,
     private_subnet_v6: bool,
 ) {
@@ -112,6 +113,10 @@ pub(crate) async fn register_router_addresses(
             return;
         }
     };
+
+    let mut names: Vec<&str> = Vec::with_capacity(1 + aliases.len());
+    names.push(hostname);
+    names.extend(aliases.iter().map(String::as_str));
 
     for msg in &msgs {
         if is_addr_deprecated(msg) {
@@ -127,7 +132,7 @@ pub(crate) async fn register_router_addresses(
                     if should_skip_v6(addr, private_subnet_v6) {
                         continue;
                     }
-                    for name in std::iter::once(hostname).chain(extra_alias) {
+                    for &name in &names {
                         match updater.upsert_aaaa(name, *addr, DEFAULT_TTL).await {
                             Ok(()) => info!("registered router {} AAAA {}", name, addr),
                             Err(e) => warn!(
@@ -135,6 +140,11 @@ pub(crate) async fn register_router_addresses(
                                 addr, name, e
                             ),
                         }
+                    }
+                    if register_apex
+                        && let Err(e) = updater.upsert_apex_aaaa(*addr, DEFAULT_TTL).await
+                    {
+                        warn!("failed to register zone apex AAAA for {}: {}", addr, e);
                     }
                     if let Err(e) = updater
                         .upsert_ptr(IpAddr::V6(*addr), hostname, DEFAULT_TTL)
@@ -144,13 +154,17 @@ pub(crate) async fn register_router_addresses(
                     }
                 }
                 IpAddr::V4(addr) => {
-                    for name in std::iter::once(hostname).chain(extra_alias) {
+                    for &name in &names {
                         match updater.upsert_a(name, *addr, DEFAULT_TTL).await {
                             Ok(()) => info!("registered router {} A {}", name, addr),
                             Err(e) => {
                                 warn!("failed to register router A {} for {}: {}", addr, name, e)
                             }
                         }
+                    }
+                    if register_apex && let Err(e) = updater.upsert_apex_a(*addr, DEFAULT_TTL).await
+                    {
+                        warn!("failed to register zone apex A for {}: {}", addr, e);
                     }
                     if let Err(e) = updater
                         .upsert_ptr(IpAddr::V4(*addr), hostname, DEFAULT_TTL)

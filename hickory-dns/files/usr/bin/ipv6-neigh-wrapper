@@ -1,6 +1,7 @@
 #!/bin/sh
 
 NEIGH_PROG=/usr/bin/ipv6-neigh
+ARGS_FILE=/var/run/hickory-dns/ipv6-neigh.args
 RETRY=30
 
 trap 'exit 1' TERM INT
@@ -11,10 +12,18 @@ i=0
 while [ "$i" -lt "$RETRY" ]; do
     if ss -lnt | grep -q ':53'; then
         logger -t ipv6-neigh-wrapper "DNS port 53 ready, starting ipv6-neigh"
-        exec "$NEIGH_PROG" --private-subnet-v4 -d "[::1]:53" -z lan --router-alias router --keepalive-gua \
-            --ptr-ipv4-subnet 10.0.0.0/24 \
-            --ptr-ipv4-subnet 192.168.3.0/24 \
-            --ptr-ula
+
+        set --
+        if [ -s "$ARGS_FILE" ]; then
+            while IFS= read -r arg; do
+                [ -n "$arg" ] || continue
+                set -- "$@" "$arg"
+            done < "$ARGS_FILE"
+        else
+            logger -t ipv6-neigh-wrapper "no args file at $ARGS_FILE, starting with defaults"
+        fi
+
+        exec "$NEIGH_PROG" "$@"
     fi
     i=$((i + 1))
     sleep 1

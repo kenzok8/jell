@@ -7,5 +7,3 @@ $TTL 60
             60 )    ; Negative caching TTL
 
     IN  NS  ns.lan.
-
-ns  IN  AAAA    ::1

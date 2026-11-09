@@ -83,9 +83,14 @@ struct Cli {
     #[clap(long, default_value = "br-lan")]
     router_iface: String,
 
-    /// Additional DNS name to register router addresses under (e.g. "router" -> "router.lan")
+    /// Additional DNS name to register router addresses under (e.g. "router" -> "router.lan");
+    /// repeatable, e.g. `--router-alias router --router-alias ns`
     #[clap(long)]
-    router_alias: Option<String>,
+    router_alias: Vec<String>,
+
+    /// Also publish the router's addresses at the zone apex (e.g. "lan." itself)
+    #[clap(long)]
+    zone_apex: bool,
 
     /// Periodically keep the newest GUA per host reachable: install/refresh its
     /// neighbour entry from the known MAC (so resolution uses a unicast NS) and
@@ -519,15 +524,18 @@ async fn main() -> anyhow::Result<()> {
     if router_hostname.is_empty() {
         warn!("could not read router hostname from /proc/sys/kernel/hostname");
     } else {
-        let router_alias = args
+        let aliases: Vec<String> = args
             .router_alias
-            .as_deref()
-            .filter(|a| *a != router_hostname);
+            .iter()
+            .filter(|a| *a != &router_hostname)
+            .cloned()
+            .collect();
         register_router_addresses(
             handle.clone(),
             &args.router_iface,
             &router_hostname,
-            router_alias,
+            &aliases,
+            args.zone_apex,
             &updater,
             private_subnet_v6,
         )

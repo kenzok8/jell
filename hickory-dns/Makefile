@@ -64,6 +64,10 @@ define Build/Compile
 	+$(INSTALL_BIN) $(PKG_BUILD_DIR)/target/$(RUSTC_TARGET_ARCH)/$(CARGO_PKG_PROFILE)/hickory-dns $(PKG_INSTALL_DIR)/bin/
 endef
 
+define Package/hickory-dns/conffiles
+/etc/config/hickory-dns
+endef
+
 define Package/hickory-dns/install
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/* $(1)/usr/bin/
@@ -71,8 +75,10 @@ define Package/hickory-dns/install
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_DIR) $(1)/etc/hickory-dns/
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface/
+	$(INSTALL_DIR) $(1)/etc/config/
 	$(INSTALL_BIN) ./files/etc/init.d/hickory-dns $(1)/etc/init.d/hickory-dns
 	$(INSTALL_BIN) ./files/etc/hotplug.d/iface/99-hickory-dns $(1)/etc/hotplug.d/iface/99-hickory-dns
+	$(INSTALL_CONF) ./files/etc/config/hickory-dns $(1)/etc/config/hickory-dns
 	$(INSTALL_BIN) ./files/etc/hickory-dns/forwarder.toml $(1)/etc/hickory-dns/forwarder.toml
 	$(INSTALL_DATA) ./files/etc/hickory-dns/lan.zone $(1)/etc/hickory-dns/lan.zone
 	$(INSTALL_DATA) ./files/etc/hickory-dns/localhost.zone $(1)/etc/hickory-dns/localhost.zone
@@ -80,9 +86,9 @@ define Package/hickory-dns/install
 	$(INSTALL_DATA) ./files/etc/hickory-dns/ipv6_1.zone $(1)/etc/hickory-dns/ipv6_1.zone
 	$(INSTALL_DATA) ./files/etc/hickory-dns/255.zone $(1)/etc/hickory-dns/255.zone
 	$(INSTALL_DATA) ./files/etc/hickory-dns/0.zone $(1)/etc/hickory-dns/0.zone
-	$(INSTALL_DATA) ./files/etc/hickory-dns/0.0.10.zone $(1)/etc/hickory-dns/0.0.10.zone
-	$(INSTALL_DATA) ./files/etc/hickory-dns/3.168.192.zone $(1)/etc/hickory-dns/3.168.192.zone
 	$(INSTALL_DATA) ./files/etc/hickory-dns/d.f.ip6.arpa.zone $(1)/etc/hickory-dns/d.f.ip6.arpa.zone
+	$(INSTALL_DATA) ./files/etc/hickory-dns/c.f.ip6.arpa.zone $(1)/etc/hickory-dns/c.f.ip6.arpa.zone
+	$(INSTALL_DATA) ./files/etc/hickory-dns/empty.zone $(1)/etc/hickory-dns/empty.zone
 	echo "$(HICKORY_COMMIT)" > $(1)/etc/hickory-dns/commit
 endef
 
