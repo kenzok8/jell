@@ -109,6 +109,7 @@ jobs:
         ) &
         (
         git_clone https://github.com/rchen14b/luci-theme-glass
+        git_clone https://github.com/zzsj0928/luci-theme-liquid
         git_clone https://github.com/sirpdboy/luci-app-advancedplus
         git_clone https://github.com/sirpdboy/luci-app-autotimeset
         git_clone https://github.com/gdy666/luci-app-lucky oplucky && mvdir oplucky
