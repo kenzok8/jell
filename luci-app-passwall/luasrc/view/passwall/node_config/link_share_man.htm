@@ -1913,7 +1913,7 @@ local current_node = map:get(section)
 			var m = parseNodeUrl("wireguard://" + info[1]);
 			var host_port = info[1].split(/[/?#]/)[0];
 			opt.set(dom_prefix + 'address', unbracketIP(m.hostname));
-			opt.set(dom_prefix + 'port', host_port.substr(host_port.lastIndexOf(':') + 1));
+			opt.set(dom_prefix + 'port', host_port.match(/:(\d+)$/)?.[1] || '51820');
 			opt.set(dom_prefix + 'wireguard_secret_key', decodeURIComponent(info[0]));
 			var queryParam = {};
 			if (m.search.length > 1) {

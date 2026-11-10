@@ -1322,6 +1322,9 @@ msgstr "UDP 中继模式"
 msgid "Congestion control algorithm"
 msgstr "拥塞控制算法"
 
+msgid "Keep Alive"
+msgstr "保活间隔"
+
 msgid "Heartbeat interval(second)"
 msgstr "保活心跳包发送间隔（单位：秒）"
 
