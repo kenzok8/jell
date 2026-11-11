@@ -8,8 +8,6 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=ThemeDog
 LUCI_DEPENDS:=
-PKG_VERSION:=0.0.73
-PKG_RELEASE:=69
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
