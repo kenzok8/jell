@@ -1,0 +1,289 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing tag to build and publish (leave empty for build only)'
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_TAG: ${{ inputs.release_tag || (startsWith(github.ref, 'refs/tags/v') && github.ref_name) || '' }}
+
+jobs:
+  # Lint + SDK-free artifacts: the universal install script and a plain .ipk
+  package:
+    name: Install script
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+
+      - name: Tag must match PKG_VERSION
+        if: env.RELEASE_TAG != ''
+        run: |
+          ver=$(sed -n 's/^PKG_VERSION:=//p' Makefile)
+          if [ "v$ver" != "$RELEASE_TAG" ]; then
+            echo "::error::Tag $RELEASE_TAG does not match PKG_VERSION $ver in Makefile"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Lint
+        run: |
+          node --check htdocs/luci-static/carbon/carbon.js
+          node --check htdocs/luci-static/carbon/brands.js
+          for f in htdocs/luci-static/carbon/i18n/*.js; do node --check "$f"; done
+          python3 -I scripts/build-css.py --check
+          python3 -I scripts/gen-i18n.py --check --github
+          sh scripts/check-version.sh
+          node -e "new Function(require('fs').readFileSync('htdocs/luci-static/resources/menu-carbon.js', 'utf8'))"
+          node -e "new Function(require('fs').readFileSync('htdocs/luci-static/resources/view/system/carbon-update.js', 'utf8'))"
+          node --test tests/*.test.js
+          python3 -m json.tool root/usr/share/rpcd/acl.d/luci-theme-carbon.json > /dev/null
+          python3 -m json.tool root/usr/share/rpcd/acl.d/luci-theme-carbon-update.json > /dev/null
+          python3 -m json.tool root/usr/share/luci/menu.d/luci-theme-carbon.json > /dev/null
+          for f in scripts/*.sh tests/*.sh root/etc/uci-defaults/* root/usr/libexec/rpcd/*; do sh -n "$f"; done
+          cmp keys/carbon-apk.pem root/usr/share/carbon/keys/carbon-apk.pem
+
+      - name: Minify release assets
+        run: |
+          npm ci --no-audit --no-fund
+          node scripts/minify.mjs
+
+      - name: Build install script and .ipk
+        run: |
+          sh scripts/build-installer.sh dist
+          sh scripts/build-ipk.sh dist-ipk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: dist/carbon-install.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ipk-standalone
+          path: dist-ipk/*.ipk
+
+  updater:
+    name: Online update integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+      - run: python3 tests/update-integration.py
+      - run: python3 tests/opkg-update.py
+      - run: python3 tests/installer-integration.py
+      - name: Render theme templates with OpenWrt ucode
+        run: |
+          docker run --rm --mount "type=bind,source=$GITHUB_WORKSPACE,target=/source,readonly" \
+            openwrt/rootfs:x86_64-24.10.8@sha256:9972a4b4747cd136abd597475d7b88c51a49fd849d0d53f069a2f4bf446061b9 \
+            sh /source/tests/template-render.sh
+
+  browser:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      # The runner image already has Chrome's system libraries; `--with-deps`
+      # (apt) can stall for the whole job, so only the headless shell is fetched.
+      - name: Install headless Chromium
+        timeout-minutes: 5
+        run: npx playwright install --only-shell chromium
+      - name: Run browser tests
+        timeout-minutes: 8
+        run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: .cache/screenshots
+
+  # Official release SDKs: 24.10 (opkg → .ipk) and 25.12 (apk → .apk)
+  sdk:
+    name: SDK ${{ matrix.sdk }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk:
+          # Release images include the SDK; floating snapshot images
+          # download it at runtime and can stall indefinitely on the mirror.
+          - x86_64-24.10.8
+          - x86_64-25.12.6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+          path: feed/luci-theme-carbon
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Packages ship minified CSS/JS; the sources in git stay readable.
+      # Tooling is installed outside the feed so the SDK never scans it.
+      - name: Minify release assets
+        run: |
+          tools="$RUNNER_TEMP/carbon-tools"
+          mkdir -p "$tools"
+          cp feed/luci-theme-carbon/package.json feed/luci-theme-carbon/package-lock.json feed/luci-theme-carbon/scripts/minify.mjs "$tools/"
+          npm ci --prefix "$tools" --no-audit --no-fund
+          node "$tools/minify.mjs" feed/luci-theme-carbon
+
+      - name: Check out SDK action
+        uses: actions/checkout@v4
+        with:
+          repository: openwrt/gh-action-sdk
+          ref: 7fc2640243284ecc44f4a9c3f749a61746ee02cb # v11
+          path: sdk-action
+
+      - name: Reuse SDK already present in release images
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          entrypoint = Path('sdk-action/entrypoint.sh')
+          source = entrypoint.read_text()
+          old = '[ ! -f setup.sh ] || bash setup.sh'
+          # v11 reruns setup.sh even when a release image already has the SDK.
+          # Keep upstream signature/checksum verification for snapshot images.
+          new = '''if [ -f scripts/feeds ] && [ -d staging_dir ] && [ -f Makefile ]; then
+            echo "Using SDK already installed in the container"
+          else
+            [ ! -f setup.sh ] || bash setup.sh
+          fi'''
+          if source.count(old) != 1:
+              raise SystemExit('SDK action initialization changed; review the guard')
+          entrypoint.write_text(source.replace(old, new))
+          PY
+
+      - name: Build with OpenWrt SDK
+        timeout-minutes: 15
+        uses: ./sdk-action
+        env:
+          ARCH: ${{ matrix.sdk }}
+          FEED_DIR: ${{ github.workspace }}/feed
+          FEEDNAME: carbon
+          PACKAGES: luci-theme-carbon
+          NO_REFRESH_CHECK: 1
+          NO_SHFMT_CHECK: 1
+          V: s
+
+      - name: Collect package
+        run: |
+          mkdir -p out
+          find bin -type f -name 'luci-theme-carbon*' \( -name '*.ipk' -o -name '*.apk' \) -exec cp {} out/ \;
+          ls -la out
+          [ -n "$(ls out)" ] || { echo "::error::no package produced"; exit 1; }
+
+      - name: Test APK signing and trust rejection
+        if: matrix.sdk == 'x86_64-25.12.6'
+        timeout-minutes: 5
+        run: |
+          docker run --rm \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/work,readonly" \
+            alpine:3.23@sha256:469c9ea410b9215eaee7976ba6c0639039b444be8e5d638f7abbada189971eb2 \
+            sh -c 'apk add --no-cache openssl && sh /work/feed/luci-theme-carbon/tests/apk-signing.sh /work/out/*.apk'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-${{ matrix.sdk }}
+          path: out/*
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '')
+    needs: [package, sdk, updater, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Gather assets
+        run: |
+          mkdir -p assets
+          cp artifacts/sdk-*/* assets/
+          cp keys/carbon-apk.pem assets/
+          cp docs/apk-install.md assets/APK-INSTALL.md
+          ls -la assets
+
+      - name: Sign and verify APK for LuCI uploads
+        env:
+          APK_SIGNING_KEY: ${{ secrets.APK_SIGNING_KEY }}
+        run: |
+          set -eu
+          if [ -z "$APK_SIGNING_KEY" ]; then
+            echo "::error::Configure the APK_SIGNING_KEY repository secret before publishing"
+            exit 1
+          fi
+          umask 077
+          key_dir=$(mktemp -d "$RUNNER_TEMP/carbon-signing.XXXXXX")
+          trap 'rm -rf "$key_dir"' EXIT
+          printf '%s\n' "$APK_SIGNING_KEY" > "$key_dir/private.pem"
+          unset APK_SIGNING_KEY
+          docker run --rm --network none \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/work" \
+            --mount "type=bind,source=$key_dir,target=/signing,readonly" \
+            --workdir /work \
+            alpine:3.23@sha256:469c9ea410b9215eaee7976ba6c0639039b444be8e5d638f7abbada189971eb2 \
+            sh -c 'sh scripts/sign-apk.sh /signing/private.pem keys/carbon-apk.pem assets/*.apk'
+
+      # The installer embeds the signed APK and the SDK IPK so it installs through
+      # apk/opkg (online updates work) and verifies the APK with the bundled key.
+      - name: Build installer with the release packages
+        run: |
+          set -eu
+          set -- assets/luci-theme-carbon-*.apk
+          [ "$#" = 1 ] && [ -s "$1" ] || { echo "::error::expected exactly one release APK"; exit 1; }
+          apk=$1
+          set -- assets/luci-theme-carbon_*_all.ipk
+          [ "$#" = 1 ] && [ -s "$1" ] || { echo "::error::expected exactly one release IPK"; exit 1; }
+          sh scripts/build-installer.sh installer --apk "$apk" --ipk "$1"
+          cp installer/carbon-install.sh assets/carbon-install.sh
+          (cd assets && sha256sum ./* > SHA256SUMS)
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # docs/releases/<tag>.md + install.md: the English section, then 简体中文
+          sh scripts/release-notes.sh "$RELEASE_TAG" "$GITHUB_REPOSITORY" > notes.md
+          gh release create "$RELEASE_TAG" assets/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Carbon $RELEASE_TAG" \
+            --notes-file notes.md \
+            --generate-notes

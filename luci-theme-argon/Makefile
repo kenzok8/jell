@@ -7,10 +7,17 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Argon Theme
-LUCI_DEPENDS:=+wget-any +jsonfilter
+LUCI_DEPENDS:=+wget-any +jsonfilter +ucode-mod-math
+LUCI_BASENAME:=argon-config
 
+PKG_PROVIDES:=luci-app-argon-config
+
+PKG_LICENSE:=Apache-2.0 MIT
 
 LUCI_MINIFY_CSS:=0
+# Ship template source across stable and snapshot runtimes. Precompiled
+# bytecode would require the SDK's ucode format (see issue #715).
+LUCI_MINIFY_UT:=0
 
 define Package/luci-theme-argon/conffiles
 /etc/config/argon

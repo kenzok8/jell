@@ -1,0 +1,110 @@
+// out: false
+
+// wireless
+/* wireless overview */
+#cbi-wireless {
+    >#wifi_assoclist_table {
+        >.tr {
+            box-shadow: inset 1px -1px 0 var(--border-subtle), inset -1px -1px 0 var(--border-subtle);
+
+            &.placeholder {
+                >.td {
+                    right: 2rem;
+                    bottom: 2rem;
+                    left: 2rem;
+                    border-top: thin solid var(--border-subtle) !important;
+                }
+            }
+
+            &.table-titles {
+                box-shadow: inset 1px 0 0 var(--border-subtle), inset -1px 0 0 var(--border-subtle);
+
+                >.th {
+                    border-bottom: thin solid var(--border-subtle);
+                    box-shadow: 0 -1px 0 0 var(--border-subtle);
+                }
+            }
+        }
+    }
+}
+
+#wifi_assoclist_table {
+    // Keep the network identity readable without reserving the rate column
+    // by its translated heading. Let the remaining columns share the space.
+    .ifacebadge[data-ssid] {
+        display: flex;
+        width: 100%;
+        gap: var(--control-gap);
+        padding: var(--control-gap);
+
+        > img {
+            flex: none;
+            margin: 0;
+        }
+
+        > span {
+            flex: 1 1 0;
+            min-width: 0;
+            text-align: start;
+        }
+
+        small {
+            display: block;
+            direction: ltr;
+            unicode-bidi: isolate;
+        }
+    }
+
+    @media screen and (min-width: 1153px) {
+        // A table action column shrinks to its controls' minimum content width.
+        // Preserve the ComboButton label when MAC filtering adds its menu.
+        .td > .cbi-dropdown:is(.btn, .cbi-button):not([multiple]) {
+            min-width: max-content;
+
+            > ul:not(.dropdown) > li {
+                white-space: nowrap;
+                overflow-wrap: normal;
+            }
+        }
+
+        > .tr > :is(.th, .td) {
+            padding-inline: var(--action-gap);
+            overflow-wrap: break-word;
+        }
+
+        > .tr > :is(.th, .td):first-child {
+            width: 22%;
+            min-width: 10rem;
+        }
+    }
+
+    // Keep host names separate from the optional address details.
+    > .tr > .td > span.hide-xs {
+        display: block;
+    }
+
+    @media screen and (max-width: 600px) {
+        .td:has(> .ifacebadge[data-ssid]) {
+            flex-basis: 100%;
+            padding-inline: var(--control-gap);
+        }
+    }
+}
+
+#cbi-wireless,
+#cbi-wireless *,
+#wifi_assoclist_table,
+#wifi_assoclist_table * {
+    overflow: visible !important;
+    max-height: none !important;
+    transform: none !important;
+    filter: none !important;
+    contain: none !important;
+    clip-path: none !important;
+}
+
+#cbi-wireless,
+#wifi_assoclist_table {
+    height: auto !important;
+    min-height: 0 !important;
+}
