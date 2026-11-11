@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_FASTNET:=$(ARCH)
 
 PKG_NAME:=fastnet
-PKG_VERSION:=fastnet-runtime-v0.8.8
+PKG_VERSION:=fastnet-runtime-v0.8.9
 PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz

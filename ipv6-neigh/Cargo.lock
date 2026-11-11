@@ -195,7 +195,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c54e03a951783e8b327515db3f2a2fd0e3bed362a96b066f341ce66ed49b4ead"
 dependencies = [
  "data-encoding",
- "syn 3.0.9",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -395,7 +395,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 [[package]]
 name = "hickory-proto"
 version = "0.27.0-alpha.1"
-source = "git+https://github.com/hickory-dns/hickory-dns.git?rev=78d11a133237eb5e00cf137584337c14177dabd7#78d11a133237eb5e00cf137584337c14177dabd7"
+source = "git+https://github.com/hickory-dns/hickory-dns.git?rev=de078da71f220d79148e10a2a7a4474b2968ead3#de078da71f220d79148e10a2a7a4474b2968ead3"
 dependencies = [
  "bitflags 2.13.2",
  "data-encoding",

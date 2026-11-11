@@ -47,19 +47,12 @@
 	font-weight: 500;
 }
 .cb-card-note { color: var(--cb-text-2); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* traffic source picker in the card head */
+/* traffic source picker in the card head: a C.listbox, like the language switch */
 .cb-card-head .cb-traffic-select {
 	flex: 0 1 auto;
+	align-self: center;
 	min-width: 0;
 	max-width: 60%;
-	width: auto;
-	height: 28px;
-	min-height: 28px;
-	padding: 0 26px 0 10px;
-	border-radius: 8px;
-	color: var(--cb-text-2);
-	font-size: 12.5px;
-	text-overflow: ellipsis;
 }
 .cb-card-link { font-size: 13px; font-weight: 500; white-space: nowrap; }
 
@@ -294,6 +287,13 @@
 	background-image: none;
 	color: var(--cb-text-2);
 }
+/* the same avatar, smaller, beside hostnames in LuCI's lease tables */
+.cb-host { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; vertical-align: middle; }
+.cb-host-name { min-width: 0; overflow-wrap: anywhere; }
+.cb-host > .cb-avatar { width: 26px; height: 26px; font-size: 12px; }
+.cb-host > .cb-avatar svg { width: 15px; height: 15px; }
+.cb-host > .cb-avatar .cb-logo { width: 14px; height: 14px; }
+.cb-host > .cb-avatar b { font-size: 12px; }
 .cb-kind { color: var(--cb-text-2); }
 .cb-kind::after { content: " · "; }
 .cb-tag {
