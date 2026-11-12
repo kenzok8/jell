@@ -10,8 +10,6 @@ LUCI_DEPENDS:=+fastnet +luci-lib-linkeaseauth +linkease-app-entry
 # APK uses -rN; OPKG uses -N for runtime package releases.
 LUCI_EXTRA_DEPENDS:=fastnet (>=0.8.9-$(if $(CONFIG_USE_APK),r)1)
 LUCI_PKGARCH:=all
-# Preserve LuCI translation version ordering when upgrading older git-* packages.
-PKG_PO_VERSION:=git-26.313.00000-082
 LUCI_MINIFY_CSS:=0
 LUCI_MINIFY_JS:=0
 
