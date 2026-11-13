@@ -31,7 +31,7 @@ LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
 	+libuci-lua +lua +luci-compat +dns2tcp +dnsmasq-full \
 	+ip-full +lua-neturl +libuci-lua +microsocks +ipt2socks +lyaml \
-	+resolveip +curl +nping \
+	+resolveip +curl +nping +coreutils-timeout \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG:chinadns-ng \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_MosDNS:mosdns \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Shadow_TLS:shadow-tls \
@@ -100,7 +100,7 @@ endchoice
 
 choice
 	prompt "V2ray-core Selection"
-	default PACKAGE_$(PKG_NAME)_INCLUDE_NONE_V2RAY
+	default PACKAGE_$(PKG_NAME)_INCLUDE_Xray
 
 	config PACKAGE_$(PKG_NAME)_INCLUDE_NONE_V2RAY
 	bool "None"
@@ -108,7 +108,6 @@ choice
 	config PACKAGE_$(PKG_NAME)_INCLUDE_Xray
 	bool "Xray-core"
 	select PACKAGE_xray-core
-	select PACKAGE_coreutils-timeout
 endchoice
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG

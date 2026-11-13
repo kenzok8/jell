@@ -10,18 +10,25 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_quickstart:=$(ARCH)
 
 PKG_NAME:=quickstart
-PKG_VERSION:=0.13.1
-PKG_RELEASE:=1
+PKG_VERSION:=0.17.1-rc20261028
+PKG_RELEASE:=2
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/linkease/istore-packages/releases/download/prebuilt/
+PKG_SOURCE_URL:=https://github.com/istoreos/quickstart/releases/download/v$(PKG_VERSION)/
 PKG_HASH:=skip
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-binary-$(PKG_VERSION)
+
+ifeq ($(CONFIG_USE_APK),y)
+PKG_VERSION:=$(subst -rc,_rc,$(PKG_VERSION))
+endif
 
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
 
 include $(INCLUDE_DIR)/package.mk
+
+# Runtime manifests cover these prebuilt bytes; do not strip them again.
+RSTRIP:=:
 
 define Package/$(PKG_NAME)
 	SECTION:=net
@@ -39,6 +46,23 @@ endef
 
 define Package/$(PKG_NAME)/conffiles
 /etc/config/quickstart
+/etc/quickstart/home-layout.json
+/etc/quickstart/home-layout.json.bak
+/etc/quickstart/home-layout.json.damaged
+/etc/quickstart/home-layout.json.bak.damaged
+/etc/quickstart/home-launcher.json
+/etc/quickstart/home-launcher.json.bak
+/etc/quickstart/home-launcher.json.damaged
+/etc/quickstart/home-launcher.json.bak.damaged
+/etc/quickstart/device-classifications.json
+/etc/quickstart/device-profiles.json
+/etc/quickstart/manual-devices.json
+/etc/quickstart/device-groups.json
+/etc/quickstart/traffic-insights.json
+/etc/quickstart/device-policy-effects-v1.json
+/etc/quickstart/task-transactions-v1.json
+/etc/quickstart/lan-device-model-v1.json
+/etc/quickstart/network-audit.json
 endef
 
 define Package/$(PKG_NAME)/postinst
@@ -71,7 +95,10 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
 	$(INSTALL_BIN) ./files/startdhns.hotplug $(1)/etc/hotplug.d/iface/21-startdhns
 	$(INSTALL_DIR) $(1)/usr/share/quickstart
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/MANIFEST $(1)/usr/share/quickstart/MANIFEST
 	$(INSTALL_DATA) ./files/manuf $(1)/usr/share/quickstart/manuf
+	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
+	$(INSTALL_DATA) ./files/quickstart.keep $(1)/lib/upgrade/keep.d/quickstart
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
