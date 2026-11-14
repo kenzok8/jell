@@ -47,8 +47,8 @@ return view.extend({
 		let webport = (uci.get(data, 'config', 'listen_port') || '8787');
 
 		m = new form.Map('filebrowser-q', _('FileBrowser Quantum'),
-			_('The best free self-hosted web-based file manager.') + '<br />'+
-			_('Default login username is %s and password is %s.').format('<code>admin</code>', '<code>admin</code>'));
+			_('The best free self-hosted web-based file manager.') + '<br />' +
+			_('Default login username is %s and password is %s.').format('<code>admin</code>', '<code>admin123</code>'));
 
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
@@ -63,7 +63,7 @@ return view.extend({
 			return E('div', { class: 'cbi-section', id: 'status_bar' }, [
 				E('p', { id: 'service_status' }, _('Collecting data...'))
 			]);
-		}
+		};
 
 		s = m.section(form.NamedSection, 'config', 'filebrowser');
 
@@ -78,6 +78,15 @@ return view.extend({
 
 		o = s.option(form.Value, 'root_path', _('Root directory'));
 		o.default = '/';
+		o.rmempty = false;
+
+		o = s.option(form.Value, 'cacheDir', _('Cache directory'));
+		o.default = '/tmp';
+		o.rmempty = false;
+
+		o = s.option(form.Value, 'cacheDirMaxSizeMB', _('Cache max size (MB)'));
+		o.datatype = 'uinteger';
+		o.default = '500';
 		o.rmempty = false;
 
 		return m.render();
