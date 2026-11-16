@@ -1,0 +1,15 @@
+location /spectra/ {
+	location ~ \.php$ {
+		fastcgi_param HTTP_PROXY "";
+		fastcgi_connect_timeout 300s;
+		fastcgi_read_timeout 300s;
+		fastcgi_send_timeout 300s;
+		fastcgi_buffer_size 32k;
+		fastcgi_buffers 4 32k;
+		fastcgi_busy_buffers_size 64k;
+		fastcgi_temp_file_write_size 64k;
+		include fastcgi_params;
+		fastcgi_pass 127.0.0.1:1026;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+	}
+}

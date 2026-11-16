@@ -1,0 +1,189 @@
+.cbi-section,
+.navbar-container::before,
+header::after,
+.navbar-container,
+.tabs,
+.main-left {
+	background-color: transparent !important;
+	border: transparent !important;
+        box-shadow: none;
+}
+
+.pure-u-2-3 h4,
+#_passwall_status_fieldset .block.pure-g,
+#_passwall2_status_fieldset .block.pure-g {
+	background-color: transparent !important;
+        box-shadow: none;
+	border: transparent !important;
+}
+
+[data-theme="dark"] .block {
+    box-shadow: none !important;
+    animation: none !important;
+}
+
+.cbi-input-select,
+.cbi-value-field select,
+.cbi-dropdown-open select {
+	background-color: transparent !important;
+}
+
+.cbi-input-select option {
+	background-color: #000000 !important;
+	color: #ffffff !important;
+}
+
+header::after,
+.cbi-section,
+.cbi-section-error,
+#iptables,
+.Firewall form,
+#cbi-network>.cbi-section-node,
+#cbi-wireless>.cbi-section-node,
+#cbi-wireless>#wifi_assoclist_table,
+[data-tab-title],
+[data-page^="admin-system-admin"]:not(.node-main-login) .cbi-map:not(#cbi-dropbear),
+[data-page="admin-system-opkg"] #maincontent>.container {
+	background-color: transparent !important;
+	border: transparent !important;
+}
+
+.cbi-tabcontainer>.cbi-value:nth-of-type(2n) {
+	background-color: transparent !important;
+}
+
+.cbi-section-node .cbi-value:nth-child(even),
+.cbi-section .tr:nth-child(even):not(:first-child) .td {
+	background-color: transparent !important;
+}
+
+#cbi-wireless .td,
+#cbi-network .tr:first-child>.td,
+.table[width="100%"]>.tr:first-child>.td,
+[data-page="admin-network-diagnostics"] .tr>.td,
+.tr.table-titles>.th,
+.tr.cbi-section-table-titles>.th {
+	background-color: transparent !important;
+}
+
+.cbi-section-table-row {
+	background-color: transparent !important;
+}
+
+.table.cbi-section-table .cbi-section-table-row:nth-of-type(odd) {
+	background-color: transparent !important;
+}
+
+.card-container .feature-card,
+.network-container .left-box .item_container .item,
+.badge, .offline, .status-icon, .status_time, .content .name .speed, .path,
+.tab .item, .info .item1,
+.reusable-card, .feature-card, .item_container .item {
+	background-color: transparent !important;
+	border: var(--glass-border) !important;
+        backdrop-filter: var(--glass-blur-mini);
+        -webkit-backdrop-filter: var(--glass-blur-mini);
+}
+
+fieldset.cbi-section>textarea,
+div#command-output>textarea {
+	background-color: transparent !important;
+}
+
+h2[name="content"] {
+	background-color: transparent !important;
+}
+
+.cbi-section>h3:first-child,
+.panel-title {
+	background-color: transparent !important;
+}
+
+div>table>tbody>tr:nth-of-type(2n),
+div>.table>.tr:nth-of-type(2n) {
+	background-color: transparent !important;
+}
+
+h2,
+h4 {
+	background-color: transparent !important;
+}
+
+select {
+	background-color: transparent !important;
+}
+
+
+.tr.cbi-rowstyle-2 {
+	background-color: transparent !important;
+}
+
+.cbi-value-field,
+.cbi-dropdown,
+.cbi-dropdown ul,
+.cbi-dropdown li {
+	background: transparent;
+}
+
+.network-status-table,
+.ifacebox,
+.ifacebox-head,
+.ifacebox-body,
+.ifacebadge {
+	background: transparent;
+}
+
+.cbi-value-field,
+.cbi-input-text {
+	background: transparent;
+}
+
+.cbi-input-textarea {
+	background: transparent;
+}
+
+.cbi-section,
+.cbi-section-node,
+.cbi-value,
+.cbi-value-field,
+.cbi-input-password,
+.control-group {
+	background: transparent;
+}
+
+.cbi-value-field,
+#localtime,
+.control-group {
+	background: transparent;
+}
+
+.control-group,
+.control-group input[type="text"] {
+	background: transparent;
+}
+
+.controls .pager.center {
+	background: transparent !important;
+}
+
+.nas-container,
+.nas-container_card,
+.app-container,
+[class*="nas-container"],
+[class*="app-container"] {
+	background: transparent !important;
+}
+
+[data-theme="dark"] [class*="nas-container"],
+[data-theme="dark"] [class*="app-container"] {
+	background: transparent !important;
+}
+
+.container .table-wrapper .table-header {
+	background-color: transparent !important;
+}
+
+.cbi-value:hover,
+.cbi-section-table tr.cbi-section-table-row:hover td {
+	background-color: transparent !important;
+}

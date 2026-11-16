@@ -1,0 +1,62 @@
+<%#
+    Spectra is a clean HTML5 theme for LuCI. It is based on luci-theme-material Argon Template
+    luci-theme-spectra
+    Copyright 2020 Jerrykuku <jerrykuku@qq.com>
+    Have a bug? Please create an issue here on GitHub!
+    https://github.com/jerrykuku/luci-theme-spectra/issues
+    luci-theme-material:
+    Copyright 2015 Lutty Yang <lutty@wcan.in>
+    Agron Theme
+    https://demos.creative-tim.com/spectra-dashboard/index.html
+    Licensed to the public under the Apache License 2.0
+-%>
+
+<% local ver = require("luci.version") %>
+</div>
+<footer class="mobile-hide" style="display: none;">
+    <a href="https://github.com/openwrt/luci" class="powered-by" target="_blank" rel="noopener noreferrer">Powered by <%= ver.luciname %> (<%= ver.luciversion %>)</a> / <a href="https://github.com/openwrt/openwrt" target="_blank" class="version" rel="noopener noreferrer"><%= ver.distversion %></a>
+    <ul class="breadcrumb pull-right" id="modemenu" style="display:none"></ul>
+</footer>
+</div>
+</div>
+<div id="tempcpu"></div>
+<div id="cpuusage"></div>
+<script>
+    var luciLocation = <%= luci.http.write_json(luci.dispatcher.context.path) %>;
+    var winHeight = $(window).height();
+    $(window).resize(function () {
+        var winWidth = $(window).width();
+        if (winWidth < 600) {
+            var newHeight = $(this).height();
+            var keyboradHeight = newHeight - winHeight;
+            $(".ftc").css("bottom", keyboradHeight + 30);
+        }
+    });
+</script>
+<script type="text/javascript">L.require('menu-spectra')</script>
+<script>
+    const hideStyle = document.createElement('style');
+    hideStyle.id = 'temp-hide-style';
+    hideStyle.textContent = '#tool_label { display: none !important; }';
+    document.head.appendChild(hideStyle);
+    
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            const styleEl = document.getElementById('temp-hide-style');
+            if (styleEl) styleEl.remove();
+            
+            const toolLabel = document.getElementById('tool_label');
+            if (toolLabel) {
+                toolLabel.style.display = 'block';
+                toolLabel.style.opacity = '0';
+                toolLabel.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toolLabel.style.opacity = '1', 10);
+            }
+            
+            const footer = document.querySelector('footer.mobile-hide');
+            if (footer) footer.style.display = 'block';
+        }, 800);
+    });
+</script>
+</body>
+</html>
