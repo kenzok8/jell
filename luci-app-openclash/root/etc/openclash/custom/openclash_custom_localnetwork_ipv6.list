@@ -14,3 +14,4 @@ fc00::/7               # unique local (ULA, includes fd00::/8)
 fd7a:115c:a1e0::/48    # Tailscale
 fe80::/10              # link-local
 ff00::/8               # multicast
+

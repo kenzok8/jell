@@ -1,0 +1,9 @@
+# Public-key file checksums must stay identical across Windows and Linux.
+Makefile text eol=lf
+keys/*.pem text eol=lf
+keys/SHA256SUMS text eol=lf
+*.sh text eol=lf
+root/usr/libexec/rpcd/* text eol=lf
+root/etc/uci-defaults/* text eol=lf
+root/usr/share/carbon/keys/*.pem text eol=lf
+root/usr/share/carbon/version text eol=lf

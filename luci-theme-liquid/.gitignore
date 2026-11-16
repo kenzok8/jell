@@ -1,0 +1,12 @@
+.research/
+.reasonix/
+*.ipk
+*.apk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+reasonix.toml
+# CDP/headless 调试临时目录
+.liquid-tmp/

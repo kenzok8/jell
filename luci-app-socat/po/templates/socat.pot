@@ -1,0 +1,97 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:113
+msgid ""
+"Allow binding to the port even when previous connections are in TIME_WAIT, "
+"preventing restart failures."
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:125
+msgid "Destination Address"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:137
+msgid "Destination Port"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:118
+msgid "Destination Protocol"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:32
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:51
+msgid "Enabled"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:29
+msgid "Global Settings"
+msgstr ""
+
+#: luci-app-socat/root/usr/share/rpcd/acl.d/luci-app-socat.json:3
+msgid "Grant UCI access for luci-app-socat"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:89
+msgid "IPv4 Only"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:88
+msgid "IPv4 and IPv6"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:90
+msgid "IPv6 Only"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:87
+msgid "Listen Address Family"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:108
+msgid "Listen Port"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:94
+msgid "Listen Protocol"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:141
+msgid "Open Firewall Port"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:35
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:84
+msgid "Port Forwarding"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:83
+msgid "Protocol Type"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:81
+msgid "Remarks"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:113
+msgid "Reuse Port"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:27
+#: luci-app-socat/root/usr/share/luci/menu.d/luci-app-socat.json:3
+msgid "Socat"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:48
+msgid "Socat Configuration"
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:27
+msgid ""
+"Socat is a relay for bidirectional data transfer between two independent "
+"data channels."
+msgstr ""
+
+#: luci-app-socat/htdocs/luci-static/resources/view/socat.js:56
+msgid "Status"
+msgstr ""

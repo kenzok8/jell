@@ -7,15 +7,12 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-socat
 
-PKG_MAINTAINER:=Lienol <lawlienol@gmail.com>
+PKG_MAINTAINER:=Lienol <lawlienol@gmail.com> \
+		sbwml <admin@cooluc.com>
 
 LUCI_TITLE:=LuCI support for Socat
 LUCI_DEPENDS:=+socat
 LUCI_PKGARCH:=all
-
-define Package/$(PKG_NAME)/conffiles
-/etc/config/socat
-endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

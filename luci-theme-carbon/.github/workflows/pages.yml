@@ -1,0 +1,62 @@
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'preview/**'
+      - 'htdocs/luci-static/carbon/**'
+      - 'scripts/build-demo.py'
+      - '.github/workflows/pages.yml'
+      - 'LICENSE'
+  pull_request:
+    paths:
+      - 'preview/**'
+      - 'htdocs/luci-static/carbon/**'
+      - 'scripts/build-demo.py'
+      - '.github/workflows/pages.yml'
+      - 'LICENSE'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'deploy' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript
+        run: |
+          node --check preview/mock.js
+          node --check preview/demo.js
+          node --check htdocs/luci-static/carbon/carbon.js
+          node --check htdocs/luci-static/carbon/brands.js
+          for f in htdocs/luci-static/carbon/i18n/*.js; do node --check "$f"; done
+      - name: Build static demo
+        run: python3 scripts/build-demo.py
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/demo
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

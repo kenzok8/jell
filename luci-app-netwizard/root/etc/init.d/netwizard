@@ -377,7 +377,7 @@ configure_network() {
     fi
     
     
-    ifname=$(uci -q get network.lan.ifname)
+    ifname=$(uci -q get network.lan.device)
     [ "x$ifname" = "x" ] && ifname="device" || ifname="ifname"
     
     [ -n "$wan_interface" ] || wan_interface=$(uci -q get network.wan.$ifname)
