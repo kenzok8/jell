@@ -1,6 +1,0 @@
-#!/bin/sh
-chmod +x /etc/init.d/advancedplus /usr/bin/advancedplusipk /usr/bin/uhttpd-watchdog
-
-
-rm -f /tmp/luci-indexcache
-exit 0

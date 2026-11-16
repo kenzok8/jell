@@ -1,4 +1,4 @@
 {
-	"config": "luci_socat",
+	"config": "socat",
 	"init": "luci_socat"
 }

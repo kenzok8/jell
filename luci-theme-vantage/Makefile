@@ -10,6 +10,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-theme-vantage
+PKG_VERSION:=1.0.20
+PKG_RELEASE:=1
 PKG_LICENSE:=GPL-3.0-or-later
 
 LUCI_TITLE:=Vantage theme
@@ -58,7 +60,7 @@ define Package/luci-theme-vantage/postrm
 exit 0
 endef
 
-# In the LuCI tree (themes/luci-theme-vantage) use $(TOPDIR)/feeds/luci/luci.mk; built from
+# In the LuCI tree (themes/luci-theme-vantage) use ../../luci.mk; built from
 # an external feed, use the luci feed installed in the build tree.
 include $(if $(wildcard $(CURDIR)/../../luci.mk),$(CURDIR)/../../luci.mk,$(TOPDIR)/feeds/luci/luci.mk)
 

@@ -2,13 +2,10 @@
 	"luci-app-socat": {
 		"description": "Grant UCI access for luci-app-socat",
 		"read": {
-			"ubus": {
-				"service": [ "list" ]
-			},
-			"uci": [ "luci_socat" ]
+			"uci": [ "socat" ]
 		},
 		"write": {
-			"uci": [ "luci_socat" ]
+			"uci": [ "socat" ]
 		}
 	}
 }

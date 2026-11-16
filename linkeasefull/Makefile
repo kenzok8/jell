@@ -11,7 +11,7 @@ PKG_ARCH_LINKEASE:=$(ARCH)
 PKG_NAME:=linkeasefull
 # use PKG_SOURCE_DATE instead of PKG_VERSION for compitable
 PKG_SOURCE_DATE:=3.0.23
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 ARCH_HEXCODE:=
 ifeq ($(ARCH),x86_64)
@@ -24,7 +24,7 @@ LINKEASE_RUNTIME_ARCH:=arm64
 PKG_HASH:=skip
 endif
 
-PKG_SOURCE_VERSION:=a026d78ce135988bc93dd4914565e869cff6e21e
+PKG_SOURCE_VERSION:=865e7e05cb57fdef54ba61c48bff29e21d909eb5
 PKG_SOURCE:=linkease-runtime-$(PKG_SOURCE_DATE)-linux-$(LINKEASE_RUNTIME_ARCH).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/linkeasefull-runtime-v$(PKG_SOURCE_DATE)/
 PKG_BUILD_DIR:=$(BUILD_DIR)/linkease-runtime-$(PKG_SOURCE_DATE)-linux-$(LINKEASE_RUNTIME_ARCH)
@@ -39,7 +39,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Network
 	SUBMENU:=Web Servers/Proxies
 	TITLE:=LinkEase Full - the local web desktop
-	DEPENDS:=@(x86_64||aarch64) +linkease-app-entry +linkease-common-bin +ca-bundle +cifsmount +kmod-fs-cifs
+	DEPENDS:=@(x86_64||aarch64) +linkease-app-entry +linkeasefull-web +linkease-common-bin +ca-bundle +cifsmount +kmod-fs-cifs
 	EXTRA_DEPENDS:=linkease-common-bin (>=1.7.6~0)
 	PKGARCH:=all
 	URL:=https://www.linkease.com/
