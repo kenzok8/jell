@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=linkease-app-entry
 # This lightweight runtime is released independently from the full desktop.
-PKG_VERSION:=linkspace-runtime-v0.3.2
+PKG_VERSION:=kaiplus-runtime-v1.0.18
 PKG_RELEASE:=1
 
 ARCH_HEXCODE:=

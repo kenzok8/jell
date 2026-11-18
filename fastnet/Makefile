@@ -9,8 +9,8 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_FASTNET:=$(ARCH)
 
 PKG_NAME:=fastnet
-PKG_VERSION:=linkspace-runtime-v0.3.2
-PKG_RELEASE:=2
+PKG_VERSION:=kaiplus-runtime-v1.0.18
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/fastnet-runtime-v$(PKG_VERSION)/
