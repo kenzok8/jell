@@ -202,12 +202,20 @@ type = "forward"
 
 [zones.stores.options]
 edns0 = true
-cache_size = 8192
+# The cache only ever holds a few dozen live entries, so the 8192 ceiling is
+# never reached; 512 keeps the same hit rate with a smaller heap bound.
+cache_size = 512
 use_hosts_file = "Always"
 num_concurrent_reqs = 1
 server_ordering_strategy = "RoundRobin"
-timeout = 2
-attempts = 1
+# Worst case a query can hold an upstream slot is
+# (attempts + 1) * max(timeout, connect_timeout): (1+1) * max(2s, 2s) = 4s
+# before, (0+1) * max(1s, 1s) = 1s now. The server spawns one task per inbound
+# request with no admission control, so this window is what bounds the number
+# of in-flight resolver tasks, and therefore peak RSS during query bursts.
+timeout = 1
+attempts = 0
+connect_timeout = 1
 enable_per_name_server_metrics = true
 positive_min_ttl = 60
 negative_min_ttl = 30

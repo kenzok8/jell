@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 PKG_NAME:=linkspace
-PKG_VERSION:=kaiplus-runtime-v1.0.16
+PKG_VERSION:=linkspace-runtime-v0.3.2
 PKG_RELEASE:=1
 include ./release.mk
 PKG_SOURCE:=linkspace-$(PKG_VERSION)-$(ARCH).tar.gz

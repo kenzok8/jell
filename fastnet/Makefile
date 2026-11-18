@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_FASTNET:=$(ARCH)
 
 PKG_NAME:=fastnet
-PKG_VERSION:=kaiplus-runtime-v1.0.16
+PKG_VERSION:=linkspace-runtime-v0.3.2
 PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
