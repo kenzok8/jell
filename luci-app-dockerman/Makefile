@@ -15,7 +15,7 @@ PKG_MAINTAINER:=lisaac <lisaac.cn@gmail.com> \
 		Florian Eckert <fe@dev.tdt.de>
 
 PKG_VERSION:=v0.5.26
-PKG_RELEASE:=642
+PKG_RELEASE:=643
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
