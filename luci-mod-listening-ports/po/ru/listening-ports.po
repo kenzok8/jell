@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: luci-mod-listening-ports\n"
+"PO-Revision-Date: 2026-11-19 12:00+0000\n"
+"Last-Translator: Denis <denis2371@gmail.com>\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Foreign Address"
+msgstr "Внешний адрес"
+
+msgid "Grant permissions for the Network Ports LuCI app"
+msgstr "Предоставить доступ к приложению LuCI «Прослушиваемые порты»"
+
+msgid "IPv4 Active Internet connections (servers only)"
+msgstr "Активные интернет-соединения IPv4 (только серверы)"
+
+msgid "IPv6 Active Internet connections (servers only)"
+msgstr "Активные интернет-соединения IPv6 (только серверы)"
+
+msgid "Listening Ports"
+msgstr "Прослушиваемые порты"
+
+msgid "Local Address"
+msgstr "Локальный адрес"
+
+msgid "PID/Program name"
+msgstr "PID/имя программы"
+
+msgid "Protocol"
+msgstr "Протокол"
+
+msgid "State"
+msgstr "Состояние"

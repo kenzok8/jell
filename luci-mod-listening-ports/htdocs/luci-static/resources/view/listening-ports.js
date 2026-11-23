@@ -7,10 +7,10 @@ return view.extend({
 	load: function() {
 		return Promise.all([
 			L.resolveDefault(fs.stat('/bin/netstat'), null),
-		]).then(function(stat) {
-			var logger = stat[0] ? stat[0].path : null;
-
-			return fs.exec_direct(logger, [ '-peanut' ]).catch(function(err) {
+ 		]).then(function(stat) {
+			var logger = stat[0] ? '/bin/netstat' : null;
+ 
+ 			return fs.exec_direct(logger, [ '-peanut' ]).catch(function(err) {
 				ui.addNotification(null, E('p', {}, _( err.message )));
 				return '';
 			});

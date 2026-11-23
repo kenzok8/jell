@@ -1,0 +1,238 @@
+name: Build packages
+
+run-name: "Build ${{ github.ref_name }} (OpenWrt ${{ inputs.openwrt_version || 'both' }})"
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - '.github/images/**'
+    tags:
+      - 'v[0-9]*'
+      - '[0-9]*'
+  workflow_dispatch:
+    inputs:
+      openwrt_version:
+        description: 'both = ipk(24.10.8) + apk(25.12.6); or one version: 23.05.6, 24.10.8, 25.12.6, snapshot'
+        required: true
+        default: 'both'
+        type: string
+      pkg_version:
+        description: 'Package version (numbers/dots). Empty = from tag or Makefile'
+        required: false
+        default: ''
+        type: string
+      pkg_release:
+        description: 'PKG_RELEASE — packaging revision. Empty = from tag or Makefile'
+        required: false
+        default: ''
+        type: string
+      skip_release:
+        description: 'Do not publish the release, even if launched from the tag'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+      pkg_version: ${{ steps.ver.outputs.pkg_version }}
+      pkg_release: ${{ steps.ver.outputs.pkg_release }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Resolve package version
+        id: ver
+        env:
+          IN_VER: ${{ inputs.pkg_version }}
+          IN_REL: ${{ inputs.pkg_release }}
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -eu
+          MK=Makefile
+          getvar() { grep -E "^$1[[:space:]]*[:?]?=" "$MK" | head -n1 | sed 's/.*=[[:space:]]*//'; }
+
+          VER="$IN_VER"; REL="$IN_REL"
+          # A tag like v1.0-4 or 1.0-4 specifies the version and revision
+          case "$REF" in
+            refs/tags/*)
+              T="${REF_NAME#v}"
+              case "$T" in
+                *-*) [ -n "$VER" ] || VER="${T%-*}"
+                     [ -n "$REL" ] || REL="${T##*-}" ;;
+                *) echo "::error::The tag should be like v1.0-4 (version-revision)"; exit 1 ;;
+              esac ;;
+          esac
+          VER="${VER:-$(getvar PKG_VERSION)}"
+          REL="${REL:-$(getvar PKG_RELEASE)}"
+          case "$VER" in ''|*[!0-9.]*) echo "::error::The version must be numeric: '$VER'"; exit 1 ;; esac
+          case "$REL" in ''|*[!0-9]*)  echo "::error::PKG_RELEASE must be a number: '$REL'"; exit 1 ;; esac
+
+          {
+            echo "pkg_version=$VER"
+            echo "pkg_release=$REL"
+          } >> "$GITHUB_OUTPUT"
+          echo "Application: ${VER}-r${REL}"
+
+      - name: Generate matrix
+        id: gen
+        env:
+          OWRT_INPUT: ${{ inputs.openwrt_version || 'both' }}
+        run: |
+          set -eu
+          case "$OWRT_INPUT" in
+            both) VERSIONS="24.10.8 25.12.6" ;;
+            *)    VERSIONS="$OWRT_INPUT" ;;
+          esac
+          JSON='{"include":['
+          first=1
+          for v in $VERSIONS; do
+            case "$v" in *[!0-9a-z.-]*) echo "::error::Suspicious version of OpenWrt: $v"; exit 1 ;; esac
+            [ "$first" -eq 1 ] || JSON="$JSON,"
+            first=0
+            JSON="$JSON{\"owrt\":\"$v\"}"
+          done
+          JSON="$JSON]}"
+          echo "matrix=$JSON" >> "$GITHUB_OUTPUT"
+          echo "Matrix: $JSON"
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      PKG_VER: ${{ needs.setup.outputs.pkg_version }}
+      PKG_REL: ${{ needs.setup.outputs.pkg_release }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git python3 python3-setuptools rsync wget file zstd
+
+      - name: Download SDK
+        run: |
+          set -eu
+          VER="${{ matrix.owrt }}"
+          # The package consists of JS/JSON (PKGARCH=all) - the target SDK is not important, so one x86/64 SDK provides packages for all architectures
+          TARGET="x86/64"
+          if [ "$VER" = "snapshot" ]; then
+            BASE_URL="https://downloads.openwrt.org/snapshots/targets/${TARGET}"
+          else
+            BASE_URL="https://downloads.openwrt.org/releases/${VER}/targets/${TARGET}"
+          fi
+          curl -fsSL "${BASE_URL}/sha256sums" -o sha256sums
+          SDK_FILE="$(grep -oE 'openwrt-sdk-[^[:space:]]+Linux-x86_64\.tar\.(zst|xz)' sha256sums | head -n1)"
+          [ -n "$SDK_FILE" ] || { echo "::error::SDK not found in ${BASE_URL} — check version"; exit 1; }
+          echo "SDK selected: ${SDK_FILE}"
+          curl -fL --retry 3 -O "${BASE_URL}/${SDK_FILE}"
+          grep -F "${SDK_FILE}" sha256sums | sha256sum -c -
+          tar -xf "${SDK_FILE}"
+          echo "SDK_DIR=${SDK_FILE%.tar.*}" >> "$GITHUB_ENV"
+
+      - name: Prepare package
+        run: |
+          set -eu
+          cd "${SDK_DIR}"
+          mkdir -p package/luci-mod-listening-ports
+          cp -a ../Makefile ../htdocs ../root ../po ../LICENSE package/luci-mod-listening-ports/
+          sed -i "s/^PKG_VERSION:=.*/PKG_VERSION:=${PKG_VER}/" package/luci-mod-listening-ports/Makefile
+          sed -i "s/^PKG_RELEASE:=.*/PKG_RELEASE:=${PKG_REL}/" package/luci-mod-listening-ports/Makefile
+
+      - name: Build packages
+        run: |
+          set -eu
+          cd "${SDK_DIR}"
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+          {
+            echo "CONFIG_PACKAGE_luci-mod-listening-ports=m"
+            for d in package/luci-mod-listening-ports/po/*/; do
+              l="${d%/}"; l="${l##*/}"
+              [ "$l" = "templates" ] || echo "CONFIG_LUCI_LANG_$l=y"
+            done
+          } >> .config
+          make defconfig
+
+          grep -q '^CONFIG_PACKAGE_luci-mod-listening-ports=m' .config || {
+            echo "::error::The package is thrown out .config — check feeds and dependencies"; exit 1; }
+          grep -Eq '^CONFIG_PACKAGE_luci-i18n-listening-ports-.+=[ym]' .config || \
+            echo "::warning::Not a single i18n package was enabled (check po/ and LUCI_LANG)"
+
+          make -j"$(nproc)" package/feeds/luci/luci-base/host/compile V=s
+
+          make -j"$(nproc)" package/luci-mod-listening-ports/compile V=s
+
+          echo "=== Build artifacts ==="
+          mkdir -p ../pkg-out
+          find bin/packages -type f \( -name '*.ipk' -o -name '*.apk' \) \
+            \( -name 'luci-mod-listening-ports[_-]*' \
+               -o -name 'luci-i18n-listening-ports-*' \) \
+            -exec cp -v {} ../pkg-out/ \;
+          ls -lh ../pkg-out
+          {
+            echo "### OpenWrt ${{ matrix.owrt }} — ${PKG_VER}-r${PKG_REL}"
+            echo '```'
+            ls -1 ../pkg-out
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: listening-ports-${{ needs.setup.outputs.pkg_version }}-r${{ needs.setup.outputs.pkg_release }}-owrt${{ matrix.owrt }}
+          if-no-files-found: error
+          path: pkg-out/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') && !inputs.skip_release
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8.0.2
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts \( -name '*.ipk' -o -name '*.apk' \) | sort -u | while read -r file; do
+            cp -v "$file" release/
+          done
+          ls -lh release/
+          echo "Total: $(find release -type f | wc -l), ipk: $(find release -name '*.ipk' | wc -l), apk: $(find release -name '*.apk' | wc -l)"
+
+      - name: Create or Update Release
+        run: |
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "The release already exists. We load the collected packages into it…"
+            gh release upload "$TAG_NAME" release/* --clobber
+          else
+            echo "Release not found. Create a new one and download packages…"
+            gh release create "$TAG_NAME" --title "LuCI Listening Ports $TAG_NAME" --generate-notes release/*
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}

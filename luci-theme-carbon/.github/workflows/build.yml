@@ -94,6 +94,9 @@ jobs:
       - name: Render theme templates with OpenWrt ucode
         run: |
           docker run --rm --mount "type=bind,source=$GITHUB_WORKSPACE,target=/source,readonly" \
+            openwrt/rootfs:x86_64-23.05.6@sha256:f53afb386d05651ada9a4a964e0779930f30962a2abc2fadf1b03bfcbcbabb14 \
+            sh /source/tests/template-render.sh
+          docker run --rm --mount "type=bind,source=$GITHUB_WORKSPACE,target=/source,readonly" \
             openwrt/rootfs:x86_64-24.10.8@sha256:9972a4b4747cd136abd597475d7b88c51a49fd849d0d53f069a2f4bf446061b9 \
             sh /source/tests/template-render.sh
 

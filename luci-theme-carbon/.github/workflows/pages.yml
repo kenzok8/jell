@@ -1,4 +1,4 @@
-name: Deploy demo to GitHub Pages
+name: Deploy demo and updates to GitHub Pages
 
 on:
   push:
@@ -16,6 +16,9 @@ on:
       - 'scripts/build-demo.py'
       - '.github/workflows/pages.yml'
       - 'LICENSE'
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -27,6 +30,13 @@ concurrency:
 
 jobs:
   build:
+    # A release created with GITHUB_TOKEN does not trigger release.published.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       (github.event.workflow_run.event == 'workflow_dispatch' ||
+        (github.event.workflow_run.event == 'push' && startsWith(github.event.workflow_run.head_branch, 'v'))))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +49,37 @@ jobs:
           for f in htdocs/luci-static/carbon/i18n/*.js; do node --check "$f"; done
       - name: Build static demo
         run: python3 scripts/build-demo.py
+      - name: Stage stable release for online updates
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          dir=dist/demo/updates
+          mkdir -p "$dir"
+          gh api "repos/$GITHUB_REPOSITORY/releases/latest" \
+            --jq '{tag_name, draft, prerelease, body, assets: [.assets[] | select(.name | endswith(".apk") or endswith(".ipk")) | {name, size, digest}]}' > "$dir/latest.json"
+          test "$(wc -c < "$dir/latest.json")" -le 1048576
+          tag=$(jq -er 'select(.draft == false and .prerelease == false) | .tag_name | select(test("^v[0-9]{1,4}[.][0-9]{1,4}[.][0-9]{1,4}$"))' "$dir/latest.json")
+          jq -e --arg ver "${tag#v}" '
+            ($ver | gsub("[.]"; "\\.")) as $v |
+            (.assets | length) == 2 and
+            ([.assets[] | select(.name | test("^luci-theme-carbon-" + $v + "-r[0-9]+\\.apk$"))] | length) == 1 and
+            ([.assets[] | select(.name | test("^luci-theme-carbon_" + $v + "-r[0-9]+_all\\.ipk$"))] | length) == 1 and
+            all(.assets[];
+              (.size | type == "number" and floor == . and . > 0 and . <= 4194304) and
+              (.digest | type == "string" and test("^sha256:[a-f0-9]{64}$")))
+          ' "$dir/latest.json" > /dev/null
+          mkdir "$dir/$tag"
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir "$dir/$tag" --pattern '*.apk' --pattern '*.ipk'
+          test "$(ls -1 "$dir/$tag" | wc -l)" -eq 2
+          jq -er '.assets[] | (.digest | ltrimstr("sha256:")) + "  " + .name' "$dir/latest.json" > "$RUNNER_TEMP/packages.sha256"
+          test "$(wc -l < "$RUNNER_TEMP/packages.sha256")" -eq 2
+          (cd "$dir/$tag" && sha256sum --strict --check "$RUNNER_TEMP/packages.sha256")
+          jq -er '.assets[] | "\(.size) \(.name)"' "$dir/latest.json" | while read -r expected name; do
+            actual=$(wc -c < "$dir/$tag/$name")
+            test "$actual" -eq "$expected"
+          done
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
