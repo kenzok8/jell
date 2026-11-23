@@ -1,0 +1,272 @@
+#!/bin/sh
+
+set -eu
+
+LOG_FILE="${LOG_FILE:-/tmp/clash_update.txt}"
+NFT_DIR="${NFT_DIR:-/usr/share/clashoo/nftables}"
+TARGET_V4="${NFT_DIR}/geoip_cn.nft"
+TARGET_V6="${NFT_DIR}/geoip6_cn.nft"
+FW4_SCRIPT="${FW4_SCRIPT:-/usr/share/clashoo/net/fw4.sh}"
+PROC_ROOT="${PROC_ROOT:-/proc}"
+SINGBOX_BIN_DIR="${SINGBOX_BIN_DIR:-/usr/share/clashoo/bin}"
+TMP_ROOT="$(mktemp -d /tmp/clashoo_china_ip.XXXXXX)"
+TMP_V4="$TMP_ROOT/china_ip.txt"
+TMP_V6="$TMP_ROOT/china_ipv6.txt"
+OUT_V4="$TMP_ROOT/geoip_cn.nft"
+OUT_V6="$TMP_ROOT/geoip6_cn.nft"
+# 失败现场放到固定路径：TMP_ROOT 会被 trap 清掉，事后才能回溯。
+KEEP_FAILED="${KEEP_FAILED:-/tmp/clashoo_china_ip_failed.txt}"
+render_failure=""
+render_detail=""
+
+log() {
+	printf '  %s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$LOG_FILE"
+}
+
+bool_enabled() {
+	case "$1" in
+		1|true|TRUE|yes|on) return 0 ;;
+		*) return 1 ;;
+	esac
+}
+
+download_with_fallback() {
+	local url="$1"
+	local output="$2"
+	local ip
+
+	if curl -fsSL --connect-timeout 10 --max-time 120 "$url" -o "$output"; then
+		return 0
+	fi
+
+	case "$url" in
+		https://ispip.clang.cn/*)
+			for ip in 182.247.248.127 103.220.64.183; do
+				if curl -fsSL --connect-timeout 10 --max-time 120 --resolve "ispip.clang.cn:443:${ip}" "$url" -o "$output"; then
+					log "DNS 异常，已使用 --resolve(${ip}) 回源下载"
+					return 0
+				fi
+			done
+			;;
+	esac
+
+	return 1
+}
+
+cleanup() {
+	rm -rf "$TMP_ROOT"
+}
+
+trap cleanup EXIT INT TERM
+
+render_nft_set() {
+	local source_file="$1"
+	local output_file="$2"
+	local set_name="$3"
+	local set_type="$4"
+	local awk_log="$output_file.awk-error"
+	local nft_log="$output_file.nft-error"
+
+	render_failure=""
+	render_detail=""
+
+	awk -v set_name="$set_name" -v set_type="$set_type" '
+	function valid_cidr(value, parts, octets, i, prefix) {
+		if (split(value, parts, "/") != 2 || parts[2] !~ /^[0-9]+$/ || parts[2] ~ /^0[0-9]/)
+			return 0
+		prefix = parts[2] + 0
+		if (set_type == "ipv4_addr") {
+			if (prefix > 32 || split(parts[1], octets, ".") != 4)
+				return 0
+			# nft 不认前导零（010.1.2.0/24），不在这里拦就只能等 nft 报错，看不出是哪一行
+			for (i = 1; i <= 4; i++)
+				if (octets[i] !~ /^[0-9]+$/ || octets[i] ~ /^0[0-9]/ || length(octets[i]) > 3 || octets[i] + 0 > 255)
+					return 0
+			return 1
+		}
+		return set_type == "ipv6_addr" && prefix <= 128 &&
+			parts[1] ~ /^[0-9A-Fa-f:]+$/ && index(parts[1], ":") > 0
+	}
+	BEGIN {
+		print "set " set_name " {"
+		print "\ttype " set_type ";"
+		print "\tflags interval;"
+		print "\tauto-merge;"
+		print "\telements = {"
+		first = 1
+	}
+	!/^[[:space:]]*$/ && !/^[[:space:]]*#/ {
+		gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
+		if ($0 == "")
+			next
+		if (!valid_cidr($0)) {
+			if (!invalid)
+				printf "invalid CIDR at line %d\n", NR > "/dev/stderr"
+			invalid = 1
+			next
+		}
+		if (!first)
+			print ","
+		printf "\t\t%s", $0
+		first = 0
+	}
+	END {
+		if (!first)
+			print ""
+		print "\t}"
+		print "}"
+		if (invalid || first)
+			exit 1
+	}
+	' "$source_file" > "$output_file" 2>"$awk_log" || {
+		render_failure="格式校验失败"
+		render_detail=$(head -n 1 "$awk_log" 2>/dev/null)
+		return 1
+	}
+	# nft catches malformed IPv6 forms and invalid network prefixes before replacement.
+	if { printf 'table inet clashoo_validate {\n'; cat "$output_file"; printf '\n}\n'; } |
+		nft -c -f - >/dev/null 2>"$nft_log"; then
+		return 0
+	fi
+	render_failure="nft 校验失败"
+	render_detail=$(head -n 1 "$nft_log" 2>/dev/null)
+	return 1
+}
+
+# 失败时保留现场：报错内容加下载到的原始文件，事后才能定位到行。
+report_render_failure() {
+	local label="$1"
+	local source_file="$2"
+	local lines
+	lines=$(grep -c '[^[:space:]]' "$source_file" 2>/dev/null || true)
+	[ -n "$render_detail" ] || render_detail="报错为空"
+	if cp -f "$source_file" "$KEEP_FAILED" 2>/dev/null; then
+		chmod 644 "$KEEP_FAILED" >/dev/null 2>&1 || true
+		log "${label}校验失败（${render_failure:-未知}），条目 ${lines:-?}，$(nft --version 2>/dev/null | head -n 1)，保留原文件；原始文件已存到 $KEEP_FAILED"
+	else
+		log "${label}校验失败（${render_failure:-未知}），条目 ${lines:-?}，$(nft --version 2>/dev/null | head -n 1)，保留原文件"
+	fi
+	log "${label}报错：$render_detail"
+}
+
+url4="$(uci -q get clashoo.config.china_ip_url 2>/dev/null || true)"
+url6="$(uci -q get clashoo.config.china_ipv6_url 2>/dev/null || true)"
+bypass_china="$(uci -q get clashoo.config.bypass_china 2>/dev/null || true)"
+bypass_china_ipv6="$(uci -q get clashoo.config.bypass_china_ipv6 2>/dev/null || true)"
+[ -n "$bypass_china_ipv6" ] || bypass_china_ipv6="$bypass_china"
+
+[ -n "$url4" ] || url4='https://ispip.clang.cn/all_cn.txt'
+[ -n "$url6" ] || url6='https://ispip.clang.cn/all_cn_ipv6.txt'
+
+mkdir -p "$NFT_DIR"
+
+log '开始更新大陆白名单'
+
+download_with_fallback "$url4" "$TMP_V4"
+[ -s "$TMP_V4" ] || {
+	log '大陆 IPv4 白名单下载失败：返回为空'
+	exit 1
+}
+changed=0
+
+if ! render_nft_set "$TMP_V4" "$OUT_V4" clashoo_china ipv4_addr; then
+	report_render_failure '大陆 IPv4 白名单' "$TMP_V4"
+	exit 1
+fi
+if cmp -s "$OUT_V4" "$TARGET_V4"; then
+	log '大陆 IPv4 白名单内容无变化'
+else
+	mv "$OUT_V4" "$TARGET_V4"
+	chmod 644 "$TARGET_V4" >/dev/null 2>&1 || true
+	changed=1
+	log '大陆 IPv4 白名单更新完成'
+fi
+
+if download_with_fallback "$url6" "$TMP_V6"; then
+	if [ -s "$TMP_V6" ]; then
+		if ! render_nft_set "$TMP_V6" "$OUT_V6" clashoo_china6 ipv6_addr; then
+			report_render_failure '大陆 IPv6 白名单' "$TMP_V6"
+			exit 1
+		fi
+		if cmp -s "$OUT_V6" "$TARGET_V6"; then
+			log '大陆 IPv6 白名单内容无变化'
+		else
+			mv "$OUT_V6" "$TARGET_V6"
+			chmod 600 "$TARGET_V6" >/dev/null 2>&1 || true
+			changed=1
+			log '大陆 IPv6 白名单更新完成'
+		fi
+	else
+		log '大陆 IPv6 白名单下载为空，保留原文件'
+	fi
+else
+	log '大陆 IPv6 白名单下载失败，保留原文件'
+fi
+
+instance_pid() {
+	local service="$1"
+	local instance="${2:-}"
+	local filter
+	if [ -n "$instance" ]; then
+		filter="@.${service}.instances.${instance}.pid"
+	else
+		filter="@[\"${service}\"].instances.*.pid"
+	fi
+	ubus call service list "{\"name\":\"$service\",\"verbose\":true}" 2>/dev/null |
+		jsonfilter -e "$filter" 2>/dev/null | head -n1
+}
+
+pid_running() {
+	[ -n "$1" ] && [ -d "$PROC_ROOT/$1" ]
+}
+
+singbox_pid_owns_private_binary() {
+	local pid="$1" exe cmdline
+	pid_running "$pid" || return 1
+	exe="$(readlink -f "$PROC_ROOT/$pid/exe" 2>/dev/null)"
+	case "$exe" in
+		"$SINGBOX_BIN_DIR/sing-box-stable"|"$SINGBOX_BIN_DIR/sing-box-alpha") return 0 ;;
+	esac
+	cmdline="$(tr '\000' ' ' < "$PROC_ROOT/$pid/cmdline" 2>/dev/null)"
+	case "$cmdline" in
+		"$SINGBOX_BIN_DIR/sing-box-stable"|"$SINGBOX_BIN_DIR/sing-box-stable "*|"$SINGBOX_BIN_DIR/sing-box-alpha"|"$SINGBOX_BIN_DIR/sing-box-alpha "*) return 0 ;;
+	esac
+	return 1
+}
+
+selected_core_running() {
+	local name pid
+	if [ "$(uci -q get clashoo.config.core_type 2>/dev/null)" = "singbox" ]; then
+		name="clashoo"
+		pid="$(instance_pid "$name" singbox)"
+		singbox_pid_owns_private_binary "$pid"
+		return $?
+	else
+		name="clashoo"
+	fi
+	pid="$(instance_pid "$name")"
+	pid_running "$pid"
+}
+
+firewall_managed() {
+	bool_enabled "$(uci -q get clashoo.config.enable 2>/dev/null)" || return 1
+	[ "$(uci -q get clashoo.config.core_only 2>/dev/null)" = "1" ] && return 1
+	selected_core_running
+}
+
+if [ "$changed" -eq 0 ]; then
+	log '白名单内容未变，跳过防火墙重载'
+elif ! firewall_managed; then
+	log '未接管防火墙（服务未运行或仅内核模式），仅更新白名单文件'
+elif bool_enabled "$bypass_china" || bool_enabled "$bypass_china_ipv6"; then
+	if "$FW4_SCRIPT" apply >/dev/null 2>&1; then
+		log "大陆白名单规则已重载（IPv4=${bypass_china:-0}，IPv6=${bypass_china_ipv6:-0}）"
+	else
+		log '大陆白名单规则重载失败'
+		exit 1
+	fi
+else
+	log '大陆 IPv4/IPv6 绕过均未启用，仅更新白名单文件'
+fi
+
+log '大陆白名单更新流程完成'

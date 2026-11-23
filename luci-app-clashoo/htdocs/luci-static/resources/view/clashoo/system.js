@@ -1,0 +1,1431 @@
+'use strict';
+'require view';
+'require form';
+'require uci';
+'require ui';
+'require poll';
+'require rpc';
+'require fs';
+'require tools.clashoo as clashoo';
+
+function getThemeClass() {
+  var h = document.documentElement;
+  // Bootstrap: explicit data-bs-theme attribute wins first
+  if (h.dataset.bsTheme === 'dark') return 'cl-theme-dark';
+  if (h.dataset.bsTheme === 'light') return 'cl-theme-light';
+  // Argon: explicit darkmode attribute
+  if (h.dataset.darkmode === 'true') return 'cl-theme-dark';
+  // Argon: dark.css loaded in document = dark mode active (most reliable)
+  var links = document.querySelectorAll('link[rel="stylesheet"]');
+  for (var i = 0; i < links.length; i++) {
+    if (links[i].href && links[i].href.indexOf('dark.css') !== -1) return 'cl-theme-dark';
+  }
+  // Generic: .dark class on root element
+  if (h.classList.contains('dark')) return 'cl-theme-dark';
+  // Body background luminance (skip transparent/rgba backgrounds)
+  var bg = window.getComputedStyle(document.body).backgroundColor;
+  if (bg && bg.indexOf('rgba') === -1 && bg.indexOf('rgb') !== -1) {
+    var m = bg.match(/\d+/g);
+    if (m && m.length >= 3 && (parseInt(m[0]) + parseInt(m[1]) + parseInt(m[2])) / 3 < 100) return 'cl-theme-dark';
+  }
+  return 'cl-theme-light';
+}
+
+var callHostHints = rpc.declare({
+  object: 'luci-rpc',
+  method: 'getHostHints',
+  expect: { '': {} }
+});
+
+var callBackupExportPrepare = rpc.declare({ object: 'luci.clashoo', method: 'backup_export_prepare', expect: {} });
+var callBackupExportCleanup = rpc.declare({ object: 'luci.clashoo', method: 'backup_export_cleanup', params: ['path'], expect: {} });
+var callBackupImportPrepare = rpc.declare({ object: 'luci.clashoo', method: 'backup_import_prepare', expect: {} });
+var callBackupImportChunk = rpc.declare({ object: 'luci.clashoo', method: 'backup_import_chunk', params: ['path', 'offset', 'data'], expect: {} });
+var callBackupImportCleanup = rpc.declare({ object: 'luci.clashoo', method: 'backup_import_cleanup', params: ['path'], expect: {} });
+var callBackupImportFile = rpc.declare({ object: 'luci.clashoo', method: 'backup_import_file', params: ['name', 'path'], expect: {} });
+var callBackupReset = rpc.declare({ object: 'luci.clashoo', method: 'backup_reset', expect: {} });
+
+var CSS = [
+  '.cl-wrap{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif}',
+  '.cl-tabs{display:flex;border-bottom:2px solid rgba(128,128,128,.15);margin-bottom:18px}',
+  '.cl-tab{padding:10px 20px;cursor:pointer;font-size:13px;opacity:.55;border-bottom:2px solid transparent;margin-bottom:-2px}',
+  '.cl-tab.active{opacity:1;border-bottom-color:currentColor;font-weight:600}',
+  '.cl-panel{display:none}.cl-panel.active{display:block}',
+  '.cl-section{margin-bottom:20px}',
+  '.cl-section h4{font-size:.95rem;font-weight:600;margin-bottom:10px;color:var(--title-color,rgba(92,102,120,.72));opacity:.95}',
+  '.cl-save-bar{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(128,128,128,.15)}',
+  '.cl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}',
+  '.cl-log-area{font-family:monospace;font-size:11px;opacity:.75;max-height:300px;overflow-y:auto;border:1px solid rgba(128,128,128,.2);border-radius:8px;padding:10px;white-space:pre-wrap;margin-top:8px}',
+  '.cl-log-tabs{display:flex;gap:8px;margin-bottom:8px}',
+  '.cl-log-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}',
+  '.cl-log-toolbar label{font-size:11px;display:inline-flex;align-items:center;gap:4px;cursor:pointer;margin:0}',
+  /* Argon shifts label>checkbox down (top:.4rem); reset so flex centers it */
+  '.cl-log-toolbar input[type=checkbox]{position:static;top:auto;right:auto;margin:0}',
+  /* unify select + button heights so the row lines up */
+  '.cl-log-toolbar>select,.cl-log-toolbar>button{height:26px;box-sizing:border-box;font-size:11px;line-height:1;padding:0 10px;margin:0}',
+  '.cl-log-tab{padding:4px 12px;border:1px solid rgba(128,128,128,.2);border-radius:20px;font-size:12px;cursor:pointer;opacity:.6}',
+  '.cl-log-tab.active{opacity:1;font-weight:600;background:rgba(128,128,128,.1)}',
+  '.cl-log-line{display:block;padding:1px 4px;border-radius:3px}',
+	  /* Light theme: AA+ contrast on white bg (issue #16) */
+	  '.cl-log-line.cl-log-info{color:#1f6b3f}',
+	  '.cl-log-line.cl-log-warn{color:#8b5a00}',
+	  '.cl-log-line.cl-log-error{color:#c0392b;background:rgba(192,57,43,.06)}',
+	  '.cl-log-line.cl-log-debug{color:#5a6270;opacity:.85}',
+	  '.cl-log-line.cl-log-hidden{display:none}',
+	  '.cl-log-ts{color:#5a6270;margin-right:8px}',
+	  '.cl-log-msg{color:inherit}',
+	  /* Dark theme overrides: original colors tuned for dark bg */
+	  '.cl-theme-dark .cl-log-line.cl-log-info{color:#7fc7a8}',
+	  '.cl-theme-dark .cl-log-line.cl-log-warn{color:#e8b95a}',
+	  '.cl-theme-dark .cl-log-line.cl-log-error{color:#ea7878;background:rgba(234,120,120,.06)}',
+	  '.cl-theme-dark .cl-log-line.cl-log-debug{color:#7a8290;opacity:.7}',
+	  '.cl-theme-dark .cl-log-ts{color:#6b7480}',
+	  '.cl-dl-hint{margin-top:6px;font-size:12px;min-height:18px;line-height:1.4}',
+  '.cl-component-card{padding:16px 18px;border:1px solid var(--cl-surface-border,rgba(128,128,128,.14));border-radius:var(--border-radius,var(--cl-radius,12px));background:var(--cl-card-bg,#fff);box-shadow:var(--card-shadow,var(--cl-card-shadow));margin:0 14px 14px}',
+  '.cl-component-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}',
+  '.cl-component-head h4{display:flex;align-items:center;gap:8px;margin:0 0 4px !important;padding:0 !important;font-size:0.95rem;font-weight:600;color:var(--title-color,var(--cl-title-color,inherit));background:transparent !important}',
+  '.cl-component-head h4:before{content:"";width:3px;height:14px;border-radius:2px;background:var(--primary-color,var(--cl-primary,#2f80ed));flex:0 0 3px}',
+  '.cl-component-adv{margin-top:10px}',
+  '.cl-component-adv-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;user-select:none;font-size:13px;font-weight:700;background:var(--cl-control-bg,rgba(128,128,128,.04));border:1px solid var(--cl-control-border,rgba(128,128,128,.14));border-radius:8px}',
+  '.cl-component-adv-bar:hover{background:var(--cl-primary-soft,rgba(0,122,255,.08))}',
+  '.cl-component-adv-chevron{font-size:16px;font-weight:700;opacity:.55;transition:transform .2s}',
+  '.cl-component-adv:not(.cl-closed) .cl-component-adv-chevron{transform:rotate(90deg)}',
+  '.cl-component-adv-body{margin-top:8px}',
+  '.cl-component-adv.cl-closed .cl-component-adv-body{display:none}',
+  '.cl-component-sub{font-size:12px;color:rgba(120,130,150,.9);line-height:1.45}',
+  '.cl-component-list{display:grid;gap:8px}',
+  '.cl-component-row{display:grid;grid-template-columns:minmax(170px,1.1fr) minmax(180px,1.5fr) minmax(130px,.9fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--cl-surface-border,rgba(128,128,128,.14));border-radius:8px;background:var(--cl-card-bg,#fff)}',
+  '.cl-component-name{font-weight:700;font-size:13px}',
+  '.cl-component-desc{font-size:12px;color:rgba(120,130,150,.92);margin-top:2px}',
+  '.cl-component-version{font-size:12px;line-height:1.45;color:rgba(90,100,120,.95);word-break:break-word}',
+  '.cl-theme-dark .cl-component-version{color:rgba(210,220,235,.86)}',
+  '.cl-component-status{font-size:12px;line-height:1.45;color:rgba(90,100,120,.95)}',
+  '.cl-component-status.cl-st-running{color:#2f80ed}.cl-component-status.cl-st-success{color:#239b56}.cl-component-status.cl-st-failed{color:#d43f3a}',
+  '.cl-component-log{margin-top:10px;font-family:monospace;font-size:11px;white-space:pre-wrap;max-height:140px;overflow:auto;padding:9px;border:1px solid var(--cl-surface-border,rgba(128,128,128,.14));border-radius:8px;background:var(--cl-card-bg,#fff);color:#1f6b3f}',
+  '.cl-theme-dark .cl-component-log{color:#a3d9ad}',
+  '.cl-component-arch{margin-bottom:12px}',
+  '.cl-component-arch-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border:1px solid var(--cl-surface-border,rgba(128,128,128,.14));border-radius:8px;background:var(--cl-card-bg,#fff)}',
+  '.cl-component-arch-label{font-size:13px;font-weight:700}',
+  '.cl-component-arch-auto{font-size:12px;color:rgba(90,100,120,.82);line-height:1.2}',
+  '.cl-theme-dark .cl-component-arch-auto{color:rgba(210,220,235,.78)}',
+  '.cl-wrap .cl-component-arch-sel{font-size:12px!important;font-weight:700!important;padding:4px 9px!important;border:1px solid rgba(46,170,92,.28)!important;border-radius:6px!important;background:rgba(46,170,92,.12)!important;color:#24844d!important}',
+  '.cl-wrap.cl-theme-dark .cl-component-arch-sel{background:rgba(104,199,135,.16)!important;color:#c6f6d3!important;border-color:rgba(104,199,135,.3)!important}',
+  '.cl-component-arch-sel option{background:var(--background-color,#fff);color:inherit}',
+  '.cl-component-arch-hint{font-size:12px;color:rgba(120,130,150,.9)}',
+  '.cl-comp-var-box{display:inline-flex;gap:4px;margin-top:5px}',
+  '.cl-comp-var{font-size:11px;padding:2px 10px;border-radius:10px;border:1px solid rgba(128,128,128,.3);background:transparent;color:inherit;cursor:pointer;min-width:52px}',
+  '.cl-comp-var.on{background:rgba(var(--primary-rgb,0,122,255),.18);border-color:rgba(var(--primary-rgb,0,122,255),.64);color:var(--primary-color,#0b68dd);font-weight:800;box-shadow:0 0 0 1px rgba(var(--primary-rgb,0,122,255),.1) inset}',
+  '.cl-comp-updatable{font-size:10px;font-weight:700;color:#239b56;margin-left:2px}',
+  '@media(max-width:760px){.cl-component-head{display:block}.cl-component-head .btn{margin-top:10px}.cl-component-row{grid-template-columns:1fr;gap:6px}.cl-component-row .btn{width:auto;justify-self:start;padding-left:18px;padding-right:18px}}',
+  /* align form.Map font with config page */
+  '.cl-panel .cbi-section>h3{font-size:13px !important;font-weight:600;margin-bottom:8px}',
+  '.cl-panel .cbi-value-title{font-size:13px !important}',
+  '.cl-panel .cbi-value-field input,.cl-panel .cbi-value-field select,.cl-panel .cbi-value-field textarea{font-size:13px !important}',
+  '.cl-panel .cbi-section-descr,.cl-panel .cbi-value-helptext{font-size:12px !important}',
+  '.cl-panel .cbi-section{margin-bottom:12px}',
+  '.cl-wrap .cbi-section>h3,.cl-wrap .cbi-value-title,.cl-wrap .cbi-section-descr,.cl-wrap .cbi-value-helptext{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif !important}',
+  '.cl-wrap .cbi-input-text,.cl-wrap .cbi-input-select,.cl-wrap select,.cl-wrap input,.cl-wrap textarea,.cl-wrap .btn,.cl-wrap .cbi-button{font-size:13px !important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif !important}',
+  '.cl-wrap .btn,.cl-wrap .cbi-button{padding:4px 10px;line-height:1.35}',
+  '#cbi-clashoo-lan_acl{overflow-x:visible!important}',
+  '#cbi-clashoo-lan_acl .cbi-section-table{display:flex;width:100%;overflow:visible!important;flex-direction:column;border:0!important}',
+  '#cbi-clashoo-lan_acl .cbi-section-thead{display:none}',
+  '#cbi-clashoo-lan_acl .cbi-section-tbody{display:flex;width:100%;flex-direction:column}',
+  '#cbi-clashoo-lan_acl .cbi-section-table-row{display:flex;width:100%;padding:14px 0;border-top:1px solid rgba(128,128,128,.16);flex-direction:column;align-items:stretch}',
+  '#cbi-clashoo-lan_acl .cbi-section-table-row:first-child{border-top:0}',
+  '#cbi-clashoo-lan_acl .cl-acl-empty-row,#cbi-clashoo-lan_acl .cl-acl-empty-row>*{border:0!important;box-shadow:none!important}',
+  '#cbi-clashoo-lan_acl .cl-acl-value{width:100%;border:0!important;box-sizing:border-box}',
+  '#cbi-clashoo-lan_acl .cl-acl-value .cbi-dropdown[open]>ul.dropdown{width:max-content;min-width:100%;max-width:calc(100vw - 48px)}',
+  '@media(max-width:600px){#cbi-clashoo-lan_acl .cl-acl-value .cbi-dropdown[open]>ul.dropdown{width:100%!important;min-width:0;max-width:100%}#cbi-clashoo-lan_acl .cl-acl-value .cbi-dropdown[open]>ul.dropdown>li{height:auto;white-space:normal;overflow-wrap:anywhere;line-height:1.35}}',
+  '#cbi-clashoo-lan_acl .cbi-section-actions{display:flex!important;justify-content:flex-end;width:auto!important;padding:8px 0 0!important;border:0!important}',
+  '#cbi-clashoo-lan_acl .cbi-section-actions>div{display:flex;gap:8px}',
+  '#cbi-clashoo-lan_acl .cbi-section-create{padding-top:10px}'
+].join('');
+
+/* component update: main area = clashoo/client only; rest in collapsible */
+var COMPONENT_MAIN_IDS = { clashoo: true, luci: true };
+
+function fastResolve(promise, timeoutMs, fallback) {
+  var t = new Promise(function (resolve) {
+    setTimeout(function () { resolve(fallback); }, timeoutMs);
+  });
+  return Promise.race([L.resolveDefault(promise, fallback), t]);
+}
+
+function decorateSystemForm(root) {
+  if (!root || !root.querySelectorAll)
+    return;
+
+  var fields = root.querySelectorAll('.cbi-value-field');
+  for (var i = 0; i < fields.length; i++) {
+    if (fields[i] && fields[i].classList)
+      fields[i].classList.add('cl-control-wrap');
+  }
+
+  var sections = root.querySelectorAll('.cbi-section');
+  for (var j = 0; j < sections.length; j++) {
+    if (sections[j] && sections[j].classList)
+      sections[j].classList.add('cl-form-card');
+  }
+}
+
+function normalizeLanAclLayout(root) {
+  var rows = root.querySelectorAll('#cbi-clashoo-lan_acl .cbi-section-table-row');
+  for (var r = 0; r < rows.length; r++) {
+    if (!rows[r].querySelector('input, select, button, .cbi-dropdown'))
+      rows[r].classList.add('cl-acl-empty-row');
+  }
+
+  var cells = root.querySelectorAll('#cbi-clashoo-lan_acl .cbi-section-table-row > td.cbi-value-field:not(.cl-acl-value)');
+  for (var i = 0; i < cells.length; i++) {
+    var cell = cells[i];
+    var control = cell.firstElementChild;
+    if (!control)
+      continue;
+
+    cell.parentElement.classList.add('cbi-section-node', 'cl-acl-node');
+
+    var field = document.createElement('div');
+    field.className = 'cbi-value-field';
+    field.appendChild(control);
+
+    var label = document.createElement('label');
+    label.className = 'cbi-value-title';
+    label.textContent = cell.getAttribute('data-title') || '';
+
+    cell.textContent = '';
+    cell.className = 'cbi-value cl-acl-value';
+    cell.appendChild(label);
+    cell.appendChild(field);
+  }
+}
+
+function syncLanAclControlWidth(root) {
+  var reference = root.querySelector('#cbi-clashoo-config-bypass_port_mode select');
+  if (!reference)
+    return;
+
+  var referenceWidth = reference.getBoundingClientRect().width;
+  if (!referenceWidth)
+    return;
+
+  var section = root.querySelector('#cbi-clashoo-lan_acl');
+  var sectionRect = section.getBoundingClientRect();
+  var sectionStyle = window.getComputedStyle(section);
+  var contentRight = sectionRect.right - parseFloat(sectionStyle.paddingRight || 0);
+  var lists = root.querySelectorAll('#cbi-clashoo-lan_acl .cbi-dynlist');
+  for (var i = 0; i < lists.length; i++) {
+    var left = lists[i].getBoundingClientRect().left;
+    var width = Math.min(referenceWidth, contentRight - left);
+    lists[i].style.width = Math.max(0, width) + 'px';
+    lists[i].style.minWidth = '0';
+    lists[i].style.maxWidth = 'none';
+
+    var controls = lists[i].querySelectorAll('.add-item, .cbi-dropdown');
+    for (var j = 0; j < controls.length; j++) {
+      controls[j].style.width = '100%';
+      controls[j].style.minWidth = '0';
+      controls[j].style.maxWidth = '100%';
+      controls[j].style.boxSizing = 'border-box';
+    }
+  }
+}
+
+function watchLanAclLayout(root) {
+  normalizeLanAclLayout(root);
+  syncLanAclControlWidth(root);
+  var observer = new MutationObserver(function () {
+    normalizeLanAclLayout(root);
+    syncLanAclControlWidth(root);
+  });
+  observer.observe(root, { childList: true, subtree: true });
+  window.addEventListener('resize', function () {
+    syncLanAclControlWidth(root);
+  });
+}
+
+function randomSecret(len) {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  var out = '';
+  var n = Math.max(6, parseInt(len, 10) || 6);
+  for (var i = 0; i < n; i++) {
+    out += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return out;
+}
+
+function enhanceDashPasswordField(root) {
+  if (!root || !root.querySelector)
+    return;
+
+  var input = root.querySelector('input[id$=".dash_pass"], input[name$=".dash_pass"]');
+  if (!input || input.dataset.clEnhanced === '1')
+    return;
+
+  input.dataset.clEnhanced = '1';
+  input.type = 'password';
+  input.autocomplete = 'new-password';
+
+  var parent = input.parentNode;
+  if (!parent)
+    return;
+
+  /* Remove LuCI default password helper controls (e.g. stray "*" button) */
+  var children = parent.children ? Array.prototype.slice.call(parent.children) : [];
+  children.forEach(function (el) {
+    if (!el || el === input)
+      return;
+    var tag = (el.tagName || '').toUpperCase();
+    var isBtnLike = tag === 'BUTTON'
+      || (tag === 'INPUT' && String(el.type || '').toLowerCase() === 'button')
+      || ((el.className || '').indexOf('cbi-button') >= 0);
+    if (isBtnLike)
+      parent.removeChild(el);
+  });
+
+  var wrap = E('div', { 'class': 'cl-pass-wrap' });
+  parent.insertBefore(wrap, input);
+  wrap.appendChild(input);
+
+  var eyeBtn = E('button', {
+    type: 'button',
+    'class': 'btn cbi-button cl-pass-btn',
+    title: _("Show/Hide"),
+    click: function (ev) {
+      ev.preventDefault();
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      eyeBtn.textContent = show ? '🙈' : '👁';
+    }
+  }, '👁');
+
+  var genBtn = E('button', {
+    type: 'button',
+    'class': 'btn cbi-button-action cl-pass-btn cl-pass-gen',
+    click: function (ev) {
+      ev.preventDefault();
+      input.type = 'text';
+      input.value = randomSecret(6);
+      eyeBtn.textContent = '🙈';
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }, _("Random"));
+
+  wrap.appendChild(eyeBtn);
+  wrap.appendChild(genBtn);
+}
+
+function clearClashooDirty() {
+  var applyPromise;
+  try {
+    applyPromise = (L.uci && typeof L.uci.callApply === 'function')
+      ? Promise.resolve(L.uci.callApply(0, false)).catch(function () {})
+      : Promise.resolve();
+  } catch (e) { applyPromise = Promise.resolve(); }
+  return applyPromise.then(function () {
+    try {
+      if (L.ui && L.ui.changes && L.ui.changes.changes) {
+        delete L.ui.changes.changes.clashoo;
+        var n = Object.keys(L.ui.changes.changes).length;
+        if (typeof L.ui.changes.renderChangeIndicator === 'function')
+          L.ui.changes.renderChangeIndicator(n);
+        else if (typeof L.ui.changes.setIndicator === 'function')
+          L.ui.changes.setIndicator(n);
+      }
+    } catch (e) {}
+  });
+}
+
+function saveCommitApplyMaybeReload(m, runningMsg, stoppedMsg) {
+  return clashoo.status()
+    .then(function (st) { return !!(st && st.running); })
+    .catch(function () { return false; })
+    .then(function (running) {
+      return m.save()
+        .then(function () { return clashoo.commitConfig(); })
+        .then(function () {
+          return running ? clashoo.reload() : { success: true, skipped: true };
+        })
+        .then(function () { return clearClashooDirty(); })
+        .then(function () {
+          ui.addNotification(null, E('p', running ? runningMsg : stoppedMsg));
+          window.setTimeout(function () { location.reload(); }, 300);
+        });
+    });
+}
+
+function coreChoiceFromConfig(coreType, dcore) {
+  if (coreType === 'singbox')
+    return dcore === '5' ? 'singbox-alpha' : 'singbox-stable';
+  if (dcore === '1') return 'smart';
+  if (dcore === '3') return 'mihomo-alpha';
+  return 'mihomo-stable';
+}
+
+function coreChoiceTarget(choice) {
+  var targets = {
+    'mihomo-stable':  { core: 'mihomo',  dcore: '2' },
+    'mihomo-alpha':   { core: 'mihomo',  dcore: '3' },
+    'smart':          { core: 'mihomo',  dcore: '1' },
+    'singbox-stable': { core: 'singbox', dcore: '4' },
+    'singbox-alpha':  { core: 'singbox', dcore: '5' }
+  };
+  return targets[choice] || targets['mihomo-stable'];
+}
+
+function waitForCoreTarget(target, attempts, sawRestart) {
+  attempts = attempts == null ? 50 : attempts;
+  sawRestart = !!sawRestart;
+  return clashoo.status().then(function (st) {
+    st = st || {};
+    var selected = st.core_type === target.core && String(st.dcore || '') === target.dcore;
+    var transitioning = !st.running || st.health_status === 'stopped' || st.health_status === 'starting';
+    sawRestart = sawRestart || transitioning;
+    if (sawRestart && selected && st.running && st.health_status !== 'stopped' && st.health_status !== 'fail')
+      return st;
+    if (selected && st.health_status === 'fail')
+      throw new Error(_("The new core failed to start, please check the core log"));
+    if (attempts <= 0)
+      throw new Error(_("Timeout waiting for new core to start, please check the core log"));
+    return new Promise(function (resolve) {
+      setTimeout(resolve, 600);
+    }).then(function () { return waitForCoreTarget(target, attempts - 1, sawRestart); });
+  });
+}
+
+// tab persistence (hash + localStorage), shared shape with config.js so save/apply
+// reloads keep the active tab instead of snapping back to the first one
+function readSavedTab(key, fallback, allowed) {
+  var raw = '';
+  if (window.location.hash)
+    raw = window.location.hash.replace(/^#/, '');
+  if (!raw) {
+    try { raw = window.localStorage.getItem(key) || ''; } catch (e) {}
+  }
+  return allowed.indexOf(raw) >= 0 ? raw : fallback;
+}
+
+function rememberTab(key, id) {
+  try { window.localStorage.setItem(key, id); } catch (e) {}
+  if (window.history && window.history.replaceState)
+    window.history.replaceState(null, '', '#' + id);
+  else
+    window.location.hash = id;
+}
+
+function readBackupSliceBase64(file, start, end) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var result = String(reader.result || '');
+      var comma = result.indexOf(',');
+      if (comma < 0)
+        reject(new Error(_("Unable to read backup file")));
+      else
+        resolve(result.substring(comma + 1));
+    };
+    reader.onerror = function () {
+      reject(reader.error || new Error(_("Unable to read backup file")));
+    };
+    reader.readAsDataURL(file.slice(start, end));
+  });
+}
+
+function uploadBackupChunks(file, path) {
+  var offset = 0;
+  var chunkSize = 32 * 1024;
+
+  function next() {
+    if (offset >= file.size)
+      return Promise.resolve();
+    var end = Math.min(offset + chunkSize, file.size);
+    var expected = end;
+    return readBackupSliceBase64(file, offset, end)
+      .then(function (data) { return callBackupImportChunk(path, offset, data); })
+      .then(function (r) {
+        if (!r || !r.success)
+          throw new Error((r && r.message) || _("Upload failed"));
+        if (parseInt(r.offset, 10) !== expected)
+          throw new Error(_("Upload offset mismatch"));
+        offset = expected;
+        return next();
+      });
+  }
+
+  return next();
+}
+
+return view.extend({
+  _tab:    'kernel',
+  _logTab: 'plugin',
+
+  load: function () {
+    return Promise.all([
+      fastResolve(clashoo.getCpuArch(), 5000, ''),
+      fastResolve(clashoo.getLogStatus(), 1200, {}),
+      fastResolve(clashoo.readLog(), 1200, ''),
+      uci.load('clashoo'),
+      fastResolve(L.resolveDefault(callHostHints(), {}), 1500, {})
+    ]);
+  },
+
+  render: function (data) {
+    var self      = this;
+    var cpuArch   = data[0] || '';
+    var logStatus = data[1] || {};
+    var runLog    = data[2] || '';
+    var hostHints = data[4] || {};
+    this._hostHints = hostHints;
+
+    if (!document.getElementById('cl-css')) {
+      var s = document.createElement('style');
+      s.id = 'cl-css'; s.textContent = CSS;
+      document.head.appendChild(s);
+    }
+    if (!document.getElementById('cl-css-ext')) {
+      var link = document.createElement('link');
+      link.id = 'cl-css-ext';
+      link.rel = 'stylesheet';
+      link.href = L.resource('view/clashoo/clashoo.css') + '?v=20260806a1';
+      document.head.appendChild(link);
+    } else {
+      document.getElementById('cl-css-ext').href = L.resource('view/clashoo/clashoo.css') + '?v=20260806a1';
+    }
+
+    // restore last-viewed tab so save/apply reloads stay put instead of jumping to kernel
+    this._tab = readSavedTab('clashoo.system.tab', this._tab || 'kernel', ['kernel', 'rules', 'logs']);
+    rememberTab('clashoo.system.tab', this._tab);
+    var tabs = [
+      { id: 'kernel', label: _("Core and Data") },
+      { id: 'rules',  label: _("Rules and Control") },
+      { id: 'logs',   label: _("Log") }
+    ];
+    var tabEls = {}, panelEls = {};
+
+    var tabBar = E('div', { 'class': 'cl-tabs' },
+      tabs.map(function (t) {
+        var el = E('div', {
+          'class': 'cl-tab' + (self._tab === t.id ? ' active' : ''),
+          click: function () {
+            Object.keys(tabEls).forEach(function (k) {
+              tabEls[k].className   = 'cl-tab'   + (k === t.id ? ' active' : '');
+              panelEls[k].className = 'cl-panel' + (k === t.id ? ' active' : '');
+            });
+            self._tab = t.id;
+            rememberTab('clashoo.system.tab', t.id);
+          }
+        }, t.label);
+        tabEls[t.id] = el;
+        return el;
+      })
+    );
+
+    var kernelPanel = E('div', { 'class': 'cl-panel' + (this._tab === 'kernel' ? ' active' : ''), id: 'cl-panel-kernel' });
+    panelEls['kernel'] = kernelPanel;
+    this._buildComponentUpdatePanel(kernelPanel, cpuArch);
+    this._buildBackupPanel(kernelPanel);
+    this._buildKernelPanel(kernelPanel, cpuArch);
+
+    var rulesPanel = E('div', { 'class': 'cl-panel' + (this._tab === 'rules' ? ' active' : ''), id: 'cl-panel-rules' });
+    panelEls['rules'] = rulesPanel;
+    this._buildRulesForm(rulesPanel);
+
+    var logsPanel = E('div', { 'class': 'cl-panel' + (this._tab === 'logs' ? ' active' : ''), id: 'cl-panel-logs' },
+      this._buildLogsPanel(runLog)
+    );
+    panelEls['logs'] = logsPanel;
+
+    this._tabEls = tabEls;
+    this._panelEls = panelEls;
+    poll.add(L.bind(this._pollLogs, this), 8);
+
+    return E('div', { 'class': 'cl-wrap clashoo-container cl-system-page cl-form-page ' + getThemeClass() }, [tabBar, kernelPanel, rulesPanel, logsPanel]);
+  },
+
+  _detectMihomoArch: function (raw) {
+    if (!raw) return '';
+    if (raw === 'x86_64')             return 'amd64-compatible';
+    if (/^aarch64/.test(raw))         return 'arm64';
+    if (/^armv7|^arm_cortex-a[7-9]|^arm_cortex-a1[0-9]/.test(raw)) return 'armv7';
+    if (/^armv6|^arm_cortex-a[56]/.test(raw))  return 'armv6';
+    if (/^arm/.test(raw))             return 'armv5';
+    if (/^i[3-6]86/.test(raw))        return '386';
+    if (/^mips64el/.test(raw))        return 'mips64le';
+    if (/^mips64/.test(raw))          return 'mips64';
+    if (/^mipsel/.test(raw))          return 'mipsle';
+    if (/^mips/.test(raw))            return 'mips';
+    return '';
+  },
+
+  _buildComponentUpdatePanel: function (container, cpuArch) {
+    var self = this;
+    this._compCpuArch = cpuArch || '';
+    this._compVariant = this._compVariant || {};
+    this._compLatest = this._compLatest || {};
+    var listEl = E('div', { 'class': 'cl-component-list' });
+    var advListEl = E('div', { 'class': 'cl-component-list' });
+    this._compAdvListEl = advListEl;
+    var logEl = E('div', { 'class': 'cl-component-log', style: 'display:none' }, '');
+    this._compLogEl = logEl;
+    var archWrap = E('div', { 'class': 'cl-component-arch' });
+    this._compArchWrap = archWrap;
+    var refreshBtn = E('button', {
+      'class': 'btn cbi-button cbi-button-neutral',
+      click: function (ev) {
+        ev.preventDefault();
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = _("Checking…");
+        self._refreshComponentUpdatePanel(listEl, logEl, true);
+      }
+    }, _("Check Updates"));
+    this._compRefreshBtn = refreshBtn;
+
+    /* advanced: core/data, collapsed by default to keep page compact.
+       CPU arch stays outside — it decides core binary arch */
+    var advWrap = E('div', { 'class': 'cl-component-adv cl-closed' }, [
+      E('div', { 'class': 'cl-component-adv-bar' }, [
+        E('span', {}, _("Advanced Settings (core / data components)")),
+        E('span', { 'class': 'cl-component-adv-chevron' }, '›')
+      ]),
+      E('div', { 'class': 'cl-component-adv-body' }, [advListEl])
+    ]);
+    advWrap.firstChild.addEventListener('click', function () {
+      advWrap.classList.toggle('cl-closed');
+    });
+
+    /* wrap in cl-component-map, reuse LuCI .cbi-map container
+       浅色出现灰托盘、暗色满宽对齐，与下方表单卡片同构 */
+    container.appendChild(E('div', { 'class': 'cl-component-map' }, [
+      E('div', { 'class': 'cl-component-card' }, [
+        E('div', { 'class': 'cl-component-head' }, [
+          E('div', {}, [
+            E('h4', {}, _("Component Updates")),
+            E('div', { 'class': 'cl-component-sub' }, _("Update components individually. Click Check Updates to refresh versions."))
+          ]),
+          refreshBtn
+        ]),
+        archWrap,
+        listEl,
+        advWrap,
+        logEl
+      ])
+    ]));
+
+    this._refreshComponentUpdatePanel(listEl, logEl, false);
+  },
+
+  /* 备份与还原：折腾内核/配置前的兜底。导出当前配置为压缩包，避免 RPC 大包限制；
+     还原默认配置则把 UCI 设置重置为出厂值（订阅/配置文件保留）。仅含配置，不含内核。 */
+  _buildBackupPanel: function (container) {
+    var exportBtn = E('button', { 'class': 'btn cbi-button cbi-button-neutral' }, _("Export Backup"));
+    exportBtn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      exportBtn.disabled = true;
+      var orig = exportBtn.textContent;
+      exportBtn.textContent = _("Exporting…");
+      var done = function () { exportBtn.disabled = false; exportBtn.textContent = orig; };
+      var exportPath = '';
+      callBackupExportPrepare().then(function (r) {
+        if (!r || !r.success) {
+          throw new Error((r && r.message) || _("Unknown error"));
+        }
+        exportPath = r.path;
+        return fs.read_direct(r.path, 'blob').then(function (blob) {
+          return { blob: blob, filename: r.filename || 'clashoo-backup.tar.gz' };
+        });
+      }).then(function (download) {
+        var url = URL.createObjectURL(download.blob);
+        var a = E('a', { href: url, download: download.filename });
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        clashoo.toast(_("Backup exported"), { kind: 'ok' });
+      }).catch(function (e) {
+        clashoo.toast(_("Export failed: ") + (e.message || e), { kind: 'err' });
+      }).finally(function () {
+        done();
+        if (exportPath)
+          callBackupExportCleanup(exportPath).catch(function () {});
+      });
+    });
+
+    var importInput = E('input', { type: 'file', accept: '.tar.gz,.json', style: 'display:none' });
+    var importBtn = E('button', { 'class': 'btn cbi-button cbi-button-neutral' }, _("Import Restore"));
+    importBtn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      importInput.value = '';
+      importInput.click();
+    });
+    importInput.addEventListener('change', function () {
+      var file = importInput.files && importInput.files[0];
+      if (!file)
+        return;
+      var lower = String(file.name || '').toLowerCase();
+      var maxSize = /\.json$/.test(lower) ? 8 * 1024 * 1024
+        : /\.tar\.gz$/.test(lower) ? 32 * 1024 * 1024 : 0;
+      if (!maxSize) {
+        clashoo.toast(_("Import failed: ") + _("Only .tar.gz and legacy .json backup files are supported"), { kind: 'err' });
+        importInput.value = '';
+        return;
+      }
+      if (file.size > maxSize) {
+        clashoo.toast(_("Import failed: ") + _("Backup file is too large"), { kind: 'err' });
+        importInput.value = '';
+        return;
+      }
+      if (!confirm(_("Importing will overwrite all current configuration and settings with the backup. Existing subscriptions/configuration files will be replaced. Continue?"))) {
+        importInput.value = '';
+        return;
+      }
+      importBtn.disabled = true;
+      var uploadPath = '';
+      callBackupImportPrepare().then(function (r) {
+        if (!r || !r.success)
+          throw new Error((r && r.message) || _("Unknown error"));
+        uploadPath = r.path;
+        return uploadBackupChunks(file, uploadPath);
+      }).then(function () {
+        return callBackupImportFile(file.name, uploadPath);
+      }).then(function (r) {
+        if (r && r.success)
+          clashoo.toast(r.message || _("Backup restored, restarting service"), { kind: 'ok' });
+        else
+          throw new Error((r && r.message) || _("Unknown error"));
+      }).catch(function (err) {
+        clashoo.toast(_("Import failed: ") + (err.message || err), { kind: 'err' });
+      }).finally(function () {
+        if (uploadPath)
+          callBackupImportCleanup(uploadPath).catch(function () {});
+        importBtn.disabled = false;
+        importInput.value = '';
+      });
+    });
+
+    var resetBtn = E('button', { 'class': 'btn cbi-button cbi-button-negative' }, _("Restore Defaults"));
+    resetBtn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      if (!confirm(_("Restore Clashoo settings to factory defaults (subscriptions and configuration files are kept). Continue?")))
+        return;
+      resetBtn.disabled = true;
+      var orig = resetBtn.textContent;
+      resetBtn.textContent = _("Restoring…");
+      var done = function () { resetBtn.disabled = false; resetBtn.textContent = orig; };
+      callBackupReset().then(function (r) {
+        done();
+        if (r && r.success)
+          clashoo.toast(r.message || _("Factory defaults restored"), { kind: 'ok' });
+        else
+          clashoo.toast(_("Restore failed: ") + ((r && r.message) || _("Unknown error")), { kind: 'err' });
+      }).catch(function (e) {
+        done();
+        clashoo.toast(_("Restore failed: ") + (e.message || e), { kind: 'err' });
+      });
+    });
+
+    container.appendChild(E('div', { 'class': 'cl-component-map' }, [
+      E('div', { 'class': 'cl-component-card' }, [
+        E('div', { 'class': 'cl-component-head' }, [
+          E('div', {}, [
+            E('h4', {}, _("Backup and Restore")),
+            E('div', { 'class': 'cl-component-sub' }, [
+              _("Export a backup before changing cores or configuration, so it can be restored if needed. Includes configuration and settings only, not cores."),
+              E('br'),
+              E('strong', {}, _("Backup files contain subscription and node credentials. Store them securely."))
+            ])
+          ])
+        ]),
+        importInput,
+        E('div', { 'class': 'cl-backup-actions' }, [exportBtn, importBtn, resetBtn])
+      ])
+    ]));
+  },
+
+  _replaceChildren: function (node, children) {
+    while (node.firstChild)
+      node.removeChild(node.firstChild);
+    children.forEach(function (child) { if (child) node.appendChild(child); });
+  },
+
+  /* latest map key: mihomo/sing-box with variant; smart fixed; pkg by id */
+  _compLatestKey: function (comp, variant) {
+    if (comp.id === 'smart') return 'smart';
+    if (comp.variant) return comp.id + '_' + (variant || 'stable');
+    return comp.id;
+  },
+
+  _compNorm: function (s) {
+    return String(s || '').toLowerCase().replace(/^v/, '').replace(/~/g, '.');
+  },
+
+  _compVariantOf: function (comp) {
+    if (!comp.variant) return '';
+    if (this._compVariant[comp.id]) return this._compVariant[comp.id];
+    var inst = String(comp.installed_version || '').toLowerCase();
+    return /(?:alpha|beta|rc|pre)/.test(inst) ? 'alpha' : 'stable';
+  },
+
+  _compInstalledVersion: function (comp, variant) {
+    if (comp && comp.installed_versions && comp.installed_versions[variant])
+      return comp.installed_versions[variant];
+    if (comp && comp.variant)
+      return '';
+    return (comp && comp.installed_version) || '';
+  },
+
+  /* install != latest = updatable (alpha compared by hash)*/
+  _compUpdatable: function (comp, latestMap) {
+    if (!comp) return false;
+    /* lgbm has no version; compare local vs remote model sha256 (kind=data skips generic path) */
+    if (comp.id === 'lgbm') {
+      var rem = latestMap.lgbm, ins = comp.installed_version;
+      return !!(rem && ins && this._compNorm(rem) !== this._compNorm(ins));
+    }
+    if (comp.kind === 'data') return false;
+    var variant = this._compVariantOf(comp);
+    var inst = this._compInstalledVersion(comp, variant);
+    if (!inst || inst === _("Not installed") || inst === _("Unknown")) return false;
+    var latest = latestMap[this._compLatestKey(comp, variant)];
+    if (!latest) return false;
+    return this._compNorm(latest) !== this._compNorm(inst);
+  },
+
+  _componentStatusText: function (comp, globalRunning) {
+    if (comp.status === 'running')
+      return comp.message || _("Updating");
+    if (comp.status === 'success')
+      return comp.message || _("Completed");
+    if (comp.status === 'failed')
+      return comp.message || _("Failed");
+    if (globalRunning)
+      return _("Wait for the current task to complete");
+    return '';
+  },
+
+  /* CPU arch: auto-detected + manual override (download_core UCI)*/
+  _renderComponentArchRow: function (arch) {
+    var self = this;
+    arch = arch || {};
+    var sys = arch.system || _("Unknown");
+    var detected = this._detectMihomoArch(this._compCpuArch || sys) || '';
+    var cur = arch.download_core || detected || '';
+    var archList = ['amd64-compatible', 'amd64-v1', 'amd64-v2', 'amd64-v3', 'arm64', 'armv7', 'armv6', 'armv5', '386', 'mips', 'mipsle', 'mips64', 'mips64le'];
+    var opts = archList.map(function (a) {
+      return E('option', { value: a, selected: a === cur ? '' : null }, a);
+    });
+    if (!cur)
+      opts.unshift(E('option', { value: '', selected: '' }, _("Not detected, please select")));
+    var sel = E('select', { 'class': 'cl-component-arch-sel' }, opts);
+    sel.addEventListener('change', function () {
+      uci.set('clashoo', 'config', 'download_core', sel.value);
+      uci.save()
+        .then(function () { return clashoo.commitConfig(); })
+        .then(function () { return clearClashooDirty(); })
+        .then(function () { clashoo.toast(_("CPU architecture set to ") + sel.value, { kind: 'info' }); })
+        .catch(function () {});
+      /* re-render row: show hint when mismatched */
+      if (self._compArchWrap)
+        self._replaceChildren(self._compArchWrap,
+          [self._renderComponentArchRow({ system: sys, download_core: sel.value })]);
+    });
+    var row = [
+      E('span', { 'class': 'cl-component-arch-label' }, _("CPU Architecture")),
+      E('span', { 'class': 'cl-component-arch-auto' }, _("Auto-detected")),
+      sel
+    ];
+    /* no hint when auto-detected matches; only show when manual choice differs */
+    if (detected && cur !== detected)
+      row.push(E('span', { 'class': 'cl-component-arch-hint' }, _("Recommended ") + detected + _(" (auto-detected by device)")));
+    else if (!detected && !cur)
+      row.push(E('span', { 'class': 'cl-component-arch-hint' }, _("Could not detect the device architecture; select it manually before updating the core.")));
+    return E('div', { 'class': 'cl-component-arch-row' }, row);
+  },
+
+  _renderComponentRow: function (comp, globalRunning, latestMap, listEl, logEl) {
+    var self = this;
+    var statusText = this._componentStatusText(comp, globalRunning);
+    var inst = comp.installed_version || '';
+    var instStable = !/(?:alpha|beta|rc|pre)/i.test(inst);
+
+    /* mihomo / sing-box：行内稳定 / Alpha 切换 */
+    var variant = '';
+    var variantBox = null;
+    if (comp.variant) {
+      if (!self._compVariant[comp.id])
+        self._compVariant[comp.id] = instStable ? 'stable' : 'alpha';
+      variant = self._compVariant[comp.id];
+      var mkV = function (v, label) {
+        var active = variant === v;
+        var b = E('button', { 'class': 'cl-comp-var' + (active ? ' on' : '') }, (active ? '✓ ' : '') + label);
+        b.addEventListener('click', function (ev) {
+          ev.preventDefault();
+          self._compVariant[comp.id] = v;
+          self._refreshComponentUpdatePanel(listEl, logEl, false);
+        });
+        return b;
+      };
+      variantBox = E('div', { 'class': 'cl-comp-var-box' }, [mkV('stable', _("Stable")), mkV('alpha', 'Alpha')]);
+      inst = this._compInstalledVersion(comp, variant) || _("Not installed");
+    }
+    var latest = latestMap[this._compLatestKey(comp, variant || this._compVariantOf(comp))];
+    if (!statusText && latest)
+      statusText = _("Remote: %s").replace('%s', latest);
+
+    /* 绿色「可更新」徽标：最新版与已装不一致时显示 */
+    var badge = this._compUpdatable(comp, latestMap)
+      ? E('span', { 'class': 'cl-comp-updatable' }, _("Update available"))
+      : null;
+
+    var btn = E('button', {
+      'class': 'btn cbi-button cbi-button-apply',
+      disabled: globalRunning ? 'disabled' : null,
+      click: function (ev) {
+        ev.preventDefault();
+        btn.disabled = true;
+        btn.textContent = _("Submitting");
+        if (self._compLogEl) self._compLogEl.style.display = '';
+        clashoo.componentUpdate(comp.id, variant).then(function (res) {
+          if (res && res.success)
+            clashoo.toast(_("Component update task submitted"), { kind: 'info' });
+          else
+            clashoo.toast((res && res.message) || _("Failed to submit component update task"), { kind: 'error' });
+          setTimeout(function () { self._refreshComponentUpdatePanel(listEl, logEl, false); }, 700);
+        });
+      }
+    }, comp.status === 'running' ? _("Updating") : _("Update"));
+
+    var verChildren = [E('span', {}, _("Current: %s").replace('%s', inst || _("Unknown")) + ' ')];
+    if (badge) verChildren.push(badge);
+    var verBlock = [E('div', {}, verChildren)];
+    if (variantBox) verBlock.push(variantBox);
+
+    return E('div', { 'class': 'cl-component-row' }, [
+      E('div', {}, [
+        E('div', { 'class': 'cl-component-name' }, comp.name || comp.id),
+        E('div', { 'class': 'cl-component-desc' }, comp.description || '')
+      ]),
+      E('div', { 'class': 'cl-component-version' }, verBlock),
+      E('div', { 'class': 'cl-component-status cl-st-' + (comp.status || 'idle') }, statusText),
+      btn
+    ]);
+  },
+
+  _refreshComponentUpdatePanel: function (listEl, logEl, doCheck) {
+    var self = this;
+    if (this._componentPollTimer) {
+      clearTimeout(this._componentPollTimer);
+      this._componentPollTimer = null;
+    }
+
+    clashoo.componentStatus().then(function (data) {
+      var comps = data.components || [];
+      if (self._compArchWrap)
+        self._replaceChildren(self._compArchWrap, [self._renderComponentArchRow(data.arch)]);
+
+      var paint = function () {
+        var mainComps = [], advComps = [];
+        comps.forEach(function (comp) {
+          (COMPONENT_MAIN_IDS[comp.id] ? mainComps : advComps).push(comp);
+        });
+        var render = function (comp) {
+          return self._renderComponentRow(comp, !!data.running, self._compLatest || {}, listEl, logEl);
+        };
+        self._replaceChildren(listEl, mainComps.map(render));
+        if (self._compAdvListEl)
+          self._replaceChildren(self._compAdvListEl, advComps.map(render));
+      };
+      paint();
+      logEl.textContent = data.log || data.last_log || _("No component update logs yet");
+
+      if (data.running) {
+        /* 有任务运行：展开日志，取消收起计时 */
+        if (self._compLogHideTimer) {
+          clearTimeout(self._compLogHideTimer);
+          self._compLogHideTimer = null;
+        }
+        logEl.style.display = '';
+        self._componentPollTimer = setTimeout(function () {
+          self._refreshComponentUpdatePanel(listEl, logEl, false);
+        }, 2000);
+      } else {
+        /* 任务结束：日志若展开着，8 秒后自动收起 */
+        if (logEl.style.display !== 'none' && !self._compLogHideTimer) {
+          self._compLogHideTimer = setTimeout(function () {
+            logEl.style.display = 'none';
+            self._compLogHideTimer = null;
+          }, 8000);
+        }
+        if (doCheck) {
+          clashoo.componentCheckUpdates().then(function (r) {
+            self._compLatest = (r && r.latest) || {};
+            paint();
+            var n = comps.reduce(function (acc, c) {
+              return acc + (self._compUpdatable(c, self._compLatest) ? 1 : 0);
+            }, 0);
+            if (self._compRefreshBtn) {
+              self._compRefreshBtn.disabled = false;
+              self._compRefreshBtn.textContent = _("Check Updates");
+            }
+            clashoo.toast(n > 0 ? _("%d updates available").replace('%d', String(n)) : _("All components are up to date"),
+              { kind: n > 0 ? 'info' : 'success' });
+          }).catch(function () {
+            if (self._compRefreshBtn) {
+              self._compRefreshBtn.disabled = false;
+              self._compRefreshBtn.textContent = _("Check Updates");
+            }
+            clashoo.toast(_("Failed to check updates, please check the network"), { kind: 'error' });
+          });
+        }
+      }
+    });
+  },
+
+  _buildKernelPanel: function (container, cpuArch) {
+    var self = this;
+    var detectedArch = this._detectMihomoArch(cpuArch);
+    var m = new form.Map('clashoo', '', '');
+    var s, o;
+	var originalCoreChoice = coreChoiceFromConfig(
+		uci.get('clashoo', 'config', 'core_type') || 'mihomo',
+		uci.get('clashoo', 'config', 'dcore') || '2'
+	);
+	var selectedCoreChoice = originalCoreChoice;
+
+    s = m.section(form.NamedSection, 'config', 'clashoo', _("Backend Core"));
+    s.addremove = false;
+    o = s.option(form.ListValue, '_core_choice', _("Core Type"));
+	o.value('mihomo-stable', _("mihomo Stable"));
+	o.value('mihomo-alpha', 'mihomo Alpha');
+	o.value('smart', 'Smart');
+	o.value('singbox-stable', _("sing-box Stable"));
+	o.value('singbox-alpha', 'sing-box Alpha');
+	o.cfgvalue = function () { return originalCoreChoice; };
+	o.write = function (sectionId, value) { selectedCoreChoice = value; };
+	o.remove = function () {};
+    o.description = '';
+	var coreChoiceOption = o;
+
+    s = m.section(form.NamedSection, 'config', 'clashoo', _("Dashboard Settings"));
+    s.addremove = false;
+    o = s.option(form.Value, 'dash_port', _("Dashboard Port"));
+    o.placeholder = '9090';
+    o = s.option(form.Value, 'dash_pass', _("Access Secret"));
+    o.placeholder = 'clashoo';
+    o = s.option(form.ListValue, 'dashboard_panel', _("Panel UI"));
+    ['metacubexd','yacd','zashboard','razord'].forEach(function(p){ o.value(p,p); });
+
+    s = m.section(form.NamedSection, 'config', 'clashoo', _("Core Download"));
+    s.addremove = false;
+    o = s.option(form.Value, 'core_mirror_prefix', _("GitHub acceleration prefix"));
+    o.placeholder = 'https://gh-proxy.com/';
+    o.description = _("When downloading core/data components, this prefix will be used first (a slash is required at the end). Leave blank to use the built-in gh-proxy.com and ghfast.top alternative sources.");
+    o.rmempty = true;
+
+    m.render().then(function (node) {
+      decorateSystemForm(node);
+      enhanceDashPasswordField(node);
+      container.appendChild(node);
+
+	  var saveKernelForm = function (applyNow) {
+		var choice = coreChoiceOption.formvalue('config') || selectedCoreChoice || originalCoreChoice;
+		var target = coreChoiceTarget(choice);
+		var changed = choice !== originalCoreChoice;
+
+		return m.save()
+		  .then(function () { return clashoo.commitConfig(); })
+		  .then(function () {
+			if (applyNow)
+			  return clashoo.setCore(target.core, target.dcore, 'apply');
+			if (changed)
+			  return clashoo.setCore(target.core, target.dcore, 'save');
+			return { success: true };
+		  })
+		  .then(function (res) {
+			if (!res || res.success === false)
+			  throw new Error((res && res.message) || _("Failed to save core configuration"));
+			if (applyNow && res.restarting)
+			  return waitForCoreTarget(target).then(function () { return res; });
+			return res;
+		  })
+		  .then(function (res) {
+			return clearClashooDirty().then(function () { return res; });
+		  })
+		  .then(function (res) {
+			var msg;
+			if (!applyNow)
+			  msg = changed ? _("Core type saved, takes effect on next start or restart") : _("Configuration saved");
+			else if (res.restarting)
+			  msg = _("Configuration saved, switched and started selected core");
+			else
+			  msg = _("Configuration saved, service remains stopped");
+			ui.addNotification(null, E('p', msg));
+			window.setTimeout(function () { location.reload(); }, 300);
+		  });
+	  };
+
+      container.appendChild(E('div', { 'class': 'cl-save-bar' }, [
+        E('button', { 'class': 'cbi-button', click: function () {
+		  saveKernelForm(false)
+            .catch(function (e) { ui.addNotification(null, E('p', _("Save failed: ") + (e.message || e))); });
+        }}, _("Save Configuration")),
+        E('button', { 'class': 'btn cbi-button-action', click: function () {
+		  saveKernelForm(true)
+            .catch(function (e) { ui.addNotification(null, E('p', _("Operation failed: ") + (e.message || e))); });
+        }}, _("Apply Configuration"))
+      ]));
+    });
+  },
+
+  _buildRulesForm: function (container) {
+    var m = new form.Map('clashoo', '', '');
+    var s, o;
+
+    s = m.section(form.NamedSection, 'config', 'clashoo', _("Bypass Rules"));
+    s.addremove = false;
+    o = s.option(form.Flag, 'bypass_china', _("Bypass China IPv4"));
+    o.default = '0';
+    o.rmempty = false;
+
+    o = s.option(form.Flag, 'bypass_china_ipv6', _("Bypass China IPv6"));
+    o.default = '0';
+    o.rmempty = false;
+    o.cfgvalue = function (section_id) {
+      var value = uci.get('clashoo', section_id, 'bypass_china_ipv6');
+      return (value != null) ? value : uci.get('clashoo', section_id, 'bypass_china');
+    };
+
+    o = s.option(form.ListValue, 'bypass_port_mode', _("Bypass Ports"));
+    o.value('all', _("All Ports"));
+    o.value('common', _("Common Ports"));
+    o.value('custom', _("Custom"));
+    o.default = 'all';
+
+    o = s.option(form.Value, 'bypass_port_custom', _("Custom Ports"));
+    o.depends('bypass_port_mode', 'custom');
+    o.placeholder = '22,53,80,443,8080,8443';
+    o.datatype = 'string';
+    o.rmempty = true;
+
+    o = s.option(form.Flag, 'sniffer_streaming', _("Sniffer (streaming compatibility)"));
+    o.default = '1';
+    o.rmempty = false;
+    o.description = _("When enabled, sniffer configuration is injected automatically to improve streaming domain detection and routing stability.");
+
+    s = m.section(form.TableSection, 'lan_acl', _("Access Control"));
+    s.addremove = true;
+    s.anonymous = true;
+    s.sortable = true;
+    s.description = _("Rules are matched from top to bottom. Unmatched devices use DNS takeover and proxy by default. A rule with IPv4, IPv6 and MAC all empty matches every device.");
+
+    var hints = this._hostHints || {};
+    var hostOptions = [], host6Options = [], macOptions = [];
+    var seen = {}, seen6 = {};
+    Object.keys(hints).forEach(function (mac) {
+      var h = hints[mac] || {};
+      var macU = mac.toUpperCase();
+      var addrs = h.ipaddrs || (h.ipv4 ? [h.ipv4] : []);
+      var addrs6 = h.ip6addrs || [];
+      var label = h.name || addrs[0] || addrs6[0] || '';
+      addrs.forEach(function (ip) {
+        if (ip && !seen[ip]) {
+          seen[ip] = true;
+          hostOptions.push([ip, ip + ' (' + macU + ')']);
+        }
+      });
+      addrs6.forEach(function (ip) {
+        if (ip && !seen6[ip]) {
+          seen6[ip] = true;
+          host6Options.push([ip, ip + ' (' + macU + ')']);
+        }
+      });
+      macOptions.push([macU, label ? macU + ' (' + label + ')' : macU]);
+    });
+
+    o = s.option(form.Flag, 'enabled', _("Enable"));
+    o.default = '1';
+    o.rmempty = false;
+
+    o = s.option(form.DynamicList, 'ip', _("IPv4"));
+    o.placeholder = '192.168.1.100';
+    o.datatype = 'ip4addr';
+    hostOptions.forEach(function (kv) { o.value(kv[0], kv[1]); });
+
+    o = s.option(form.DynamicList, 'ip6', _("IPv6"));
+    o.placeholder = 'fd00::100';
+    o.datatype = 'ip6addr';
+    host6Options.forEach(function (kv) { o.value(kv[0], kv[1]); });
+
+    o = s.option(form.DynamicList, 'mac', _("MAC"));
+    o.placeholder = '00:11:22:33:44:55';
+    o.datatype = 'macaddr';
+    macOptions.forEach(function (kv) { o.value(kv[0], kv[1]); });
+
+    o = s.option(form.Flag, 'dns', _("DNS Takeover"));
+    o.default = '1';
+    o.rmempty = false;
+
+    o = s.option(form.Flag, 'proxy', _("Proxy"));
+    o.default = '1';
+    o.rmempty = false;
+
+    s = m.section(form.NamedSection, 'config', 'clashoo', _("Automation Tasks"));
+    s.addremove = false;
+    o = s.option(form.Flag,  'auto_update',   _("Regularly update rule data"));
+    o.description = _("Rule data includes China allowlist (direct IP ranges) and GeoIP / GeoSite databases");
+    o = s.option(form.Value, 'auto_update_time',   _("Update interval (hours)"));
+    o = s.option(form.Flag,  'auto_clear_log',    _("Scheduled Log Cleanup"));
+    o = s.option(form.Value, 'clear_time',_("Cleanup interval (hours)"));
+    o = s.option(form.ListValue, 'geoip_source', _("GeoIP Source"));
+    o.value('3', 'Loyalsoldier'); o.value('5', 'v2fly'); o.value('4', _("Custom"));
+    o.default = '3';
+    o = s.option(form.Value, 'geoip_mmdb_url', 'Country.mmdb URL');
+    o.depends('geoip_source', '4');
+    o.placeholder = 'https://…/Country.mmdb';
+    o = s.option(form.Value, 'geosite_url', 'geosite.dat URL');
+    o.depends('geoip_source', '4');
+    o.placeholder = 'https://…/geosite.dat';
+    o = s.option(form.Value, 'geoip_dat_url', 'geoip.dat URL');
+    o.depends('geoip_source', '4');
+    o.placeholder = 'https://…/geoip.dat';
+
+    m.render().then(function (node) {
+      normalizeLanAclLayout(node);
+      decorateSystemForm(node);
+      container.appendChild(node);
+      watchLanAclLayout(node);
+      container.appendChild(E('div', { 'class': 'cl-save-bar' }, [
+        E('button', { 'class': 'cbi-button', click: function () {
+          m.save().then(function () { return clashoo.commitConfig(); })
+            .then(function () { return clearClashooDirty(); })
+            .then(function () { location.reload(); })
+            .catch(function (e) { ui.addNotification(null, E('p', _("Save failed: ") + (e.message || e))); });
+        }}, _("Save Configuration")),
+        E('button', { 'class': 'btn cbi-button-action', click: function () {
+          saveCommitApplyMaybeReload(m, _("Configuration saved and service hot-reloaded"), _("Configuration saved, service is not running"))
+            .catch(function (e) { ui.addNotification(null, E('p', _("Operation failed: ") + (e.message || e))); });
+        }}, _("Apply Configuration"))
+      ]));
+    });
+  },
+
+  _buildLogsPanel: function (runLog) {
+    var self = this;
+    var logTypes = [
+      { id: 'plugin', label: _("Plugin Log"), read: clashoo.readLog.bind(clashoo),              clear: clashoo.clearLog.bind(clashoo) },
+      { id: 'core',   label: _("Core Log"), read: clashoo.readCoreLog.bind(clashoo),           clear: clashoo.clearCoreLog.bind(clashoo) },
+      { id: 'update', label: _("Update Log"), read: clashoo.readUpdateMergedLog.bind(clashoo),   clear: clashoo.clearUpdateMergedLog.bind(clashoo) }
+    ];
+    var MAX_LINES = 5000;
+
+    var state = { autoScroll: true, paused: false, filter: '' };
+
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* Expose helpers for _pollLogs */
+    self._buildLogLine = buildLine;
+    self._applyLogFilter = applyFilter;
+
+    /* parse level token; no keyword (e.g. mihomo info lines with [info] stripped) => info */
+    function detectLevelToken(ln) {
+      var m = ln.match(/\b(DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|PANIC)\b/i);
+      if (!m) return 'info';
+      var l = m[1].toUpperCase();
+      if (l === 'DEBUG') return 'debug';
+      if (l === 'INFO')  return 'info';
+      if (l.startsWith('WARN')) return 'warn';
+      if (l === 'FATAL' || l === 'PANIC') return 'fatal';
+      return 'error';
+    }
+    function levelClass(token) {
+      if (token === 'debug') return 'cl-log-debug';
+      if (token === 'warn')  return 'cl-log-warn';
+      if (token === 'error' || token === 'fatal') return 'cl-log-error';
+      return 'cl-log-info';
+    }
+
+    var MONTHS = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
+    /* render a single line as colored HTML */
+    function buildLine(ln) {
+      var token = detectLevelToken(ln);
+      var cls = levelClass(token);
+      var ts = '', msg = ln;
+      /* core syslog: Mon DD HH:MM:SS YYYY → MM-DD HH:MM:SS */
+      var cm = ln.match(/^(\w{3})\s+(\d{1,2})\s+(\d{2}:\d{2}:\d{2})\s+\d{4}\s+\S+\.(\S+)\s+\S+\[\d+\]:\s+(.*)$/);
+      if (cm) { ts = (MONTHS[cm[1]] || cm[1]) + '-' + cm[2].padStart(2,'0') + ' ' + cm[3]; msg = cm[5] || ln; }
+      /* plugin / update: MM-DD HH:MM:SS [warn] message */
+      else if (/^\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s/.test(ln)) {
+        ts = ln.substring(0,14);
+        msg = ln.substring(15);
+        /* update: MM-DD HH:MM:SS - message → strip dash */
+        if (msg.indexOf(' - ') === 0) msg = msg.substring(3);
+      }
+      if (ts) {
+        return '<div class="cl-log-line ' + cls + '" data-level="' + token + '"><span class="cl-log-ts">' + esc(ts) + '</span><span class="cl-log-msg">' + esc(msg) + '</span></div>';
+      }
+      return '<div class="cl-log-line ' + cls + '" data-level="' + token + '">' + esc(ln) + '</div>';
+    }
+
+    function renderLines(text) {
+      var lines = text.split('\n').filter(function(l) { return l; });
+      var html = '';
+      for (var i = 0; i < lines.length; i++) {
+        html += buildLine(lines[i]);
+      }
+      return html;
+    }
+
+    function applyFilter() {
+      var f = state.filter;   /* '' = all, else exact level: info/warn/error/fatal */
+      var els = document.querySelectorAll('#cl-log-area .cl-log-line');
+      for (var i = 0; i < els.length; i++) {
+        if (!f || els[i].getAttribute('data-level') === f)
+          els[i].classList.remove('cl-log-hidden');
+        else
+          els[i].classList.add('cl-log-hidden');
+      }
+    }
+
+    var logTabEls = {};
+    var logArea = E('div', { 'class': 'cl-log-area', id: 'cl-log-area' });
+    logArea.innerHTML = runLog ? renderLines(runLog) : _("<em>(empty)</em>");
+
+    var clearBtn = null;
+
+    function activateLogTab(id) {
+      var logType = logTypes.find(function (lt) { return lt.id === id; }) || logTypes[0];
+      Object.keys(logTabEls).forEach(function (k) {
+        logTabEls[k].className = 'cl-log-tab' + (k === logType.id ? ' active' : '');
+      });
+      self._logTab = logType.id;
+      syncClearButton();
+      return logType.read().then(function (content) {
+        logArea.innerHTML = (content && content.trim()) ? renderLines(content) : _("<em>(empty)</em>");
+        applyFilter();
+        if (state.autoScroll) logArea.scrollTop = logArea.scrollHeight;
+      });
+    }
+    this._activateLogTab = activateLogTab;
+
+    var logTabBar = E('div', { 'class': 'cl-log-tabs' },
+      logTypes.map(function (lt) {
+        var el = E('span', {
+          'class': 'cl-log-tab' + (self._logTab === lt.id ? ' active' : ''),
+          click: function () { activateLogTab(lt.id); }
+        }, lt.label);
+        logTabEls[lt.id] = el;
+        return el;
+      })
+    );
+
+    var currentType = function () {
+      return logTypes.find(function (lt) { return lt.id === self._logTab; }) || logTypes[0];
+    };
+
+    function syncClearButton() {
+      if (!clearBtn) return;
+      var ct = currentType();
+      clearBtn.disabled = !ct.clear;
+    }
+
+    /* ---- toolbar ---- */
+    var cbAuto = E('input', { type: 'checkbox', checked: 'checked' });
+    cbAuto.addEventListener('change', function () { state.autoScroll = cbAuto.checked; });
+
+    var cbPause = E('input', { type: 'checkbox' });
+    cbPause.addEventListener('change', function () { state.paused = cbPause.checked; });
+
+    var selFilter = E('select', { 'class': 'cbi-button' }, [
+      E('option', { value: '' }, _("All")),
+      E('option', { value: 'info' }, 'INFO'),
+      E('option', { value: 'warn' }, 'WARN'),
+      E('option', { value: 'error' }, 'ERROR'),
+      E('option', { value: 'fatal' }, 'FATAL')
+    ]);
+    selFilter.addEventListener('change', function () {
+      state.filter = selFilter.value;
+      applyFilter();
+    });
+
+    var btnClearView = E('button', { 'class': 'cbi-button' }, _("Clear View"));
+    btnClearView.addEventListener('click', function () { logArea.innerHTML = ''; });
+
+    var btnDownload = E('button', { 'class': 'cbi-button' }, _("Download"));
+    btnDownload.addEventListener('click', function () {
+      var blob = new Blob([logArea.textContent || ''], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'clashoo-' + new Date().toISOString().replace(/[:.]/g, '-') + '.log';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    clearBtn = E('button', { 'class': 'cbi-button' }, _("Clear File"));
+    clearBtn.addEventListener('click', function () {
+      var ct = currentType();
+      if (!ct.clear) return;
+      if (!confirm(_("Clear the current log file? This cannot be undone."))) return;
+      ct.clear().then(function () { logArea.innerHTML = ''; });
+    });
+    syncClearButton();
+
+    var toolbar = E('div', { 'class': 'cl-log-toolbar' }, [
+      E('label', {}, [cbAuto, _("Auto Scroll")]),
+      E('label', {}, [cbPause, _("Pause")]),
+      selFilter,
+      btnClearView,
+      btnDownload,
+      clearBtn
+    ]);
+
+    return E('div', { 'class': 'cl-section cl-card cl-log-card' }, [
+      E('h4', {}, _("Log")),
+      logTabBar,
+      toolbar,
+      logArea
+    ]);
+  },
+
+  _pollLogs: function () {
+    if (this._tab !== 'logs') return Promise.resolve();
+    var self = this;
+    var el = document.getElementById('cl-log-area');
+    if (!el) return Promise.resolve();
+    var cbPause = el.parentNode.querySelector('input[type="checkbox"]:nth-of-type(2)');
+    if (cbPause && cbPause.checked) return Promise.resolve();
+    var logFns = {
+      plugin: clashoo.readLog.bind(clashoo),
+      core:   clashoo.readCoreLog.bind(clashoo),
+      update: clashoo.readUpdateMergedLog.bind(clashoo)
+    };
+    var readFn = logFns[this._logTab] || logFns.plugin;
+    return readFn().then(function (content) {
+      if (!content || !content.trim()) { el.innerHTML = _("<em>(empty)</em>"); return; }
+      var html = '';
+      var lines = content.split('\n').filter(function(l) { return l; });
+      for (var i = 0; i < lines.length; i++) {
+        html += self._buildLogLine(lines[i]);
+      }
+      el.innerHTML = html;
+      self._applyLogFilter();
+      var cbAuto = el.parentNode.querySelector('input[type="checkbox"]:first-of-type');
+      if (!cbAuto || cbAuto.checked) el.scrollTop = el.scrollHeight;
+    });
+  },
+
+  _switchTab: function (id) {
+    var tabEls = this._tabEls || {};
+    var panelEls = this._panelEls || {};
+    Object.keys(tabEls).forEach(function (k) {
+      tabEls[k].className = 'cl-tab' + (k === id ? ' active' : '');
+      panelEls[k].className = 'cl-panel' + (k === id ? ' active' : '');
+    });
+    this._tab = id;
+    rememberTab('clashoo.system.tab', id);
+  },
+
+  handleSaveApply: null,
+  handleSave:      null,
+  handleReset:     null
+});

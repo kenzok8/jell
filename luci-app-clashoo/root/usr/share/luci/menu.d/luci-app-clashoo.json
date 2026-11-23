@@ -1,0 +1,45 @@
+{
+  "admin/services/clashoo": {
+    "title": "Clashoo",
+    "order": 90,
+    "action": {
+      "type": "firstchild"
+    },
+    "depends": {
+      "acl": ["luci-app-clashoo"]
+    }
+  },
+  "admin/services/clashoo/overview": {
+    "title": "Overview",
+    "order": 10,
+    "action": {
+      "type": "view",
+      "path": "clashoo/overview"
+    },
+    "depends": {
+      "acl": ["luci-app-clashoo"]
+    }
+  },
+  "admin/services/clashoo/config": {
+    "title": "Configuration",
+    "order": 20,
+    "action": {
+      "type": "view",
+      "path": "clashoo/config"
+    },
+    "depends": {
+      "acl": ["luci-app-clashoo"]
+    }
+  },
+  "admin/services/clashoo/system": {
+    "title": "System",
+    "order": 30,
+    "action": {
+      "type": "view",
+      "path": "clashoo/system"
+    },
+    "depends": {
+      "acl": ["luci-app-clashoo"]
+    }
+  }
+}
