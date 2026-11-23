@@ -2,78 +2,527 @@
 
 USE_PROCD=1
 START=99
+STOP=10
 
 CONF="filebrowser-q"
 PROG="/usr/bin/filebrowser-q"
-CONF_PATH="/etc/filebrowser-q/config.yaml"
-DB_PATH="/etc/filebrowser-q/filebrowser.sqlite"
+DEFAULT_CONF_PATH="/etc/filebrowser-q/config.yaml"
+DEFAULT_DB_PATH="/etc/filebrowser-q/filebrowser.sqlite"
+
+yaml_escape() {
+	printf '%s' "$1" | tr -d '\r' | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+bool_yaml() {
+	if [ "$1" = "1" ]; then
+		printf 'true'
+	else
+		printf 'false'
+	fi
+}
+
+procd_add_env() {
+	if [ "${_FB_ENV_INIT:-0}" -eq 0 ]; then
+		procd_set_param env "$1"
+		_FB_ENV_INIT=1
+	else
+		procd_append_param env "$1"
+	fi
+}
+
+emit_source_global_rules() {
+	local indent="$1"
+	local is_root_fs="$2"
+
+	if [ "$disable_indexing" -eq 1 ]; then
+		cat <<EOF
+${indent}rules:
+${indent}  - folderPath: "/"
+${indent}    viewable: true
+EOF
+		return 0
+	fi
+
+	local has_rules=0
+	if [ "$is_root_fs" = "1" ] && [ "$exclude_virtual_fs" -eq 1 ]; then
+		has_rules=1
+	fi
+	[ "$ignore_hidden" -eq 1 ] && has_rules=1
+	[ "$ignore_symlinks" -eq 1 ] && has_rules=1
+	[ "$ignore_zero_size_folders" -eq 1 ] && has_rules=1
+
+	[ "$has_rules" -eq 1 ] || return 0
+
+	printf '%srules:\n' "$indent"
+
+	if [ "$is_root_fs" = "1" ] && [ "$exclude_virtual_fs" -eq 1 ]; then
+		cat <<EOF
+${indent}  - folderPath: "/proc"
+${indent}  - folderPath: "/sys"
+${indent}  - folderPath: "/dev"
+${indent}  - folderPath: "/tmp"
+${indent}    viewable: true
+${indent}  - folderPath: "/var"
+${indent}    viewable: true
+EOF
+	fi
+
+	if [ "$ignore_hidden" -eq 1 ]; then
+		cat <<EOF
+${indent}  - folderPath: "/"
+${indent}    ignoreHidden: true
+EOF
+	fi
+
+	if [ "$ignore_symlinks" -eq 1 ]; then
+		cat <<EOF
+${indent}  - folderPath: "/"
+${indent}    ignoreSymlinks: true
+EOF
+	fi
+
+	if [ "$ignore_zero_size_folders" -eq 1 ]; then
+		cat <<EOF
+${indent}  - folderPath: "/"
+${indent}    ignoreZeroSizeFolders: true
+EOF
+	fi
+}
+
+append_extra_source() {
+	local entry="$1"
+	[ -n "$entry" ] || return 0
+
+	local src_path src_rest src_name="" src_flag="" src_ro="0"
+	src_path="${entry%%:*}"
+	if [ "$src_path" != "$entry" ]; then
+		src_rest="${entry#*:}"
+		src_name="${src_rest%%:*}"
+		if [ "$src_name" != "$src_rest" ]; then
+			src_flag="${src_rest#*:}"
+			case "$src_flag" in
+				ro|readonly) src_ro="1" ;;
+			esac
+		fi
+	fi
+
+	[ -n "$src_path" ] || return 0
+	if [ -z "$src_name" ]; then
+		if [ "$src_path" = "/" ]; then
+			src_name="root"
+		else
+			src_name="$(basename "$src_path")"
+		fi
+	fi
+
+	local esc_path esc_name is_root="0"
+	esc_path="$(yaml_escape "$src_path")"
+	esc_name="$(yaml_escape "$src_name")"
+	[ "$src_path" = "/" ] && is_root="1"
+
+	cat <<EOF >> "$TMP_CONF"
+    - path: "$esc_path"
+      name: "$esc_name"
+      config:
+        defaultEnabled: true
+        readOnly: $(bool_yaml "$src_ro")
+EOF
+	emit_source_global_rules "        " "$is_root" >> "$TMP_CONF"
+}
+
+reload_firewall() {
+	[ -x /etc/init.d/firewall ] && /etc/init.d/firewall reload >/dev/null 2>&1 || true
+}
 
 start_service() {
 	config_load "$CONF"
 
 	local enabled
 	config_get_bool enabled "config" "enabled" "0"
-	[ "$enabled" -eq "1" ] || return 1
+	[ "$enabled" -eq 1 ] || return 0
 
-	local listen_port root_path root_name cacheDir cacheDirMaxSizeMB
+	local use_custom_config custom_config_path
+	config_get_bool use_custom_config "config" "use_custom_config" "0"
+	config_get custom_config_path "config" "custom_config_path" "$DEFAULT_CONF_PATH"
+
+	local listen_addr listen_port open_firewall base_url socket
+	local https_enabled tls_cert tls_key external_url internal_url
+	local disable_webdav trust_proxy_headers disable_rate_limit
+	config_get listen_addr "config" "listen_addr" "0.0.0.0"
 	config_get listen_port "config" "listen_port" "8787"
+	config_get_bool open_firewall "config" "open_firewall" "0"
+	config_get base_url "config" "base_url" "/"
+	config_get socket "config" "socket" ""
+	config_get_bool https_enabled "config" "https_enabled" "0"
+	config_get tls_cert "config" "tls_cert" ""
+	config_get tls_key "config" "tls_key" ""
+	config_get external_url "config" "external_url" ""
+	config_get internal_url "config" "internal_url" ""
+	config_get_bool disable_webdav "config" "disable_webdav" "0"
+	config_get_bool trust_proxy_headers "config" "trust_proxy_headers" "0"
+	config_get_bool disable_rate_limit "config" "disable_rate_limit" "0"
+
+	local locale frontend_name disable_update_check disable_default_links
+	local disable_used_percentage disable_pwa_install disable_event_themes
+	config_get locale "config" "locale" "zhCN"
+	config_get frontend_name "config" "frontend_name" ""
+	config_get_bool disable_update_check "config" "disable_update_check" "0"
+	config_get_bool disable_default_links "config" "disable_default_links" "0"
+	config_get_bool disable_used_percentage "config" "disable_used_percentage" "0"
+	config_get_bool disable_pwa_install "config" "disable_pwa_install" "0"
+	config_get_bool disable_event_themes "config" "disable_event_themes" "0"
+
+	local root_path root_name read_only private_source create_user_dir use_logical_size
+	local exclude_virtual_fs disable_indexing ignore_hidden ignore_symlinks ignore_zero_size_folders
+	local file_mode dir_mode
 	config_get root_path "config" "root_path" "/"
-	config_get cacheDir "config" "cacheDir" "/tmp"
+	config_get root_name "config" "root_name" ""
+	config_get_bool read_only "config" "read_only" "0"
+	config_get_bool private_source "config" "private_source" "0"
+	config_get_bool create_user_dir "config" "create_user_dir" "0"
+	config_get_bool use_logical_size "config" "use_logical_size" "0"
+	config_get_bool exclude_virtual_fs "config" "exclude_virtual_fs" "1"
+	config_get_bool disable_indexing "config" "disable_indexing" "0"
+	config_get_bool ignore_hidden "config" "ignore_hidden" "0"
+	config_get_bool ignore_symlinks "config" "ignore_symlinks" "0"
+	config_get_bool ignore_zero_size_folders "config" "ignore_zero_size_folders" "0"
+	config_get file_mode "config" "file_mode" "644"
+	config_get dir_mode "config" "dir_mode" "755"
+
+	local auth_mode adminUsername adminPassword min_password_length signup
+	local enforced_otp totp_secret enable_passkey proxy_header token_expiration_hours
+	config_get auth_mode "config" "auth_mode" "password"
+	config_get adminUsername "config" "adminUsername" ""
+	[ -z "$adminUsername" ] && config_get adminUsername "config" "admin_user" "admin"
+	config_get adminPassword "config" "adminPassword" ""
+	[ -z "$adminPassword" ] && config_get adminPassword "config" "admin_password" ""
+	config_get min_password_length "config" "min_password_length" "5"
+	config_get_bool signup "config" "signup" "0"
+	config_get_bool enforced_otp "config" "enforced_otp" "0"
+	config_get totp_secret "config" "totp_secret" ""
+	config_get_bool enable_passkey "config" "enable_passkey" "0"
+	config_get proxy_header "config" "proxy_header" "X-Forwarded-User"
+	config_get token_expiration_hours "config" "token_expiration_hours" "2"
+
+	local db_path disable_auto_backup cacheDir cacheDirMaxSizeMB cache_cleanup max_archive_size
+	local min_search_length search_results_limit disable_previews disable_preview_resize
+	local disable_type_detection num_image_processors startup_integrity_check index_cache_size_mb index_wal_mode
+	config_get db_path "config" "db_path" "$DEFAULT_DB_PATH"
+	config_get_bool disable_auto_backup "config" "disable_auto_backup" "0"
+	config_get cacheDir "config" "cacheDir" "/tmp/filebrowser-q"
 	config_get cacheDirMaxSizeMB "config" "cacheDirMaxSizeMB" "300"
+	config_get_bool cache_cleanup "config" "cache_cleanup" "0"
+	config_get max_archive_size "config" "max_archive_size" "20"
+	config_get min_search_length "config" "min_search_length" "3"
+	config_get search_results_limit "config" "search_results_limit" "1000"
+	config_get_bool disable_previews "config" "disable_previews" "0"
+	config_get_bool disable_preview_resize "config" "disable_preview_resize" "0"
+	config_get_bool disable_type_detection "config" "disable_type_detection" "0"
+	config_get num_image_processors "config" "num_image_processors" ""
+	config_get startup_integrity_check "config" "startup_integrity_check" "quickCheck"
+	config_get index_cache_size_mb "config" "index_cache_size_mb" "32"
+	config_get_bool index_wal_mode "config" "index_wal_mode" "0"
 
-	root_name=""
-	[ "$root_path" = "/" ] && root_name="root"
+	local ffmpeg_path extract_subtitles heic_preview
+	local onlyoffice_enabled onlyoffice_url onlyoffice_internal_url onlyoffice_secret onlyoffice_view_only
+	local log_level api_log log_file
+	config_get ffmpeg_path "config" "ffmpeg_path" ""
+	config_get_bool extract_subtitles "config" "extract_subtitles" "0"
+	config_get_bool heic_preview "config" "heic_preview" "0"
+	config_get_bool onlyoffice_enabled "config" "onlyoffice_enabled" "0"
+	config_get onlyoffice_url "config" "onlyoffice_url" ""
+	config_get onlyoffice_internal_url "config" "onlyoffice_internal_url" ""
+	config_get onlyoffice_secret "config" "onlyoffice_secret" ""
+	config_get_bool onlyoffice_view_only "config" "onlyoffice_view_only" "0"
+	config_get log_level "config" "log_level" "info|warning|error"
+	config_get_bool api_log "config" "api_log" "0"
+	config_get log_file "config" "log_file" ""
 
-	# Migrate config files generated by older package versions.
-	if grep -q 'database.db' "$CONF_PATH"; then
-		mv -f "$CONF_PATH" "$CONF_PATH".old
+	# Guard against FileBrowser Quantum v2 forbidden 'database.db' filename
+	case "$db_path" in
+		*/database.db|database.db)
+			db_path="$(dirname "$db_path")/filebrowser.sqlite"
+			;;
+	esac
+
+	mkdir -p "$(dirname "$DEFAULT_CONF_PATH")" "$(dirname "$db_path")" "$cacheDir"
+	[ -n "$socket" ] && mkdir -p "$(dirname "$socket")"
+	[ -n "$log_file" ] && mkdir -p "$(dirname "$log_file")"
+
+	local active_conf="$DEFAULT_CONF_PATH"
+	if [ "$use_custom_config" -eq 1 ]; then
+		[ -n "$custom_config_path" ] && active_conf="$custom_config_path"
+		mkdir -p "$(dirname "$active_conf")"
 	fi
-	if [ ! -f "$CONF_PATH" ]; then
-		mkdir -p "$(dirname "$CONF_PATH")"
-		cat <<EOF > "$CONF_PATH"
+
+	# Generate YAML config unless custom config mode is enabled with an existing file
+	if [ "$use_custom_config" -eq 0 ] || [ ! -f "$active_conf" ]; then
+		if [ -f "$active_conf" ] && grep -q 'database\.db' "$active_conf" 2>/dev/null; then
+			mv -f "$active_conf" "$active_conf.v1.bak"
+		fi
+
+		local migrate_from=""
+		local legacy_db="$(dirname "$db_path")/database.db"
+		if [ ! -f "$db_path" ]; then
+			if [ -f "$legacy_db" ]; then
+				mv -f "$legacy_db" "${legacy_db}.v1.bak"
+				migrate_from="${legacy_db}.v1.bak"
+			elif [ -f "${legacy_db}.v1.bak" ]; then
+				migrate_from="${legacy_db}.v1.bak"
+			fi
+		fi
+
+		if [ -z "$root_name" ]; then
+			if [ "$root_path" = "/" ]; then
+				root_name="root"
+			else
+				root_name="$(basename "$root_path")"
+			fi
+		fi
+
+		[ -z "$base_url" ] && base_url="/"
+		local api_levels="disabled"
+		[ "$api_log" -eq 1 ] && api_levels="info|warning|error"
+
+		TMP_CONF="${active_conf}.tmp.$$"
+		: > "$TMP_CONF"
+		chmod 600 "$TMP_CONF"
+
+		# 1. http section
+		cat <<EOF >> "$TMP_CONF"
 http:
+  baseURL: "$(yaml_escape "$base_url")"
+  disableWebDAV: $(bool_yaml "$disable_webdav")
+  trustProxyHeaders: $(bool_yaml "$trust_proxy_headers")
+  disableRateLimit: $(bool_yaml "$disable_rate_limit")
+EOF
+		if [ -n "$socket" ]; then
+			printf '  socket: "%s"\n' "$(yaml_escape "$socket")" >> "$TMP_CONF"
+		else
+			cat <<EOF >> "$TMP_CONF"
+  listen: "$(yaml_escape "$listen_addr")"
   port: $listen_port
+EOF
+			if [ "$https_enabled" -eq 1 ] && [ -n "$tls_cert" ] && [ -n "$tls_key" ]; then
+				cat <<EOF >> "$TMP_CONF"
+  tlsCert: "$(yaml_escape "$tls_cert")"
+  tlsKey: "$(yaml_escape "$tls_key")"
+EOF
+			fi
+		fi
+		[ -n "$external_url" ] && printf '  externalUrl: "%s"\n' "$(yaml_escape "$external_url")" >> "$TMP_CONF"
+		[ -n "$internal_url" ] && printf '  internalUrl: "%s"\n' "$(yaml_escape "$internal_url")" >> "$TMP_CONF"
+
+		# 2. server section
+		cat <<EOF >> "$TMP_CONF"
 server:
   database:
-    path: "$DB_PATH"
+    path: "$(yaml_escape "$db_path")"
+EOF
+		[ -n "$migrate_from" ] && printf '    migrateFrom: "%s"\n' "$(yaml_escape "$migrate_from")" >> "$TMP_CONF"
+
+		cat <<EOF >> "$TMP_CONF"
+  cacheDir: "$(yaml_escape "$cacheDir")"
+  cacheDirMaxSizeMB: ${cacheDirMaxSizeMB:-300}
+  cacheDirCleanup: $(bool_yaml "$cache_cleanup")
+  maxArchiveSize: ${max_archive_size:-20}
+  minSearchLength: ${min_search_length:-3}
+  searchResultsLimit: ${search_results_limit:-1000}
+  disableUpdateCheck: $(bool_yaml "$disable_update_check")
+  disablePreviews: $(bool_yaml "$disable_previews")
+  disablePreviewResize: $(bool_yaml "$disable_preview_resize")
+  disableTypeDetectionByHeader: $(bool_yaml "$disable_type_detection")
+EOF
+		if [ -n "$num_image_processors" ] && [ "$num_image_processors" -gt 0 ] 2>/dev/null; then
+			printf '  numImageProcessors: %s\n' "$num_image_processors" >> "$TMP_CONF"
+		fi
+
+		cat <<EOF >> "$TMP_CONF"
+  filesystem:
+    createFilePermission: "$(yaml_escape "${file_mode:-644}")"
+    createDirectoryPermission: "$(yaml_escape "${dir_mode:-755}")"
+  indexSqlConfig:
+    cacheSizeMB: ${index_cache_size_mb:-32}
+    walMode: $(bool_yaml "$index_wal_mode")
+    startupIntegrityCheck: "$(yaml_escape "${startup_integrity_check:-quickCheck}")"
+  logging:
+    - levels: "$(yaml_escape "${log_level:-info|warning|error}")"
+      apiLevels: "$api_levels"
+EOF
+		if [ -n "$log_file" ]; then
+			cat <<EOF >> "$TMP_CONF"
+      output: "$(yaml_escape "$log_file")"
+      noColors: true
+EOF
+		else
+			printf '      output: "stdout"\n' >> "$TMP_CONF"
+		fi
+
+		local primary_is_root="0"
+		[ "$root_path" = "/" ] && primary_is_root="1"
+		cat <<EOF >> "$TMP_CONF"
   sources:
-    - path: "$root_path"
-      name: "$root_name"
+    - path: "$(yaml_escape "$root_path")"
+      name: "$(yaml_escape "$root_name")"
       config:
         defaultEnabled: true
-  cacheDir: "$cacheDir"
-  cacheDirMaxSizeMB: $cacheDirMaxSizeMB
+        readOnly: $(bool_yaml "$read_only")
+        private: $(bool_yaml "$private_source")
+        createUserDir: $(bool_yaml "$create_user_dir")
+        useLogicalSize: $(bool_yaml "$use_logical_size")
+EOF
+		emit_source_global_rules "        " "$primary_is_root" >> "$TMP_CONF"
+		config_list_foreach "config" "extra_sources" append_extra_source
+
+		# 3. auth section
+		cat <<EOF >> "$TMP_CONF"
 auth:
+  tokenExpirationHours: ${token_expiration_hours:-2}
   methods:
+EOF
+		case "$auth_mode" in
+			noauth)
+				cat <<EOF >> "$TMP_CONF"
+    noauth: true
+    password:
+      enabled: false
+EOF
+				;;
+			proxy)
+				cat <<EOF >> "$TMP_CONF"
+    noauth: false
+    password:
+      enabled: false
+      adminUsername: "$(yaml_escape "${adminUsername:-admin}")"
+    proxy:
+      enabled: true
+      header: "$(yaml_escape "${proxy_header:-X-Forwarded-User}")"
+EOF
+				;;
+			*)
+				cat <<EOF >> "$TMP_CONF"
+    noauth: false
     password:
       enabled: true
-      adminUsername: "admin"
-      adminPassword: "admin123"
+      adminUsername: "$(yaml_escape "${adminUsername:-admin}")"
+      minLength: ${min_password_length:-5}
+      signup: $(bool_yaml "$signup")
+      enforcedOtp: $(bool_yaml "$enforced_otp")
+    passkey:
+      enabled: $(bool_yaml "$enable_passkey")
+EOF
+				;;
+		esac
+
+		# 4. frontend section
+		printf 'frontend:\n' >> "$TMP_CONF"
+		[ -n "$frontend_name" ] && printf '  name: "%s"\n' "$(yaml_escape "$frontend_name")" >> "$TMP_CONF"
+		cat <<EOF >> "$TMP_CONF"
+  disableDefaultLinks: $(bool_yaml "$disable_default_links")
+  disableUsedPercentage: $(bool_yaml "$disable_used_percentage")
+  disablePWAInstall: $(bool_yaml "$disable_pwa_install")
+  styling:
+    disableEventThemes: $(bool_yaml "$disable_event_themes")
+EOF
+
+		# 5. integrations section
+		local has_media=0 has_office=0
+		if [ -n "$ffmpeg_path" ] || [ "$extract_subtitles" -eq 1 ] || [ "$heic_preview" -eq 1 ]; then
+			has_media=1
+		fi
+		if [ "$onlyoffice_enabled" -eq 1 ] && [ -n "$onlyoffice_url" ] && [ -n "$onlyoffice_secret" ]; then
+			has_office=1
+		fi
+
+		if [ "$has_media" -eq 1 ] || [ "$has_office" -eq 1 ]; then
+			printf 'integrations:\n' >> "$TMP_CONF"
+			if [ "$has_media" -eq 1 ]; then
+				cat <<EOF >> "$TMP_CONF"
+  media:
+    extractEmbeddedSubtitles: $(bool_yaml "$extract_subtitles")
+EOF
+				[ -n "$ffmpeg_path" ] && printf '    ffmpegPath: "%s"\n' "$(yaml_escape "$ffmpeg_path")" >> "$TMP_CONF"
+				if [ "$heic_preview" -eq 1 ]; then
+					cat <<EOF >> "$TMP_CONF"
+    convert:
+      imagePreview:
+        heic: true
+EOF
+				fi
+			fi
+			if [ "$has_office" -eq 1 ]; then
+				cat <<EOF >> "$TMP_CONF"
+  office:
+    url: "$(yaml_escape "$onlyoffice_url")"
+    viewOnly: $(bool_yaml "$onlyoffice_view_only")
+EOF
+				[ -n "$onlyoffice_internal_url" ] && printf '    internalUrl: "%s"\n' "$(yaml_escape "$onlyoffice_internal_url")" >> "$TMP_CONF"
+			fi
+		fi
+
+		# 6. userDefaults section (omit when 'unlocked' so UI language remains editable in Web UI)
+		if [ -n "$locale" ] && [ "$locale" != "unlocked" ] && [ "$locale" != "auto" ]; then
+			cat <<EOF >> "$TMP_CONF"
 userDefaults:
   ui:
-    locale: "zhCN"
+    locale: "$(yaml_escape "$locale")"
 EOF
-	else
-		grep -q " name:" "$CONF_PATH" || sed -i "s,.*- path:.*,&\n      name: \"\"," "$CONF_PATH"
-		sed -e "s/^  port:.*/  port: $listen_port/" \
-			-e "s, - path:.*, - path: \"$root_path\"," \
-			-e "s/      name: \".*\"/      name: \"$root_name\"/" \
-			-e "s,^  cacheDir:.*,  cacheDir: \"$cacheDir\"," \
-			-e "s/^  cacheDirMaxSizeMB:.*/  cacheDirMaxSizeMB: $cacheDirMaxSizeMB/" \
-			-i "$CONF_PATH"
+		fi
+
+		mv -f "$TMP_CONF" "$active_conf"
 	fi
 
+	_FB_ENV_INIT=0
 	procd_open_instance
 	procd_set_param command "$PROG"
-	procd_append_param command -c "$CONF_PATH"
+	procd_append_param command -c "$active_conf"
+	procd_set_param file "$active_conf"
 
-	procd_set_param limits core="unlimited"
-	procd_set_param limits nofile="1000000 1000000"
+	if [ "$auth_mode" = "password" ]; then
+		if [ -n "$adminPassword" ] && [ "$adminPassword" != "admin" ]; then
+			procd_add_env "FILEBROWSER_ADMIN_PASSWORD=$adminPassword"
+		fi
+		[ -n "$totp_secret" ] && procd_add_env "FILEBROWSER_TOTP_SECRET=$totp_secret"
+	fi
+
+	if [ "$onlyoffice_enabled" -eq 1 ] && [ -n "$onlyoffice_url" ] && [ -n "$onlyoffice_secret" ]; then
+		procd_add_env "FILEBROWSER_ONLYOFFICE_SECRET=$onlyoffice_secret"
+	fi
+
+	if [ "$disable_auto_backup" -eq 1 ]; then
+		procd_add_env "FILEBROWSER_DISABLE_AUTOMATIC_BACKUP=true"
+	fi
+
+	procd_set_param limits nofile="65535 65535"
+	procd_set_param term_timeout 15
 	procd_set_param stdout 1
 	procd_set_param stderr 1
-	procd_set_param respawn
+	procd_set_param respawn 3600 5 5
+
+	if [ "$open_firewall" -eq 1 ] && [ -z "$socket" ]; then
+		procd_open_data
+		json_add_array firewall
+			json_add_object ""
+			json_add_string type rule
+			json_add_string name "Allow-FileBrowser-Quantum"
+			json_add_string src "*"
+			json_add_string dest_port "$listen_port"
+			json_add_string proto "tcp"
+			json_add_string target "ACCEPT"
+			json_close_object
+		json_close_array
+		procd_close_data
+	fi
 
 	procd_close_instance
+}
+
+service_started() {
+	reload_firewall
+}
+
+service_stopped() {
+	reload_firewall
 }
 
 service_triggers() {

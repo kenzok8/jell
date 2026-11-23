@@ -1,7 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=filebrowser-q
-PKG_VERSION:=2.1.5-beta
+PKG_VERSION:=2.1.6-beta
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -21,7 +23,7 @@ GO_PKG:=github.com/gtsteffaniak/filebrowser/backend
 GO_PKG_BUILD_DIR:=$(PKG_BUILD_DIR)/backend
 GO_PKG_LDFLAGS_X:= \
 	$(GO_PKG)/internal/version.Version=v$(PKG_VERSION) \
-	$(GO_PKG)/internal/version.CommitSHA=$(PKG_VERSION)
+	$(GO_PKG)/internal/version.CommitSHA=v$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
@@ -32,12 +34,13 @@ define Package/filebrowser-q
   SUBMENU:=Filesystem
   TITLE:=FileBrowser Quantum - Modern Web File Manager
   URL:=https://github.com/gtsteffaniak/filebrowser
-  DEPENDS:=$(GO_ARCH_DEPENDS)
+  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
 endef
 
 define Package/filebrowser-q/description
   FileBrowser Quantum provides a modern, responsive web-based file management
-  interface with multi-source, real-time search, and enhanced preview features.
+  interface with multi-source storage, real-time indexed search, WebDAV,
+  granular permissions, and rich media/document preview features.
 endef
 
 define Package/filebrowser-q/conffiles
@@ -51,17 +54,19 @@ endef
 
 define Build/Compile
 	( \
-		pushd $(PKG_BUILD_DIR)/frontend && \
-		npm install && \
-		npm run build ; \
+		cd $(PKG_BUILD_DIR)/frontend && \
+		npm install --no-audit --no-fund && \
+		npm run build \
 	)
 	( \
 		cd $(PKG_BUILD_DIR)/backend && \
 		$(GO_PKG_VARS) \
 		go build \
 			-trimpath \
-			-ldflags="-w -s" \
-			-o $(PKG_BUILD_DIR)/filebrowser . ; \
+			-ldflags="-w -s \
+				-X '$(GO_PKG)/internal/version.Version=v$(PKG_VERSION)' \
+				-X '$(GO_PKG)/internal/version.CommitSHA=v$(PKG_VERSION)'" \
+			-o $(PKG_BUILD_DIR)/filebrowser . \
 	)
 endef
 

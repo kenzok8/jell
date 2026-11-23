@@ -1,0 +1,39 @@
+#!/bin/sh
+
+uci -q batch <<-EOF >/dev/null
+	set clouddrive2.main=clouddrive2
+	commit clouddrive2
+EOF
+
+for kv in \
+	"enabled=0" \
+	"port=19798" \
+	"https_enabled=0" \
+	"https_port=19799" \
+	"open_firewall=0" \
+	"config_dir=/etc/clouddrive2" \
+	"mount_point=/mnt/clouddrive" \
+	"cache_dir=/tmp/clouddrive2" \
+	"shared_mount=1" \
+	"allow_other=1" \
+	"startup_delay=0" \
+	"max_open_files=65535" \
+	"enable_run_after_start=0" \
+	"log_stdout=1" \
+	"log_stderr=1"
+do
+	key="${kv%%=*}"
+	val="${kv#*=}"
+	if [ -z "$(uci -q get clouddrive2.main.$key)" ]; then
+		uci -q set "clouddrive2.main.$key=$val"
+	fi
+done
+uci -q commit clouddrive2
+
+rm -rf /tmp/luci-indexcache* /tmp/luci-modulecache/ 2>/dev/null
+
+if [ -z "$IPKG_INSTROOT" ] && [ -x /etc/init.d/rpcd ]; then
+	/etc/init.d/rpcd reload >/dev/null 2>&1 || true
+fi
+
+exit 0

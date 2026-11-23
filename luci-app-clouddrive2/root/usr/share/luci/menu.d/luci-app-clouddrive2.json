@@ -1,0 +1,36 @@
+{
+	"admin/nas": {
+		"title": "NAS",
+		"order": 45,
+		"action": {
+			"type": "firstchild"
+		}
+	},
+	"admin/nas/clouddrive2": {
+		"title": "CloudDrive2",
+		"order": 10,
+		"action": {
+			"type": "firstchild"
+		},
+		"depends": {
+			"acl": [ "luci-app-clouddrive2" ],
+			"uci": { "clouddrive2": true }
+		}
+	},
+	"admin/nas/clouddrive2/config": {
+		"title": "Settings",
+		"order": 10,
+		"action": {
+			"type": "view",
+			"path": "clouddrive2/config"
+		}
+	},
+	"admin/nas/clouddrive2/log": {
+		"title": "Log",
+		"order": 20,
+		"action": {
+			"type": "view",
+			"path": "clouddrive2/log"
+		}
+	}
+}

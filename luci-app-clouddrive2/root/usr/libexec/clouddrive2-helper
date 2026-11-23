@@ -1,0 +1,165 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
+# Helper script for luci-app-clouddrive2 status & log queries
+
+. /lib/functions.sh
+. /usr/share/libubox/jshn.sh
+
+PROG="/usr/share/clouddrive2/clouddrive"
+
+get_uci_vars() {
+	config_load 'clouddrive2'
+	config_get port main port '19798'
+	config_get_bool https_enabled main https_enabled 0
+	config_get https_port main https_port '19799'
+	config_get config_dir main config_dir '/etc/clouddrive2'
+	config_get mount_point main mount_point '/mnt/clouddrive'
+	config_get cache_dir main cache_dir '/tmp/clouddrive2'
+}
+
+find_latest_log() {
+	local log_dir="${1%/}/log"
+	[ -d "$log_dir" ] || return 1
+	ls -1t "$log_dir"/*.log "$log_dir"/*.txt 2>/dev/null | head -n 1
+}
+
+cmd_status() {
+	local port https_enabled https_port config_dir mount_point cache_dir
+	local pid="" rss_kb=0 running=0 mp_base m OLD_IFS
+
+	get_uci_vars
+
+	if [ -f /var/run/clouddrive2.pid ]; then
+		local pf_pid
+		pf_pid="$(cat /var/run/clouddrive2.pid 2>/dev/null)"
+		if [ -n "$pf_pid" ] && [ -d "/proc/$pf_pid" ]; then
+			pid="$pf_pid"
+		fi
+	fi
+
+	if [ -z "$pid" ]; then
+		pid="$(pgrep -f "$PROG" 2>/dev/null | head -n 1)"
+	fi
+
+	if [ -n "$pid" ] && [ -d "/proc/$pid" ]; then
+		running=1
+		rss_kb="$(awk '/^VmRSS:/ { print $2; exit }' "/proc/$pid/status" 2>/dev/null)"
+		[ -n "$rss_kb" ] || rss_kb=0
+	fi
+
+	json_init
+	json_add_boolean "running" "$running"
+	json_add_int "pid" "${pid:-0}"
+	json_add_int "rss_kb" "${rss_kb:-0}"
+	json_add_int "port" "${port:-19798}"
+	json_add_boolean "https_enabled" "${https_enabled:-0}"
+	json_add_int "https_port" "${https_port:-19799}"
+	json_add_string "config_dir" "$config_dir"
+	json_add_string "mount_point" "$mount_point"
+	json_add_boolean "binary_exists" "$([ -x "$PROG" ] && echo 1 || echo 0)"
+	json_add_boolean "fuse_ready" "$([ -c /dev/fuse ] && echo 1 || echo 0)"
+
+	json_add_array "mounts"
+	mp_base="${mount_point%/}"
+	if [ -n "$mp_base" ]; then
+		OLD_IFS="$IFS"
+		IFS='
+'
+		for m in $(awk -v base="$mp_base" '
+			$3 ~ /^fuse/ {
+				mp = $2
+				gsub(/\\040/, " ", mp)
+				if (mp == base || index(mp, base "/") == 1)
+					print mp
+			}
+		' /proc/mounts 2>/dev/null); do
+			[ -n "$m" ] && json_add_string "" "$m"
+		done
+		IFS="$OLD_IFS"
+	fi
+	json_close_array
+
+	json_dump
+	json_cleanup
+}
+
+cmd_log_meta() {
+	local port https_enabled https_port config_dir mount_point cache_dir
+	local latest_log="" log_size=0 has_app_log=0
+
+	get_uci_vars
+	latest_log="$(find_latest_log "$config_dir")"
+	if [ -n "$latest_log" ] && [ -f "$latest_log" ]; then
+		has_app_log=1
+		log_size="$(wc -c < "$latest_log" 2>/dev/null | tr -d ' ')"
+		[ -n "$log_size" ] || log_size=0
+	fi
+
+	json_init
+	json_add_boolean "has_app_log" "$has_app_log"
+	json_add_string "log_file" "${latest_log:-${config_dir%/}/log/}"
+	json_add_int "log_size" "${log_size:-0}"
+	json_dump
+	json_cleanup
+}
+
+cmd_log() {
+	local source="${1:-app}"
+	local lines="${2:-200}"
+	local port https_enabled https_port config_dir mount_point cache_dir
+	local latest_log=""
+
+	case "$lines" in
+		''|*[!0-9]*) lines=200 ;;
+	esac
+	[ "$lines" -gt 2000 ] && lines=2000
+	[ "$lines" -lt 10 ] && lines=10
+
+	get_uci_vars
+
+	if [ "$source" = "syslog" ]; then
+		logread -e clouddrive 2>/dev/null | tail -n "$lines"
+		return 0
+	fi
+
+	latest_log="$(find_latest_log "$config_dir")"
+	if [ -n "$latest_log" ] && [ -f "$latest_log" ]; then
+		tail -n "$lines" "$latest_log" 2>/dev/null
+	else
+		logread -e clouddrive 2>/dev/null | tail -n "$lines"
+	fi
+}
+
+cmd_clear_log() {
+	local port https_enabled https_port config_dir mount_point cache_dir
+	local log_dir f
+
+	get_uci_vars
+	log_dir="${config_dir%/}/log"
+	if [ -d "$log_dir" ]; then
+		for f in "$log_dir"/*.log "$log_dir"/*.txt; do
+			[ -f "$f" ] && : > "$f"
+		done
+	fi
+	echo '{"cleared":true}'
+}
+
+case "$1" in
+	status)
+		cmd_status
+		;;
+	log_meta)
+		cmd_log_meta
+		;;
+	log)
+		shift
+		cmd_log "$@"
+		;;
+	clear_log)
+		cmd_clear_log
+		;;
+	*)
+		echo '{"error":"Invalid command"}'
+		exit 1
+		;;
+esac

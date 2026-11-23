@@ -1,32 +1,263 @@
 msgid ""
-msgstr "Content-Type: text/plain; charset=UTF-8\n"
+msgstr ""
+"Language: zh_Hans\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 
-msgid "Configure and manage CloudDrive2"
-msgstr "配置和管理CloudDrive2"
+msgid "NAS"
+msgstr "网络存储"
+
+msgid "CloudDrive2"
+msgstr "CloudDrive2"
 
 msgid "Settings"
-msgstr "设置"
+msgstr "基本设置"
+
+msgid "Log"
+msgstr "运行日志"
+
+msgid "Grant UCI, service, and helper access for luci-app-clouddrive2"
+msgstr "授予 luci-app-clouddrive2 的 UCI、服务控制及辅助脚本访问权限"
+
+msgid "Path cannot be empty"
+msgstr "路径不能为空"
+
+msgid "Please enter an absolute path starting with /"
+msgstr "请输入以 / 开头的绝对路径"
+
+msgid "PID: %d"
+msgstr "进程 PID: %d"
+
+msgid "Memory: %s MB"
+msgstr "内存占用: %s MB"
+
+msgid "Active Mounts: %d"
+msgstr "活动挂载数: %d"
+
+msgid "Service action failed: %s"
+msgstr "服务操作失败: %s"
+
+msgid "Failed to execute service command: %s"
+msgstr "执行服务命令失败: %s"
+
+msgid "Open Web Interface"
+msgstr "打开管理界面"
+
+msgid "Restart"
+msgstr "重启"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "Start"
+msgstr "启动"
+
+msgid "RUNNING"
+msgstr "运行中"
+
+msgid "NOT RUNNING"
+msgstr "未运行"
+
+msgid "Web Console"
+msgstr "管理后台"
+
+msgid "Mounted Paths"
+msgstr "已挂载路径"
+
+msgid "Core binary /usr/share/clouddrive2/clouddrive was not found."
+msgstr "未找到核心程序 /usr/share/clouddrive2/clouddrive。"
+
+msgid "Warning: /dev/fuse device was not detected. Install kmod-fuse for local cloud mounting."
+msgstr "警告：未检测到 /dev/fuse 设备，本地云盘挂载需要安装 kmod-fuse。"
+
+msgid "CloudDrive2 is a multi-cloud storage management tool supporting local FUSE mounting, cross-cloud backup, and WebDAV service."
+msgstr "CloudDrive2 是一款多云盘管理与挂载工具，支持通过 FUSE 将网盘挂载为本地磁盘、跨云复制备份与 WebDAV 服务。"
+
+msgid "Service Configuration"
+msgstr "服务配置"
+
+msgid "General Settings"
+msgstr "基本设置"
+
+msgid "Storage & Mount"
+msgstr "存储与挂载"
+
+msgid "Advanced Settings"
+msgstr "高级设置"
 
 msgid "Enable"
 msgstr "启用"
 
-msgid "Port"
-msgstr "端口"
+msgid "Enable and start the CloudDrive2 background service."
+msgstr "启用并运行 CloudDrive2 后台服务。"
 
-msgid "Mount Point"
-msgstr "挂载点"
+msgid "HTTP Port"
+msgstr "HTTP 端口"
 
-msgid "CloudDrive2 Status"
-msgstr "CloudDrive2状态"
+msgid "Default HTTP port for Web UI and WebDAV is 19798. Keep consistent if modified inside CloudDrive2 Web Server settings."
+msgstr "Web 管理界面与 WebDAV 的默认 HTTP 端口为 19798。若在 CloudDrive2 网页端修改过监听端口，请在此保持一致。"
 
-msgid "Running Status"
-msgstr "运行状态"
+msgid "Enable HTTPS"
+msgstr "启用 HTTPS 访问"
 
-msgid "Collecting data..."
-msgstr "正在收集数据..."
+msgid "Use HTTPS when opening the Web UI and optionally expose the HTTPS port in the firewall. Certificate must be configured in CloudDrive2 Web Server settings."
+msgstr "点击打开管理界面时使用 HTTPS 协议，并在开启防火墙放行时同步开放 HTTPS 端口（需先在 CloudDrive2 内部设置中配置证书并开启 HTTPS）。"
 
-msgid "CloudDrive2 is running"
-msgstr "CloudDrive2 正在运行"
+msgid "HTTPS Port"
+msgstr "HTTPS 端口"
 
-msgid "CloudDrive2 is not running"
-msgstr "CloudDrive2 未运行"
+msgid "Default HTTPS port in CloudDrive2 is 19799."
+msgstr "CloudDrive2 默认 HTTPS 监听端口为 19799。"
+
+msgid "Open Firewall Port"
+msgstr "开放防火墙端口"
+
+msgid "Automatically add firewall accept rules to allow external access to CloudDrive2 Web UI and WebDAV ports."
+msgstr "自动添加防火墙放行规则，允许从外网（WAN）访问 CloudDrive2 管理界面与 WebDAV 端口。"
+
+msgid "Startup Delay (Seconds)"
+msgstr "开机启动延迟（秒）"
+
+msgid "Delay service startup at boot to wait for external USB/SATA drives or WAN connection readiness. Set 0 to start immediately."
+msgstr "路由器开机时延迟指定秒数再启动服务，以便等待外置硬盘挂载或拨号联网就绪；填 0 表示立即启动。"
+
+msgid "Configuration Directory"
+msgstr "配置与数据目录"
+
+msgid "Directory storing CloudDrive2 configuration, account database, directory cache, and logs (CLOUDDRIVE_HOME). Place on external storage if flash space is limited."
+msgstr "存放 CloudDrive2 配置文件、账号数据、目录缓存数据库及日志的目录（CLOUDDRIVE_HOME）。闪存空间较小时建议设置到外置存储分区。"
+
+msgid "Mount Base Directory"
+msgstr "本地挂载主目录"
+
+msgid "Local base directory for FUSE cloud mounts. Sub-mounts under this directory are safely unmounted when stopping the service."
+msgstr "FUSE 云盘挂载点的本地主目录。停止或重启服务时，会自动安全卸载该目录及其子目录下的所有 FUSE 挂载点。"
+
+msgid "Temp & Cache Directory"
+msgstr "临时缓冲目录"
+
+msgid "Directory for upload buffers and temporary files (temp_dir / TMPDIR). Using /tmp or an external disk prevents flash wear."
+msgstr "上传分片与临时缓冲文件存放目录（同步写入 temp_dir 与 TMPDIR）。建议使用内存盘 /tmp 或外置硬盘以减少路由器闪存写入损耗。"
+
+msgid "Shared Mount Propagation"
+msgstr "开启共享挂载传播"
+
+msgid "Enable shared mount propagation (mount --make-shared) on the mount partition so Docker containers such as Jellyfin or Emby can access mounted cloud files."
+msgstr "对挂载所在分区启用共享挂载传播（mount --make-shared），确保 Jellyfin、Emby 等 Docker 容器可正常读取挂载的云盘文件。"
+
+msgid "Allow Other Users"
+msgstr "允许其他用户访问挂载"
+
+msgid "Enable user_allow_other in /etc/fuse.conf so Samba, ksmbd, and media services running under non-root accounts can read mounted directories."
+msgstr "自动在 /etc/fuse.conf 中启用 user_allow_other，使非 root 身份运行的 Samba、ksmbd 及影音服务能够访问挂载目录。"
+
+msgid "HTTP/HTTPS Proxy"
+msgstr "HTTP/HTTPS 代理"
+
+msgid "Optional proxy URL for accessing cloud storage APIs (for example http://127.0.0.1:7890 or socks5://127.0.0.1:1080)."
+msgstr "可选代理地址，用于连接 Google Drive、OneDrive、PikPak 等海外网盘接口（例如 http://127.0.0.1:7890 或 socks5://127.0.0.1:1080）。"
+
+msgid "Max Open Files"
+msgstr "最大打开文件数"
+
+msgid "Maximum file descriptor limit (ulimit -n) for the CloudDrive2 process to avoid handle exhaustion under heavy concurrency."
+msgstr "为 CloudDrive2 进程设置的最大文件句柄数（ulimit -n），避免大目录扫描或多任务并发传输时耗尽系统句柄。"
+
+msgid "Run Post-Start Command"
+msgstr "挂载就绪后执行命令"
+
+msgid "Enable ENABLE_RUN_AFTER_START so CloudDrive2 executes a command once startup and cloud mounts are ready."
+msgstr "启用官方 ENABLE_RUN_AFTER_START 机制，在核心服务启动且挂载点就绪后自动执行指定命令。"
+
+msgid "Post-Start Command"
+msgstr "启动后执行命令"
+
+msgid "Command written to systemsettings.json (run_after_start), such as restarting media containers after mounts come online."
+msgstr "写入 systemsettings.json 的 run_after_start 命令（例如 docker restart jellyfin），避免依赖挂载路径的服务过早启动看到空目录。"
+
+msgid "Forward Stdout to Syslog"
+msgstr "转发标准输出至系统日志"
+
+msgid "Forward standard output of CloudDrive2 to OpenWrt system log (logread)."
+msgstr "将 CloudDrive2 的标准输出（stdout）转发至 OpenWrt 系统日志（logread）。"
+
+msgid "Forward Stderr to Syslog"
+msgstr "转发错误输出至系统日志"
+
+msgid "Forward standard error output of CloudDrive2 to OpenWrt system log (logread)."
+msgstr "将 CloudDrive2 的标准错误输出（stderr）转发至 OpenWrt 系统日志（logread）。"
+
+msgid "Custom Environment Variables"
+msgstr "自定义环境变量"
+
+msgid "Additional environment variables passed to CloudDrive2 in KEY=VALUE format (for example RUST_LOG=info)."
+msgstr "传递给 CloudDrive2 进程的额外环境变量，格式为 KEY=VALUE（例如 RUST_LOG=info）。"
+
+msgid "Invalid format, expected KEY=VALUE"
+msgstr "格式无效，请使用 KEY=VALUE 格式"
+
+msgid "Log File: %s (%s)"
+msgstr "日志文件: %s（%s）"
+
+msgid "No application log file found in %s, showing syslog output"
+msgstr "在 %s 下暂未找到应用日志文件，当前显示系统日志输出"
+
+msgid "Source: OpenWrt logread (clouddrive)"
+msgstr "日志来源: OpenWrt 系统日志 logread (clouddrive)"
+
+msgid "No log entries found."
+msgstr "暂无匹配的日志记录。"
+
+msgid "Application Log"
+msgstr "应用日志"
+
+msgid "System Log (syslog)"
+msgstr "系统日志 (syslog)"
+
+msgid "All Levels"
+msgstr "全部级别"
+
+msgid "100 Lines"
+msgstr "100 行"
+
+msgid "200 Lines"
+msgstr "200 行"
+
+msgid "500 Lines"
+msgstr "500 行"
+
+msgid "1000 Lines"
+msgstr "1000 行"
+
+msgid "Filter by keyword..."
+msgstr "输入关键字筛选..."
+
+msgid "Refresh"
+msgstr "立即刷新"
+
+msgid "Download Log"
+msgstr "下载日志"
+
+msgid "Are you sure you want to clear CloudDrive2 application log files?"
+msgstr "确定要清空 CloudDrive2 应用日志文件吗？"
+
+msgid "Application log files have been cleared."
+msgstr "应用日志文件已清空。"
+
+msgid "Failed to clear logs: %s"
+msgstr "清空日志失败: %s"
+
+msgid "Clear Log"
+msgstr "清空日志"
+
+msgid "CloudDrive2 Logs"
+msgstr "CloudDrive2 运行日志"
+
+msgid "View real-time CloudDrive2 application logs and OpenWrt procd system logs."
+msgstr "实时查看 CloudDrive2 应用日志文件与 OpenWrt procd 系统运行日志。"
+
+msgid "Newest First"
+msgstr "最新日志置顶"
+
+msgid "Auto Refresh"
+msgstr "自动刷新"

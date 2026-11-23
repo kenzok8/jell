@@ -1,0 +1,582 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: luci-app-filebrowser-q\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "0.0.0.0 (All IPv4/IPv6 interfaces)"
+msgstr ""
+
+msgid "127.0.0.1 (Localhost only)"
+msgstr ""
+
+msgid "2FA encryption secret"
+msgstr ""
+
+msgid ":: (IPv6 & dual-stack)"
+msgstr ""
+
+msgid "Additional storage sources"
+msgstr ""
+
+msgid "Admin password"
+msgstr ""
+
+msgid "Admin username"
+msgstr ""
+
+msgid "Advanced search results limit"
+msgstr ""
+
+msgid "Allow browsing files without building background search and directory size indexes (saves RAM/IO on slow mounts)."
+msgstr ""
+
+msgid "Allow extracting embedded subtitle tracks from video files during playback (I/O intensive on large videos)."
+msgstr ""
+
+msgid "Allow user signup"
+msgstr ""
+
+msgid "Allow users to register hardware security keys or biometric passkeys (requires HTTPS or localhost)."
+msgstr ""
+
+msgid "Allow visitors to self-register new accounts on the login page."
+msgstr ""
+
+msgid "Authentication & Security"
+msgstr ""
+
+msgid "Authentication mode"
+msgstr ""
+
+msgid "Auto (CPU cores)"
+msgstr ""
+
+msgid "Auto-clean cache directory"
+msgstr ""
+
+msgid "Auto-create per-user directory"
+msgstr ""
+
+msgid "Auto-derived from path"
+msgstr ""
+
+msgid "Automatically add a dynamic firewall rule allowing incoming TCP connections to the listen port."
+msgstr ""
+
+msgid "Automatically clean up temporary cache files on startup and shutdown."
+msgstr ""
+
+msgid "Automatically create and scope each user to an isolated subdirectory named after their username."
+msgstr ""
+
+msgid "Base URL path"
+msgstr ""
+
+msgid "Basic Settings"
+msgstr ""
+
+msgid "Block file creation, modification, upload, and deletion across Web UI, API, and WebDAV."
+msgstr ""
+
+msgid "Browser-accessible URL of your OnlyOffice Document Server."
+msgstr ""
+
+msgid "Built-in administrator account username."
+msgstr ""
+
+msgid "Cache directory"
+msgstr ""
+
+msgid "Calculate sizes from apparent file length instead of disk blocks (recommended for FUSE/CloudDrive2/rclone mounts)."
+msgstr ""
+
+msgid "Collecting data..."
+msgstr ""
+
+msgid "Concurrent image preview workers (FFmpeg uses half). Leave empty to match CPU cores, or set 1-2 on low-power routers."
+msgstr ""
+
+msgid "Configuration YAML (/etc/filebrowser-q/config.yaml)"
+msgstr ""
+
+msgid "Connect an external OnlyOffice Document Server for online Office viewing and collaborative editing."
+msgstr ""
+
+msgid "Custom Config & Logs"
+msgstr ""
+
+msgid "Custom config file path"
+msgstr ""
+
+msgid "Custom display name shown in the browser tab, top header, and PWA manifest."
+msgstr ""
+
+msgid "Custom log file path"
+msgstr ""
+
+msgid "Database path must be an absolute file path."
+msgstr ""
+
+msgid "Debug (Verbose)"
+msgstr ""
+
+msgid "Default UI language"
+msgstr ""
+
+msgid "Default directory permission"
+msgstr ""
+
+msgid "Default file permission"
+msgstr ""
+
+msgid "Default language seeded for new users. Choose Unlocked to manage freely in the Web UI."
+msgstr ""
+
+msgid "Default login username is %s and password is %s."
+msgstr ""
+
+msgid "Detect file types by extension only without reading file headers (improves listing speed on slow network/USB drives)."
+msgstr ""
+
+msgid "Directory containing ffmpeg and ffprobe binaries (for example /usr/bin) for video thumbnails. Leave empty for system PATH discovery."
+msgstr ""
+
+msgid "Directory storing thumbnails, index SQLite files, and archive spool files. Point to disk storage when downloading large ZIP folders."
+msgstr ""
+
+msgid "Disable PWA install prompt"
+msgstr ""
+
+msgid "Disable WebDAV"
+msgstr ""
+
+msgid "Disable all previews & thumbnails"
+msgstr ""
+
+msgid "Disable auth rate limiting"
+msgstr ""
+
+msgid "Disable automatic DB backup"
+msgstr ""
+
+msgid "Disable background indexing"
+msgstr ""
+
+msgid "Disable file header type detection"
+msgstr ""
+
+msgid "Disable preview resizing"
+msgstr ""
+
+msgid "Disable public sharing"
+msgstr ""
+
+msgid "Disable seasonal themes"
+msgstr ""
+
+msgid "Disable the /dav/<source> WebDAV endpoint if external WebDAV client access is not needed."
+msgstr ""
+
+msgid "Disable update check"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Displays the active YAML file. Edits made here are saved only when \"Use custom YAML configuration\" is enabled above."
+msgstr ""
+
+msgid "Enable"
+msgstr ""
+
+msgid "Enable HEIC image conversion"
+msgstr ""
+
+msgid "Enable HTTP API access logs"
+msgstr ""
+
+msgid "Enable OnlyOffice integration"
+msgstr ""
+
+msgid "Enable Passkey (WebAuthn)"
+msgstr ""
+
+msgid "Enable SQLite Write-Ahead Logging for the search index (higher RAM usage, better concurrency under heavy activity)."
+msgstr ""
+
+msgid "Enable index WAL mode"
+msgstr ""
+
+msgid "Enable native HTTPS (TLS)"
+msgstr ""
+
+msgid "Enforce Two-Factor Authentication (2FA)"
+msgstr ""
+
+msgid "English (en)"
+msgstr ""
+
+msgid "Enter a valid 3 or 4 digit octal permission (for example 644 or 0664)."
+msgstr ""
+
+msgid "Enter a valid 3 or 4 digit octal permission (for example 755 or 2755)."
+msgstr ""
+
+msgid "Enter a valid http:// or https:// OnlyOffice server URL."
+msgstr ""
+
+msgid "Errors only"
+msgstr ""
+
+msgid "Exclude empty folders"
+msgstr ""
+
+msgid "Exclude hidden files"
+msgstr ""
+
+msgid "Exclude symbolic links"
+msgstr ""
+
+msgid "Exclude virtual kernel filesystems"
+msgstr ""
+
+msgid "External public URL"
+msgstr ""
+
+msgid "Extract embedded video subtitles"
+msgstr ""
+
+msgid "FFmpeg directory path"
+msgstr ""
+
+msgid "FileBrowser Quantum"
+msgstr ""
+
+msgid "FileBrowser Quantum v2 rejects \"admin\" as a configured password; choose another password with at least 5 characters."
+msgstr ""
+
+msgid "Filename \"database.db\" is reserved for legacy v1 BoltDB migration; use \"filebrowser.sqlite\" instead."
+msgstr ""
+
+msgid "Filesystem path for the primary storage source (for example /mnt/sda1 or /)."
+msgstr ""
+
+msgid "French (fr)"
+msgstr ""
+
+msgid "German (de)"
+msgstr ""
+
+msgid "Globally hide the \"Install App\" prompt banner across desktop and mobile browsers."
+msgstr ""
+
+msgid "Grant UCI and file access for luci-app-filebrowser-q"
+msgstr ""
+
+msgid "HTTP request header carrying the authenticated username from your reverse proxy (such as Authelia or Authentik)."
+msgstr ""
+
+msgid "Hide built-in external documentation and project links from the sidebar."
+msgstr ""
+
+msgid "Hide default sidebar links"
+msgstr ""
+
+msgid "Hide disk capacity percentage bars on storage sources in the sidebar."
+msgstr ""
+
+msgid "Hide folders whose total indexed content size is 0 bytes."
+msgstr ""
+
+msgid "Hide storage usage bar"
+msgstr ""
+
+msgid "Honor X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Host, and X-Real-IP when running behind Nginx, Caddy, Lucky, or Traefik."
+msgstr ""
+
+msgid "IP address to bind the HTTP server. Choose 127.0.0.1 when running behind a local reverse proxy."
+msgstr ""
+
+msgid "Index DB startup check"
+msgstr ""
+
+msgid "Index SQLite cache size (MB)"
+msgstr ""
+
+msgid "Integrity verification mode for the SQLite search index database on service startup."
+msgstr ""
+
+msgid "Internal callback URL"
+msgstr ""
+
+msgid "Invalid format. Use /path, /path:Name, or /path:Name:ro."
+msgstr ""
+
+msgid "Japanese (ja)"
+msgstr ""
+
+msgid "Korean (ko)"
+msgstr ""
+
+msgid "Leave empty to log to OpenWrt system log (stdout), or enter a file path such as /var/log/filebrowser-q.log."
+msgstr ""
+
+msgid "Listen address"
+msgstr ""
+
+msgid "Listen on a local Unix socket instead of TCP port/TLS (for example /var/run/filebrowser-q.sock). Leave empty to use TCP."
+msgstr ""
+
+msgid "Listen port"
+msgstr ""
+
+msgid "Log individual API request/response events (disabled by default to reduce syslog noise)."
+msgstr ""
+
+msgid "Log level"
+msgstr ""
+
+msgid "Mark the primary source as private to disallow generating share links."
+msgstr ""
+
+msgid "Max archive/unarchive size (GB)"
+msgstr ""
+
+msgid "Maximum combined size in GB for ZIP/TAR compression and extraction operations (0 = unlimited)."
+msgstr ""
+
+msgid "Maximum disk space used by generated thumbnail previews (0 = unlimited)."
+msgstr ""
+
+msgid "Maximum indexed matches returned for a single Advanced Search request."
+msgstr ""
+
+msgid "Minimum password length"
+msgstr ""
+
+msgid "Minimum search query length"
+msgstr ""
+
+msgid "Modern self-hosted web file manager with multi-source storage, indexed search, WebDAV, and rich previews."
+msgstr ""
+
+msgid "Mount extra directories as separate sidebar sources. Format: /path, /path:DisplayName, or /path:DisplayName:ro (read-only)."
+msgstr ""
+
+msgid "NOT RUNNING"
+msgstr ""
+
+msgid "Network, TLS & Proxy"
+msgstr ""
+
+msgid "No authentication (Trusted LAN only)"
+msgstr ""
+
+msgid "No log entries found."
+msgstr ""
+
+msgid "Omit symbolic links completely from source indexing."
+msgstr ""
+
+msgid "OnlyOffice JWT secret"
+msgstr ""
+
+msgid "OnlyOffice JWT secret is required when OnlyOffice integration is enabled."
+msgstr ""
+
+msgid "OnlyOffice internal URL"
+msgstr ""
+
+msgid "OnlyOffice server URL"
+msgstr ""
+
+msgid "OnlyOffice view-only mode"
+msgstr ""
+
+msgid "Open Office documents in read-only viewer mode without editing."
+msgstr ""
+
+msgid "Open Web Interface"
+msgstr ""
+
+msgid "Open firewall port"
+msgstr ""
+
+msgid "Optional LAN/container address FileBrowser uses for backend requests to OnlyOffice."
+msgstr ""
+
+msgid "Optional base64 secret passed via FILEBROWSER_TOTP_SECRET to encrypt TOTP keys. Do not change once users enable 2FA."
+msgstr ""
+
+msgid "Optional label shown in the sidebar. Defaults to \"root\" for / or the directory basename."
+msgstr ""
+
+msgid "Optional private LAN URL (for example http://192.168.1.1:8787) used by OnlyOffice to reach FileBrowser directly."
+msgstr ""
+
+msgid "Password authentication (Recommended)"
+msgstr ""
+
+msgid "Password length must be at least %d characters."
+msgstr ""
+
+msgid "Path to the SQLite state database (must not be named database.db). Move to external storage if /overlay space is tight."
+msgstr ""
+
+msgid "Performance & Integrations"
+msgstr ""
+
+msgid "Prevent automatic holiday theme switching (such as Halloween styling)."
+msgstr ""
+
+msgid "Preview cache max size (MB)"
+msgstr ""
+
+msgid "Primary root directory"
+msgstr ""
+
+msgid "Primary source display name"
+msgstr ""
+
+msgid "Public scheme and domain (for example https://files.example.com) used when generating share links and WebAuthn origins."
+msgstr ""
+
+msgid "RUNNING"
+msgstr ""
+
+msgid "Read-only primary source"
+msgstr ""
+
+msgid "Refresh Logs"
+msgstr ""
+
+msgid "Require all password-authenticated users to set up TOTP 2FA on login."
+msgstr ""
+
+msgid "Reverse-proxy header authentication"
+msgstr ""
+
+msgid "Russian (ru)"
+msgstr ""
+
+msgid "SQLite database path"
+msgstr ""
+
+msgid "Serve HTTPS directly from FileBrowser Quantum using a certificate and private key."
+msgstr ""
+
+msgid "Service Logs"
+msgstr ""
+
+msgid "Session expiration (hours)"
+msgstr ""
+
+msgid "Set FILEBROWSER_DISABLE_AUTOMATIC_BACKUP=true to save flash storage space on routers."
+msgstr ""
+
+msgid "Shared JWT secret matching your OnlyOffice Document Server configuration (passed via FILEBROWSER_ONLYOFFICE_SECRET)."
+msgstr ""
+
+msgid "Simplified Chinese (zhCN)"
+msgstr ""
+
+msgid "Site title"
+msgstr ""
+
+msgid "Skip dotfiles and hidden folders starting with \".\" during indexing and listing."
+msgstr ""
+
+msgid "Skip image resizing when serving previews."
+msgstr ""
+
+msgid "Skip indexing /proc, /sys, and /dev, and set /tmp and /var to browse-only when root directory is /."
+msgstr ""
+
+msgid "Source path must be an absolute path starting with \"/\"."
+msgstr ""
+
+msgid "Spanish (es)"
+msgstr ""
+
+msgid "Standard (info | warning | error)"
+msgstr ""
+
+msgid "Stop periodic background requests checking GitHub for new FileBrowser Quantum releases."
+msgstr ""
+
+msgid "Storage & Sources"
+msgstr ""
+
+msgid "Synced via FILEBROWSER_ADMIN_PASSWORD on startup. Clear this field after setup if you want password changes made inside the Web UI to persist across restarts."
+msgstr ""
+
+msgid "TLS certificate path"
+msgstr ""
+
+msgid "TLS private key path"
+msgstr ""
+
+msgid "Thumbnail worker threads"
+msgstr ""
+
+msgid "Traditional Chinese (zhTW)"
+msgstr ""
+
+msgid "Trust reverse-proxy headers"
+msgstr ""
+
+msgid "Trusted proxy user header"
+msgstr ""
+
+msgid "Turn off built-in brute-force throttling and 15-minute failed-login lockouts on /api/auth/* endpoints."
+msgstr ""
+
+msgid "URL subpath prefix when serving FileBrowser under a reverse proxy path (for example /files)."
+msgstr ""
+
+msgid "Unix Socket Mode"
+msgstr ""
+
+msgid "Unix domain socket path"
+msgstr ""
+
+msgid "Unix octal permission applied to newly created folders (default: 755)."
+msgstr ""
+
+msgid "Unix octal permission applied to newly created or uploaded files (default: 644)."
+msgstr ""
+
+msgid "Unlocked (Manage in Web UI)"
+msgstr ""
+
+msgid "Use FFmpeg to convert Apple HEIC photos for preview in non-Safari browsers (requires FFmpeg 8.1+)."
+msgstr ""
+
+msgid "Use custom YAML configuration"
+msgstr ""
+
+msgid "Use lightweight file icons instead of generating image, video, and document thumbnails."
+msgstr ""
+
+msgid "Use logical file size"
+msgstr ""
+
+msgid "Validity duration in hours for each Web UI login session token."
+msgstr ""
+
+msgid "Warnings & Errors only"
+msgstr ""
+
+msgid "When enabled, the init script will not overwrite the YAML file from UCI options above, allowing manual configuration of OIDC, LDAP, or complex access rules."
+msgstr ""
+
+msgid "off (Fastest startup, minimal check)"
+msgstr ""
+
+msgid "probe (Fast catalog check, recommended for large disks)"
+msgstr ""
+
+msgid "quickCheck (Thorough PRAGMA quick_check)"
+msgstr ""

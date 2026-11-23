@@ -1,10 +1,24 @@
 {
 	"luci-app-clouddrive2": {
-		"description": "Grant UCI access for luci-app-clouddrive2",
+		"description": "Grant UCI, service, and helper access for luci-app-clouddrive2",
 		"read": {
+			"file": {
+				"/usr/libexec/clouddrive2-helper status": [ "exec" ],
+				"/usr/libexec/clouddrive2-helper log_meta": [ "exec" ],
+				"/usr/libexec/clouddrive2-helper log *": [ "exec" ]
+			},
+			"ubus": {
+				"service": [ "list" ]
+			},
 			"uci": [ "clouddrive2" ]
 		},
 		"write": {
+			"file": {
+				"/usr/libexec/clouddrive2-helper": [ "exec" ],
+				"/usr/libexec/clouddrive2-helper *": [ "exec" ],
+				"/etc/init.d/clouddrive2": [ "exec" ],
+				"/etc/init.d/clouddrive2 *": [ "exec" ]
+			},
 			"uci": [ "clouddrive2" ]
 		}
 	}
