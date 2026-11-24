@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 PKG_NAME:=changeguard
-PKG_VERSION:=kaiplus-runtime-v1.0.18
+PKG_VERSION:=linkease-runtime-v1.7.7
 PKG_RELEASE:=1
 include ./release.mk
 PKG_SOURCE:=changeguard-$(PKG_VERSION)-$(ARCH).tar.gz
