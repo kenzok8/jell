@@ -6,18 +6,13 @@
 
 include $(TOPDIR)/rules.mk
 
-KAIPLUS_ARCH_x86_64:=amd64
-KAIPLUS_ARCH_aarch64:=arm64
-KAIPLUS_ARCH:=$(KAIPLUS_ARCH_$(ARCH))
-KAIPLUS_HASH_x86_64:=e6b202d8b6c6ee47787473eb8c33122cf5a3fca6c73deb110be4b0e52bcd6967
-KAIPLUS_HASH_aarch64:=c5634f44f6202c2e6977cbb5e7ad9d1faf7faa331bac0e945776841a183fb1d0
-
 PKG_NAME:=kaiplus
-PKG_VERSION:=1.0.20
-PKG_RELEASE:=1
+PKG_VERSION:=1.0.25
+PKG_RELEASE:=2
 
-KAIPLUS_URL_FILE:=kaiplus-linux-$(KAIPLUS_ARCH)
-KAIPLUS_DOWNLOAD:=$(KAIPLUS_URL_FILE)-$(KAIPLUS_HASH_$(ARCH))
+KAIPLUS_URL_FILE:=kaiplus-binary-$(PKG_VERSION).tar.gz
+KAIPLUS_HASH:=13d31810ca6dd861515a683a1c7710868cba2895c515295eb064753eada1c628
+KAIPLUS_DOWNLOAD:=$(KAIPLUS_URL_FILE)-$(KAIPLUS_HASH)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_BUILD_PARALLEL:=1
@@ -34,6 +29,24 @@ define Download/kaiplus
 	HASH:=skip
 endef
 
+define Package/kaiplus-sandbox
+	SECTION:=net
+	CATEGORY:=System
+	TITLE:=KaiPlus optional Linux sandbox backend
+	DEPENDS:=@(x86_64||aarch64) +kaiplus +bubblewrap
+endef
+
+define Package/kaiplus-sandbox/description
+  Optional backend for explicitly configured sandbox.bash="enforce".
+  KAIPlus native device management does not require bubblewrap.
+  Installation never rewrites the user's execution or approval preferences.
+endef
+
+define Package/kaiplus-sandbox/install
+	$(INSTALL_DIR) $(1)/usr/share/kaiplus
+	$(INSTALL_DATA) ./files/sandbox-backend.txt $(1)/usr/share/kaiplus/sandbox-backend.txt
+endef
+
 define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=System
@@ -42,7 +55,7 @@ define Package/$(PKG_NAME)
 	URL:=https://github.com/linkease/istore-packages
 	DEPENDS:=@(x86_64||aarch64) +linkease-app-entry +changeguard
 	# Build matrix: OpenWrt 21.02 OPKG uses -N; 25.12 APK uses -rN.
-	EXTRA_DEPENDS:=changeguard (>=0.3.5-$(if $(CONFIG_USE_APK),r)1)
+	EXTRA_DEPENDS:=changeguard (>=0.3.5-$(if $(CONFIG_USE_APK),r)2), luci-lib-linkeaseauth (>=1.2.1-r5)
 endef
 
 define Package/$(PKG_NAME)/description
@@ -50,7 +63,6 @@ define Package/$(PKG_NAME)/description
 endef
 
 define Package/$(PKG_NAME)/conffiles
-/etc/init.d/kaiplus
 /etc/config/kaiplus
 endef
 
@@ -62,6 +74,13 @@ legacy="$${root}/usr/share/linkeasefull/desktop-apps.d/00-kaiplus-plugin.json"
 if [ ! -e "$${legacy}" ] && [ ! -L "$${legacy}" ]; then
 	mkdir -p "$${legacy%/*}"
 	ln -s /usr/share/kaiplus/kaiplus-plugin.json "$${legacy}" || exit $$?
+fi
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	for option in port listen_mode external_port_enabled bind_addr; do
+		uci -q delete "kaiplus.@kaiplus[0].$${option}" || true
+	done
+	uci -q commit kaiplus || exit $$?
+	if pidof kaiplus kaiplus_bin >/dev/null 2>&1; then /etc/init.d/kaiplus restart || exit $$?; fi
 fi
 exit 0
 endef
@@ -81,7 +100,7 @@ endef
 
 define Build/Prepare
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)
-	$(CP) $(DL_DIR)/$(KAIPLUS_DOWNLOAD) $(PKG_BUILD_DIR)/kaiplus
+	tar -xzf $(DL_DIR)/$(KAIPLUS_DOWNLOAD) -C $(PKG_BUILD_DIR) --strip-components=1
 endef
 
 define Build/Configure
@@ -92,9 +111,10 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/sbin $(1)/usr/share/kaiplus $(1)/usr/share/linkease/apps.d $(1)/usr/share/rpcd/acl.d $(1)/etc/init.d $(1)/etc/config
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/kaiplus $(1)/usr/sbin/kaiplus_bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/kaiplus.$(ARCH) $(1)/usr/sbin/kaiplus_bin
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/kaiplus-web.zip $(1)/usr/share/kaiplus/kaiplus-web.zip
 	ln -sf kaiplus_bin $(1)/usr/sbin/kaiplus
-	$(INSTALL_DATA) ./files/logo.png $(1)/usr/share/kaiplus/logo.png
+	ln -sf /www/luci-static/resources/app-icons/kaiplus.png $(1)/usr/share/kaiplus/logo.png
 	$(INSTALL_DATA) ./files/kaiplus-plugin.json $(1)/usr/share/kaiplus/kaiplus-plugin.json
 	$(INSTALL_DATA) ./files/kaiplus.json $(1)/usr/share/rpcd/acl.d/kaiplus.json
 	ln -sf /usr/share/kaiplus/kaiplus-plugin.json $(1)/usr/share/linkease/apps.d/00-kaiplus-plugin.json
@@ -104,3 +124,4 @@ endef
 
 $(eval $(call Download,kaiplus))
 $(eval $(call BuildPackage,$(PKG_NAME)))
+$(eval $(call BuildPackage,kaiplus-sandbox))

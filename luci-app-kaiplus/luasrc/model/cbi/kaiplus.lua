@@ -8,8 +8,8 @@ m:section(SimpleSection).template = "kaiplus/kaiplus_status"
 m.on_after_commit = function(self)
 	sys.call("/etc/init.d/kaiplus restart >/dev/null 2>&1")
 	if self.uci:get_first("kaiplus", "kaiplus", "enabled") == "1" then
-		local port = self.uci:get_first("kaiplus", "kaiplus", "port") or "8189"
-		kaiplus_model.wait_ready(port, 30, 500)
+		local socket_path = self.uci:get_first("kaiplus", "kaiplus", "socket_path") or "/var/run/kaiplus.sock"
+		kaiplus_model.wait_socket_ready(socket_path, 30, 500)
 	end
 	if sys.call("[ -x /etc/init.d/linkease ]") == 0 then
 		sys.call("/etc/init.d/linkease restart >/dev/null 2>&1 &")
@@ -35,10 +35,14 @@ for _, val in pairs(paths) do
 end
 data_dir.default = default_path
 
-local port = s:option(Value, "port", translate("Access port"))
-port.default = "8189"
-port.rmempty = false
-port.datatype = "port"
-port.description = translate("KaiPlus is available at http://router-address:port/apps/kaiplus/.")
+local backup_dir = s:option(Value, "backup_dir", translate("Backup directory"))
+backup_dir.rmempty = false
+backup_dir.description = translate("Required. Device recovery points are stored here. The default TimeMachine folder is at the disk root, next to Configs.")
+
+local backup_paths, default_backup_path = kaiplus_model.find_root_paths(blocks, home, "TimeMachine")
+for _, val in pairs(backup_paths) do
+	backup_dir:value(val, val)
+end
+backup_dir.default = default_backup_path
 
 return m

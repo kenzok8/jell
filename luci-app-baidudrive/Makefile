@@ -8,6 +8,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=baidudrive
 LUCI_DEPENDS:=+baidudrive +luci-compat +luci-lib-linkeaseauth +linkease-app-entry
+LUCI_EXTRA_DEPENDS:=luci-lib-linkeaseauth (>=1.2.1-r5)
 LUCI_MINIFY_CSS:=0
 LUCI_MINIFY_JS:=0
 

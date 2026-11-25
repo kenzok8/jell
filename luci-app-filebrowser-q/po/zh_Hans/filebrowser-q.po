@@ -8,20 +8,17 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "0.0.0.0 (All IPv4/IPv6 interfaces)"
-msgstr "0.0.0.0 (所有 IPv4/IPv6 接口)"
+msgid "0.0.0.0 (All interfaces)"
+msgstr "0.0.0.0 (所有接口)"
 
 msgid "127.0.0.1 (Localhost only)"
 msgstr "127.0.0.1 (仅本机回环)"
 
-msgid "2FA encryption secret"
-msgstr "两步验证加密密钥"
-
 msgid ":: (IPv6 & dual-stack)"
 msgstr ":: (IPv6 与双栈接口)"
 
-msgid "Additional storage sources"
-msgstr "附加存储源"
+msgid "Additional directories"
+msgstr "附加存储目录"
 
 msgid "Admin password"
 msgstr "管理员密码"
@@ -29,50 +26,11 @@ msgstr "管理员密码"
 msgid "Admin username"
 msgstr "管理员用户名"
 
-msgid "Advanced search results limit"
-msgstr "高级搜索最大结果数"
-
-msgid "Allow browsing files without building background search and directory size indexes (saves RAM/IO on slow mounts)."
-msgstr "仅浏览文件而不建立后台搜索与目录大小索引（在慢速挂载存储或小内存设备上可显著节省资源）。"
-
-msgid "Allow extracting embedded subtitle tracks from video files during playback (I/O intensive on large videos)."
-msgstr "允许在播放视频时提取内嵌字幕轨道（大体积视频首次读取较消耗磁盘 I/O）。"
-
-msgid "Allow user signup"
-msgstr "允许用户注册"
-
-msgid "Allow users to register hardware security keys or biometric passkeys (requires HTTPS or localhost)."
-msgstr "允许用户绑定硬件安全密钥或生物识别通行密钥（需通过 HTTPS 或 localhost 访问）。"
-
-msgid "Allow visitors to self-register new accounts on the login page."
-msgstr "允许访客在登录页面自助注册新账号。"
-
-msgid "Authentication & Security"
-msgstr "认证与安全"
-
 msgid "Authentication mode"
 msgstr "认证模式"
 
-msgid "Auto (CPU cores)"
-msgstr "自动 (按 CPU 核心数)"
-
-msgid "Auto-clean cache directory"
-msgstr "自动清理缓存目录"
-
-msgid "Auto-create per-user directory"
-msgstr "自动创建用户专属目录"
-
-msgid "Auto-derived from path"
-msgstr "自动根据目录路径生成"
-
-msgid "Automatically add a dynamic firewall rule allowing incoming TCP connections to the listen port."
-msgstr "自动添加动态防火墙规则，放行外部传入监听端口的 TCP 连接。"
-
-msgid "Automatically clean up temporary cache files on startup and shutdown."
-msgstr "在服务启动与关闭时自动清理临时缓存文件。"
-
-msgid "Automatically create and scope each user to an isolated subdirectory named after their username."
-msgstr "为每位用户自动创建并限制访问以其用户名命名的独立子目录。"
+msgid "Automatically allow incoming WAN TCP traffic to the listen port."
+msgstr "自动添加动态防火墙规则，允许外网访问监听端口。"
 
 msgid "Base URL path"
 msgstr "Web 基础路径"
@@ -80,299 +38,83 @@ msgstr "Web 基础路径"
 msgid "Basic Settings"
 msgstr "基本设置"
 
-msgid "Block file creation, modification, upload, and deletion across Web UI, API, and WebDAV."
-msgstr "禁止通过 Web 界面、API 及 WebDAV 创建、修改、上传或删除文件。"
-
-msgid "Browser-accessible URL of your OnlyOffice Document Server."
-msgstr "浏览器可访问的 OnlyOffice 文档服务器地址。"
-
-msgid "Built-in administrator account username."
-msgstr "内置管理员账号的登录用户名。"
-
 msgid "Cache directory"
 msgstr "缓存目录"
 
-msgid "Calculate sizes from apparent file length instead of disk blocks (recommended for FUSE/CloudDrive2/rclone mounts)."
-msgstr "按文件实际字节长度而非磁盘块占用计算大小（推荐在 FUSE / CloudDrive2 / rclone 挂载目录上开启）。"
+msgid "Cache max size (MB)"
+msgstr "最大缓存大小 (MB)"
+
+msgid "Changes here are saved only when \"Use custom YAML configuration\" is enabled."
+msgstr "仅当勾选上方“使用自定义 YAML 配置”时，此处修改才会在保存时生效。"
+
+msgid "Choose 127.0.0.1 when running behind a local reverse proxy."
+msgstr "配合本机反向代理使用时建议选择 127.0.0.1。"
+
+msgid "Clear this field after initial login if you want password changes made in the Web UI to persist across restarts."
+msgstr "若希望在 Web 界面修改密码后重启不被重置，可在完成初始化后清空此项。"
 
 msgid "Collecting data..."
 msgstr "正在收集数据..."
 
-msgid "Concurrent image preview workers (FFmpeg uses half). Leave empty to match CPU cores, or set 1-2 on low-power routers."
-msgstr "缩略图并发处理线程数（FFmpeg 使用其一半）。留空默认等于 CPU 核心数，弱性能软路由建议设为 1 或 2。"
-
 msgid "Configuration YAML (/etc/filebrowser-q/config.yaml)"
 msgstr "YAML 配置文件 (/etc/filebrowser-q/config.yaml)"
 
-msgid "Connect an external OnlyOffice Document Server for online Office viewing and collaborative editing."
-msgstr "接入外部 OnlyOffice 文档服务器以支持 Office 文档在线预览与多人协同编辑。"
+msgid "Custom Config"
+msgstr "自定义配置"
 
-msgid "Custom Config & Logs"
-msgstr "自定义配置与日志"
-
-msgid "Custom config file path"
-msgstr "自定义配置文件路径"
-
-msgid "Custom display name shown in the browser tab, top header, and PWA manifest."
-msgstr "显示在浏览器标签页、顶栏标题与 PWA 应用清单中的自定义站点名称。"
-
-msgid "Custom log file path"
-msgstr "自定义日志文件路径"
-
-msgid "Database path must be an absolute file path."
-msgstr "数据库路径必须是以“/”开头的绝对文件路径。"
-
-msgid "Debug (Verbose)"
-msgstr "调试模式 (详细日志)"
-
-msgid "Default UI language"
-msgstr "默认界面语言"
-
-msgid "Default directory permission"
-msgstr "默认新建目录权限"
-
-msgid "Default file permission"
-msgstr "默认新建文件权限"
-
-msgid "Default language seeded for new users. Choose Unlocked to manage freely in the Web UI."
-msgstr "为新用户初始化的默认语言；选择“不锁定”则不在 config.yaml 中锁定，可在 Web 界面自由调整。"
+msgid "Database file path"
+msgstr "数据库文件路径"
 
 msgid "Default login username is %s and password is %s."
 msgstr "默认登录用户名为 %s，密码为 %s。"
 
-msgid "Detect file types by extension only without reading file headers (improves listing speed on slow network/USB drives)."
-msgstr "仅通过文件扩展名识别类型而不读取文件头（可加快慢速网络盘或 USB 存储的目录加载速度）。"
+msgid "Disable image, video, and document thumbnail generation to reduce CPU and RAM usage on low-end devices."
+msgstr "关闭图片、视频和文档缩略图生成，以降低低配设备的 CPU 与内存占用。"
 
-msgid "Directory containing ffmpeg and ffprobe binaries (for example /usr/bin) for video thumbnails. Leave empty for system PATH discovery."
-msgstr "包含 ffmpeg 与 ffprobe 可执行文件的目录路径（例如 /usr/bin），用于生成视频缩略图；留空则自动从系统 PATH 查找。"
-
-msgid "Directory storing thumbnails, index SQLite files, and archive spool files. Point to disk storage when downloading large ZIP folders."
-msgstr "用于存放缩略图、搜索索引库及打包临时文件的目录；如需打包下载大文件夹，建议改设到大容量磁盘路径。"
-
-msgid "Disable PWA install prompt"
-msgstr "禁用 PWA 安装提示"
-
-msgid "Disable WebDAV"
-msgstr "禁用 WebDAV"
-
-msgid "Disable all previews & thumbnails"
-msgstr "禁用所有预览与缩略图"
-
-msgid "Disable auth rate limiting"
-msgstr "禁用登录频率限制"
-
-msgid "Disable automatic DB backup"
-msgstr "禁用数据库自动备份"
-
-msgid "Disable background indexing"
-msgstr "禁用后台目录索引"
-
-msgid "Disable file header type detection"
-msgstr "禁用文件头类型检测"
-
-msgid "Disable preview resizing"
-msgstr "禁用预览图缩放"
-
-msgid "Disable public sharing"
-msgstr "禁止创建公开分享"
-
-msgid "Disable seasonal themes"
-msgstr "禁用节日主题"
-
-msgid "Disable the /dav/<source> WebDAV endpoint if external WebDAV client access is not needed."
-msgstr "若无需外部 WebDAV 客户端挂载访问，可关闭 /dav/<存储源> 接口。"
-
-msgid "Disable update check"
-msgstr "禁用更新检查"
-
-msgid "Disabled"
-msgstr "已禁用"
-
-msgid "Displays the active YAML file. Edits made here are saved only when \"Use custom YAML configuration\" is enabled above."
-msgstr "显示当前生效的 YAML 配置内容；仅当上方勾选“使用自定义 YAML 配置”时，此处修改才会在保存时写入文件。"
+msgid "Disable thumbnails"
+msgstr "禁用缩略图预览"
 
 msgid "Enable"
 msgstr "启用"
 
-msgid "Enable HEIC image conversion"
-msgstr "启用 HEIC 图片预览转换"
+msgid "Enable HTTPS (TLS)"
+msgstr "启用 HTTPS (TLS)"
 
-msgid "Enable HTTP API access logs"
-msgstr "记录 HTTP API 访问日志"
-
-msgid "Enable OnlyOffice integration"
-msgstr "启用 OnlyOffice 集成"
-
-msgid "Enable Passkey (WebAuthn)"
-msgstr "启用通行密钥 (Passkey/WebAuthn)"
-
-msgid "Enable SQLite Write-Ahead Logging for the search index (higher RAM usage, better concurrency under heavy activity)."
-msgstr "为搜索索引数据库开启 SQLite WAL 预写日志模式（内存占用略增，但高并发读写更流畅）。"
-
-msgid "Enable index WAL mode"
-msgstr "启用索引库 WAL 模式"
-
-msgid "Enable native HTTPS (TLS)"
-msgstr "启用原生 HTTPS (TLS)"
-
-msgid "Enforce Two-Factor Authentication (2FA)"
-msgstr "强制启用两步验证 (2FA)"
-
-msgid "English (en)"
-msgstr "英语 (en)"
-
-msgid "Enter a valid 3 or 4 digit octal permission (for example 644 or 0664)."
-msgstr "请输入有效的 3 位或 4 位八进制权限值（例如 644 或 0664）。"
-
-msgid "Enter a valid 3 or 4 digit octal permission (for example 755 or 2755)."
-msgstr "请输入有效的 3 位或 4 位八进制权限值（例如 755 或 2755）。"
-
-msgid "Enter a valid http:// or https:// OnlyOffice server URL."
-msgstr "请输入以 http:// 或 https:// 开头的有效 OnlyOffice 服务地址。"
-
-msgid "Errors only"
-msgstr "仅错误 (error)"
-
-msgid "Exclude empty folders"
-msgstr "排除空文件夹"
-
-msgid "Exclude hidden files"
-msgstr "排除隐藏文件"
-
-msgid "Exclude symbolic links"
-msgstr "排除符号链接"
-
-msgid "Exclude virtual kernel filesystems"
-msgstr "排除系统虚拟目录索引"
-
-msgid "External public URL"
-msgstr "外部公网访问 URL"
-
-msgid "Extract embedded video subtitles"
-msgstr "提取视频内嵌字幕"
-
-msgid "FFmpeg directory path"
-msgstr "FFmpeg 程序目录"
+msgid "Enable when running behind Nginx, Caddy, or Lucky to honor X-Forwarded-* headers."
+msgstr "部署在 Nginx、Caddy 或 Lucky 反代后方时开启，用于识别真实客户端 IP 与协议。"
 
 msgid "FileBrowser Quantum"
 msgstr "FileBrowser Quantum"
 
-msgid "FileBrowser Quantum v2 rejects \"admin\" as a configured password; choose another password with at least 5 characters."
-msgstr "FileBrowser Quantum v2 不允许将密码设为“admin”，请设置其他不少于 5 位的密码。"
-
-msgid "Filename \"database.db\" is reserved for legacy v1 BoltDB migration; use \"filebrowser.sqlite\" instead."
-msgstr "文件名“database.db”仅保留用于旧版 v1 数据库迁移，请改用“filebrowser.sqlite”。"
-
-msgid "Filesystem path for the primary storage source (for example /mnt/sda1 or /)."
-msgstr "主存储源对应的本地文件系统路径（例如 /mnt/sda1 或 /）。"
-
-msgid "French (fr)"
-msgstr "法语 (fr)"
-
-msgid "German (de)"
-msgstr "德语 (de)"
-
-msgid "Globally hide the \"Install App\" prompt banner across desktop and mobile browsers."
-msgstr "在桌面与移动端浏览器中全局隐藏“安装应用”提示横幅。"
+msgid "Filename \"database.db\" is reserved for v1 migration; use \"filebrowser.sqlite\" instead."
+msgstr "文件名“database.db”仅保留用于旧版迁移，请改用“filebrowser.sqlite”。"
 
 msgid "Grant UCI and file access for luci-app-filebrowser-q"
-msgstr "授予 luci-app-filebrowser-q 访问 UCI 配置与日志文件的权限"
-
-msgid "HTTP request header carrying the authenticated username from your reverse proxy (such as Authelia or Authentik)."
-msgstr "由反向代理（如 Authelia 或 Authentik）传递已认证用户名的 HTTP 请求头名称。"
-
-msgid "Hide built-in external documentation and project links from the sidebar."
-msgstr "隐藏侧边栏底部内置的官方文档与项目外部链接。"
-
-msgid "Hide default sidebar links"
-msgstr "隐藏侧边栏默认外链"
-
-msgid "Hide disk capacity percentage bars on storage sources in the sidebar."
-msgstr "隐藏侧边栏存储源上的磁盘容量占用百分比进度条。"
-
-msgid "Hide folders whose total indexed content size is 0 bytes."
-msgstr "在索引结果中隐藏总内容大小为 0 字节的空文件夹。"
-
-msgid "Hide storage usage bar"
-msgstr "隐藏存储空间占用条"
-
-msgid "Honor X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Host, and X-Real-IP when running behind Nginx, Caddy, Lucky, or Traefik."
-msgstr "部署在 Nginx、Caddy、Lucky 或 Traefik 反代后方时启用，用于正确识别真实客户端 IP、协议与域名。"
-
-msgid "IP address to bind the HTTP server. Choose 127.0.0.1 when running behind a local reverse proxy."
-msgstr "HTTP 服务绑定的监听 IP 地址；配合本机反向代理使用时建议选择 127.0.0.1。"
-
-msgid "Index DB startup check"
-msgstr "索引库启动校验模式"
-
-msgid "Index SQLite cache size (MB)"
-msgstr "索引库缓存大小 (MB)"
-
-msgid "Integrity verification mode for the SQLite search index database on service startup."
-msgstr "服务启动时对 SQLite 搜索索引数据库执行的完整性检查级别。"
-
-msgid "Internal callback URL"
-msgstr "内部服务回调 URL"
+msgstr "授予 luci-app-filebrowser-q 访问 UCI 配置与日志的权限"
 
 msgid "Invalid format. Use /path, /path:Name, or /path:Name:ro."
-msgstr "格式无效，请使用 /路径、/路径:显示名称 或 /路径:显示名称:ro。"
+msgstr "格式无效，请使用 /路径、/路径:名称 或 /路径:名称:ro。"
 
-msgid "Japanese (ja)"
-msgstr "日语 (ja)"
-
-msgid "Korean (ko)"
-msgstr "韩语 (ko)"
-
-msgid "Leave empty to log to OpenWrt system log (stdout), or enter a file path such as /var/log/filebrowser-q.log."
-msgstr "留空默认输出至 OpenWrt 系统日志（stdout），也可填写如 /var/log/filebrowser-q.log 的日志文件路径。"
+msgid "Keep manual edits to /etc/filebrowser-q/config.yaml without overwriting from UCI options above (for OIDC, OnlyOffice, or advanced rules)."
+msgstr "保留对 /etc/filebrowser-q/config.yaml 的手动编辑而不被上方选项覆盖（适用于 OIDC、OnlyOffice 或复杂规则）。"
 
 msgid "Listen address"
 msgstr "监听地址"
 
-msgid "Listen on a local Unix socket instead of TCP port/TLS (for example /var/run/filebrowser-q.sock). Leave empty to use TCP."
-msgstr "改用本地 Unix 套接字监听并忽略 TCP 端口与 TLS（例如 /var/run/filebrowser-q.sock）；留空则使用常规 TCP 监听。"
-
 msgid "Listen port"
 msgstr "监听端口"
 
-msgid "Log individual API request/response events (disabled by default to reduce syslog noise)."
-msgstr "记录每次 HTTP API 请求与响应明细（默认关闭以减少系统日志刷屏）。"
-
-msgid "Log level"
-msgstr "日志级别"
-
-msgid "Mark the primary source as private to disallow generating share links."
-msgstr "将主存储源标记为私有，禁止任何用户为其创建外部分享链接。"
-
-msgid "Max archive/unarchive size (GB)"
-msgstr "最大压缩/解压大小 (GB)"
-
-msgid "Maximum combined size in GB for ZIP/TAR compression and extraction operations (0 = unlimited)."
-msgstr "在线 ZIP/TAR 打包压缩或解压操作允许的文件总大小上限，单位 GB（0 表示不限制）。"
-
-msgid "Maximum disk space used by generated thumbnail previews (0 = unlimited)."
-msgstr "生成的缩略图预览缓存允许占用的最大磁盘空间（0 表示不限制）。"
-
-msgid "Maximum indexed matches returned for a single Advanced Search request."
-msgstr "单次高级搜索请求允许返回的最大索引匹配条目数。"
-
-msgid "Minimum password length"
-msgstr "最小密码长度"
-
-msgid "Minimum search query length"
-msgstr "最短搜索触发字符数"
+msgid "Maximum disk space used by thumbnail previews (0 = unlimited)."
+msgstr "缩略图预览缓存允许占用的最大空间（0 表示不限制）。"
 
 msgid "Modern self-hosted web file manager with multi-source storage, indexed search, WebDAV, and rich previews."
-msgstr "现代化自托管 Web 文件管理器，支持多存储源管理、实时索引搜索、WebDAV 挂载与多媒体预览。"
+msgstr "现代化自托管 Web 文件管理器，支持多存储源、实时索引搜索、WebDAV 与多媒体预览。"
 
-msgid "Mount extra directories as separate sidebar sources. Format: /path, /path:DisplayName, or /path:DisplayName:ro (read-only)."
-msgstr "将其他挂载点作为独立存储源显示在侧边栏。格式：/路径、/路径:显示名称 或 /路径:显示名称:ro（只读）。"
+msgid "Move to external storage (for example /mnt/sda1/filebrowser-q/filebrowser.sqlite) if router flash space is limited."
+msgstr "若路由器闪存空间较小，建议迁移至外置存储（如 /mnt/sda1/filebrowser-q/filebrowser.sqlite）。"
 
 msgid "NOT RUNNING"
 msgstr "未运行"
-
-msgid "Network, TLS & Proxy"
-msgstr "网络、TLS 与反代"
 
 msgid "No authentication (Trusted LAN only)"
 msgstr "免密直接访问 (仅限受信任内网)"
@@ -380,140 +122,47 @@ msgstr "免密直接访问 (仅限受信任内网)"
 msgid "No log entries found."
 msgstr "暂无运行日志记录。"
 
-msgid "Omit symbolic links completely from source indexing."
-msgstr "在建立存储源索引时完全跳过符号链接。"
-
-msgid "OnlyOffice JWT secret"
-msgstr "OnlyOffice JWT 密钥"
-
-msgid "OnlyOffice JWT secret is required when OnlyOffice integration is enabled."
-msgstr "启用 OnlyOffice 集成时必须填写 OnlyOffice JWT 密钥。"
-
-msgid "OnlyOffice internal URL"
-msgstr "OnlyOffice 内网地址"
-
-msgid "OnlyOffice server URL"
-msgstr "OnlyOffice 服务地址"
-
-msgid "OnlyOffice view-only mode"
-msgstr "OnlyOffice 仅预览模式"
-
-msgid "Open Office documents in read-only viewer mode without editing."
-msgstr "以只读预览模式打开 Office 文档，禁止在线编辑保存。"
-
 msgid "Open Web Interface"
 msgstr "打开 Web 界面"
 
 msgid "Open firewall port"
 msgstr "开放防火墙端口"
 
-msgid "Optional LAN/container address FileBrowser uses for backend requests to OnlyOffice."
-msgstr "供 FileBrowser 后端在局域网或容器网络内直接请求 OnlyOffice 的可选内部地址。"
+msgid "Optional extra storage sources. Format: /path, /path:Name, or /path:Name:ro (read-only)."
+msgstr "挂载其他目录作为独立存储源。格式：/路径、/路径:显示名称 或 /路径:显示名称:ro（只读）。"
 
-msgid "Optional base64 secret passed via FILEBROWSER_TOTP_SECRET to encrypt TOTP keys. Do not change once users enable 2FA."
-msgstr "通过 FILEBROWSER_TOTP_SECRET 传入的 TOTP 加密密钥（可选）；一旦有用户启用 2FA 请勿更改，否则会导致已有验证码失效。"
+msgid "Password authentication"
+msgstr "账号密码认证"
 
-msgid "Optional label shown in the sidebar. Defaults to \"root\" for / or the directory basename."
-msgstr "侧边栏显示的存储源名称（可选）；留空时若路径为 / 则显示为 root，否则使用目录名。"
+msgid "Password cannot be \"admin\"; enter at least 5 characters."
+msgstr "密码不能设为“admin”，请输入其他不少于 5 位的密码。"
 
-msgid "Optional private LAN URL (for example http://192.168.1.1:8787) used by OnlyOffice to reach FileBrowser directly."
-msgstr "供 OnlyOffice 等内网服务直接回调访问 FileBrowser 的私网地址（例如 http://192.168.1.1:8787）。"
+msgid "Password length must be at least 5 characters."
+msgstr "密码长度不能少于 5 个字符。"
 
-msgid "Password authentication (Recommended)"
-msgstr "账号密码认证 (推荐)"
+msgid "Path must start with \"/\"."
+msgstr "路径必须以“/”开头。"
 
-msgid "Password length must be at least %d characters."
-msgstr "密码长度不能少于 %d 个字符。"
-
-msgid "Path to the SQLite state database (must not be named database.db). Move to external storage if /overlay space is tight."
-msgstr "SQLite 状态数据库文件路径（不可命名为 database.db）；若路由器 /overlay 空间较小，建议迁移至外置存储。"
-
-msgid "Performance & Integrations"
-msgstr "性能与外部集成"
-
-msgid "Prevent automatic holiday theme switching (such as Halloween styling)."
-msgstr "禁止在特定节假日自动切换主题样式（如万圣节主题）。"
-
-msgid "Preview cache max size (MB)"
-msgstr "预览缓存上限 (MB)"
-
-msgid "Primary root directory"
-msgstr "主存储根目录"
-
-msgid "Primary source display name"
-msgstr "主存储显示名称"
-
-msgid "Public scheme and domain (for example https://files.example.com) used when generating share links and WebAuthn origins."
-msgstr "生成外部分享链接与 WebAuthn 校验时使用的公网协议与域名（例如 https://files.example.com）。"
+msgid "Primary storage path (for example / or /mnt/sda1)."
+msgstr "主存储目录路径（例如 / 或 /mnt/sda1）。"
 
 msgid "RUNNING"
 msgstr "运行中"
 
-msgid "Read-only primary source"
-msgstr "主存储源只读模式"
-
 msgid "Refresh Logs"
 msgstr "刷新日志"
 
-msgid "Require all password-authenticated users to set up TOTP 2FA on login."
-msgstr "强制所有使用密码登录的用户在登录时配置并验证 TOTP 动态口令。"
-
-msgid "Reverse-proxy header authentication"
-msgstr "反向代理请求头认证"
-
-msgid "Russian (ru)"
-msgstr "俄语 (ru)"
-
-msgid "SQLite database path"
-msgstr "SQLite 数据库路径"
-
-msgid "Serve HTTPS directly from FileBrowser Quantum using a certificate and private key."
-msgstr "配置 TLS 证书与私钥，由 FileBrowser Quantum 直接提供原生 HTTPS 服务。"
+msgid "Root directory"
+msgstr "主存储目录"
 
 msgid "Service Logs"
 msgstr "运行日志"
 
-msgid "Session expiration (hours)"
-msgstr "登录会话有效期 (小时)"
+msgid "Stores thumbnails, search index, and archive temp files. Point to disk storage when downloading large folders."
+msgstr "用于存放缩略图、搜索索引及打包临时文件；打包下载大目录时建议改设到磁盘路径。"
 
-msgid "Set FILEBROWSER_DISABLE_AUTOMATIC_BACKUP=true to save flash storage space on routers."
-msgstr "设置 FILEBROWSER_DISABLE_AUTOMATIC_BACKUP=true 关闭数据库自动备份，以节省路由器闪存空间。"
-
-msgid "Shared JWT secret matching your OnlyOffice Document Server configuration (passed via FILEBROWSER_ONLYOFFICE_SECRET)."
-msgstr "与 OnlyOffice 文档服务器配置一致的 JWT 密钥（通过环境变量 FILEBROWSER_ONLYOFFICE_SECRET 安全传入）。"
-
-msgid "Simplified Chinese (zhCN)"
-msgstr "简体中文 (zhCN)"
-
-msgid "Site title"
-msgstr "站点标题名称"
-
-msgid "Skip dotfiles and hidden folders starting with \".\" during indexing and listing."
-msgstr "在索引与文件列表中跳过以“.”开头的隐藏文件与隐藏文件夹。"
-
-msgid "Skip image resizing when serving previews."
-msgstr "加载图片预览时跳过尺寸压缩。"
-
-msgid "Skip indexing /proc, /sys, and /dev, and set /tmp and /var to browse-only when root directory is /."
-msgstr "当主存储根目录设为 / 时，跳过对 /proc、/sys、/dev 的索引，并将 /tmp 与 /var 设为仅浏览不索引，避免扫描虚拟文件或缓存循环索引。"
-
-msgid "Source path must be an absolute path starting with \"/\"."
-msgstr "存储源路径必须是以“/”开头的绝对路径。"
-
-msgid "Spanish (es)"
-msgstr "西班牙语 (es)"
-
-msgid "Standard (info | warning | error)"
-msgstr "标准 (info | warning | error)"
-
-msgid "Stop periodic background requests checking GitHub for new FileBrowser Quantum releases."
-msgstr "关闭后台定期向 GitHub 检查 FileBrowser Quantum 新版本的网络请求。"
-
-msgid "Storage & Sources"
-msgstr "存储与目录"
-
-msgid "Synced via FILEBROWSER_ADMIN_PASSWORD on startup. Clear this field after setup if you want password changes made inside the Web UI to persist across restarts."
-msgstr "启动时通过 FILEBROWSER_ADMIN_PASSWORD 同步管理员密码。若希望在 Web 界面修改密码后重启不被重置，请在初始化完成后清空此项。"
+msgid "Subpath prefix when behind a reverse proxy (for example /files)."
+msgstr "通过反向代理子路径访问时的前缀（例如 /files）。"
 
 msgid "TLS certificate path"
 msgstr "TLS 证书路径"
@@ -521,65 +170,8 @@ msgstr "TLS 证书路径"
 msgid "TLS private key path"
 msgstr "TLS 私钥路径"
 
-msgid "Thumbnail worker threads"
-msgstr "缩略图并发线程数"
-
-msgid "Traditional Chinese (zhTW)"
-msgstr "繁體中文 (zhTW)"
-
 msgid "Trust reverse-proxy headers"
 msgstr "信任反向代理请求头"
 
-msgid "Trusted proxy user header"
-msgstr "代理认证用户名请求头"
-
-msgid "Turn off built-in brute-force throttling and 15-minute failed-login lockouts on /api/auth/* endpoints."
-msgstr "关闭 /api/auth/* 登录接口内置的防暴力破解限流与连续失败 15 分钟锁定机制。"
-
-msgid "URL subpath prefix when serving FileBrowser under a reverse proxy path (for example /files)."
-msgstr "通过反向代理子路径提供服务时的 URL 前缀（例如 /files）。"
-
-msgid "Unix Socket Mode"
-msgstr "Unix 套接字模式"
-
-msgid "Unix domain socket path"
-msgstr "Unix 套接字路径"
-
-msgid "Unix octal permission applied to newly created folders (default: 755)."
-msgstr "新建文件夹时应用的 Unix 八进制权限（默认：755）。"
-
-msgid "Unix octal permission applied to newly created or uploaded files (default: 644)."
-msgstr "新建或上传文件时应用的 Unix 八进制权限（默认：644）。"
-
-msgid "Unlocked (Manage in Web UI)"
-msgstr "不锁定 (在 Web 界面自由调整)"
-
-msgid "Use FFmpeg to convert Apple HEIC photos for preview in non-Safari browsers (requires FFmpeg 8.1+)."
-msgstr "调用 FFmpeg 将苹果 HEIC 照片转换为非 Safari 浏览器可预览的图像（需 FFmpeg 8.1 及以上版本）。"
-
 msgid "Use custom YAML configuration"
 msgstr "使用自定义 YAML 配置"
-
-msgid "Use lightweight file icons instead of generating image, video, and document thumbnails."
-msgstr "使用轻量级图标代替生成图片、视频和文档缩略图，大幅降低 CPU 与内存占用。"
-
-msgid "Use logical file size"
-msgstr "使用逻辑文件大小"
-
-msgid "Validity duration in hours for each Web UI login session token."
-msgstr "每次 Web 界面登录生成的会话令牌有效时长（单位：小时）。"
-
-msgid "Warnings & Errors only"
-msgstr "仅警告与错误 (warning | error)"
-
-msgid "When enabled, the init script will not overwrite the YAML file from UCI options above, allowing manual configuration of OIDC, LDAP, or complex access rules."
-msgstr "启用后启动脚本将不再根据上方 UCI 选项覆盖 YAML 配置文件，便于手动配置 OIDC、LDAP 或复杂访问规则。"
-
-msgid "off (Fastest startup, minimal check)"
-msgstr "off (极速启动，跳过校验)"
-
-msgid "probe (Fast catalog check, recommended for large disks)"
-msgstr "probe (快速目录探测，大容量磁盘推荐)"
-
-msgid "quickCheck (Thorough PRAGMA quick_check)"
-msgstr "quickCheck (完整快速检查，默认)"

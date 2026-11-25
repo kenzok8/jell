@@ -3,10 +3,8 @@
 		"description": "Grant UCI and file access for luci-app-filebrowser-q",
 		"read": {
 			"file": {
-				"/etc/filebrowser-q/*": [ "read" ],
-				"/sbin/logread": [ "exec" ],
-				"/var/log/*": [ "read" ],
-				"/tmp/*": [ "read" ]
+				"/etc/filebrowser-q/config.yaml": [ "read" ],
+				"/sbin/logread": [ "exec" ]
 			},
 			"ubus": {
 				"service": [ "list" ]
@@ -15,7 +13,7 @@
 		},
 		"write": {
 			"file": {
-				"/etc/filebrowser-q/*": [ "write" ]
+				"/etc/filebrowser-q/config.yaml": [ "write" ]
 			},
 			"uci": [ "filebrowser-q" ]
 		}

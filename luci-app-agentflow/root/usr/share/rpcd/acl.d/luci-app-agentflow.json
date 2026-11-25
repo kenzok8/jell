@@ -1,0 +1,7 @@
+{
+  "luci-app-agentflow": {
+    "description": "Manage AgentFlow orchestration",
+    "read": { "uci": ["agentflow", "quickstart"] },
+    "write": { "uci": ["agentflow"] }
+  }
+}

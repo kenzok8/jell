@@ -1,5 +1,3 @@
-local jsonc = require "luci.jsonc"
-
 local kaiplus = {}
 
 local function valid_port(port)
@@ -37,7 +35,30 @@ kaiplus.wait_ready = function(port, attempts, delay_ms)
   return false
 end
 
+kaiplus.socket_ready = function(path)
+  if type(path) ~= "string" or path:sub(1, 1) ~= "/" then return false end
+  local socket = require("nixio").socket("unix", "stream")
+  if not socket then return false end
+  socket:setopt("socket", "sndtimeo", 1)
+  local connected = socket:connect(path)
+  socket:close()
+  return connected == true
+end
+
+kaiplus.wait_socket_ready = function(path, attempts, delay_ms)
+  attempts = tonumber(attempts) or 30
+  delay_ms = tonumber(delay_ms) or 500
+  for attempt = 1, attempts do
+    if kaiplus.socket_ready(path) then return true end
+    if attempt < attempts and delay_ms > 0 then
+      require("nixio").nanosleep(math.floor(delay_ms / 1000), (delay_ms % 1000) * 1000000)
+    end
+  end
+  return false
+end
+
 kaiplus.blocks = function()
+  local jsonc = require "luci.jsonc"
   local f = io.popen("lsblk -s -f -b -o NAME,FSSIZE,MOUNTPOINT --json", "r")
   local vals = {}
   if f then
@@ -78,6 +99,24 @@ kaiplus.find_paths = function(blocks, home_dirs, path_name, product)
     end
     local without_conf_dir = "/root/" .. path_name .. "/" .. product
     if default_path == without_conf_dir then
+      default_path = paths[1]
+    end
+  end
+
+  return paths, default_path
+end
+
+kaiplus.find_root_paths = function(blocks, home_dirs, folder)
+  local default_path = home_dirs["main_dir"] .. "/" .. folder
+  local paths = {}
+
+  if #blocks == 0 then
+    table.insert(paths, default_path)
+  else
+    for _, val in pairs(blocks) do
+      table.insert(paths, val .. "/" .. folder)
+    end
+    if default_path == "/root/" .. folder then
       default_path = paths[1]
     end
   end
