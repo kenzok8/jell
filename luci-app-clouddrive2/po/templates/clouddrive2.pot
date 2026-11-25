@@ -72,127 +72,37 @@ msgstr ""
 msgid "CloudDrive2 is a multi-cloud storage management tool supporting local FUSE mounting, cross-cloud backup, and WebDAV service."
 msgstr ""
 
-msgid "Service Configuration"
-msgstr ""
-
-msgid "General Settings"
-msgstr ""
-
-msgid "Storage & Mount"
-msgstr ""
-
-msgid "Advanced Settings"
-msgstr ""
-
 msgid "Enable"
 msgstr ""
 
-msgid "Enable and start the CloudDrive2 background service."
+msgid "Port"
 msgstr ""
 
-msgid "HTTP Port"
-msgstr ""
-
-msgid "Default HTTP port for Web UI and WebDAV is 19798. Keep consistent if modified inside CloudDrive2 Web Server settings."
-msgstr ""
-
-msgid "Enable HTTPS"
-msgstr ""
-
-msgid "Use HTTPS when opening the Web UI and optionally expose the HTTPS port in the firewall. Certificate must be configured in CloudDrive2 Web Server settings."
-msgstr ""
-
-msgid "HTTPS Port"
-msgstr ""
-
-msgid "Default HTTPS port in CloudDrive2 is 19799."
+msgid "Default HTTP port for Web UI and WebDAV is 19798."
 msgstr ""
 
 msgid "Open Firewall Port"
 msgstr ""
 
-msgid "Automatically add firewall accept rules to allow external access to CloudDrive2 Web UI and WebDAV ports."
-msgstr ""
-
-msgid "Startup Delay (Seconds)"
-msgstr ""
-
-msgid "Delay service startup at boot to wait for external USB/SATA drives or WAN connection readiness. Set 0 to start immediately."
+msgid "Allow external WAN access to the CloudDrive2 port."
 msgstr ""
 
 msgid "Configuration Directory"
 msgstr ""
 
-msgid "Directory storing CloudDrive2 configuration, account database, directory cache, and logs (CLOUDDRIVE_HOME). Place on external storage if flash space is limited."
+msgid "Stores configuration, account database, directory cache, and logs (CLOUDDRIVE_HOME)."
 msgstr ""
 
-msgid "Mount Base Directory"
+msgid "Mount Point"
 msgstr ""
 
-msgid "Local base directory for FUSE cloud mounts. Sub-mounts under this directory are safely unmounted when stopping the service."
+msgid "Local base directory for FUSE cloud mounts."
 msgstr ""
 
-msgid "Temp & Cache Directory"
+msgid "Cache Directory"
 msgstr ""
 
-msgid "Directory for upload buffers and temporary files (temp_dir / TMPDIR). Using /tmp or an external disk prevents flash wear."
-msgstr ""
-
-msgid "Shared Mount Propagation"
-msgstr ""
-
-msgid "Enable shared mount propagation (mount --make-shared) on the mount partition so Docker containers such as Jellyfin or Emby can access mounted cloud files."
-msgstr ""
-
-msgid "Allow Other Users"
-msgstr ""
-
-msgid "Enable user_allow_other in /etc/fuse.conf so Samba, ksmbd, and media services running under non-root accounts can read mounted directories."
-msgstr ""
-
-msgid "HTTP/HTTPS Proxy"
-msgstr ""
-
-msgid "Optional proxy URL for accessing cloud storage APIs (for example http://127.0.0.1:7890 or socks5://127.0.0.1:1080)."
-msgstr ""
-
-msgid "Max Open Files"
-msgstr ""
-
-msgid "Maximum file descriptor limit (ulimit -n) for the CloudDrive2 process to avoid handle exhaustion under heavy concurrency."
-msgstr ""
-
-msgid "Run Post-Start Command"
-msgstr ""
-
-msgid "Enable ENABLE_RUN_AFTER_START so CloudDrive2 executes a command once startup and cloud mounts are ready."
-msgstr ""
-
-msgid "Post-Start Command"
-msgstr ""
-
-msgid "Command written to systemsettings.json (run_after_start), such as restarting media containers after mounts come online."
-msgstr ""
-
-msgid "Forward Stdout to Syslog"
-msgstr ""
-
-msgid "Forward standard output of CloudDrive2 to OpenWrt system log (logread)."
-msgstr ""
-
-msgid "Forward Stderr to Syslog"
-msgstr ""
-
-msgid "Forward standard error output of CloudDrive2 to OpenWrt system log (logread)."
-msgstr ""
-
-msgid "Custom Environment Variables"
-msgstr ""
-
-msgid "Additional environment variables passed to CloudDrive2 in KEY=VALUE format (for example RUST_LOG=info)."
-msgstr ""
-
-msgid "Invalid format, expected KEY=VALUE"
+msgid "Temporary staging directory for uploads and downloads. Use /tmp or an external disk to reduce flash wear."
 msgstr ""
 
 msgid "Log File: %s (%s)"

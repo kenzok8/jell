@@ -10,8 +10,6 @@ PROG="/usr/share/clouddrive2/clouddrive"
 get_uci_vars() {
 	config_load 'clouddrive2'
 	config_get port main port '19798'
-	config_get_bool https_enabled main https_enabled 0
-	config_get https_port main https_port '19799'
 	config_get config_dir main config_dir '/etc/clouddrive2'
 	config_get mount_point main mount_point '/mnt/clouddrive'
 	config_get cache_dir main cache_dir '/tmp/clouddrive2'
@@ -24,12 +22,15 @@ find_latest_log() {
 }
 
 cmd_status() {
-	local port https_enabled https_port config_dir mount_point cache_dir
-	local pid="" rss_kb=0 running=0 mp_base m OLD_IFS
+	local port config_dir mount_point cache_dir
+	local pid="" worker_pid="" rss_kb=0 p p_rss running=0 mp_base m OLD_IFS
 
 	get_uci_vars
 
-	if [ -f /var/run/clouddrive2.pid ]; then
+	worker_pid="$(pgrep -f "^${PROG} Start-Service" 2>/dev/null | head -n 1)"
+	if [ -n "$worker_pid" ] && [ -d "/proc/$worker_pid" ]; then
+		pid="$worker_pid"
+	elif [ -f /var/run/clouddrive2.pid ]; then
 		local pf_pid
 		pf_pid="$(cat /var/run/clouddrive2.pid 2>/dev/null)"
 		if [ -n "$pf_pid" ] && [ -d "/proc/$pf_pid" ]; then
@@ -38,13 +39,15 @@ cmd_status() {
 	fi
 
 	if [ -z "$pid" ]; then
-		pid="$(pgrep -f "$PROG" 2>/dev/null | head -n 1)"
+		pid="$(pgrep -f "^${PROG}" 2>/dev/null | head -n 1)"
 	fi
 
 	if [ -n "$pid" ] && [ -d "/proc/$pid" ]; then
 		running=1
-		rss_kb="$(awk '/^VmRSS:/ { print $2; exit }' "/proc/$pid/status" 2>/dev/null)"
-		[ -n "$rss_kb" ] || rss_kb=0
+		for p in $(pgrep -f "^${PROG}" 2>/dev/null); do
+			p_rss="$(awk '/^VmRSS:/ { print $2; exit }' "/proc/$p/status" 2>/dev/null)"
+			[ -n "$p_rss" ] && rss_kb=$((rss_kb + p_rss))
+		done
 	fi
 
 	json_init
@@ -52,8 +55,6 @@ cmd_status() {
 	json_add_int "pid" "${pid:-0}"
 	json_add_int "rss_kb" "${rss_kb:-0}"
 	json_add_int "port" "${port:-19798}"
-	json_add_boolean "https_enabled" "${https_enabled:-0}"
-	json_add_int "https_port" "${https_port:-19799}"
 	json_add_string "config_dir" "$config_dir"
 	json_add_string "mount_point" "$mount_point"
 	json_add_boolean "binary_exists" "$([ -x "$PROG" ] && echo 1 || echo 0)"
@@ -84,7 +85,7 @@ cmd_status() {
 }
 
 cmd_log_meta() {
-	local port https_enabled https_port config_dir mount_point cache_dir
+	local port config_dir mount_point cache_dir
 	local latest_log="" log_size=0 has_app_log=0
 
 	get_uci_vars
@@ -106,7 +107,7 @@ cmd_log_meta() {
 cmd_log() {
 	local source="${1:-app}"
 	local lines="${2:-200}"
-	local port https_enabled https_port config_dir mount_point cache_dir
+	local port config_dir mount_point cache_dir
 	local latest_log=""
 
 	case "$lines" in
@@ -131,7 +132,7 @@ cmd_log() {
 }
 
 cmd_clear_log() {
-	local port https_enabled https_port config_dir mount_point cache_dir
+	local port config_dir mount_point cache_dir
 	local log_dir f
 
 	get_uci_vars

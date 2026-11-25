@@ -14,15 +14,13 @@ function getServiceStatus() {
 }
 
 function buildWebUrl(status, pathSuffix) {
-	var useHttps = !!status.https_enabled;
-	var scheme = useHttps ? 'https' : 'http';
-	var port = useHttps ? (status.https_port || 19799) : (status.port || 19798);
+	var port = status.port || 19798;
 	var host = window.location.hostname;
 
 	if (host.indexOf(':') !== -1 && host.charAt(0) !== '[')
 		host = '[' + host + ']';
 
-	return scheme + '://' + host + ':' + port + (pathSuffix || '');
+	return 'http://' + host + ':' + port + (pathSuffix || '');
 }
 
 function validateAbsPath(section_id, value) {
@@ -186,122 +184,45 @@ return view.extend({
 			});
 		}, 3);
 
-		s = m.section(form.NamedSection, 'main', 'clouddrive2', _('Service Configuration'));
+		s = m.section(form.NamedSection, 'main', 'clouddrive2', _('Settings'));
 		s.addremove = false;
 		s.anonymous = true;
 
-		s.tab('general', _('General Settings'));
-		s.tab('storage', _('Storage & Mount'));
-		s.tab('advanced', _('Advanced Settings'));
-
-		/* General Settings */
-		o = s.taboption('general', form.Flag, 'enabled', _('Enable'),
-			_('Enable and start the CloudDrive2 background service.'));
+		o = s.option(form.Flag, 'enabled', _('Enable'));
 		o.rmempty = false;
 
-		o = s.taboption('general', form.Value, 'port', _('HTTP Port'),
-			_('Default HTTP port for Web UI and WebDAV is 19798. Keep consistent if modified inside CloudDrive2 Web Server settings.'));
+		o = s.option(form.Value, 'port', _('Port'),
+			_('Default HTTP port for Web UI and WebDAV is 19798.'));
 		o.datatype = 'port';
 		o.default = '19798';
 		o.placeholder = '19798';
 		o.rmempty = false;
 
-		o = s.taboption('general', form.Flag, 'https_enabled', _('Enable HTTPS'),
-			_('Use HTTPS when opening the Web UI and optionally expose the HTTPS port in the firewall. Certificate must be configured in CloudDrive2 Web Server settings.'));
+		o = s.option(form.Flag, 'open_firewall', _('Open Firewall Port'),
+			_('Allow external WAN access to the CloudDrive2 port.'));
 		o.default = '0';
 		o.rmempty = false;
 
-		o = s.taboption('general', form.Value, 'https_port', _('HTTPS Port'),
-			_('Default HTTPS port in CloudDrive2 is 19799.'));
-		o.datatype = 'port';
-		o.default = '19799';
-		o.placeholder = '19799';
-		o.depends('https_enabled', '1');
-
-		o = s.taboption('general', form.Flag, 'open_firewall', _('Open Firewall Port'),
-			_('Automatically add firewall accept rules to allow external access to CloudDrive2 Web UI and WebDAV ports.'));
-		o.default = '0';
-		o.rmempty = false;
-
-		o = s.taboption('general', form.Value, 'startup_delay', _('Startup Delay (Seconds)'),
-			_('Delay service startup at boot to wait for external USB/SATA drives or WAN connection readiness. Set 0 to start immediately.'));
-		o.datatype = 'uinteger';
-		o.default = '0';
-		o.placeholder = '0';
-
-		/* Storage & Mount */
-		o = s.taboption('storage', form.Value, 'config_dir', _('Configuration Directory'),
-			_('Directory storing CloudDrive2 configuration, account database, directory cache, and logs (CLOUDDRIVE_HOME). Place on external storage if flash space is limited.'));
+		o = s.option(form.Value, 'config_dir', _('Configuration Directory'),
+			_('Stores configuration, account database, directory cache, and logs (CLOUDDRIVE_HOME).'));
 		o.default = '/etc/clouddrive2';
 		o.placeholder = '/etc/clouddrive2';
 		o.rmempty = false;
 		o.validate = validateAbsPath;
 
-		o = s.taboption('storage', form.Value, 'mount_point', _('Mount Base Directory'),
-			_('Local base directory for FUSE cloud mounts. Sub-mounts under this directory are safely unmounted when stopping the service.'));
+		o = s.option(form.Value, 'mount_point', _('Mount Point'),
+			_('Local base directory for FUSE cloud mounts.'));
 		o.default = '/mnt/clouddrive';
 		o.placeholder = '/mnt/clouddrive';
 		o.rmempty = false;
 		o.validate = validateAbsPath;
 
-		o = s.taboption('storage', form.Value, 'cache_dir', _('Temp & Cache Directory'),
-			_('Directory for upload buffers and temporary files (temp_dir / TMPDIR). Using /tmp or an external disk prevents flash wear.'));
+		o = s.option(form.Value, 'cache_dir', _('Cache Directory'),
+			_('Temporary staging directory for uploads and downloads. Use /tmp or an external disk to reduce flash wear.'));
 		o.default = '/tmp/clouddrive2';
 		o.placeholder = '/tmp/clouddrive2';
 		o.rmempty = false;
 		o.validate = validateAbsPath;
-
-		o = s.taboption('storage', form.Flag, 'shared_mount', _('Shared Mount Propagation'),
-			_('Enable shared mount propagation (mount --make-shared) on the mount partition so Docker containers such as Jellyfin or Emby can access mounted cloud files.'));
-		o.default = '1';
-		o.rmempty = false;
-
-		o = s.taboption('storage', form.Flag, 'allow_other', _('Allow Other Users'),
-			_('Enable user_allow_other in /etc/fuse.conf so Samba, ksmbd, and media services running under non-root accounts can read mounted directories.'));
-		o.default = '1';
-		o.rmempty = false;
-
-		/* Advanced Settings */
-		o = s.taboption('advanced', form.Value, 'proxy', _('HTTP/HTTPS Proxy'),
-			_('Optional proxy URL for accessing cloud storage APIs (for example http://127.0.0.1:7890 or socks5://127.0.0.1:1080).'));
-		o.placeholder = 'http://127.0.0.1:7890';
-
-		o = s.taboption('advanced', form.Value, 'max_open_files', _('Max Open Files'),
-			_('Maximum file descriptor limit (ulimit -n) for the CloudDrive2 process to avoid handle exhaustion under heavy concurrency.'));
-		o.datatype = 'uinteger';
-		o.default = '65535';
-		o.placeholder = '65535';
-
-		o = s.taboption('advanced', form.Flag, 'enable_run_after_start', _('Run Post-Start Command'),
-			_('Enable ENABLE_RUN_AFTER_START so CloudDrive2 executes a command once startup and cloud mounts are ready.'));
-		o.default = '0';
-		o.rmempty = false;
-
-		o = s.taboption('advanced', form.Value, 'run_after_start', _('Post-Start Command'),
-			_('Command written to systemsettings.json (run_after_start), such as restarting media containers after mounts come online.'));
-		o.placeholder = 'docker restart jellyfin';
-		o.depends('enable_run_after_start', '1');
-
-		o = s.taboption('advanced', form.Flag, 'log_stdout', _('Forward Stdout to Syslog'),
-			_('Forward standard output of CloudDrive2 to OpenWrt system log (logread).'));
-		o.default = '1';
-		o.rmempty = false;
-
-		o = s.taboption('advanced', form.Flag, 'log_stderr', _('Forward Stderr to Syslog'),
-			_('Forward standard error output of CloudDrive2 to OpenWrt system log (logread).'));
-		o.default = '1';
-		o.rmempty = false;
-
-		o = s.taboption('advanced', form.DynamicList, 'extra_env', _('Custom Environment Variables'),
-			_('Additional environment variables passed to CloudDrive2 in KEY=VALUE format (for example RUST_LOG=info).'));
-		o.placeholder = 'RUST_LOG=info';
-		o.validate = function(section_id, value) {
-			if (!value)
-				return true;
-			if (!/^[A-Za-z_][A-Za-z0-9_]*=.*/.test(value))
-				return _('Invalid format, expected KEY=VALUE');
-			return true;
-		};
 
 		return m.render();
 	}

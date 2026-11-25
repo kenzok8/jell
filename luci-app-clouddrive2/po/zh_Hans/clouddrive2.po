@@ -73,128 +73,38 @@ msgstr "警告：未检测到 /dev/fuse 设备，本地云盘挂载需要安装 
 msgid "CloudDrive2 is a multi-cloud storage management tool supporting local FUSE mounting, cross-cloud backup, and WebDAV service."
 msgstr "CloudDrive2 是一款多云盘管理与挂载工具，支持通过 FUSE 将网盘挂载为本地磁盘、跨云复制备份与 WebDAV 服务。"
 
-msgid "Service Configuration"
-msgstr "服务配置"
-
-msgid "General Settings"
-msgstr "基本设置"
-
-msgid "Storage & Mount"
-msgstr "存储与挂载"
-
-msgid "Advanced Settings"
-msgstr "高级设置"
-
 msgid "Enable"
 msgstr "启用"
 
-msgid "Enable and start the CloudDrive2 background service."
-msgstr "启用并运行 CloudDrive2 后台服务。"
+msgid "Port"
+msgstr "监听端口"
 
-msgid "HTTP Port"
-msgstr "HTTP 端口"
-
-msgid "Default HTTP port for Web UI and WebDAV is 19798. Keep consistent if modified inside CloudDrive2 Web Server settings."
-msgstr "Web 管理界面与 WebDAV 的默认 HTTP 端口为 19798。若在 CloudDrive2 网页端修改过监听端口，请在此保持一致。"
-
-msgid "Enable HTTPS"
-msgstr "启用 HTTPS 访问"
-
-msgid "Use HTTPS when opening the Web UI and optionally expose the HTTPS port in the firewall. Certificate must be configured in CloudDrive2 Web Server settings."
-msgstr "点击打开管理界面时使用 HTTPS 协议，并在开启防火墙放行时同步开放 HTTPS 端口（需先在 CloudDrive2 内部设置中配置证书并开启 HTTPS）。"
-
-msgid "HTTPS Port"
-msgstr "HTTPS 端口"
-
-msgid "Default HTTPS port in CloudDrive2 is 19799."
-msgstr "CloudDrive2 默认 HTTPS 监听端口为 19799。"
+msgid "Default HTTP port for Web UI and WebDAV is 19798."
+msgstr "Web 管理界面与 WebDAV 的默认 HTTP 端口为 19798。"
 
 msgid "Open Firewall Port"
 msgstr "开放防火墙端口"
 
-msgid "Automatically add firewall accept rules to allow external access to CloudDrive2 Web UI and WebDAV ports."
-msgstr "自动添加防火墙放行规则，允许从外网（WAN）访问 CloudDrive2 管理界面与 WebDAV 端口。"
-
-msgid "Startup Delay (Seconds)"
-msgstr "开机启动延迟（秒）"
-
-msgid "Delay service startup at boot to wait for external USB/SATA drives or WAN connection readiness. Set 0 to start immediately."
-msgstr "路由器开机时延迟指定秒数再启动服务，以便等待外置硬盘挂载或拨号联网就绪；填 0 表示立即启动。"
+msgid "Allow external WAN access to the CloudDrive2 port."
+msgstr "允许从外网（WAN）访问 CloudDrive2 端口。"
 
 msgid "Configuration Directory"
-msgstr "配置与数据目录"
+msgstr "配置目录"
 
-msgid "Directory storing CloudDrive2 configuration, account database, directory cache, and logs (CLOUDDRIVE_HOME). Place on external storage if flash space is limited."
-msgstr "存放 CloudDrive2 配置文件、账号数据、目录缓存数据库及日志的目录（CLOUDDRIVE_HOME）。闪存空间较小时建议设置到外置存储分区。"
+msgid "Stores configuration, account database, directory cache, and logs (CLOUDDRIVE_HOME)."
+msgstr "存放配置文件、账号数据、目录缓存及日志（CLOUDDRIVE_HOME），闪存较小时建议改到外置存储。"
 
-msgid "Mount Base Directory"
-msgstr "本地挂载主目录"
+msgid "Mount Point"
+msgstr "挂载目录"
 
-msgid "Local base directory for FUSE cloud mounts. Sub-mounts under this directory are safely unmounted when stopping the service."
-msgstr "FUSE 云盘挂载点的本地主目录。停止或重启服务时，会自动安全卸载该目录及其子目录下的所有 FUSE 挂载点。"
+msgid "Local base directory for FUSE cloud mounts."
+msgstr "本地 FUSE 云盘挂载主目录，停止服务时自动卸载其下所有挂载点。"
 
-msgid "Temp & Cache Directory"
-msgstr "临时缓冲目录"
+msgid "Cache Directory"
+msgstr "缓存目录"
 
-msgid "Directory for upload buffers and temporary files (temp_dir / TMPDIR). Using /tmp or an external disk prevents flash wear."
-msgstr "上传分片与临时缓冲文件存放目录（同步写入 temp_dir 与 TMPDIR）。建议使用内存盘 /tmp 或外置硬盘以减少路由器闪存写入损耗。"
-
-msgid "Shared Mount Propagation"
-msgstr "开启共享挂载传播"
-
-msgid "Enable shared mount propagation (mount --make-shared) on the mount partition so Docker containers such as Jellyfin or Emby can access mounted cloud files."
-msgstr "对挂载所在分区启用共享挂载传播（mount --make-shared），确保 Jellyfin、Emby 等 Docker 容器可正常读取挂载的云盘文件。"
-
-msgid "Allow Other Users"
-msgstr "允许其他用户访问挂载"
-
-msgid "Enable user_allow_other in /etc/fuse.conf so Samba, ksmbd, and media services running under non-root accounts can read mounted directories."
-msgstr "自动在 /etc/fuse.conf 中启用 user_allow_other，使非 root 身份运行的 Samba、ksmbd 及影音服务能够访问挂载目录。"
-
-msgid "HTTP/HTTPS Proxy"
-msgstr "HTTP/HTTPS 代理"
-
-msgid "Optional proxy URL for accessing cloud storage APIs (for example http://127.0.0.1:7890 or socks5://127.0.0.1:1080)."
-msgstr "可选代理地址，用于连接 Google Drive、OneDrive、PikPak 等海外网盘接口（例如 http://127.0.0.1:7890 或 socks5://127.0.0.1:1080）。"
-
-msgid "Max Open Files"
-msgstr "最大打开文件数"
-
-msgid "Maximum file descriptor limit (ulimit -n) for the CloudDrive2 process to avoid handle exhaustion under heavy concurrency."
-msgstr "为 CloudDrive2 进程设置的最大文件句柄数（ulimit -n），避免大目录扫描或多任务并发传输时耗尽系统句柄。"
-
-msgid "Run Post-Start Command"
-msgstr "挂载就绪后执行命令"
-
-msgid "Enable ENABLE_RUN_AFTER_START so CloudDrive2 executes a command once startup and cloud mounts are ready."
-msgstr "启用官方 ENABLE_RUN_AFTER_START 机制，在核心服务启动且挂载点就绪后自动执行指定命令。"
-
-msgid "Post-Start Command"
-msgstr "启动后执行命令"
-
-msgid "Command written to systemsettings.json (run_after_start), such as restarting media containers after mounts come online."
-msgstr "写入 systemsettings.json 的 run_after_start 命令（例如 docker restart jellyfin），避免依赖挂载路径的服务过早启动看到空目录。"
-
-msgid "Forward Stdout to Syslog"
-msgstr "转发标准输出至系统日志"
-
-msgid "Forward standard output of CloudDrive2 to OpenWrt system log (logread)."
-msgstr "将 CloudDrive2 的标准输出（stdout）转发至 OpenWrt 系统日志（logread）。"
-
-msgid "Forward Stderr to Syslog"
-msgstr "转发错误输出至系统日志"
-
-msgid "Forward standard error output of CloudDrive2 to OpenWrt system log (logread)."
-msgstr "将 CloudDrive2 的标准错误输出（stderr）转发至 OpenWrt 系统日志（logread）。"
-
-msgid "Custom Environment Variables"
-msgstr "自定义环境变量"
-
-msgid "Additional environment variables passed to CloudDrive2 in KEY=VALUE format (for example RUST_LOG=info)."
-msgstr "传递给 CloudDrive2 进程的额外环境变量，格式为 KEY=VALUE（例如 RUST_LOG=info）。"
-
-msgid "Invalid format, expected KEY=VALUE"
-msgstr "格式无效，请使用 KEY=VALUE 格式"
+msgid "Temporary staging directory for uploads and downloads. Use /tmp or an external disk to reduce flash wear."
+msgstr "上传与下载临时缓冲目录，建议使用 /tmp 或外置磁盘以减少闪存磨损。"
 
 msgid "Log File: %s (%s)"
 msgstr "日志文件: %s（%s）"

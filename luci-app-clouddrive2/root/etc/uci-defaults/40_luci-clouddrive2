@@ -2,25 +2,28 @@
 
 uci -q batch <<-EOF >/dev/null
 	set clouddrive2.main=clouddrive2
+	delete clouddrive2.main.https_enabled
+	delete clouddrive2.main.https_port
+	delete clouddrive2.main.shared_mount
+	delete clouddrive2.main.allow_other
+	delete clouddrive2.main.startup_delay
+	delete clouddrive2.main.max_open_files
+	delete clouddrive2.main.proxy
+	delete clouddrive2.main.enable_run_after_start
+	delete clouddrive2.main.run_after_start
+	delete clouddrive2.main.log_stdout
+	delete clouddrive2.main.log_stderr
+	delete clouddrive2.main.extra_env
 	commit clouddrive2
 EOF
 
 for kv in \
 	"enabled=0" \
 	"port=19798" \
-	"https_enabled=0" \
-	"https_port=19799" \
 	"open_firewall=0" \
 	"config_dir=/etc/clouddrive2" \
 	"mount_point=/mnt/clouddrive" \
-	"cache_dir=/tmp/clouddrive2" \
-	"shared_mount=1" \
-	"allow_other=1" \
-	"startup_delay=0" \
-	"max_open_files=65535" \
-	"enable_run_after_start=0" \
-	"log_stdout=1" \
-	"log_stderr=1"
+	"cache_dir=/tmp/clouddrive2"
 do
 	key="${kv%%=*}"
 	val="${kv#*=}"

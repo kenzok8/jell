@@ -5,8 +5,6 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-clouddrive2
-
 LUCI_TITLE:=LuCI support for CloudDrive2
 LUCI_DEPENDS:=+luci-base +clouddrive2
 LUCI_PKGARCH:=all
