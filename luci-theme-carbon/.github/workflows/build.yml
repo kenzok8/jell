@@ -122,11 +122,6 @@ jobs:
       - name: Run browser tests
         timeout-minutes: 8
         run: npm run test:browser
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: screenshots
-          path: .cache/screenshots
 
   # Official release SDKs: 24.10 (opkg → .ipk) and 25.12 (apk → .apk)
   sdk:

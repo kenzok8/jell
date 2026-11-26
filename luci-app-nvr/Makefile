@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-nvr
 PKG_VERSION:=20230818
-PKG_RELEASE:=308
+PKG_RELEASE:=309
 
 include $(INCLUDE_DIR)/package.mk
 

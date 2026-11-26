@@ -11,7 +11,7 @@ PKG_ARCH_kai_session:=$(ARCH)
 
 PKG_NAME:=kai_session
 PKG_VERSION:=linkease-runtime-v1.7.7
-PKG_RELEASE:=10
+PKG_RELEASE:=11
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/istoreos-app-hub/releases/download/kai-runtime-v$(PKG_VERSION)/
 PKG_HASH:=skip
@@ -42,6 +42,8 @@ define Package/$(PKG_NAME)/conffiles
 endef
 
 define Package/$(PKG_NAME)/postinst
+#!/bin/sh
+exit 0
 endef
 
 define Build/Configure

@@ -5,9 +5,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_UPSTREAM_NAME:=natmap
-PKG_NAME:=natmapt
 PKG_UPSTREAM_VERSION:=20261109
 PKG_UPSTREAM_GITHASH:=
+
+PKG_NAME:=natmapt
 PKG_VERSION:=$(PKG_UPSTREAM_VERSION)$(if $(PKG_UPSTREAM_GITHASH),~$(call version_abbrev,$(PKG_UPSTREAM_GITHASH)))
 PKG_RELEASE:=1
 SCRIPTS_VERSION:=0.2026.01.24
@@ -16,17 +17,15 @@ PKG_SOURCE_SUBDIR:=$(PKG_UPSTREAM_NAME)-$(PKG_UPSTREAM_VERSION)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
 
 ifeq ($(PKG_UPSTREAM_GITHASH),)
-PKG_SOURCE_URL:=https://github.com/heiher/natmap/releases/download/$(PKG_UPSTREAM_VERSION)
-PKG_HASH:=skip
-
-PKG_SOURCE:=$(PKG_SOURCE_SUBDIR).tar.xz
+  PKG_SOURCE_URL:=https://github.com/heiher/natmap/releases/download/$(PKG_UPSTREAM_VERSION)
+  PKG_SOURCE:=$(PKG_SOURCE_SUBDIR).tar.xz
+  PKG_HASH:=skip
 else
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/heiher/natmap.git
-PKG_SOURCE_VERSION:=b7c09eb633d788438a5040a072a562afcd9e6caa
-PKG_MIRROR_HASH:=skip
-
-PKG_SOURCE:=$(PKG_SOURCE_SUBDIR)-$(PKG_SOURCE_VERSION).tar.gz
+  PKG_SOURCE_PROTO:=git
+  PKG_SOURCE_URL:=https://github.com/heiher/natmap.git
+  PKG_SOURCE_VERSION:=$(PKG_UPSTREAM_GITHASH)
+  PKG_SOURCE:=$(PKG_SOURCE_SUBDIR)-$(PKG_SOURCE_VERSION).tar.gz
+  PKG_MIRROR_HASH:=skip
 endif
 
 PKG_MAINTAINER:=Anya Lin <hukk1996@gmail.com>, Richard Yu <yurichard3839@gmail.com>, Ray Wang <r@hev.cc>
