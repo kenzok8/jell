@@ -10,8 +10,8 @@ include $(TOPDIR)/rules.mk
 PKG_ARCH_quickstart:=$(ARCH)
 
 PKG_NAME:=quickstart
-PKG_VERSION:=0.17.1-rc20261028
-PKG_RELEASE:=3
+PKG_VERSION:=0.18.0
+PKG_RELEASE:=1
 PKG_SOURCE:=$(PKG_NAME)-binary-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/istoreos/quickstart/releases/download/v$(PKG_VERSION)/
 PKG_HASH:=skip
