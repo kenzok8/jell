@@ -139,6 +139,7 @@ jobs:
         git_clone https://github.com/sirpdboy/luci-app-netspeedtest speedtest && rm -rf speedtest/{iperf*,演示.gif};mvdir speedtest
         git_clone https://github.com/sirpdboy/luci-app-parentcontrol
         git_clone https://github.com/sirpdboy/luci-app-netwizard app-netwizard && mv -n app-netwizard/*netwizard ./; rm -rf app-netwizard
+        git_clone https://github.com/huladabang/luci-app-device-gateway
         git_clone https://github.com/sirpdboy/luci-app-poweroffdevice poweroffdevice && mvdir poweroffdevice
         ) &
         (
